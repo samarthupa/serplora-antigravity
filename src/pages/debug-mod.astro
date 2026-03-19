@@ -1,0 +1,12 @@
+---
+const posts = import.meta.glob('../content/blog/*/*.{md,mdoc}', { eager: true });
+const firstEntry = Object.entries(posts)[0];
+const mod: any = firstEntry ? firstEntry[1] : {};
+
+const keys = Object.keys(mod);
+---
+<html>
+  <body>
+    <pre>{JSON.stringify(keys)}</pre>
+  </body>
+</html>

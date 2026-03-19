@@ -1,0 +1,15 @@
+---
+let globPosts = [];
+try {
+  const posts = import.meta.glob('../content/blog/*/*.{md,mdoc}', { eager: true });
+  globPosts = Object.keys(posts);
+} catch (e: any) {
+  globPosts = [e.message];
+}
+---
+<html>
+  <body>
+    <h1>Glob Posts</h1>
+    <pre>{JSON.stringify(globPosts, null, 2)}</pre>
+  </body>
+</html>

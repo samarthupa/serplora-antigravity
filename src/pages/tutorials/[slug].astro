@@ -1,0 +1,75 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const tutorialsGlob = import.meta.glob('../../content/tutorials/*/*.{md,mdoc}', { eager: true });
+  const rawGlob = import.meta.glob('../../content/tutorials/*/*.{md,mdoc}', { eager: true, query: '?raw', import: 'default' });
+
+  const allTutorials = Object.entries(tutorialsGlob).map(([filepath, module]: any) => {
+    const rawText = rawGlob[filepath] as string || '';
+    const slugMatch = rawText.match(/^slug:\s*(.+)$/m);
+    const draftMatch = rawText.match(/^draft:\s*(true|false)/m);
+    const descMatch = rawText.match(/^description:\s*(.+)$/m);
+    const titleMatch = rawText.match(/^title:\s*(.+)$/m);
+
+    const match = filepath.match(/tutorials\/([^/]+)\//);
+    const id = match ? match[1] : '';
+
+    return {
+      id,
+      slug: id,
+      data: {
+        title: titleMatch ? titleMatch[1].trim().replace(/^['"](.*)['"]$/, '$1') : id,
+        slug: slugMatch ? slugMatch[1].trim().replace(/^['"](.*)['"]$/, '$1') : '',
+        draft: draftMatch ? draftMatch[1] === 'true' : false,
+        description: descMatch ? descMatch[1].trim() : '',
+      },
+      Content: module.Content,
+    };
+  });
+
+  const publishedTutorials = allTutorials.filter((entry: any) => !entry.data?.draft);
+  
+  const paths: any[] = [];
+
+  publishedTutorials.forEach((entry: any) => {
+    // 1. The clean WordPress-style slug for public facing index links
+    let rawSlug = entry.data?.slug || entry.slug || entry.id.replace(/\/?index\.mdoc$/, '').replace(/\.mdoc$/, '');
+    const cleanSlug = rawSlug.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+
+    // 2. The exact folder identifier for Keystatic's Preview button
+    const keystaticSlug = entry.id.replace(/\/?index\.mdoc$/, '').replace(/\.mdoc$/, '');
+
+    paths.push({
+      params: { slug: cleanSlug },
+      props: { entry },
+    });
+
+    if (cleanSlug !== keystaticSlug) {
+      paths.push({
+        params: { slug: keystaticSlug },
+        props: { entry },
+      });
+    }
+  });
+
+  return paths;
+}
+
+const { entry } = Astro.props;
+const Content = entry.Content;
+---
+
+<Layout>
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <article class="prose prose-lg dark:prose-invert">
+      <h1 class="text-4xl font-bold mb-4">{entry.data?.title}</h1>
+      {entry.data?.description && <p class="text-xl text-gray-500 mb-8">{entry.data.description}</p>}
+      <div class="mt-8">
+        <Content />
+      </div>
+    </article>
+  </main>
+</Layout>

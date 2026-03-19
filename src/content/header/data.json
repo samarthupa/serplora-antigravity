@@ -1,0 +1,30 @@
+{
+  "siteTitle": "Serplora Acad",
+  "navItems": [
+    {
+      "label": "Home",
+      "url": "/",
+      "subItems": []
+    },
+    {
+      "label": "Tutorials",
+      "url": "/tutorials",
+      "subItems": []
+    },
+    {
+      "label": "Blog",
+      "url": "/blog",
+      "subItems": []
+    }
+  ],
+  "primaryButton": {
+    "label": "Sign up free",
+    "url": "#",
+    "show": true
+  },
+  "secondaryButton": {
+    "label": "Log in",
+    "url": "#",
+    "show": true
+  }
+}

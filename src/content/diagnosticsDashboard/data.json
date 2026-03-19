@@ -1,0 +1,3 @@
+{
+  "notice": "Keystatic natively hides corrupted or malformed files from the CMS. To view a complete list of all living files, orphaned directories, and potential data corruptions across all collections, click the \"Preview\" button above or visit /admin/diagnostics."
+}

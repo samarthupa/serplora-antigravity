@@ -1,0 +1,54 @@
+{
+  "brand": {
+    "show": false,
+    "text": ""
+  },
+  "description": "Building state-of-the-art tools for the web.",
+  "columns": [
+    {
+      "title": "Product",
+      "links": [
+        {
+          "label": "Features",
+          "url": "#"
+        },
+        {
+          "label": "Pricing",
+          "url": "#"
+        },
+        {
+          "label": "Tutorials",
+          "url": "/tutorials"
+        }
+      ]
+    },
+    {
+      "title": "Company",
+      "links": [
+        {
+          "label": "About Us",
+          "url": "#"
+        },
+        {
+          "label": "Contact",
+          "url": "#"
+        },
+        {
+          "label": "Careers",
+          "url": "#"
+        }
+      ]
+    }
+  ],
+  "socialLinks": [
+    {
+      "platform": "twitter",
+      "url": "#"
+    },
+    {
+      "platform": "github",
+      "url": "#"
+    }
+  ],
+  "copyrightText": "© 2026 Serplora. All rights reserved."
+}

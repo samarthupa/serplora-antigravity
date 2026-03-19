@@ -1,0 +1,156 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Helper to scan a directory for valid and invalid posts/tutorials
+const scanDirectory = (dirName: string) => {
+  const absolutePath = path.resolve(process.cwd(), `src/content/${dirName}`);
+  
+  if (!fs.existsSync(absolutePath)) return [];
+
+  const folders = fs.readdirSync(absolutePath, { withFileTypes: true });
+  const results = [];
+
+  for (const dirent of folders) {
+    if (dirent.isDirectory()) {
+      const folderPath = path.join(absolutePath, dirent.name);
+      const mdocPath = path.join(folderPath, 'index.mdoc');
+      
+      let status = 'Valid';
+      let issue = '';
+      
+      // Check if mdoc exists
+      if (!fs.existsSync(mdocPath)) {
+        status = 'Corrupted';
+        issue = 'Missing index.mdoc file. Keystatic requires an index.mdoc file inside every folder.';
+      } else {
+        // Read file contents to check for structural YAML issues
+        try {
+          const content = fs.readFileSync(mdocPath, 'utf8');
+          if (!content.startsWith('---')) {
+            status = 'Corrupted';
+            issue = 'Missing YAML frontmatter fence (---) at the top of the file.';
+          } else {
+            const yamlEnd = content.indexOf('---', 3);
+            if (yamlEnd === -1) {
+              status = 'Corrupted';
+              issue = 'Missing closing YAML frontmatter fence (---).';
+            }
+          }
+        } catch(e) {
+             status = 'Corrupted';
+             issue = 'Unreadable file permissions or filesystem error.';
+        }
+      }
+
+      results.push({
+        folder: dirent.name,
+        type: 'Directory',
+        status,
+        issue,
+      });
+    } else {
+       // Keystatic strict collections normally expect folders, not loose files here
+       results.push({
+        folder: dirent.name,
+        type: 'Orphaned File',
+        status: 'Corrupted',
+        issue: 'Loose file found in collection root. Keystatic strictly expects all posts to be inside sub-folders.',
+      });
+    }
+  }
+
+  return results;
+};
+
+const blogFiles = scanDirectory('posts');
+const tutorialFiles = scanDirectory('tutorials');
+
+const allFilesCounter = blogFiles.length + tutorialFiles.length;
+const corruptedCounter = [...blogFiles, ...tutorialFiles].filter(f => f.status === 'Corrupted').length;
+---
+
+<Layout>
+  <main class="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-6">
+    <div class="max-w-6xl mx-auto space-y-12">
+      
+      {/* Header */}
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between md:items-center gap-6">
+        <div>
+          <h1 class="text-3xl font-black text-slate-900 dark:text-white mb-2">System Diagnostics</h1>
+          <p class="text-slate-600 dark:text-slate-400">Raw filesystem surveillance bridging the Keystatic schema gaps.</p>
+        </div>
+        <div class="flex gap-4">
+          <div class="bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-5 py-3 rounded-2xl font-bold flex flex-col items-center justify-center">
+            <span class="text-2xl">{allFilesCounter}</span>
+            <span class="text-xs uppercase tracking-wide opacity-80">Total Items</span>
+          </div>
+          <div class={`px-5 py-3 rounded-2xl font-bold flex flex-col items-center justify-center ${corruptedCounter > 0 ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
+            <span class="text-2xl">{corruptedCounter}</span>
+            <span class="text-xs uppercase tracking-wide opacity-80">Corruptions</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Blog Files Grid */}
+      <div class="space-y-6">
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+          <svg class="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+          Blog Posts Directory <span class="text-base font-normal text-slate-500 dark:text-slate-400">(/src/content/posts)</span>
+        </h2>
+        
+        {blogFiles.length === 0 ? (
+          <div class="p-8 text-center bg-slate-100 dark:bg-slate-800/50 rounded-2xl text-slate-500 border border-slate-200 dark:border-slate-700 border-dashed">Directory is completely empty.</div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {blogFiles.map(file => (
+              <div class={`rounded-2xl p-6 border-l-4 shadow-sm bg-white dark:bg-slate-800 ${file.status === 'Valid' ? 'border-l-green-500 border-t border-b border-r border-slate-200 dark:border-slate-700' : 'border-l-red-500 border-t border-b border-r border-red-200 dark:border-red-900/30'}`}>
+                 <div class="flex justify-between items-start mb-3">
+                   <h3 class="font-bold text-lg text-slate-900 dark:text-white truncate" title={file.folder}>{file.folder}</h3>
+                   <span class={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${file.status === 'Valid' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                      {file.status}
+                   </span>
+                 </div>
+                 {file.status === 'Corrupted' && (
+                   <p class="text-sm font-medium text-red-600 dark:text-red-400 mt-2 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg">{file.issue}</p>
+                 )}
+                 <div class="mt-4 text-xs tracking-wider uppercase text-slate-400 dark:text-slate-500 font-semibold">{file.type}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+       {/* Tutorials Files Grid */}
+       <div class="space-y-6">
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+          <svg class="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+          Tutorials Directory <span class="text-base font-normal text-slate-500 dark:text-slate-400">(/src/content/tutorials)</span>
+        </h2>
+        
+        {tutorialFiles.length === 0 ? (
+          <div class="p-8 text-center bg-slate-100 dark:bg-slate-800/50 rounded-2xl text-slate-500 border border-slate-200 dark:border-slate-700 border-dashed">Directory is completely empty.</div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tutorialFiles.map(file => (
+              <div class={`rounded-2xl p-6 border-l-4 shadow-sm bg-white dark:bg-slate-800 ${file.status === 'Valid' ? 'border-l-green-500 border-t border-b border-r border-slate-200 dark:border-slate-700' : 'border-l-red-500 border-t border-b border-r border-red-200 dark:border-red-900/30'}`}>
+                 <div class="flex justify-between items-start mb-3">
+                   <h3 class="font-bold text-lg text-slate-900 dark:text-white truncate" title={file.folder}>{file.folder}</h3>
+                   <span class={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${file.status === 'Valid' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                      {file.status}
+                   </span>
+                 </div>
+                 {file.status === 'Corrupted' && (
+                   <p class="text-sm font-medium text-red-600 dark:text-red-400 mt-2 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg">{file.issue}</p>
+                 )}
+                 <div class="mt-4 text-xs tracking-wider uppercase text-slate-400 dark:text-slate-500 font-semibold">{file.type}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
+  </main>
+</Layout>

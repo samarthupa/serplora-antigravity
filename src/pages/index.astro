@@ -1,17 +1,20 @@
 ---
-
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <main class="min-h-screen flex flex-col items-center justify-center p-8 text-center">
+    <h1 class="text-5xl font-extrabold tracking-tight mb-4">
+      Welcome to <span class="text-blue-600">Serplora Academy</span>
+    </h1>
+    <p class="text-lg text-slate-600 max-w-2xl mb-8">
+      Your custom Astro architecture is officially online. Zero bloat. 100% control.
+    </p>
+    <div class="flex gap-4">
+      <a href="/keystatic" class="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors">
+        Open CMS Dashboard
+      </a>
+    </div>
+  </main>
+</Layout>

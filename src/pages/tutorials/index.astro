@@ -1,0 +1,121 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// Fetch the tutorials settings page CMS content
+const pageEntry = await getEntry('tutorialsPage', 'data');
+const headline = pageEntry?.data?.headline || 'Tutorials & Guides';
+const subheadline = pageEntry?.data?.subheadline || 'Explore our latest guides and learn step-by-step with state-of-the-art tutorials.';
+const hiddenTutorialsSingleton = pageEntry?.data?.hiddenTutorials || [];
+
+const generateSlug = (entry: any) => {
+  let rawSlug = entry.data?.slug || entry.slug || entry.id?.replace(/\/?index\.mdoc$/, '').replace(/\.mdoc$/, '');
+  return rawSlug?.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toLowerCase() || '';
+};
+
+// Bypass getCollection entirely using raw memory globs
+const tutorialsGlob = import.meta.glob('../../content/tutorials/*/*.{md,mdoc}', { eager: true });
+const rawGlob = import.meta.glob('../../content/tutorials/*/*.{md,mdoc}', { eager: true, query: '?raw', import: 'default' });
+
+const allTutorials = Object.entries(tutorialsGlob).map(([filepath, module]: any) => {
+  const rawText = rawGlob[filepath] as string || '';
+  
+  const fmMatch = rawText.match(/^---\n([\s\S]+?)\n---/);
+  const fm = fmMatch ? fmMatch[1] : '';
+
+  const slugMatch = fm.match(/\bslug:\s*(['"]?)(.+?)\1\s*$/m);
+  const titleMatch = fm.match(/\bname:\s*(['"]?)(.+?)\1\s*$/m);
+  const draftMatch = fm.match(/^draft:\s*(true|false)/m);
+  const descMatch = fm.match(/^description:\s*(.+)$/m);
+
+  const match = filepath.match(/tutorials\/([^/]+)\//);
+  const id = match ? match[1] : '';
+
+  return {
+    id,
+    slug: id,
+    data: {
+      title: titleMatch ? titleMatch[1].trim().replace(/^['"](.*)['"]$/, '$1') : id,
+      slug: slugMatch ? slugMatch[1].trim().replace(/^['"](.*)['"]$/, '$1') : '',
+      draft: draftMatch ? draftMatch[1] === 'true' : false,
+      description: descMatch ? descMatch[1].trim() : '',
+    },
+    Content: module.Content,
+  };
+});
+
+const publishedTutorials = allTutorials.filter((tutorial: any) => {
+  // 1. Drafts are ALWAYS unconditionally removed from the index.
+  if (tutorial.data?.draft === true) return false;
+  
+  const slug = generateSlug(tutorial);
+  // 2. Singleton Global Overrides take priority over local index visibility
+  if (hiddenTutorialsSingleton.includes(slug)) return false;
+  // Everything else shows normally by default
+  return true;
+});
+
+// Optionally sort tutorials by ID or date here if added to frontmatter later
+---
+
+<Layout>
+  <main class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-50 py-16 px-4 md:px-8">
+    <div class="max-w-6xl mx-auto">
+      
+      {/* Header Section */}
+      <div class="text-center mb-16 space-y-4">
+        <h1 class="text-5xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 drop-shadow-sm">
+          {headline}
+        </h1>
+        <p class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto font-medium">
+          {subheadline}
+        </p>
+      </div>
+
+      {/* Grid Section */}
+      {publishedTutorials.length === 0 ? (
+        <div class="text-center py-24 bg-white dark:bg-slate-800/50 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700/50 backdrop-blur-xl">
+          <p class="text-slate-500 dark:text-slate-400 text-xl font-medium">No tutorials available at the moment. Check back soon!</p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {publishedTutorials.map((tutorial) => {
+            const slug = generateSlug(tutorial);
+            
+            return (
+              <a 
+                href={`/tutorials/${slug}`}
+                class="group relative bg-white dark:bg-slate-800/80 rounded-[2rem] p-8 overflow-hidden border border-slate-100 dark:border-slate-700/60 shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between backdrop-blur-xl"
+              >
+                {/* Hover Background Gradient Injection */}
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 dark:from-blue-900/10 dark:to-indigo-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                
+                {/* Content Container */}
+                <div class="relative z-10 flex flex-col h-full">
+                  <div>
+                    <h2 class="text-3xl font-bold mb-4 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 tracking-tight">
+                      {tutorial.data?.title || slug}
+                    </h2>
+                    {tutorial.data?.description && (
+                      <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-8 line-clamp-3 text-lg">
+                        {tutorial.data.description}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Decorative CTA */}
+                  <div class="mt-auto flex items-center text-sm font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    Read Tutorial
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-3 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </main>
+</Layout>
