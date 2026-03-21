@@ -22,10 +22,5 @@
     "label": "Sign up free",
     "url": "#",
     "show": true
-  },
-  "secondaryButton": {
-    "label": "Log in",
-    "url": "#",
-    "show": true
   }
 }

@@ -82,15 +82,11 @@ export default config({
                     { label: 'Navigation Menu Items', itemLabel: props => props.fields.label.value || 'Menu Item' }
                 ),
                 primaryButton: fields.object({
-                    label: fields.text({ label: 'Primary Button Label', defaultValue: 'Sign up free' }),
+                    label: fields.text({ label: 'Primary Button Label', defaultValue: 'Sign up for free' }), // Updated default label
                     url: fields.text({ label: 'Primary Button URL', defaultValue: '#' }),
                     show: fields.checkbox({ label: 'Show Primary Button', defaultValue: true })
-                }, { label: 'Primary Button (Solid/Right)' }),
-                secondaryButton: fields.object({
-                    label: fields.text({ label: 'Secondary Button Label', defaultValue: 'Log in' }),
-                    url: fields.text({ label: 'Secondary Button URL', defaultValue: '#' }),
-                    show: fields.checkbox({ label: 'Show Secondary Button', defaultValue: true })
-                }, { label: 'Secondary Button (Ghost/Left)' })
+                }, { label: 'Primary Button (Solid/Right)' })
+                // Completely removed the secondaryButton schema here
             },
         }),
         footer: singleton({

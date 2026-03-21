@@ -6,16 +6,10 @@ const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
 const logo = headerEntry?.data?.logo;
 const navItems = headerEntry?.data?.navItems || [];
 
-// Fallback logic for new fields that might not exist in the old JSON yet
 const primaryBtn = {
-  label: headerEntry?.data?.primaryButton?.label || 'Sign up free',
+  label: headerEntry?.data?.primaryButton?.label || 'Sign up for free',
   url: headerEntry?.data?.primaryButton?.url || '#',
   show: headerEntry?.data?.primaryButton?.show !== false
-};
-const secondaryBtn = {
-  label: headerEntry?.data?.secondaryButton?.label || 'Log in',
-  url: headerEntry?.data?.secondaryButton?.url || '#',
-  show: headerEntry?.data?.secondaryButton?.show !== false
 };
 ---
 
@@ -36,10 +30,7 @@ const secondaryBtn = {
         
         return (
           <li class="relative group">
-            <a 
-              href={item.url || '#'} 
-              class="flex items-center px-[14px] py-2 rounded-[6px] text-[15px] font-[600] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main"
-            >
+            <a href={item.url || '#'} class="flex items-center px-[14px] py-2 rounded-[6px] text-[15px] font-[600] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main">
               {item.label}
               {hasSubItems && (
                 <svg class="w-4 h-4 ml-1 opacity-60 group-hover:opacity-100 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,15 +39,11 @@ const secondaryBtn = {
               )}
             </a>
             
-            {/* Dropdown Menu Container */}
             {hasSubItems && (
               <div class={`absolute ${isLast ? 'right-0' : 'left-0'} top-full pt-1 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top translate-y-1 group-hover:translate-y-0 z-[200]`}>
                 <div class="py-1 bg-surface rounded-md shadow-sm border border-subtle">
                   {item.subItems.map((subItem) => (
-                     <a 
-                      href={subItem.url || '#'} 
-                      class="block px-4 py-2 text-[14px] text-tx-muted hover:text-tx-main hover:bg-main transition-colors"
-                    >
+                     <a href={subItem.url || '#'} class="block px-4 py-2 text-[14px] text-tx-muted hover:text-tx-main hover:bg-main transition-colors">
                       {subItem.label}
                     </a>
                   ))}
@@ -68,25 +55,30 @@ const secondaryBtn = {
       })}
     </ul>
 
-    {/* Right Area: Buttons */}
-    <div class="ml-auto hidden md:flex items-center gap-3">
-      {secondaryBtn.show && (
-        <a href={secondaryBtn.url} class="px-5 py-[10px] rounded-[6px] text-[15px] font-[600] text-tx-main bg-transparent hover:bg-main transition-colors cursor-pointer border-none outline-none leading-none">
-          {secondaryBtn.label}
-        </a>
-      )}
-      {primaryBtn.show && (
-        <a href={primaryBtn.url} class="px-6 py-[10px] rounded-[6px] bg-tx-main text-main text-[15px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
-          {primaryBtn.label}
-        </a>
-      )}
-    </div>
+    {/* Right Area: Actions (Toggle, Buttons, Mobile Menu) */}
+    <div class="ml-auto flex items-center gap-4">
+      
+      {/* Theme Toggle Button (Visible everywhere) */}
+      <button id="theme-toggle" class="p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none" aria-label="Toggle theme">
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 4.22a1 1 0 011.415 0l.708.708a1 1 0 01-1.414 1.414l-.708-.708a1 1 0 010-1.414zM16 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-4.22 4.22a1 1 0 010 1.415l-.708.708a1 1 0 01-1.414-1.414l.708-.708a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-4.22a1 1 0 01-1.415 0l-.708-.708a1 1 0 011.414-1.414l.708.708a1 1 0 010 1.414zM4 10a1 1 0 011 1H6a1 1 0 110-2H5a1 1 0 01-1 1zm4.22-4.22a1 1 0 010-1.415l.708-.708a1 1 0 011.414 1.414l-.708.708a1 1 0 01-1.414 0z"></path><path d="M10 6a4 4 0 100 8 4 4 0 000-8z"></path></svg>
+      </button>
 
-    {/* Mobile Hamburger Toggle Button */}
-    <div class="md:hidden ml-auto flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer" id="mobile-menu-btn" aria-label="Toggle menu">
-      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
-      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
-      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
+      {/* Desktop Main Button */}
+      <div class="hidden md:block">
+        {primaryBtn.show && (
+          <a href={primaryBtn.url} class="px-6 py-[10px] rounded-[6px] bg-tx-main text-main text-[15px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
+            {primaryBtn.label}
+          </a>
+        )}
+      </div>
+
+      {/* Mobile Hamburger Toggle */}
+      <div class="md:hidden flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer" id="mobile-menu-btn" aria-label="Toggle menu">
+        <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
+        <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
+        <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
+      </div>
     </div>
 
     {/* Mobile Navigation Drawer */}
@@ -124,11 +116,6 @@ const secondaryBtn = {
         })}
       </ul>
       <div class="flex flex-col gap-3 px-6 pb-6 pt-2">
-        {secondaryBtn.show && (
-          <a href={secondaryBtn.url} class="text-center px-5 py-3 rounded-[6px] text-[15px] font-[600] text-tx-main bg-main active:opacity-80 transition-colors">
-            {secondaryBtn.label}
-          </a>
-        )}
         {primaryBtn.show && (
           <a href={primaryBtn.url} class="text-center px-6 py-3 rounded-[6px] bg-tx-main text-main text-[15px] font-[600] transition-opacity active:opacity-80">
             {primaryBtn.label}
@@ -141,6 +128,32 @@ const secondaryBtn = {
 </header>
 
 <script>
+  // Theme Toggle Logic
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const darkIcon = document.getElementById('theme-toggle-dark-icon');
+  const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+  // Check initial theme state on load and display correct icon
+  if (document.documentElement.classList.contains('dark')) {
+    lightIcon.classList.remove('hidden');
+  } else {
+    darkIcon.classList.remove('hidden');
+  }
+
+  themeToggleBtn?.addEventListener('click', function() {
+    darkIcon.classList.toggle('hidden');
+    lightIcon.classList.toggle('hidden');
+
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+
+  // Mobile Menu Logic
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
   const topBar = document.getElementById('ham-top');
@@ -195,14 +208,11 @@ const secondaryBtn = {
     
     if (currentScrollY > 64) {
       if (currentScrollY > lastScrollY && menu?.classList.contains('hidden')) {
-        // Scrolling down and mobile menu is fully closed -> hide header
         header.classList.add('-translate-y-full');
       } else {
-        // Scrolling up -> show header
         header.classList.remove('-translate-y-full');
       }
     } else {
-      // Near top of page -> show header
       header.classList.remove('-translate-y-full');
     }
     

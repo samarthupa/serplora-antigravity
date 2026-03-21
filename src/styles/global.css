@@ -9,15 +9,13 @@
   --color-border-subtle: #e2e8f0; /* slate-200 */
 }
 
-/* 2. Define Dark Mode Colors (High Contrast) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg-main: #0f172a;       /* slate-900 */
-    --color-bg-surface: #1e293b;    /* slate-800 */
-    --color-text-main: #f8fafc;     /* slate-50 (Nearly white) */
-    --color-text-muted: #cbd5e1;    /* slate-300 (Brighter gray for dark mode) */
-    --color-border-subtle: #334155; /* slate-700 */
-  }
+/* 2. Define Dark Mode Colors (High Contrast) using the .dark class */
+.dark {
+  --color-bg-main: #0f172a;       /* slate-900 */
+  --color-bg-surface: #1e293b;    /* slate-800 */
+  --color-text-main: #f8fafc;     /* slate-50 (Nearly white) */
+  --color-text-muted: #cbd5e1;    /* slate-300 (Brighter gray for dark mode) */
+  --color-border-subtle: #334155; /* slate-700 */
 }
 
 /* 3. Feed them into Tailwind v4 */
