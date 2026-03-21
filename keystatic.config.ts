@@ -1,9 +1,14 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 export default config({
-    storage: {
-        kind: 'local', // Saves directly to your Mac while developing
-    },
+    // 👇 This tells Keystatic to use your Mac locally, but use GitHub on the live site
+    storage: import.meta.env.DEV 
+        ? { kind: 'local' } 
+        : {
+            kind: 'github',
+            repo: 'samarthupa/serplora-antigravity',
+          },
+          
     collections: {
         posts: collection({
             label: 'Blog Posts',
@@ -173,19 +178,6 @@ export default config({
                     }
                 ),
             },
-        }),
-        diagnosticsDashboard: singleton({
-            label: 'System Diagnostics & Health',
-            path: 'src/content/diagnosticsDashboard/data',
-            format: { data: 'json' },
-            schema: {
-                notice: fields.text({
-                    label: 'System Message',
-                    defaultValue: 'Keystatic natively hides corrupted or malformed files from the CMS. To view a complete list of all living files, orphaned directories, and potential data corruptions across all collections, click the "Preview" button above or visit /admin/diagnostics.',
-                    multiline: true
-                })
-            },
-            previewUrl: '/admin/diagnostics',
         }),
     },
 });

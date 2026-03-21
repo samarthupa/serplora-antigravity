@@ -5,20 +5,14 @@ import markdoc from '@astrojs/markdoc';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 
-import cloudflare from '@astrojs/cloudflare';
-
 export default defineConfig({
-  // 👇 Add this line so Astro knows to build server files
-  output: 'server', 
-  
-  adapter: cloudflare(),
+  // 👇 This is the magic word. No adapters, no servers.
+  output: 'static', 
+
   integrations: [react(), markdoc({ allowHTML: true }), keystatic()],
 
   vite: {
     plugins: [tailwindcss()],
-    // 👇 Add this entire ssr block to fix the Vite crash
-    ssr: {
-      noExternal: ['@keystatic/astro'],
-    },
+    // Notice the entire 'ssr' block is completely gone!
   },
 });
