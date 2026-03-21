@@ -19,7 +19,7 @@
     }
   ],
   "primaryButton": {
-    "label": "Sign up free",
+    "label": "Sign in",
     "url": "#",
     "show": true
   }
