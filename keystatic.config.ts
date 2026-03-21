@@ -1,13 +1,10 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 export default config({
-    // 👇 This tells Keystatic to use your Mac locally, but use GitHub on the live site
-    storage: import.meta.env.DEV 
-        ? { kind: 'local' } 
-        : {
-            kind: 'github',
-            repo: 'samarthupa/serplora-antigravity',
-          },
+    // 👇 Pure local storage. Keystatic is now completely decoupled from Cloudflare.
+    storage: {
+        kind: 'local', 
+    },
           
     collections: {
         posts: collection({
@@ -17,33 +14,30 @@ export default config({
             format: { contentField: 'content' },
             previewUrl: '/blog/{slug}',
             schema: {
-    title: fields.slug({ 
-        name: { label: 'Title' },
-        slug: { label: 'SEO Slug', description: 'Auto-generates from the title.' }
-    }),
-    draft: fields.checkbox({ label: 'Draft', description: 'Take this post fully offline', defaultValue: false }),
-    
-    // 🟢 NEW: Author & Dates
-    authorName: fields.text({ label: 'Author Name', defaultValue: 'Serplora Team' }),
-    authorImage: fields.image({ label: 'Author Avatar', directory: 'public/images/avatars', publicPath: '/images/avatars/' }),
-    publishDate: fields.date({ label: 'Publish Date', defaultValue: { kind: 'today' } }),
-    updatedDate: fields.date({ label: 'Last Modified Date (Optional)', description: 'Leave blank to just show publish date' }),
-    
-    // 🟢 NEW: Featured Image & Excerpt
-    image: fields.image({ label: 'Featured Image', directory: 'public/images/posts', publicPath: '/images/posts/' }),
-    excerpt: fields.text({ label: 'Excerpt', multiline: true }),
-    
-    // 🟢 NEW: FAQ Section
-    faqs: fields.array(
-        fields.object({
-            question: fields.text({ label: 'Question' }),
-            answer: fields.text({ label: 'Answer', multiline: true })
-        }),
-        { label: 'FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
-    ),
-    
-    content: fields.markdoc({ label: 'Content' }),
-},
+                title: fields.slug({ 
+                    name: { label: 'Title' },
+                    slug: { label: 'SEO Slug', description: 'Auto-generates from the title.' }
+                }),
+                draft: fields.checkbox({ label: 'Draft', description: 'Take this post fully offline', defaultValue: false }),
+                
+                authorName: fields.text({ label: 'Author Name', defaultValue: 'Serplora Team' }),
+                authorImage: fields.image({ label: 'Author Avatar', directory: 'public/images/avatars', publicPath: '/images/avatars/' }),
+                publishDate: fields.date({ label: 'Publish Date', defaultValue: { kind: 'today' } }),
+                updatedDate: fields.date({ label: 'Last Modified Date (Optional)', description: 'Leave blank to just show publish date' }),
+                
+                image: fields.image({ label: 'Featured Image', directory: 'public/images/posts', publicPath: '/images/posts/' }),
+                excerpt: fields.text({ label: 'Excerpt', multiline: true }),
+                
+                faqs: fields.array(
+                    fields.object({
+                        question: fields.text({ label: 'Question' }),
+                        answer: fields.text({ label: 'Answer', multiline: true })
+                    }),
+                    { label: 'FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
+                ),
+                
+                content: fields.markdoc({ label: 'Content' }),
+            },
         }),
         tutorials: collection({
             label: 'Tutorials',
@@ -52,7 +46,6 @@ export default config({
             format: { contentField: 'content' },
             previewUrl: '/tutorials/{slug}',
             schema: {
-                // 🟢 REPLACED THE OLD TITLE FIELD HERE TOO:
                 title: fields.slug({ 
                     name: { label: 'Title' },
                     slug: { 
