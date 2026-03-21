@@ -67,6 +67,12 @@ export default config({
             schema: {
                 siteTitle: fields.text({ label: 'Site Title (Optional)' }),
                 logo: fields.image({ label: 'Logo Image (Optional)', directory: 'public/images/logo', publicPath: '/images/logo/', validation: { isRequired: false } }),
+                favicon: fields.image({ 
+            label: 'Favicon (.png, .svg, or .ico)', 
+            directory: 'public/images/favicon', 
+            publicPath: '/images/favicon/', 
+            validation: { isRequired: false } 
+        }),
                 navItems: fields.array(
                     fields.object({
                         label: fields.text({ label: 'Menu Label' }),

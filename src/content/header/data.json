@@ -1,6 +1,7 @@
 {
   "siteTitle": "Serplora Acad",
   "logo": "/images/logo/logo.svg",
+  "favicon": "/images/favicon/favicon.png",
   "navItems": [
     {
       "label": "Home",
