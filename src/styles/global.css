@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
-/* 1. Define Light Mode Colors (Default) */
+/* 1. Define Light Mode Colors (High Contrast) */
 :root {
   --color-bg-main: #f8fafc;       /* slate-50 */
   --color-bg-surface: #ffffff;    /* white */
-  --color-text-main: #0f172a;     /* slate-900 */
-  --color-text-muted: #64748b;    /* slate-500 */
+  --color-text-main: #0f172a;     /* slate-900 (Nearly black, excellent readability) */
+  --color-text-muted: #000000;    /* slate-600 (Darker gray, much easier to read) */
   --color-border-subtle: #e2e8f0; /* slate-200 */
 }
 
-/* 2. Define Dark Mode Colors */
+/* 2. Define Dark Mode Colors (High Contrast) */
 @media (prefers-color-scheme: dark) {
   :root {
     --color-bg-main: #0f172a;       /* slate-900 */
     --color-bg-surface: #1e293b;    /* slate-800 */
-    --color-text-main: #f8fafc;     /* slate-50 */
-    --color-text-muted: #94a3b8;    /* slate-400 */
+    --color-text-main: #f8fafc;     /* slate-50 (Nearly white) */
+    --color-text-muted: #cbd5e1;    /* slate-300 (Brighter gray for dark mode) */
     --color-border-subtle: #334155; /* slate-700 */
   }
 }
 
-/* 3. Feed them into Tailwind v4 so you can use them as classes */
+/* 3. Feed them into Tailwind v4 */
 @theme {
   --color-main: var(--color-bg-main);
   --color-surface: var(--color-bg-surface);
