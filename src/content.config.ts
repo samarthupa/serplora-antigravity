@@ -29,6 +29,10 @@ const header = defineCollection({
   schema: z.object({
     siteTitle: z.string().optional(),
     logo: z.string().optional(),
+    
+    // Add the favicon schema validation right here 👇
+    favicon: z.string().optional(), 
+    
     navItems: z.array(z.object({
       label: z.string().optional(),
       url: z.string().default('#'),
