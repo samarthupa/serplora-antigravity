@@ -1,3 +1,4 @@
+
 ---
 import { getCollection, getEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
@@ -8,54 +9,22 @@ const headline = pageEntry?.data?.headline || 'Tutorials & Guides';
 const subheadline = pageEntry?.data?.subheadline || 'Explore our latest guides and learn step-by-step with state-of-the-art tutorials.';
 const hiddenTutorialsSingleton = pageEntry?.data?.hiddenTutorials || [];
 
-const generateSlug = (entry: any) => {
-  let rawSlug = entry.data?.slug || entry.slug || entry.id?.replace(/\/?index\.mdoc$/, '').replace(/\.mdoc$/, '');
-  return rawSlug?.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toLowerCase() || '';
-};
+// 🟢 THE NEW, CLEAN WAY TO GET TUTORIALS:
+const allTutorials = await getCollection('tutorials');
 
-// Bypass getCollection entirely using raw memory globs
-const tutorialsGlob = import.meta.glob('../../content/tutorials/*/*.{md,mdoc}', { eager: true });
-const rawGlob = import.meta.glob('../../content/tutorials/*/*.{md,mdoc}', { eager: true, query: '?raw', import: 'default' });
-
-const allTutorials = Object.entries(tutorialsGlob).map(([filepath, module]: any) => {
-  const rawText = rawGlob[filepath] as string || '';
+const publishedTutorials = allTutorials.filter((tutorial) => {
+  // 1. Drafts are ALWAYS unconditionally removed
+  if (tutorial.data.draft === true) return false;
   
-  const fmMatch = rawText.match(/^---\n([\s\S]+?)\n---/);
-  const fm = fmMatch ? fmMatch[1] : '';
-
-  const slugMatch = fm.match(/\bslug:\s*(['"]?)(.+?)\1\s*$/m);
-  const titleMatch = fm.match(/\bname:\s*(['"]?)(.+?)\1\s*$/m);
-  const draftMatch = fm.match(/^draft:\s*(true|false)/m);
-  const descMatch = fm.match(/^description:\s*(.+)$/m);
-
-  const match = filepath.match(/tutorials\/([^/]+)\//);
-  const id = match ? match[1] : '';
-
-  return {
-    id,
-    slug: id,
-    data: {
-      title: titleMatch ? titleMatch[1].trim().replace(/^['"](.*)['"]$/, '$1') : id,
-      slug: slugMatch ? slugMatch[1].trim().replace(/^['"](.*)['"]$/, '$1') : '',
-      draft: draftMatch ? draftMatch[1] === 'true' : false,
-      description: descMatch ? descMatch[1].trim() : '',
-    },
-    Content: module.Content,
-  };
-});
-
-const publishedTutorials = allTutorials.filter((tutorial: any) => {
-  // 1. Drafts are ALWAYS unconditionally removed from the index.
-  if (tutorial.data?.draft === true) return false;
-  
-  const slug = generateSlug(tutorial);
-  // 2. Singleton Global Overrides take priority over local index visibility
+  // 2. Hide tutorials if they are in the hidden list
+  const slug = tutorial.data.slug || tutorial.id;
   if (hiddenTutorialsSingleton.includes(slug)) return false;
-  // Everything else shows normally by default
+  
   return true;
 });
 
-// Optionally sort tutorials by ID or date here if added to frontmatter later
+// Helper for your HTML template below
+const generateSlug = (tutorial: any) => tutorial.data.slug || tutorial.id;
 ---
 
 <Layout>
@@ -96,10 +65,8 @@ const publishedTutorials = allTutorials.filter((tutorial: any) => {
                     <h2 class="text-3xl font-bold mb-4 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 tracking-tight">
                       {tutorial.data?.title || slug}
                     </h2>
-                    {tutorial.data?.description && (
-                      <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-8 line-clamp-3 text-lg">
-                        {tutorial.data.description}
-                      </p>
+                    {tutorial.data?.excerpt && (
+                      <div class="text-slate-600 dark:text-slate-300 leading-relaxed mb-8 line-clamp-3 text-lg" set:html={tutorial.data.excerpt} />
                     )}
                   </div>
                   

@@ -1,0 +1,84 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// Fetch the blog settings page CMS content
+const pageEntry = await getEntry('blogPage', 'data');
+const headline = pageEntry?.data?.headline || 'Our Blog';
+const subheadline = pageEntry?.data?.subheadline || 'Read the latest updates, stories, and announcements.';
+const hiddenPosts = pageEntry?.data?.hiddenPosts || [];
+
+// 🟢 Fetch all blog posts
+const allPosts = await getCollection('posts');
+
+const publishedPosts = allPosts.filter((post) => {
+  // 1. Remove drafts
+  if (post.data.draft === true) return false;
+  
+  // 2. Hide posts if they are in the hidden list
+  const slug = post.data.slug || post.id;
+  if (hiddenPosts.includes(slug)) return false;
+  
+  return true;
+});
+
+// Helper for your HTML template
+const generateSlug = (post: any) => post.data.slug || post.id;
+---
+
+<Layout>
+  <main class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-50 py-16 px-4 md:px-8">
+    <div class="max-w-6xl mx-auto">
+      
+      {/* Header Section */}
+      <div class="text-center mb-16 space-y-4">
+        <h1 class="text-5xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 drop-shadow-sm">
+          {headline}
+        </h1>
+        <p class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto font-medium">
+          {subheadline}
+        </p>
+      </div>
+
+      {/* Grid Section */}
+      {publishedPosts.length === 0 ? (
+        <div class="text-center py-24 bg-white dark:bg-slate-800/50 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700/50 backdrop-blur-xl">
+          <p class="text-slate-500 dark:text-slate-400 text-xl font-medium">No posts available right now. Check back soon!</p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {publishedPosts.map((post) => {
+            const slug = generateSlug(post);
+            
+            return (
+              <a 
+                href={`/blog/${slug}`}
+                class="group relative bg-white dark:bg-slate-800/80 rounded-[2rem] p-8 overflow-hidden border border-slate-100 dark:border-slate-700/60 shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between backdrop-blur-xl"
+              >
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 dark:from-blue-900/10 dark:to-indigo-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                
+                <div class="relative z-10 flex flex-col h-full">
+                  <div>
+                    <h2 class="text-3xl font-bold mb-4 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 tracking-tight">
+                      {post.data?.title || slug}
+                    </h2>
+                    {post.data?.excerpt && (
+                      <div class="text-slate-600 dark:text-slate-300 leading-relaxed mb-8 line-clamp-3 text-lg" set:html={post.data.excerpt} />
+                    )}
+                  </div>
+                  
+                  <div class="mt-auto flex items-center text-sm font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 pt-8">
+                    Read Post
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-3 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </main>
+</Layout>

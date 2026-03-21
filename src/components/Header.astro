@@ -19,13 +19,13 @@ const secondaryBtn = {
 };
 ---
 
-<header id="site-header" class="sticky top-0 z-[200] h-[64px] bg-white/95 backdrop-blur-[8px] border-b border-[#e2e8f0] flex items-center font-['Outfit',sans-serif] transition-transform duration-300">
+<header id="site-header" class="sticky top-0 z-[200] h-[64px] bg-surface/95 backdrop-blur-[8px] border-b border-subtle flex items-center font-['Outfit',sans-serif] transition-transform duration-300">
   <div class="max-w-[1200px] mx-auto px-8 w-full flex items-center gap-10">
     
     {/* Brand / Logo */}
-    <a href="/" class="text-[20px] font-[800] text-[#0f172a] tracking-[-0.5px] shrink-0 outline-none flex items-center gap-2">
+    <a href="/" class="text-[20px] font-[800] text-tx-main tracking-[-0.5px] shrink-0 outline-none flex items-center gap-2">
       {logo && <img src={logo} alt={siteTitle} class="h-8 w-auto object-contain" />}
-      {!logo && <>{siteTitle}<span class="text-[#3b82f6]">.</span></>}
+      {!logo && <>{siteTitle}<span class="text-blue-500">.</span></>}
     </a>
 
     {/* Desktop Navigation Links */}
@@ -38,7 +38,7 @@ const secondaryBtn = {
           <li class="relative group">
             <a 
               href={item.url || '#'} 
-              class="flex items-center px-[14px] py-2 rounded-[6px] text-[15px] font-[600] text-[#64748b] transition-all duration-200 hover:bg-[#f4f6f8] hover:text-[#0f172a]"
+              class="flex items-center px-[14px] py-2 rounded-[6px] text-[15px] font-[600] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main"
             >
               {item.label}
               {hasSubItems && (
@@ -51,11 +51,11 @@ const secondaryBtn = {
             {/* Dropdown Menu Container */}
             {hasSubItems && (
               <div class={`absolute ${isLast ? 'right-0' : 'left-0'} top-full pt-1 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top translate-y-1 group-hover:translate-y-0 z-[200]`}>
-                <div class="py-1 bg-white rounded-md shadow-sm border border-gray-100">
+                <div class="py-1 bg-surface rounded-md shadow-sm border border-subtle">
                   {item.subItems.map((subItem) => (
                      <a 
                       href={subItem.url || '#'} 
-                      class="block px-4 py-2 text-[14px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      class="block px-4 py-2 text-[14px] text-tx-muted hover:text-tx-main hover:bg-main transition-colors"
                     >
                       {subItem.label}
                     </a>
@@ -71,12 +71,12 @@ const secondaryBtn = {
     {/* Right Area: Buttons */}
     <div class="ml-auto hidden md:flex items-center gap-3">
       {secondaryBtn.show && (
-        <a href={secondaryBtn.url} class="px-5 py-[10px] rounded-[6px] text-[15px] font-[600] text-[#0f172a] bg-transparent hover:bg-[#f4f6f8] transition-colors cursor-pointer border-none outline-none leading-none">
+        <a href={secondaryBtn.url} class="px-5 py-[10px] rounded-[6px] text-[15px] font-[600] text-tx-main bg-transparent hover:bg-main transition-colors cursor-pointer border-none outline-none leading-none">
           {secondaryBtn.label}
         </a>
       )}
       {primaryBtn.show && (
-        <a href={primaryBtn.url} class="px-6 py-[10px] rounded-[6px] bg-[#10162f] text-white text-[15px] font-[600] transition-colors hover:bg-[#3b82f6] cursor-pointer border-none outline-none leading-none">
+        <a href={primaryBtn.url} class="px-6 py-[10px] rounded-[6px] bg-tx-main text-main text-[15px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
           {primaryBtn.label}
         </a>
       )}
@@ -84,24 +84,24 @@ const secondaryBtn = {
 
     {/* Mobile Hamburger Toggle Button */}
     <div class="md:hidden ml-auto flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer" id="mobile-menu-btn" aria-label="Toggle menu">
-      <span class="block w-6 h-[2.5px] bg-[#0f172a] rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
-      <span class="block w-6 h-[2.5px] bg-[#0f172a] rounded-sm transition-opacity duration-300" id="ham-mid"></span>
-      <span class="block w-6 h-[2.5px] bg-[#0f172a] rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
+      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
+      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
+      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
     </div>
 
     {/* Mobile Navigation Drawer */}
-    <div id="mobile-menu" class="hidden absolute top-[64px] left-0 w-full bg-white border-b border-[#e2e8f0] shadow-md flex-col max-h-[calc(100vh-64px)] overflow-y-auto z-[190]">
+    <div id="mobile-menu" class="hidden absolute top-[64px] left-0 w-full bg-surface border-b border-subtle shadow-md flex-col max-h-[calc(100vh-64px)] overflow-y-auto z-[190]">
       <ul class="flex flex-col list-none m-0 px-6 py-4 gap-2">
         {navItems.map((item) => {
            const hasSubItems = item.subItems && item.subItems.length > 0;
            return (
              <li>
-               <div class="flex items-center justify-between border-b border-gray-100">
-                 <a href={item.url || '#'} class="py-3 text-[16px] font-[500] text-gray-800 flex-1">
+               <div class="flex items-center justify-between border-b border-subtle">
+                 <a href={item.url || '#'} class="py-3 text-[16px] font-[500] text-tx-main flex-1">
                    {item.label}
                  </a>
                  {hasSubItems && (
-                   <button class="mobile-submenu-toggle p-3 -mr-3 text-gray-400 focus:outline-none" aria-expanded="false" aria-label="Toggle submenu">
+                   <button class="mobile-submenu-toggle p-3 -mr-3 text-tx-muted focus:outline-none" aria-expanded="false" aria-label="Toggle submenu">
                      <svg class="w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
                      </svg>
@@ -112,7 +112,7 @@ const secondaryBtn = {
                  <ul class="mobile-submenu hidden pl-4 py-1 space-y-1 mt-1 mb-2">
                    {item.subItems.map((subItem) => (
                      <li>
-                       <a href={subItem.url || '#'} class="block py-2 text-[14px] text-gray-500 hover:text-gray-900">
+                       <a href={subItem.url || '#'} class="block py-2 text-[14px] text-tx-muted hover:text-tx-main">
                          {subItem.label}
                        </a>
                      </li>
@@ -125,12 +125,12 @@ const secondaryBtn = {
       </ul>
       <div class="flex flex-col gap-3 px-6 pb-6 pt-2">
         {secondaryBtn.show && (
-          <a href={secondaryBtn.url} class="text-center px-5 py-3 rounded-[6px] text-[15px] font-[600] text-[#0f172a] bg-[#f4f6f8] active:bg-gray-200 transition-colors">
+          <a href={secondaryBtn.url} class="text-center px-5 py-3 rounded-[6px] text-[15px] font-[600] text-tx-main bg-main active:opacity-80 transition-colors">
             {secondaryBtn.label}
           </a>
         )}
         {primaryBtn.show && (
-          <a href={primaryBtn.url} class="text-center px-6 py-3 rounded-[6px] bg-[#10162f] text-white text-[15px] font-[600] transition-colors active:bg-[#3b82f6]">
+          <a href={primaryBtn.url} class="text-center px-6 py-3 rounded-[6px] bg-tx-main text-main text-[15px] font-[600] transition-opacity active:opacity-80">
             {primaryBtn.label}
           </a>
         )}

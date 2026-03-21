@@ -12,12 +12,33 @@ export default config({
             format: { contentField: 'content' },
             previewUrl: '/blog/{slug}',
             schema: {
-                title: fields.text({ label: 'Title', validation: { isRequired: false } }),
-                slug: fields.text({ label: 'Custom URL Slug (Auto-population is natively blocked by Astro Zod typing bug)', defaultValue: '', validation: { isRequired: false } }),
-                draft: fields.checkbox({ label: 'Draft', description: 'Take this post fully offline (returns a 404 Not Found)', defaultValue: false }),
-                description: fields.text({ label: 'Description' }),
-                content: fields.markdoc({ label: 'Content' }),
-            },
+    title: fields.slug({ 
+        name: { label: 'Title' },
+        slug: { label: 'SEO Slug', description: 'Auto-generates from the title.' }
+    }),
+    draft: fields.checkbox({ label: 'Draft', description: 'Take this post fully offline', defaultValue: false }),
+    
+    // 🟢 NEW: Author & Dates
+    authorName: fields.text({ label: 'Author Name', defaultValue: 'Serplora Team' }),
+    authorImage: fields.image({ label: 'Author Avatar', directory: 'public/images/avatars', publicPath: '/images/avatars/' }),
+    publishDate: fields.date({ label: 'Publish Date', defaultValue: { kind: 'today' } }),
+    updatedDate: fields.date({ label: 'Last Modified Date (Optional)', description: 'Leave blank to just show publish date' }),
+    
+    // 🟢 NEW: Featured Image & Excerpt
+    image: fields.image({ label: 'Featured Image', directory: 'public/images/posts', publicPath: '/images/posts/' }),
+    excerpt: fields.text({ label: 'Excerpt', multiline: true }),
+    
+    // 🟢 NEW: FAQ Section
+    faqs: fields.array(
+        fields.object({
+            question: fields.text({ label: 'Question' }),
+            answer: fields.text({ label: 'Answer', multiline: true })
+        }),
+        { label: 'FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
+    ),
+    
+    content: fields.markdoc({ label: 'Content' }),
+},
         }),
         tutorials: collection({
             label: 'Tutorials',
@@ -26,10 +47,16 @@ export default config({
             format: { contentField: 'content' },
             previewUrl: '/tutorials/{slug}',
             schema: {
-                title: fields.text({ label: 'Title', validation: { isRequired: false } }),
-                slug: fields.text({ label: 'Custom URL Slug (Auto-population is natively blocked by Astro Zod typing bug)', defaultValue: '', validation: { isRequired: false } }),
+                // 🟢 REPLACED THE OLD TITLE FIELD HERE TOO:
+                title: fields.slug({ 
+                    name: { label: 'Title' },
+                    slug: { 
+                        label: 'SEO Slug', 
+                        description: 'Auto-generates from the title, but you can edit it to be shorter and cleaner for SEO (e.g. "xbox-guide").' 
+                    }
+                }),
                 draft: fields.checkbox({ label: 'Draft', description: 'Take this page fully offline (returns a 404 Not Found)', defaultValue: false }),
-                description: fields.text({ label: 'Description' }),
+                excerpt: fields.text({ label: 'Excerpt (HTML Allowed)', multiline: true }),
                 content: fields.markdoc({ label: 'Content' }),
             },
         }),
