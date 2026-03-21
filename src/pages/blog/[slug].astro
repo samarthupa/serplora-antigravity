@@ -60,7 +60,7 @@ const relatedPosts = otherPosts.slice(0, 3);
         </h1>
         {/* Excerpt Section */}
         {entry.data.excerpt && (
-          <div class="markdown-content text-[16px] md:text-[18px] font-[400] leading-[1.7] md:leading-[1.8]" set:html={entry.data.excerpt} />
+          <div class="markdown-content text-[16px] md:text-[20px] font-[400] leading-[1.7] md:leading-[1.8]" set:html={entry.data.excerpt} />
         )}
       </header>
 
@@ -100,7 +100,7 @@ const relatedPosts = otherPosts.slice(0, 3);
       </div>
 
       {/* 5. Main Content Area */}
-      <div class="markdown-content text-[16px] md:text-[18px] leading-[1.7] md:leading-[1.8] pb-16 border-b border-subtle font-['Outfit',sans-serif]">
+      <div class="markdown-content text-[16px] md:text-[20px] leading-[1.7] md:leading-[1.8] pb-16 border-b border-subtle font-['Outfit',sans-serif]">
         <Content />
       </div>
 
@@ -187,7 +187,8 @@ const relatedPosts = otherPosts.slice(0, 3);
   
   /* Paragraphs & Text */
   .markdown-content p, .faq-content p { 
-    color: var(--color-tx-muted);
+    color: var(--color-tx-main); 
+    opacity: 0.9; 
     margin-bottom: 1.5em; 
   }
   .markdown-content p:last-child {
@@ -196,6 +197,7 @@ const relatedPosts = otherPosts.slice(0, 3);
   .markdown-content strong, .faq-content strong {
     color: var(--color-tx-main);
     font-weight: 700;
+    opacity: 1;
   }
   
   /* Links */
@@ -213,13 +215,15 @@ const relatedPosts = otherPosts.slice(0, 3);
     list-style-type: disc; 
     padding-left: 1.2em; 
     margin-bottom: 1.5em; 
-    color: var(--color-tx-muted);
+    color: var(--color-tx-main); 
+    opacity: 0.9;
   }
   .markdown-content ol, .faq-content ol { 
     list-style-type: decimal; 
     padding-left: 1.2em; 
     margin-bottom: 1.5em; 
-    color: var(--color-tx-muted);
+    color: var(--color-tx-main); 
+    opacity: 0.9;
   }
   .markdown-content li, .faq-content li { 
     margin-bottom: 0.5em; 
@@ -249,7 +253,7 @@ const relatedPosts = otherPosts.slice(0, 3);
     margin-bottom: 1.75em; 
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     position: relative; 
-    /* 🟢 Apply font sizing directly to the PRE tag */
+    /* Apply font sizing directly to the PRE tag */
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85em; 
     line-height: 1.6;
@@ -266,7 +270,7 @@ const relatedPosts = otherPosts.slice(0, 3);
     border-radius: 0.25rem; 
   }
 
-  /* 🟢 Copy Button Styles */
+  /* Copy Button Styles */
   .copy-code-btn {
     position: absolute;
     top: 8px;
@@ -313,7 +317,7 @@ const relatedPosts = otherPosts.slice(0, 3);
     const codeBlocks = document.querySelectorAll('.markdown-content pre');
 
     codeBlocks.forEach((preBlock) => {
-      // 🟢 1. Grab the raw code text BEFORE we inject the button into the HTML
+      // 1. Grab the raw code text BEFORE we inject the button into the HTML
       const textToCopy = preBlock.innerText || preBlock.textContent;
 
       // 2. Create the button element
