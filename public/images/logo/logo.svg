@@ -1,14 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- 
-    Option 1: The Classic 'S' Crossbar
-    - The path has been redrawn into a classic, symmetrical 'S' curve.
-    - It remains perfectly connected to the legs of the 'A'.
-  -->
-  <rect width="100" height="100" rx="15" fill="#0F172A"/>
-  <g fill="none" stroke="#64FFDA" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-    <!-- The 'A' shape -->
-    <path d="M15 85 L 50 15 L 85 85"/>
-    <!-- The new, more legible 'S' crossbar -->
-    <path d="M30 65 C 30 55, 45 55, 50 65 S 70 75, 70 65"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100">
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    
+    <!-- S shape -->
+    <path d="M 55 30 H 28 A 7 7 0 0 0 21 37 V 43 A 7 7 0 0 0 28 50 H 45 A 7 7 0 0 1 52 57 V 63 A 7 7 0 0 1 45 70 H 21" stroke="#22A06B" stroke-width="9"></path>
+    
+    <!-- A circle (moved further right) -->
+    <circle cx="82" cy="55" r="15" stroke="#22A06B" stroke-width="9"></circle>
+    
+    <!-- A vertical line -->
+    <path d="M 100 40 V 70" stroke="#22A06B" stroke-width="9"></path>
+    
+    <!-- Top dot (slightly higher) -->
+    <circle cx="100" cy="20" r="6" fill="#22A06B" stroke="none"></circle>
+    
   </g>
 </svg>
