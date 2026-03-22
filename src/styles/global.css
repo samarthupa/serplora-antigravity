@@ -2,8 +2,8 @@
 
 /* 1. Define Light Mode Colors (High Contrast) */
 :root {
-  --color-bg-main: #f8fafc;       /* slate-50 */
-  --color-bg-surface: #ffffff;    /* white */
+  --color-bg-main: #fff;       /* slate-50 */
+  --color-bg-surface: #f5f5f5;    /* white */
   --color-text-main: #0f172a;     /* slate-900 (Nearly black, excellent readability) */
   --color-text-muted: #000000;    /* slate-600 (Darker gray, much easier to read) */
   --color-border-subtle: #e2e8f0; /* slate-200 */
