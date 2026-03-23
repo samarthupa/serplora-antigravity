@@ -67,7 +67,6 @@ lessons: collection({
             name: { label: 'Internal Title (e.g., Python - Variables)' },
             slug: { label: 'Keystatic Folder ID (Do not edit)' }
         }),
-        // This is what generates the clean URL: /tutorials/python/variables
         urlSlug: fields.text({ 
             label: 'URL Slug', 
             description: 'e.g. "variables", "if-statements"' 

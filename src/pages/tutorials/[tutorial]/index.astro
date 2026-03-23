@@ -23,7 +23,9 @@ const { Content } = await render(series);
 ---
 
 <TutorialSidebarLayout series={series} lessons={seriesLessons} currentSlug="intro">
-  <h1 class="text-4xl font-black mb-6">{series.data.title}: Introduction</h1>
+  <h1 class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
+  {series.data.title}: Introduction
+</h1>
   {series.data.excerpt && <p class="text-xl text-slate-500 mb-8">{series.data.excerpt}</p>}
   <div class="mt-8">
     <Content />

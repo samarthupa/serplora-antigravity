@@ -35,9 +35,9 @@ const { Content } = await render(lesson);
 ---
 
 <TutorialSidebarLayout series={series} lessons={seriesLessons} currentSlug={lesson.data.urlSlug}>
-  <h1 class="text-4xl font-bold mb-8">
-    {lesson.data.title.includes('-') ? lesson.data.title.split(' - ')[1] : lesson.data.title}
-  </h1>
+  <h1 class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
+  {lesson.data.title.includes('-') ? lesson.data.title.split(' - ')[1] : lesson.data.title}
+</h1>
   <div class="mt-8">
     <Content />
   </div>
