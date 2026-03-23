@@ -1,0 +1,42 @@
+---
+import Layout from './Layout.astro';
+
+const { series, lessons, currentSlug } = Astro.props;
+---
+
+<Layout>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row gap-8">
+    
+    {/* Left Sidebar */}
+    <aside class="w-full md:w-64 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 pr-4">
+      <h3 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">
+        {series.data.title}
+      </h3>
+      <nav class="flex flex-col space-y-2">
+        {/* Intro Link */}
+        <a 
+          href={`/tutorials/${series.id}`} 
+          class={`px-3 py-2 rounded-lg text-sm transition-colors ${currentSlug === 'intro' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 font-semibold' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+        >
+          Introduction
+        </a>
+
+        {/* Lesson Links */}
+        {lessons.map((lesson: any) => (
+          <a 
+            href={`/tutorials/${series.id}/${lesson.data.urlSlug}`}
+            class={`px-3 py-2 rounded-lg text-sm transition-colors ${currentSlug === lesson.data.urlSlug ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 font-semibold' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          >
+            {lesson.data.order}. {lesson.data.title.split(' - ')[1] || lesson.data.title}
+          </a>
+        ))}
+      </nav>
+    </aside>
+
+    {/* Right Main Content */}
+    <main class="flex-1 min-w-0 prose prose-lg dark:prose-invert max-w-none">
+      <slot />
+    </main>
+    
+  </div>
+</Layout>

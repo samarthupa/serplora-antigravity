@@ -1,0 +1,44 @@
+---
+import { getCollection, render } from 'astro:content';
+import TutorialSidebarLayout from '../../../layouts/TutorialSidebarLayout.astro';
+
+export async function getStaticPaths() {
+  const allSeries = await getCollection('tutorials');
+  const allLessons = await getCollection('lessons');
+  
+  // Build paths for every lesson
+  const paths = allLessons.map((lesson) => {
+    // Find the parent series for this lesson
+    const series = allSeries.find(s => s.id === lesson.data.tutorial);
+    
+    return {
+      params: { 
+        tutorial: lesson.data.tutorial, 
+        lesson: lesson.data.urlSlug 
+      },
+      props: { lesson, series },
+    };
+  });
+
+  return paths.filter(path => path.props.series); // Ensure parent exists
+}
+
+const { lesson, series } = Astro.props;
+
+// Fetch sibling lessons for the sidebar
+const allLessons = await getCollection('lessons');
+const seriesLessons = allLessons
+  .filter(l => l.data.tutorial === series.id)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const { Content } = await render(lesson);
+---
+
+<TutorialSidebarLayout series={series} lessons={seriesLessons} currentSlug={lesson.data.urlSlug}>
+  <h1 class="text-4xl font-bold mb-8">
+    {lesson.data.title.includes('-') ? lesson.data.title.split(' - ')[1] : lesson.data.title}
+  </h1>
+  <div class="mt-8">
+    <Content />
+  </div>
+</TutorialSidebarLayout>

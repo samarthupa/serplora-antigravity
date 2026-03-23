@@ -39,25 +39,52 @@ export default config({
                 content: fields.markdoc({ label: 'Content' }),
             },
         }),
-        tutorials: collection({
-            label: 'Tutorials',
-            slugField: 'title',
-            path: 'src/content/tutorials/*/',
-            format: { contentField: 'content' },
-            previewUrl: '/tutorials/{slug}',
-            schema: {
-                title: fields.slug({ 
-                    name: { label: 'Title' },
-                    slug: { 
-                        label: 'SEO Slug', 
-                        description: 'Auto-generates from the title, but you can edit it to be shorter and cleaner for SEO (e.g. "xbox-guide").' 
-                    }
-                }),
-                draft: fields.checkbox({ label: 'Draft', description: 'Take this page fully offline (returns a 404 Not Found)', defaultValue: false }),
-                excerpt: fields.text({ label: 'Excerpt (HTML Allowed)', multiline: true }),
-                content: fields.markdoc({ label: 'Content' }),
-            },
+        // Add this inside the collections object in your keystatic.config.ts
+        // Add this inside the collections object in your keystatic.config.ts
+tutorials: collection({
+    label: 'Tutorial Series (Parents)',
+    slugField: 'title',
+    path: 'src/content/tutorials/*/',
+    format: { contentField: 'content' },
+    previewUrl: '/tutorials/{slug}',
+    schema: {
+        title: fields.slug({ 
+            name: { label: 'Series Title (e.g. Python)' },
+            slug: { label: 'SEO Slug' }
         }),
+        draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
+        excerpt: fields.text({ label: 'Excerpt', multiline: true }),
+        content: fields.markdoc({ label: 'Introduction Content' }),
+    },
+}),
+lessons: collection({
+    label: 'Lessons (Children)',
+    slugField: 'title',
+    path: 'src/content/lessons/*/',
+    format: { contentField: 'content' },
+    schema: {
+        title: fields.slug({ 
+            name: { label: 'Internal Title (e.g., Python - Variables)' },
+            slug: { label: 'Keystatic Folder ID (Do not edit)' }
+        }),
+        // This is what generates the clean URL: /tutorials/python/variables
+        urlSlug: fields.text({ 
+            label: 'URL Slug', 
+            description: 'e.g. "variables", "if-statements"' 
+        }),
+        tutorial: fields.relationship({
+            label: 'Belongs to Tutorial Series',
+            collection: 'tutorials',
+            validation: { isRequired: true }
+        }),
+        order: fields.integer({ 
+            label: 'Lesson Order', 
+            description: 'Order in the sidebar (1, 2, 3...)', 
+            defaultValue: 1 
+        }),
+        content: fields.markdoc({ label: 'Content' }),
+    },
+}),
     },
     singletons: {
         header: singleton({

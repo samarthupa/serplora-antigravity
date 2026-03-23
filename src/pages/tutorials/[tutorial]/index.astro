@@ -1,0 +1,31 @@
+---
+import { getCollection, render } from 'astro:content';
+import TutorialSidebarLayout from '../../../layouts/TutorialSidebarLayout.astro';
+
+export async function getStaticPaths() {
+  const allSeries = await getCollection('tutorials');
+  
+  return allSeries.map((series) => ({
+    params: { tutorial: series.id },
+    props: { series },
+  }));
+}
+
+const { series } = Astro.props;
+
+// Fetch all lessons belonging to this series and sort them by 'order'
+const allLessons = await getCollection('lessons');
+const seriesLessons = allLessons
+  .filter(lesson => lesson.data.tutorial === series.id)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const { Content } = await render(series);
+---
+
+<TutorialSidebarLayout series={series} lessons={seriesLessons} currentSlug="intro">
+  <h1 class="text-4xl font-black mb-6">{series.data.title}: Introduction</h1>
+  {series.data.excerpt && <p class="text-xl text-slate-500 mb-8">{series.data.excerpt}</p>}
+  <div class="mt-8">
+    <Content />
+  </div>
+</TutorialSidebarLayout>

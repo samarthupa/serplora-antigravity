@@ -13,6 +13,16 @@ const tutorials = defineCollection({
   }),
 });
 
+const lessons = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/lessons" }),
+  schema: z.object({
+    title: z.string().optional(),
+    urlSlug: z.string(),
+    tutorial: z.string(), // This stores the ID of the parent tutorial series
+    order: z.number().default(1),
+  }),
+});
+
 // 2. Tutorials Page (The JSON settings for the tutorials index)
 const tutorialsPage = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/tutorialsPage' }),
@@ -119,7 +129,8 @@ const diagnosticsDashboard = defineCollection({
 
 // 8. EXPORT ALL COLLECTIONS (This tells Astro to build them)
 export const collections = { 
-  tutorials, 
+  tutorials,
+  lessons, 
   tutorialsPage, 
   header, 
   footer, 
