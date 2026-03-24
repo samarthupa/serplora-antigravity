@@ -203,19 +203,24 @@ const primaryBtn = {
   let lastScrollY = window.scrollY;
 
   window.addEventListener('scroll', () => {
-    if (!header) return;
-    const currentScrollY = window.scrollY;
-    
-    if (currentScrollY > 64) {
-      if (currentScrollY > lastScrollY && menu?.classList.contains('hidden')) {
-        header.classList.add('-translate-y-full');
-      } else {
-        header.classList.remove('-translate-y-full');
-      }
+  if (!header) return;
+  const currentScrollY = window.scrollY;
+  
+  if (currentScrollY > 64) {
+    if (currentScrollY > lastScrollY && menu?.classList.contains('hidden')) {
+      header.classList.add('-translate-y-full');
+      // Tell the rest of the page the header is gone
+      document.documentElement.classList.add('header-hidden'); 
     } else {
       header.classList.remove('-translate-y-full');
+      // Tell the rest of the page the header is back
+      document.documentElement.classList.remove('header-hidden'); 
     }
-    
-    lastScrollY = currentScrollY;
-  }, { passive: true });
+  } else {
+    header.classList.remove('-translate-y-full');
+    document.documentElement.classList.remove('header-hidden');
+  }
+  
+  lastScrollY = currentScrollY;
+}, { passive: true });
 </script>
