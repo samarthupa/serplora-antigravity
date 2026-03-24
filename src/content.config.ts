@@ -126,6 +126,16 @@ const diagnosticsDashboard = defineCollection({
     notice: z.string().optional()
   })
 });
+const sidebarAds = defineCollection({
+  loader: glob({ pattern: 'data.json', base: './src/content/sidebarAds' }),
+  schema: z.object({
+    globalAd: z.string().optional(),
+    tutorialAds: z.array(z.object({
+      tutorial: z.string().nullable(),
+      htmlContent: z.string()
+    })).optional().default([])
+  })
+});
 
 // 8. EXPORT ALL COLLECTIONS (This tells Astro to build them)
 export const collections = { 
@@ -137,4 +147,5 @@ export const collections = {
   posts, 
   blogPage, 
   diagnosticsDashboard,
+  sidebarAds,
 };

@@ -200,5 +200,35 @@ lessons: collection({
                 ),
             },
         }),
+        sidebarAds: singleton({
+            label: 'Sidebar Ads & Banners',
+            path: 'src/content/sidebarAds/data',
+            format: { data: 'json' },
+            schema: {
+                globalAd: fields.text({ 
+                    label: 'Global Default Ad (HTML)', 
+                    multiline: true, 
+                    description: 'This HTML will show up on ALL tutorials by default unless overridden below.' 
+                }),
+                tutorialAds: fields.array(
+                    fields.object({
+                        tutorial: fields.relationship({ 
+                            label: 'Target Tutorial', 
+                            collection: 'tutorials',
+                            description: 'Select the parent tutorial series to target.'
+                        }),
+                        htmlContent: fields.text({ 
+                            label: 'Custom Ad HTML', 
+                            multiline: true,
+                            description: 'This will override the Global Ad for this specific tutorial and its child lessons.'
+                        })
+                    }),
+                    { 
+                        label: 'Tutorial-Specific Overrides', 
+                        itemLabel: props => props.fields.tutorial.value || 'New Tutorial Ad Override' 
+                    }
+                )
+            }
+        }),
     },
 });
