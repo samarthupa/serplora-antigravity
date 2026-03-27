@@ -4,6 +4,7 @@ import { getEntry } from 'astro:content';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import 'photoswipe/style.css';
 
 // Fetch the header data from Keystatic to get the Favicon and Site Title
 const headerEntry = await getEntry('header', 'data');
@@ -49,5 +50,33 @@ const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
       <slot />
     </main>
     <Footer />
+   <script>
+  import PhotoSwipeLightbox from 'photoswipe/lightbox';
+
+  // Wait for the page to load
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    // Initialize PhotoSwipe
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: 'main', 
+      children: 'img', 
+      pswpModule: () => import('photoswipe'),
+      bgOpacity: 0.9,
+    });
+
+    lightbox.addFilter('itemData', (itemData, index) => {
+      const img = itemData.element;
+      if (img) {
+          itemData.src = img.src;
+          itemData.w = img.naturalWidth || img.width;
+          itemData.h = img.naturalHeight || img.height;
+          itemData.msrc = img.src; 
+      }
+      return itemData;
+    });
+
+    lightbox.init();
+  });
+</script>
   </body>
 </html>

@@ -36,7 +36,15 @@ export default config({
                     { label: 'FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
                 ),
                 
-                content: fields.markdoc({ label: 'Content' }),
+                content: fields.markdoc({ 
+    label: 'Content',
+    options: {
+        image: {
+            directory: 'public/images/posts',
+            publicPath: '/images/posts/'
+        }
+    }
+}),
             },
         }),
         // Add this inside the collections object in your keystatic.config.ts
@@ -54,7 +62,15 @@ tutorials: collection({
         }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         excerpt: fields.text({ label: 'Excerpt', multiline: true }),
-        content: fields.markdoc({ label: 'Introduction Content' }),
+        content: fields.markdoc({ 
+    label: 'Introduction Content',
+    options: {
+        image: {
+            directory: 'public/images/tutorials',
+            publicPath: '/images/tutorials/'
+        }
+    }
+}),
     },
 }),
 lessons: collection({
@@ -81,7 +97,15 @@ lessons: collection({
             description: 'Order in the sidebar (1, 2, 3...)', 
             defaultValue: 1 
         }),
-        content: fields.markdoc({ label: 'Content' }),
+        content: fields.markdoc({ 
+    label: 'Content',
+    options: {
+        image: {
+            directory: 'public/images/lessons',
+            publicPath: '/images/lessons/'
+        }
+    }
+}),
     },
 }),
     },

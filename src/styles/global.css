@@ -26,3 +26,16 @@
   --color-tx-muted: var(--color-text-muted);
   --color-subtle: var(--color-border-subtle);
 }
+
+
+/* Make all images responsive */
+article img, 
+.prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem; /* Optional: adds nice rounded corners */
+    cursor: zoom-in;       /* Changes the mouse pointer to a magnifying glass */
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
