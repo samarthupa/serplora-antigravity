@@ -161,6 +161,9 @@ const relatedPosts = otherPosts.slice(0, 3);
       
     </article>
   </main>
+  {entry.data.customJs && (
+    <script is:inline set:html={entry.data.customJs}></script>
+  )}
 </Layout>
 
 <style is:global>

@@ -41,4 +41,8 @@ const { Content } = await render(lesson);
   <div class="mt-8">
     <Content />
   </div>
+
+{lesson.data.customJs && (
+    <script is:inline set:html={lesson.data.customJs}></script>
+  )}
 </TutorialSidebarLayout>

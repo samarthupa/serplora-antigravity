@@ -10,6 +10,7 @@ const tutorials = defineCollection({
     title: z.string().optional(),
     draft: z.boolean().optional(),
     excerpt: z.string().optional(), // <-- Renamed this
+    customJs: z.string().optional(),
   }),
 });
 
@@ -20,6 +21,8 @@ const lessons = defineCollection({
     urlSlug: z.string(),
     tutorial: z.string(), // This stores the ID of the parent tutorial series
     order: z.number().default(1),
+    customJs: z.string().optional(),
+    
   }),
 });
 
@@ -106,6 +109,7 @@ const posts = defineCollection({
       question: z.string(),
       answer: z.string()
     })).optional().default([]),
+    customJs: z.string().optional(),
   })
 });
 

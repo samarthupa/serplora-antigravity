@@ -45,6 +45,11 @@ export default config({
         }
     }
 }),
+customJs: fields.text({ 
+    label: 'Custom JavaScript', 
+    multiline: true, 
+    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
+}),
             },
         }),
         // Add this inside the collections object in your keystatic.config.ts
@@ -70,6 +75,11 @@ tutorials: collection({
             publicPath: '/images/tutorials/'
         }
     }
+}),
+customJs: fields.text({ 
+    label: 'Custom JavaScript', 
+    multiline: true, 
+    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
 }),
     },
 }),
@@ -105,6 +115,11 @@ lessons: collection({
             publicPath: '/images/lessons/'
         }
     }
+}),
+customJs: fields.text({ 
+    label: 'Custom JavaScript', 
+    multiline: true, 
+    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
 }),
     },
 }),

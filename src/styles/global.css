@@ -39,3 +39,62 @@ article img,
     margin-right: auto;
     display: block;
 }
+
+
+
+/* --- CUSTOM TOOLTIPS --- */
+  .markdown-content abbr[data-tooltip] {
+    text-decoration: underline dotted #3b82f6;
+    cursor: help;
+    position: relative;
+  }
+
+  .markdown-content abbr[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    
+    /* 🟢 DYNAMIC COLORS: Invert the text and background variables */
+    background: var(--color-text-main);
+    color: var(--color-bg-main);
+    
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1.5;
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: normal;
+    width: max-content;
+    max-width: 280px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Softened shadow for both modes */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 100;
+  }
+
+  .markdown-content abbr[data-tooltip]::before {
+    content: "";
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    
+    /* 🟢 MATCH POINTER TO BACKGROUND: Uses your text variable */
+    border-top-color: var(--color-text-main);
+    
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 100;
+  }
+
+  .markdown-content abbr[data-tooltip]:hover::after,
+  .markdown-content abbr[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }

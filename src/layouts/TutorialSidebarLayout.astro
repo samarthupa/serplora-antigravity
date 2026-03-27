@@ -63,7 +63,7 @@ if (adsData?.data) {
   <div class="absolute top-0 inset-x-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_100%,transparent_100%)] -z-10 h-[200px] pointer-events-none"></div>
 
   {/* WRAPPER: 3-Column Flex Layout on Desktop */}
-  <div class="max-w-[1600px] 2xl:max-w-[1700px] mx-auto w-full px-4 sm:px-6 lg:px-0 flex flex-col lg:flex-row lg:justify-between items-start font-['Outfit',sans-serif] relative">    
+  <div class="max-w-[1600px] 2xl:max-w-[1700px] mx-auto w-full px-4 sm:px-6 lg:px-0 flex flex-col lg:flex-row lg:justify-start xl:justify-between items-start font-['Outfit',sans-serif] relative">
     
     {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
     <div class="lg:hidden w-full flex flex-col">
@@ -175,13 +175,9 @@ if (adsData?.data) {
     {/* --- RIGHT BANNER / AD SIDEBAR (Visible on XL screens only) --- */}
     <aside class="hidden xl:block w-[260px] 2xl:w-[300px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto py-8 pr-6 2xl:pr-8 custom-scrollbar z-30">
       
-      {/* Dynamic Ad Injection */}
-      {adHtml ? (
+      {/* Dynamic Ad Injection - Only shows if adHtml exists, otherwise leaves an invisible empty column */}
+      {adHtml && (
         <div class="ad-container w-full" set:html={adHtml} />
-      ) : (
-        <div class="w-full h-[600px] bg-slate-900 border border-dashed border-slate-700 rounded-2xl flex flex-col items-center justify-center text-slate-400 transition-colors hover:border-slate-500 shadow-inner">
-          <span class="text-[10px] uppercase tracking-widest font-bold opacity-60">Ad Space</span>
-        </div>
       )}
 
     </aside>
