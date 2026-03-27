@@ -4,4 +4,68 @@ urlSlug: variables
 tutorial: python
 order: 3
 ---
-hello
+A variable is a name used to store a data value in Python.
+
+For example:
+
+```python
+x = 10
+```
+
+Here, `x` is the variable name and it holds the value `10`.
+
+```python
+name = "sam"
+```
+
+Here, `name` is the variable name and it holds the text `sam`.
+
+## Why do we need variables?
+
+Variables are not a necessity, but without variables, it becomes hard to read, write, or change Python code.
+
+### Example
+
+**Without variables:**
+
+```python
+print(10 + 10)
+print(10 - 5)
+```
+
+**With variables:**
+
+```python
+x = 10
+print(x + x)
+print(x - 5)
+```
+
+Now, if we want to use the value `10` anywhere, we can use `x`. And if we need to change the value from `10` to `15` everywhere, we just need to update the value of `x`:
+
+```python
+x = 15
+print(x + x)
+print(x - 5)
+```
+
+Here, we are using the value stored in `x` in different places and also changing it when needed.
+
+## Conclusion
+
+A variable is a name used to store a data value, such as numbers, text, or objects, which can be used and modified during program execution.
+
+## Important Note
+
+When writing a text (string) variable, you can use single quotes (`'text'`), double quotes (`"text"`), or triple quotes (`'''text'''` or `"""text"""`).
+
+```python
+x = 'sam'
+y = "sam"
+z = '''sam'''
+z2 = """sam"""
+
+print(x, y, z, z2)
+```
+
+However, generally everyone uses double quotes (`"text"`).
