@@ -1,15 +1,34 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+// 👇 NEW: Define Categories
+const categories = defineCollection({
+  loader: glob({ pattern: "**/*.json", base: "./src/content/categories" }),
+  schema: z.object({
+    title: z.string().optional(),
+  }),
+});
 
+// 👇 NEW: Define Tags
+const tags = defineCollection({
+  loader: glob({ pattern: "**/*.json", base: "./src/content/tags" }),
+  schema: z.object({
+    title: z.string().optional(),
+  }),
+});
 
 // 1. Tutorials (Your Markdown/Markdoc files)
 const tutorials = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/tutorials" }),
-    schema: z.object({
+  schema: z.object({
     title: z.string().optional(),
     draft: z.boolean().optional(),
-    excerpt: z.string().optional(), // <-- Renamed this
+    excerpt: z.string().optional(),
+    
+    // 👇 NEW: Support for category and tags
+    category: z.string().nullable().optional(),
+    tags: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
+    
     customJs: z.string().optional(),
   }),
 });
@@ -19,14 +38,13 @@ const lessons = defineCollection({
   schema: z.object({
     title: z.string().optional(),
     urlSlug: z.string(),
-    tutorial: z.string(), // This stores the ID of the parent tutorial series
+    tutorial: z.string(), 
     order: z.number().default(1),
     customJs: z.string().optional(),
-    
   }),
 });
 
-// 2. Tutorials Page (The JSON settings for the tutorials index)
+// 2. Tutorials Page 
 const tutorialsPage = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/tutorialsPage' }),
   schema: z.object({
@@ -36,16 +54,13 @@ const tutorialsPage = defineCollection({
   }),
 });
 
-// 3. Header (The JSON settings for your top nav)
+// 3. Header 
 const header = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/header' }),
   schema: z.object({
     siteTitle: z.string().optional(),
     logo: z.string().optional(),
-    
-    // Add the favicon schema validation right here 👇
     favicon: z.string().optional(), 
-    
     navItems: z.array(z.object({
       label: z.string().optional(),
       url: z.string().default('#'),
@@ -67,7 +82,7 @@ const header = defineCollection({
   }),
 });
 
-// 4. NEW: Footer (The JSON settings for your bottom nav and social links)
+// 4. Footer 
 const footer = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/footer' }),
   schema: z.object({
@@ -92,15 +107,19 @@ const footer = defineCollection({
   })
 });
 
-// 5. NEW: Posts (Your Blog Markdown/Markdoc files)
+// 5. Posts 
 const posts = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/posts" }),
   schema: z.object({
     title: z.string().optional(),
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
+    
+    // 👇 NEW: Support for category and tags
+    category: z.string().nullable().optional(),
+    tags: z.array(z.string()).optional().default([]),
+
     publishDate: z.coerce.date().optional(),
-    // 🟢 NEW FIELDS FOR THE REDESIGN:
     updatedDate: z.coerce.date().optional(),
     image: z.string().optional(),
     authorName: z.string().default('Serplora Team'),
@@ -113,7 +132,7 @@ const posts = defineCollection({
   })
 });
 
-// 6. NEW: Blog Page (The JSON settings for the blog index)
+// 6. Blog Page 
 const blogPage = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/blogPage' }),
   schema: z.object({
@@ -123,7 +142,7 @@ const blogPage = defineCollection({
   })
 });
 
-// 7. NEW: Diagnostics Dashboard (JSON notice setting)
+// 7. Diagnostics Dashboard 
 const diagnosticsDashboard = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/diagnosticsDashboard' }),
   schema: z.object({
@@ -141,8 +160,10 @@ const sidebarAds = defineCollection({
   })
 });
 
-// 8. EXPORT ALL COLLECTIONS (This tells Astro to build them)
+// 8. EXPORT ALL COLLECTIONS 👇 (Make sure to export the new ones!)
 export const collections = { 
+  categories, // <-- Exported
+  tags,       // <-- Exported
   tutorials,
   lessons, 
   tutorialsPage, 

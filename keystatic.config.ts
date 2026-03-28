@@ -1,12 +1,33 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 export default config({
-    // 👇 Pure local storage. Keystatic is now completely decoupled from Cloudflare.
     storage: {
         kind: 'local', 
     },
           
     collections: {
+        // 👇 NEW: Categories Collection
+        categories: collection({
+            label: 'Categories',
+            slugField: 'title',
+            path: 'src/content/categories/*',
+            format: { data: 'json' }, // Saves purely as data
+            schema: {
+                title: fields.slug({ name: { label: 'Category Name' } })
+            }
+        }),
+
+        // 👇 NEW: Tags Collection
+        tags: collection({
+            label: 'Tags',
+            slugField: 'title',
+            path: 'src/content/tags/*',
+            format: { data: 'json' },
+            schema: {
+                title: fields.slug({ name: { label: 'Tag Name' } })
+            }
+        }),
+
         posts: collection({
             label: 'Blog Posts',
             slugField: 'title',
@@ -20,6 +41,21 @@ export default config({
                 }),
                 draft: fields.checkbox({ label: 'Draft', description: 'Take this post fully offline', defaultValue: false }),
                 
+                // 👇 NEW: Category and Tag selectors for Posts
+                category: fields.relationship({
+                    label: 'Category',
+                    description: 'Select one main category (Optional)',
+                    collection: 'categories',
+                    validation: { isRequired: false }
+                }),
+                tags: fields.relationship({
+                    label: 'Tags',
+                    description: 'Select multiple tags (Optional)',
+                    collection: 'tags',
+                    validation: { isRequired: false },
+                    many: true // This allows selecting more than one!
+                }),
+
                 authorName: fields.text({ label: 'Author Name', defaultValue: 'Serplora Team' }),
                 authorImage: fields.image({ label: 'Author Avatar', directory: 'public/images/avatars', publicPath: '/images/avatars/' }),
                 publishDate: fields.date({ label: 'Publish Date', defaultValue: { kind: 'today' } }),
@@ -37,92 +73,107 @@ export default config({
                 ),
                 
                 content: fields.markdoc({ 
-    label: 'Content',
-    options: {
-        image: {
-            directory: 'public/images/posts',
-            publicPath: '/images/posts/'
-        }
-    }
-}),
-customJs: fields.text({ 
-    label: 'Custom JavaScript', 
-    multiline: true, 
-    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
-}),
+                    label: 'Content',
+                    options: {
+                        image: {
+                            directory: 'public/images/posts',
+                            publicPath: '/images/posts/'
+                        }
+                    }
+                }),
+                customJs: fields.text({ 
+                    label: 'Custom JavaScript', 
+                    multiline: true, 
+                    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
+                }),
             },
         }),
-        // Add this inside the collections object in your keystatic.config.ts
-        // Add this inside the collections object in your keystatic.config.ts
-tutorials: collection({
-    label: 'Tutorial Series (Parents)',
-    slugField: 'title',
-    path: 'src/content/tutorials/*/',
-    format: { contentField: 'content' },
-    previewUrl: '/tutorials/{slug}',
-    schema: {
-        title: fields.slug({ 
-            name: { label: 'Series Title (e.g. Python)' },
-            slug: { label: 'SEO Slug' }
+        
+        tutorials: collection({
+            label: 'Tutorial Series (Parents)',
+            slugField: 'title',
+            path: 'src/content/tutorials/*/',
+            format: { contentField: 'content' },
+            previewUrl: '/tutorials/{slug}',
+            schema: {
+                title: fields.slug({ 
+                    name: { label: 'Series Title (e.g. Python)' },
+                    slug: { label: 'SEO Slug' }
+                }),
+                draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
+                
+                // 👇 NEW: Category and Tag selectors for Tutorials
+                category: fields.relationship({
+                    label: 'Category',
+                    description: 'Select one main category (Optional)',
+                    collection: 'categories',
+                    validation: { isRequired: false }
+                }),
+                tags: fields.relationship({
+                    label: 'Tags',
+                    description: 'Select multiple tags (Optional)',
+                    collection: 'tags',
+                    validation: { isRequired: false },
+                    many: true
+                }),
+
+                excerpt: fields.text({ label: 'Excerpt', multiline: true }),
+                content: fields.markdoc({ 
+                    label: 'Introduction Content',
+                    options: {
+                        image: {
+                            directory: 'public/images/tutorials',
+                            publicPath: '/images/tutorials/'
+                        }
+                    }
+                }),
+                customJs: fields.text({ 
+                    label: 'Custom JavaScript', 
+                    multiline: true, 
+                    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
+                }),
+            },
         }),
-        draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
-        excerpt: fields.text({ label: 'Excerpt', multiline: true }),
-        content: fields.markdoc({ 
-    label: 'Introduction Content',
-    options: {
-        image: {
-            directory: 'public/images/tutorials',
-            publicPath: '/images/tutorials/'
-        }
-    }
-}),
-customJs: fields.text({ 
-    label: 'Custom JavaScript', 
-    multiline: true, 
-    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
-}),
-    },
-}),
-lessons: collection({
-    label: 'Lessons (Children)',
-    slugField: 'title',
-    path: 'src/content/lessons/*/',
-    format: { contentField: 'content' },
-    schema: {
-        title: fields.slug({ 
-            name: { label: 'Internal Title (e.g., Python - Variables)' },
-            slug: { label: 'Keystatic Folder ID (Do not edit)' }
+        lessons: collection({
+            label: 'Lessons (Children)',
+            slugField: 'title',
+            path: 'src/content/lessons/*/',
+            format: { contentField: 'content' },
+            schema: {
+                title: fields.slug({ 
+                    name: { label: 'Internal Title (e.g., Python - Variables)' },
+                    slug: { label: 'Keystatic Folder ID (Do not edit)' }
+                }),
+                urlSlug: fields.text({ 
+                    label: 'URL Slug', 
+                    description: 'e.g. "variables", "if-statements"' 
+                }),
+                tutorial: fields.relationship({
+                    label: 'Belongs to Tutorial Series',
+                    collection: 'tutorials',
+                    validation: { isRequired: true }
+                }),
+                order: fields.integer({ 
+                    label: 'Lesson Order', 
+                    description: 'Order in the sidebar (1, 2, 3...)', 
+                    defaultValue: 1 
+                }),
+                content: fields.markdoc({ 
+                    label: 'Content',
+                    options: {
+                        image: {
+                            directory: 'public/images/lessons',
+                            publicPath: '/images/lessons/'
+                        }
+                    }
+                }),
+                customJs: fields.text({ 
+                    label: 'Custom JavaScript', 
+                    multiline: true, 
+                    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
+                }),
+            },
         }),
-        urlSlug: fields.text({ 
-            label: 'URL Slug', 
-            description: 'e.g. "variables", "if-statements"' 
-        }),
-        tutorial: fields.relationship({
-            label: 'Belongs to Tutorial Series',
-            collection: 'tutorials',
-            validation: { isRequired: true }
-        }),
-        order: fields.integer({ 
-            label: 'Lesson Order', 
-            description: 'Order in the sidebar (1, 2, 3...)', 
-            defaultValue: 1 
-        }),
-        content: fields.markdoc({ 
-    label: 'Content',
-    options: {
-        image: {
-            directory: 'public/images/lessons',
-            publicPath: '/images/lessons/'
-        }
-    }
-}),
-customJs: fields.text({ 
-    label: 'Custom JavaScript', 
-    multiline: true, 
-    description: 'Paste raw JavaScript here. It will be injected safely at the bottom of the page.' 
-}),
-    },
-}),
     },
     singletons: {
         header: singleton({
@@ -153,11 +204,10 @@ customJs: fields.text({
                     { label: 'Navigation Menu Items', itemLabel: props => props.fields.label.value || 'Menu Item' }
                 ),
                 primaryButton: fields.object({
-                    label: fields.text({ label: 'Primary Button Label', defaultValue: 'Sign up for free' }), // Updated default label
+                    label: fields.text({ label: 'Primary Button Label', defaultValue: 'Sign up for free' }), 
                     url: fields.text({ label: 'Primary Button URL', defaultValue: '#' }),
                     show: fields.checkbox({ label: 'Show Primary Button', defaultValue: true })
                 }, { label: 'Primary Button (Solid/Right)' })
-                // Completely removed the secondaryButton schema here
             },
         }),
         footer: singleton({

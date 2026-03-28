@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { BM25Utils } from 'relatinator';
 import Layout from '../../layouts/Layout.astro';
 
 export const prerender = true;
@@ -8,33 +9,63 @@ export async function getStaticPaths() {
   const allPosts = await getCollection('posts');
   const publishedPosts = allPosts.filter((entry) => !entry.data.draft);
 
-  const paths: any[] = [];
-  publishedPosts.forEach((entry) => {
-    paths.push({
-      params: { slug: entry.id },
-      props: { entry, publishedPosts },
-    });
+  // 1. Prepare documents for Relatinator to read
+  const documents = publishedPosts.map((post) => {
+    // Combine all text data into one string (Title, Excerpt, Category, Tags, Body)
+    const contentToAnalyze = [
+      post.data.title,
+      post.data.excerpt,
+      post.data.category,
+      post.data.tags ? post.data.tags.join(' ') : '',
+      post.body || ''
+    ].filter(Boolean).join(' ');
+
+    return {
+      id: post.id,
+      content: contentToAnalyze,
+    };
   });
+
+  // 2. Reset and Train the BM25 model (Reset is important for dev-mode live reloads)
+  await BM25Utils.resetInstance();
+  await BM25Utils.train(documents);
+
+  // 3. Generate pages and find related posts for each one
+  const paths = await Promise.all(publishedPosts.map(async (entry) => {
+    
+    // Reconstruct the current post's text to compare against the model
+    const contentToCompare = [
+      entry.data.title,
+      entry.data.excerpt,
+      entry.data.category,
+      entry.data.tags ? entry.data.tags.join(' ') : '',
+      entry.body || ''
+    ].filter(Boolean).join(' ');
+
+    // 4. Ask Relatinator for the top 6 related document IDs
+    const relatedIds = await BM25Utils.findRelated(contentToCompare, entry.id, 6);
+
+    // 5. Convert those IDs back into actual post objects
+    const relatedPosts = relatedIds
+      .map(id => publishedPosts.find(p => p.id === id))
+      .filter(Boolean); // removes any undefined
+
+    return {
+      params: { slug: entry.id },
+      props: { entry, relatedPosts },
+    };
+  }));
 
   return paths;
 }
 
-const { entry, publishedPosts } = Astro.props;
+// Now we simply receive the relatedPosts that were calculated during the build!
+const { entry, relatedPosts } = Astro.props;
 const { Content } = await render(entry);
 
 // --- DATE LOGIC ---
 const displayDate = entry.data.updatedDate || entry.data.publishDate || new Date();
 const formattedDate = new Date(displayDate).toISOString().split('T')[0]; // YYYY-MM-DD
-
-// --- RELATED POSTS LOGIC ---
-const otherPosts = publishedPosts
-  .filter(p => p.id !== entry.id)
-  .sort((a, b) => {
-    const dateA = new Date(a.data.publishDate || 0).getTime();
-    const dateB = new Date(b.data.publishDate || 0).getTime();
-    return dateB - dateA; 
-  });
-const relatedPosts = otherPosts.slice(0, 3);
 ---
 
 <Layout>
@@ -112,7 +143,7 @@ const relatedPosts = otherPosts.slice(0, 3);
             FAQ.md
           </h2>
           <div class="flex flex-col gap-3 md:gap-4">
-            {entry.data.faqs.map((faq) => (
+            {entry.data.faqs.map((faq: any) => (
               <details class="group bg-surface border border-subtle rounded-[8px] overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                 <summary class="flex items-center justify-between cursor-pointer px-4 md:px-5 py-4 font-[600] text-[16px] md:text-[17px] text-tx-main bg-surface hover:bg-main transition-colors outline-none select-none">
                   <span class="flex items-center gap-3 pr-4">
@@ -132,7 +163,7 @@ const relatedPosts = otherPosts.slice(0, 3);
         </section>
       )}
 
-      {/* 7. Related Articles */}
+      {/* 7. Related Articles (Now maps up to 6 items perfectly!) */}
       {relatedPosts.length > 0 && (
         <section class="mt-16">
           <h3 class="text-xl font-[800] text-tx-main mb-6 tracking-tight font-['JetBrains_Mono',monospace]">ls ./related-posts</h3>
@@ -319,7 +350,7 @@ const relatedPosts = otherPosts.slice(0, 3);
     // Find every code block on the page
     const codeBlocks = document.querySelectorAll('.markdown-content pre');
 
-    codeBlocks.forEach((preBlock) => {
+    codeBlocks.forEach((preBlock: any) => {
       // 🟢 1. Grab the raw code text BEFORE we inject the button into the HTML
       const textToCopy = preBlock.innerText || preBlock.textContent;
 

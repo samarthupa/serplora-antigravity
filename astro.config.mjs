@@ -20,7 +20,15 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
-    // 👇 THIS is the fix for the blank white screen! 
+    
+    // 👇 NEW FIX: Tell Vite's engine to ignore Relatinator so it doesn't crash
+    ssr: {
+        external: ['relatinator']
+    },
+    optimizeDeps: {
+        exclude: ['relatinator']
+    },
+
     // It forces React to render the HTML properly on Cloudflare's servers.
     define: {
         'process.env.NODE_ENV': JSON.stringify(isLocalDev ? 'development' : 'production')
