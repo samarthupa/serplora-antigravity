@@ -1,5 +1,6 @@
 ---
 import { getEntry } from 'astro:content';
+import Search from "astro-pagefind/components/Search"; // 👈 NEW
 
 const headerEntry = await getEntry('header', 'data');
 const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
@@ -27,7 +28,6 @@ const primaryBtn = {
       {navItems.map((item, index) => {
         const hasSubItems = item.subItems && item.subItems.length > 0;
         const isLast = index === navItems.length - 1;
-        
         return (
           <li class="relative group">
             <a href={item.url || '#'} class="flex items-center px-[14px] py-2 rounded-[6px] text-[15px] font-[600] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main">
@@ -38,7 +38,6 @@ const primaryBtn = {
                 </svg>
               )}
             </a>
-            
             {hasSubItems && (
               <div class={`absolute ${isLast ? 'right-0' : 'left-0'} top-full pt-1 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top translate-y-1 group-hover:translate-y-0 z-[200]`}>
                 <div class="py-1 bg-surface rounded-md shadow-sm border border-subtle">
@@ -55,21 +54,26 @@ const primaryBtn = {
       })}
     </ul>
 
-    {/* Right Area: Actions (Toggle, Buttons, Mobile Menu) */}
-    <div class="ml-auto flex items-center gap-3 md:gap-4">
+    {/* Right Area: Actions */}
+    <div class="ml-auto flex items-center gap-2 md:gap-4">
       
+      {/* 🟢 NEW: Search Button (Cmd+K) */}
+      <button id="search-trigger" class="p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer flex items-center gap-2" aria-label="Search">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <span class="hidden md:flex text-[11px] font-['JetBrains_Mono',monospace] bg-main px-1.5 py-0.5 rounded border border-subtle opacity-70">⌘K</span>
+      </button>
+
       {/* Theme Toggle Button */}
       <button id="theme-toggle" class="p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer" aria-label="Toggle theme">
-    
-    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-    </svg>
-    
-    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-    </svg>
-    
-  </button>
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+      </button>
 
       {/* Desktop Main Button */}
       <div class="hidden md:block">
@@ -122,24 +126,58 @@ const primaryBtn = {
            );
         })}
       </ul>
-      <div class="flex flex-col gap-3 px-6 pb-6 pt-2">
-        {primaryBtn.show && (
-          <a href={primaryBtn.url} class="text-center px-6 py-3 rounded-[6px] bg-tx-main text-main text-[15px] font-[600] transition-opacity active:opacity-80">
-            {primaryBtn.label}
-          </a>
-        )}
-      </div>
     </div>
 
   </div>
 </header>
+
+{/* 🟢 NEW: The Search Overlay Modal */}
+<div id="search-modal" class="fixed inset-0 z-[300] bg-surface/80 backdrop-blur-sm opacity-0 invisible transition-all duration-300">
+  <div class="absolute inset-0" id="search-modal-backdrop"></div>
+  <div class="absolute top-[10vh] left-1/2 -translate-x-1/2 w-full max-w-[650px] bg-surface border border-subtle rounded-xl shadow-2xl p-6 transform -translate-y-4 transition-transform duration-300 flex flex-col max-h-[80vh]" id="search-modal-content">
+    <div class="flex items-center justify-between mb-4 pb-4 border-b border-subtle">
+      <h3 class="font-[700] text-tx-main flex items-center gap-2">
+        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        Search Documentation
+      </h3>
+      <button id="close-search" class="text-[12px] font-['JetBrains_Mono',monospace] bg-main px-2 py-1 rounded text-tx-muted border border-subtle hover:text-tx-main">ESC</button>
+    </div>
+    <div class="overflow-y-auto pr-2 custom-scrollbar">
+      <Search id="site-search" className="pagefind-ui" uiOptions={{ showImages: false }} />
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  /* 🟢 Force Pagefind to perfectly match your Dark/Light Theme automatically! */
+  .pagefind-ui {
+    --pagefind-ui-scale: 0.95;
+    --pagefind-ui-primary: #3b82f6;
+    --pagefind-ui-text: var(--color-tx-main);
+    --pagefind-ui-background: transparent;
+    --pagefind-ui-border: var(--color-border-subtle);
+    --pagefind-ui-tag: var(--color-bg-main);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 8px;
+    --pagefind-ui-font: 'Outfit', sans-serif;
+  }
+  .pagefind-ui .pagefind-ui__search-input {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    color: var(--color-tx-main);
+    background-color: var(--color-bg-main);
+  }
+  .pagefind-ui .pagefind-ui__result { border-bottom: 1px solid var(--color-border-subtle); }
+  .pagefind-ui .pagefind-ui__result-title { font-weight: 700; }
+  .pagefind-ui .pagefind-ui__result-excerpt { color: var(--color-tx-muted); }
+  .pagefind-ui mark { background-color: rgba(59, 130, 246, 0.2); color: var(--color-tx-main); border-radius: 2px; padding: 0 2px;}
+</style>
 
 <script>
   // Theme Toggle Logic
   const themeToggleBtn = document.getElementById('theme-toggle');
   const darkIcon = document.getElementById('theme-toggle-dark-icon');
   const lightIcon = document.getElementById('theme-toggle-light-icon');
-
   if (themeToggleBtn && darkIcon && lightIcon) {
     if (document.documentElement.classList.contains('dark')) {
       lightIcon.classList.remove('hidden');
@@ -160,6 +198,40 @@ const primaryBtn = {
       }
     });
   }
+
+  // 🟢 NEW: Search Modal Logic
+  const searchTrigger = document.getElementById('search-trigger');
+  const searchModal = document.getElementById('search-modal');
+  const searchBackdrop = document.getElementById('search-modal-backdrop');
+  const searchContent = document.getElementById('search-modal-content');
+  const closeSearchBtn = document.getElementById('close-search');
+
+  function openSearch() {
+    searchModal.classList.remove('opacity-0', 'invisible');
+    searchContent.classList.remove('-translate-y-4');
+    // Focus the input automatically
+    setTimeout(() => {
+      document.querySelector('.pagefind-ui__search-input')?.focus();
+    }, 100);
+  }
+
+  function closeSearch() {
+    searchModal.classList.add('opacity-0', 'invisible');
+    searchContent.classList.add('-translate-y-4');
+  }
+
+  searchTrigger?.addEventListener('click', openSearch);
+  searchBackdrop?.addEventListener('click', closeSearch);
+  closeSearchBtn?.addEventListener('click', closeSearch);
+  
+  // Listen for Cmd+K and ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSearch();
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      openSearch();
+    }
+  });
 
   // Mobile Menu Logic
   const btn = document.getElementById('mobile-menu-btn');
@@ -185,7 +257,6 @@ const primaryBtn = {
     });
   }
 
-  // Mobile submenu toggles
   const submenuToggles = document.querySelectorAll('.mobile-submenu-toggle');
   submenuToggles.forEach(toggle => {
     toggle.addEventListener('click', (e) => {
@@ -208,26 +279,23 @@ const primaryBtn = {
   // Smart header logic
   const header = document.getElementById('site-header');
   let lastScrollY = window.scrollY;
-
   window.addEventListener('scroll', () => {
-  if (!header) return;
-  const currentScrollY = window.scrollY;
-  
-  if (currentScrollY > 64) {
-    if (currentScrollY > lastScrollY && menu?.classList.contains('hidden')) {
-      header.classList.add('-translate-y-full');
-      // Tell the rest of the page the header is gone
-      document.documentElement.classList.add('header-hidden'); 
+    if (!header) return;
+    const currentScrollY = window.scrollY;
+    
+    // Don't hide header if search modal or mobile menu is open
+    if (currentScrollY > 64 && menu?.classList.contains('hidden') && searchModal?.classList.contains('hidden')) {
+      if (currentScrollY > lastScrollY) {
+        header.classList.add('-translate-y-full');
+        document.documentElement.classList.add('header-hidden'); 
+      } else {
+        header.classList.remove('-translate-y-full');
+        document.documentElement.classList.remove('header-hidden'); 
+      }
     } else {
       header.classList.remove('-translate-y-full');
-      // Tell the rest of the page the header is back
-      document.documentElement.classList.remove('header-hidden'); 
+      document.documentElement.classList.remove('header-hidden');
     }
-  } else {
-    header.classList.remove('-translate-y-full');
-    document.documentElement.classList.remove('header-hidden');
-  }
-  
-  lastScrollY = currentScrollY;
-}, { passive: true });
+    lastScrollY = currentScrollY;
+  }, { passive: true });
 </script>

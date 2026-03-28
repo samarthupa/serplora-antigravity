@@ -35,14 +35,20 @@ const { Content } = await render(lesson);
 ---
 
 <TutorialSidebarLayout series={series} lessons={seriesLessons} currentSlug={lesson.data.urlSlug}>
-  <h1 class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
-  {lesson.data.title.includes('-') ? lesson.data.title.split(' - ')[1] : lesson.data.title}
-</h1>
-  <div class="mt-8">
-    <Content />
+  
+  {/* 🟢 NEW: Wrap the content in data-pagefind-body so the Sidebar is ignored! */}
+  <div data-pagefind-body>
+    {/* 🟢 NEW: Boost the title weight to 10 */}
+    <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
+      {lesson.data.title.includes('-') ? lesson.data.title.split(' - ')[1] : lesson.data.title}
+    </h1>
+    
+    <div class="mt-8">
+      <Content />
+    </div>
   </div>
 
-{lesson.data.customJs && (
+  {lesson.data.customJs && (
     <script is:inline set:html={lesson.data.customJs}></script>
   )}
 </TutorialSidebarLayout>

@@ -23,6 +23,7 @@
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "astro": "^6.0.5",
+    "astro-pagefind": "^1.8.6",
     "js-yaml": "^4.1.1",
     "photoswipe": "^5.4.4",
     "react": "^18.3.1",

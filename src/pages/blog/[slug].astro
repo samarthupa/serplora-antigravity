@@ -73,10 +73,11 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0]; // YYYY
   <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10 h-[600px] pointer-events-none"></div>
 
   <main class="w-full bg-transparent py-10 md:py-20 font-['Outfit',sans-serif]">
-    <article class="max-w-[900px] mx-auto px-6">
+    {/* 🟢 NEW: data-pagefind-body ensures ONLY this article block is indexed */}
+    <article class="max-w-[900px] mx-auto px-6" data-pagefind-body>
       
-      {/* 1. Terminal Breadcrumbs */}
-      <nav aria-label="Breadcrumb" class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex items-center gap-2">
+      {/* 1. Terminal Breadcrumbs (Ignored from Search) */}
+      <nav aria-label="Breadcrumb" data-pagefind-ignore class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex items-center gap-2">
         <a href="/" class="hover:text-blue-500 transition-colors">~</a>
         <span class="opacity-40">/</span>
         <a href="/blog" class="hover:text-blue-500 transition-colors">blog</a>
@@ -86,7 +87,8 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0]; // YYYY
 
       {/* 2. Header (Title & Excerpt) */}
       <header class="mb-10 md:mb-12">
-        <h1 class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
+        {/* 🟢 NEW: Boost the weight of the Title to 10 so it always ranks highest on exact matches */}
+        <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
           {entry.data.title || entry.id}
         </h1>
         {/* Excerpt Section */}
@@ -95,9 +97,9 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0]; // YYYY
         )}
       </header>
 
-      {/* 3. Featured Image (EXACT 16:9 / 1200x675 RATIO) */}
+      {/* 3. Featured Image (Ignored from Search) */}
       {entry.data.image && (
-        <figure class="mb-10 w-full rounded-[12px] md:rounded-[16px] border border-subtle bg-surface shadow-sm overflow-hidden">
+        <figure data-pagefind-ignore class="mb-10 w-full rounded-[12px] md:rounded-[16px] border border-subtle bg-surface shadow-sm overflow-hidden">
           <img 
             src={entry.data.image} 
             alt={entry.data.title} 
@@ -106,8 +108,8 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0]; // YYYY
         </figure>
       )}
 
-      {/* 4. Git-Style Meta Block */}
-      <div class="flex flex-wrap items-center gap-x-8 gap-y-4 py-5 border-y border-subtle mb-12 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px]">
+      {/* 4. Git-Style Meta Block (Ignored from Search so names don't pollute results) */}
+      <div data-pagefind-ignore class="flex flex-wrap items-center gap-x-8 gap-y-4 py-5 border-y border-subtle mb-12 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px]">
         <div class="flex items-center gap-3">
           {entry.data.authorImage ? (
             <img src={entry.data.authorImage} alt={entry.data.authorName} class="w-9 h-9 rounded-md object-cover border border-subtle" />
@@ -163,9 +165,9 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0]; // YYYY
         </section>
       )}
 
-      {/* 7. Related Articles (Now maps up to 6 items perfectly!) */}
+      {/* 7. Related Articles (Ignored from Search to stop algorithm hijacking) */}
       {relatedPosts.length > 0 && (
-        <section class="mt-16">
+        <section data-pagefind-ignore class="mt-16">
           <h3 class="text-xl font-[800] text-tx-main mb-6 tracking-tight font-['JetBrains_Mono',monospace]">ls ./related-posts</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {relatedPosts.map((post) => (

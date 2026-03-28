@@ -3,6 +3,7 @@ import keystatic from '@keystatic/astro';
 import markdoc from '@astrojs/markdoc';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
+import pagefind from 'astro-pagefind'; // 👈 NEW
 
 // Detect if you are running locally
 const isLocalDev = process.argv.includes('dev');
@@ -13,6 +14,7 @@ export default defineConfig({
   integrations: [
     react(), 
     markdoc({ allowHTML: true }), 
+    pagefind(), // 👈 NEW
     
     // Keystatic ONLY runs on your Mac now.
     ...(isLocalDev ? [keystatic()] : [])
@@ -20,16 +22,12 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
-    
-    // 👇 NEW FIX: Tell Vite's engine to ignore Relatinator so it doesn't crash
     ssr: {
         external: ['relatinator']
     },
     optimizeDeps: {
         exclude: ['relatinator']
     },
-
-    // It forces React to render the HTML properly on Cloudflare's servers.
     define: {
         'process.env.NODE_ENV': JSON.stringify(isLocalDev ? 'development' : 'production')
     }
