@@ -1,6 +1,6 @@
 ---
 import { getEntry } from 'astro:content';
-import Search from "astro-pagefind/components/Search"; // 👈 NEW
+import Search from "astro-pagefind/components/Search";
 
 const headerEntry = await getEntry('header', 'data');
 const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
@@ -57,7 +57,7 @@ const primaryBtn = {
     {/* Right Area: Actions */}
     <div class="ml-auto flex items-center gap-2 md:gap-4">
       
-      {/* 🟢 NEW: Search Button (Cmd+K) */}
+      {/* Search Button (Cmd+K) */}
       <button id="search-trigger" class="p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer flex items-center gap-2" aria-label="Search">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -126,51 +126,161 @@ const primaryBtn = {
            );
         })}
       </ul>
+      
+      <div class="flex flex-col gap-3 px-6 pb-6 pt-2">
+        {primaryBtn.show && (
+          <a href={primaryBtn.url} class="text-center px-6 py-3 rounded-[6px] bg-tx-main text-main text-[15px] font-[600] transition-opacity active:opacity-80">
+            {primaryBtn.label}
+          </a>
+        )}
+      </div>
+
     </div>
 
   </div>
 </header>
 
-{/* 🟢 NEW: The Search Overlay Modal */}
-<div id="search-modal" class="fixed inset-0 z-[300] bg-surface/80 backdrop-blur-sm opacity-0 invisible transition-all duration-300">
+{/* Full-Screen Search Overlay Modal */}
+<div id="search-modal" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-xl opacity-0 invisible transition-all duration-300">
+  
   <div class="absolute inset-0" id="search-modal-backdrop"></div>
-  <div class="absolute top-[10vh] left-1/2 -translate-x-1/2 w-full max-w-[650px] bg-surface border border-subtle rounded-xl shadow-2xl p-6 transform -translate-y-4 transition-transform duration-300 flex flex-col max-h-[80vh]" id="search-modal-content">
-    <div class="flex items-center justify-between mb-4 pb-4 border-b border-subtle">
-      <h3 class="font-[700] text-tx-main flex items-center gap-2">
-        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        Search Documentation
-      </h3>
-      <button id="close-search" class="text-[12px] font-['JetBrains_Mono',monospace] bg-main px-2 py-1 rounded text-tx-muted border border-subtle hover:text-tx-main">ESC</button>
+  
+  <div id="search-modal-content" class="absolute top-0 left-0 w-full h-full flex flex-col transform -translate-y-8 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+    
+    <div class="w-full max-w-[1000px] mx-auto px-4 md:px-8 pt-6 pb-2 flex justify-end shrink-0">
+      <button id="close-search" class="text-[12px] font-['JetBrains_Mono',monospace] bg-main px-3 py-1.5 rounded-full text-tx-muted border border-subtle hover:text-tx-main hover:border-tx-muted transition-all flex items-center gap-2 cursor-pointer outline-none focus:ring-2 focus:ring-blue-500/50">
+        <span>ESC</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
     </div>
-    <div class="overflow-y-auto pr-2 custom-scrollbar">
-      <Search id="site-search" className="pagefind-ui" uiOptions={{ showImages: false }} />
+
+    <div class="flex-1 overflow-y-auto custom-scrollbar w-full">
+      <div class="w-full max-w-[1000px] mx-auto px-4 md:px-8 pb-20 pt-4 md:pt-10">
+        <Search id="site-search" className="pagefind-ui-custom" uiOptions={{ showImages: false }} />
+      </div>
     </div>
+
   </div>
 </div>
 
 <style is:global>
-  /* 🟢 Force Pagefind to perfectly match your Dark/Light Theme automatically! */
-  .pagefind-ui {
-    --pagefind-ui-scale: 0.95;
+  /* 🟢 OVERRIDE: World-Class Minimalist Search Design */
+  .pagefind-ui-custom {
+    --pagefind-ui-scale: 1;
     --pagefind-ui-primary: #3b82f6;
     --pagefind-ui-text: var(--color-tx-main);
     --pagefind-ui-background: transparent;
-    --pagefind-ui-border: var(--color-border-subtle);
+    --pagefind-ui-border: transparent; 
     --pagefind-ui-tag: var(--color-bg-main);
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: 8px;
+    --pagefind-ui-border-radius: 0px;
     --pagefind-ui-font: 'Outfit', sans-serif;
+    width: 100%;
   }
-  .pagefind-ui .pagefind-ui__search-input {
+
+  .pagefind-ui-custom .pagefind-ui__form {
+    position: relative;
+  }
+
+  /* 🟢 FIX: Locks the magnifying glass securely inside the input field */
+  .pagefind-ui-custom .pagefind-ui__form::before {
+    width: 28px;
+    height: 28px;
+    top: 26px !important; 
+    transform: none !important;
+    left: 8px;
+    opacity: 0.4;
+  }
+
+  .pagefind-ui-custom .pagefind-ui__search-input {
     font-family: 'Outfit', sans-serif;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 32px; 
     color: var(--color-tx-main);
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid var(--color-border-subtle);
+    padding: 24px 24px 24px 50px; 
+    border-radius: 0;
+    transition: all 0.3s ease;
+  }
+  
+  @media (max-width: 768px) {
+    .pagefind-ui-custom .pagefind-ui__search-input {
+      font-size: 20px;
+      padding: 16px 16px 16px 40px;
+    }
+    .pagefind-ui-custom .pagefind-ui__form::before {
+      width: 20px;
+      height: 20px;
+      top: 20px !important;
+    }
+  }
+
+  .pagefind-ui-custom .pagefind-ui__search-input:focus {
+    outline: none;
+    border-bottom-color: var(--pagefind-ui-primary);
+  }
+
+  .pagefind-ui-custom .pagefind-ui__drawer {
+    margin-top: 32px;
+  }
+
+  /* 🟢 Forces layout to cleanly span 100% of the hover area */
+  .pagefind-ui-custom .pagefind-ui__result {
+    display: block !important; 
+    padding: 24px !important;
+    border: none !important;
+    border-radius: 16px;
+    margin-bottom: 8px;
+    transition: background-color 0.2s ease;
+  }
+
+  .pagefind-ui-custom .pagefind-ui__result:hover {
     background-color: var(--color-bg-main);
   }
-  .pagefind-ui .pagefind-ui__result { border-bottom: 1px solid var(--color-border-subtle); }
-  .pagefind-ui .pagefind-ui__result-title { font-weight: 700; }
-  .pagefind-ui .pagefind-ui__result-excerpt { color: var(--color-tx-muted); }
-  .pagefind-ui mark { background-color: rgba(59, 130, 246, 0.2); color: var(--color-tx-main); border-radius: 2px; padding: 0 2px;}
+
+  .pagefind-ui-custom .pagefind-ui__result-title { 
+    font-weight: 800; 
+    font-size: 1.35rem;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  
+  .pagefind-ui-custom .pagefind-ui__result-link {
+    text-decoration: none !important;
+  }
+
+  .pagefind-ui-custom .pagefind-ui__result-excerpt { 
+    color: var(--color-tx-muted); 
+    line-height: 1.6;
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .pagefind-ui-custom mark { 
+    background-color: rgba(59, 130, 246, 0.15); 
+    color: var(--pagefind-ui-primary); 
+    font-weight: 600;
+    border-radius: 4px; 
+    padding: 2px 4px;
+  }
+
+  .pagefind-ui-custom .pagefind-ui__message {
+    padding: 0 24px 24px 24px;
+    font-size: 15px;
+    color: var(--color-tx-muted);
+    font-weight: 500;
+  }
+
+  .pagefind-ui-custom .pagefind-ui__result-inner {
+    width: 100% !important;
+    margin-top: 0 !important;
+  }
+
+  .pagefind-ui-custom .pagefind-ui__results {
+    padding: 0 !important;
+  }
 </style>
 
 <script>
@@ -199,7 +309,7 @@ const primaryBtn = {
     });
   }
 
-  // 🟢 NEW: Search Modal Logic
+  // Search Modal Logic (With Body Scroll Locking)
   const searchTrigger = document.getElementById('search-trigger');
   const searchModal = document.getElementById('search-modal');
   const searchBackdrop = document.getElementById('search-modal-backdrop');
@@ -208,8 +318,11 @@ const primaryBtn = {
 
   function openSearch() {
     searchModal.classList.remove('opacity-0', 'invisible');
-    searchContent.classList.remove('-translate-y-4');
-    // Focus the input automatically
+    searchContent.classList.remove('-translate-y-8');
+    searchContent.classList.add('translate-y-0');
+    
+    document.body.style.overflow = 'hidden';
+
     setTimeout(() => {
       document.querySelector('.pagefind-ui__search-input')?.focus();
     }, 100);
@@ -217,14 +330,16 @@ const primaryBtn = {
 
   function closeSearch() {
     searchModal.classList.add('opacity-0', 'invisible');
-    searchContent.classList.add('-translate-y-4');
+    searchContent.classList.remove('translate-y-0');
+    searchContent.classList.add('-translate-y-8');
+    
+    document.body.style.overflow = '';
   }
 
   searchTrigger?.addEventListener('click', openSearch);
   searchBackdrop?.addEventListener('click', closeSearch);
   closeSearchBtn?.addEventListener('click', closeSearch);
   
-  // Listen for Cmd+K and ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeSearch();
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -283,7 +398,6 @@ const primaryBtn = {
     if (!header) return;
     const currentScrollY = window.scrollY;
     
-    // Don't hide header if search modal or mobile menu is open
     if (currentScrollY > 64 && menu?.classList.contains('hidden') && searchModal?.classList.contains('hidden')) {
       if (currentScrollY > lastScrollY) {
         header.classList.add('-translate-y-full');
