@@ -1,5 +1,6 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
-
+import { block } from '@keystatic/core/content-components';
+import { KeystaticCodePreview } from './src/components/KeystaticCodePreview';
 export default config({
     storage: {
         kind: 'local', 
@@ -134,6 +135,7 @@ export default config({
                 }),
             },
         }),
+
         lessons: collection({
             label: 'Lessons (Children)',
             slugField: 'title',
@@ -158,6 +160,7 @@ export default config({
                     description: 'Order in the sidebar (1, 2, 3...)', 
                     defaultValue: 1 
                 }),
+                
                 content: fields.markdoc({ 
                     label: 'Content',
                     options: {
@@ -165,8 +168,19 @@ export default config({
                             directory: 'public/images/lessons',
                             publicPath: '/images/lessons/'
                         }
+                    },
+                    components: {
+                        codeEditor: block({
+                            label: 'Interactive Code Editor',
+                            ContentView: KeystaticCodePreview,
+                            schema: {
+                                language: fields.text({ label: 'Language (e.g., javascript, python)', defaultValue: 'javascript' }),
+                                code: fields.text({ label: 'Initial Code', multiline: true })
+                            }
+                        })
                     }
                 }),
+
                 customJs: fields.text({ 
                     label: 'Custom JavaScript', 
                     multiline: true, 
@@ -174,7 +188,8 @@ export default config({
                 }),
             },
         }),
-    },
+    }, // <-- I FIXED THE BRACKET HERE FOR YOU
+
     singletons: {
         header: singleton({
             label: 'Site Header',
@@ -184,11 +199,11 @@ export default config({
                 siteTitle: fields.text({ label: 'Site Title (Optional)' }),
                 logo: fields.image({ label: 'Logo Image (Optional)', directory: 'public/images/logo', publicPath: '/images/logo/', validation: { isRequired: false } }),
                 favicon: fields.image({ 
-            label: 'Favicon (.png, .svg, or .ico)', 
-            directory: 'public/images/favicon', 
-            publicPath: '/images/favicon/', 
-            validation: { isRequired: false } 
-        }),
+                    label: 'Favicon (.png, .svg, or .ico)', 
+                    directory: 'public/images/favicon', 
+                    publicPath: '/images/favicon/', 
+                    validation: { isRequired: false } 
+                }),
                 navItems: fields.array(
                     fields.object({
                         label: fields.text({ label: 'Menu Label' }),

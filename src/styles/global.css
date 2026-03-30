@@ -98,3 +98,8 @@ article img,
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+
+  /* Creates ~2 extra lines of space at the bottom of the CodeMirror content */
+.code-editor-wrapper .cm-content {
+    padding-bottom: 2.5rem !important;
+}
