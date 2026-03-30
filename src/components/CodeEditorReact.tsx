@@ -181,7 +181,7 @@ export default function CodeEditorReact({ code, language }) {
           <CodeMirror
             value={value}
             height={isFullscreen ? "100%" : "auto"}
-            maxHeight={isFullscreen ? "none" : "400px"}
+            maxHeight={isFullscreen ? "none" : "360px"}
             extensions={extensions}
             onChange={(val) => setValue(val)}
             theme="dark"
