@@ -5,6 +5,7 @@ import Search from "astro-pagefind/components/Search";
 const headerEntry = await getEntry('header', 'data');
 const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
 const logo = headerEntry?.data?.logo;
+const logoDark = headerEntry?.data?.logoDark || logo; // Fallback to light logo if dark isn't provided
 const navItems = headerEntry?.data?.navItems || [];
 
 const primaryBtn = {
@@ -17,12 +18,19 @@ const primaryBtn = {
 <header id="site-header" class="sticky top-0 z-[200] h-[64px] bg-surface/95 backdrop-blur-[8px] border-b border-subtle flex items-center font-['Outfit',sans-serif] transition-transform duration-300">
   <div class="max-w-[1200px] mx-auto px-4 w-full flex items-center gap-10">
     
-    {/* Brand / Logo */}
+   {/* Brand / Logo */}
     <a href="/" class="text-[20px] font-[800] text-tx-main tracking-[-0.5px] shrink-0 outline-none flex items-center gap-2">
-      {logo && <img src={logo} alt={siteTitle} class="h-10 w-auto object-contain" />}
+      {logo && (
+        <>
+          {/* Light theme logo: hides when dark mode is active */}
+          <img src={logo} alt={siteTitle} class="h-10 w-auto object-contain dark:hidden" />
+          
+          {/* Dark theme logo: shows ONLY when dark mode is active */}
+          <img src={logoDark} alt={siteTitle} class="h-10 w-auto object-contain hidden dark:block" />
+        </>
+      )}
       {!logo && <>{siteTitle}<span class="text-blue-500">.</span></>}
     </a>
-
     {/* Desktop Navigation Links */}
     <ul class="hidden md:flex gap-2 list-none m-0 p-0">
       {navItems.map((item, index) => {

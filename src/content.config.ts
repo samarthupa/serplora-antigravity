@@ -60,6 +60,7 @@ const header = defineCollection({
   schema: z.object({
     siteTitle: z.string().optional(),
     logo: z.string().optional(),
+    logoDark: z.string().optional(),
     favicon: z.string().optional(), 
     navItems: z.array(z.object({
       label: z.string().optional(),

@@ -197,7 +197,20 @@ export default config({
             format: { data: 'json' },
             schema: {
                 siteTitle: fields.text({ label: 'Site Title (Optional)' }),
-                logo: fields.image({ label: 'Logo Image (Optional)', directory: 'public/images/logo', publicPath: '/images/logo/', validation: { isRequired: false } }),
+                logo: fields.image({ 
+                    label: 'Logo Image (Light Theme)', 
+                    directory: 'public/images/logo', 
+                    publicPath: '/images/logo/', 
+                    validation: { isRequired: false } 
+                }),
+                
+                // 🆕 ADD THIS NEW FIELD FOR THE DARK LOGO
+                logoDark: fields.image({ 
+                    label: 'Logo Image (Dark Theme)', 
+                    directory: 'public/images/logo', 
+                    publicPath: '/images/logo/', 
+                    validation: { isRequired: false } 
+                }),
                 favicon: fields.image({ 
                     label: 'Favicon (.png, .svg, or .ico)', 
                     directory: 'public/images/favicon', 

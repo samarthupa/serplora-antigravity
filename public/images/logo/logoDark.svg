@@ -5,8 +5,8 @@
   </style>
 
   <text x="0" y="25" class="main">
-    <tspan fill="#111111">ser</tspan><tspan fill="#22c55e" dx="0.9">plora</tspan>
+    <tspan fill="#ffffff">ser</tspan><tspan fill="#22c55e" dx="0.9">plora</tspan>
   </text>
 
-  <text x="1" y="42" class="sub" fill="#6b7280">ACADEMY</text>
+  <text x="2" y="42" class="sub" fill="#9ca3af">ACADEMY</text>
 </svg>
