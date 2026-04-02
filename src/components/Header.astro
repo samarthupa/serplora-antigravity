@@ -63,13 +63,15 @@ const primaryBtn = {
     </ul>
 
     {/* Right Area: Actions */}
-    <div class="ml-auto flex items-center gap-2 md:gap-4">
+    {/* Right Area: Actions */}
+    <div class="ml-auto flex items-center flex-1 justify-end gap-3 md:gap-4 pl-2 md:pl-0">
       
-      {/* Search Button (Cmd+K) */}
-      <button id="search-trigger" class="p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer flex items-center gap-2" aria-label="Search">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      {/* Search Button - Expanded into a search bar on mobile */}
+      <button id="search-trigger" class="flex-1 md:flex-none flex items-center gap-2 px-3 py-2 md:p-2 rounded-[8px] md:rounded-full bg-surface md:bg-transparent border border-subtle md:border-transparent text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer max-w-[250px] md:max-w-none" aria-label="Search">
+        <svg class="w-4 h-4 md:w-5 md:h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
+        <span class="block md:hidden text-[14px] truncate text-left w-full">Search...</span>
         <span class="hidden md:flex text-[11px] font-['JetBrains_Mono',monospace] bg-main px-1.5 py-0.5 rounded border border-subtle opacity-70">⌘K</span>
       </button>
 
@@ -83,8 +85,8 @@ const primaryBtn = {
         </svg>
       </button>
 
-      {/* Main Button (Visible on Mobile & Desktop) */}
-      <div class="block">
+      {/* Main Button (Hidden on Mobile, Visible on Desktop) */}
+      <div class="hidden md:block">
         {primaryBtn.show && (
           <a href={primaryBtn.url} class="px-3 py-2 md:px-6 md:py-[10px] rounded-[6px] bg-tx-main text-main text-[13px] md:text-[15px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
             {primaryBtn.label}
@@ -93,7 +95,7 @@ const primaryBtn = {
       </div>
 
       {/* Mobile Hamburger Toggle */}
-      <div class="md:hidden flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer" id="mobile-menu-btn" aria-label="Toggle menu">
+      <div class="md:hidden flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer shrink-0" id="mobile-menu-btn" aria-label="Toggle menu">
         <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
         <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
         <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
@@ -135,7 +137,10 @@ const primaryBtn = {
         })}
       </ul>
       {/* Mobile Theme Toggle */}
-      <div class="px-6 py-4 border-t border-subtle mt-4">
+      {/* Mobile Menu Footer (Theme Toggle & Sign In) */}
+      <div class="px-6 py-4 border-t border-subtle mt-auto flex flex-col gap-4 pb-6">
+        
+        {/* Theme Toggle */}
         <button class="theme-toggle-btn flex items-center justify-between w-full py-2 text-[16px] font-[500] text-tx-main focus:outline-none" aria-label="Toggle theme">
           <span>Appearance</span>
           <div class="p-2 rounded-full bg-main text-tx-muted flex items-center justify-center">
@@ -147,14 +152,18 @@ const primaryBtn = {
             </svg>
           </div>
         </button>
+
+        {/* Primary Button (Sign In / Sign Up) */}
+        {primaryBtn.show && (
+          <a href={primaryBtn.url} class="flex items-center justify-center w-full py-3 mt-2 rounded-[8px] bg-tx-main text-main text-[16px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none">
+            {primaryBtn.label}
+          </a>
+        )}
       </div>
 
-
     </div>
-
   </div>
 </header>
-
 {/* Full-Screen Search Overlay Modal */}
 <div id="search-modal" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-xl opacity-0 invisible transition-all duration-300">
   
