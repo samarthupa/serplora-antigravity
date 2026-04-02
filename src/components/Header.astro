@@ -23,10 +23,10 @@ const primaryBtn = {
       {logo && (
         <>
           {/* Light theme logo: hides when dark mode is active */}
-          <img src={logo} alt={siteTitle} class="h-10.1 w-auto object-contain dark:hidden" />
+          <img src={logo} alt={siteTitle} class="h-10 w-auto object-contain dark:hidden" />
           
           {/* Dark theme logo: shows ONLY when dark mode is active */}
-          <img src={logoDark} alt={siteTitle} class="h-10.1 w-auto object-contain hidden dark:block" />
+          <img src={logoDark} alt={siteTitle} class="h-10 w-auto object-contain hidden dark:block" />
         </>
       )}
       {!logo && <>{siteTitle}<span class="text-blue-500">.</span></>}
@@ -88,7 +88,7 @@ const primaryBtn = {
       {/* Main Button (Hidden on Mobile, Visible on Desktop) */}
       <div class="hidden md:block">
         {primaryBtn.show && (
-          <a href={primaryBtn.url} class="px-3 py-2 md:px-6 md:py-[10px] rounded-[6px] bg-tx-main text-main text-[13px] md:text-[15px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
+          <a href={primaryBtn.url} class="px-3 py-2 md:px-4 md:py-[6px] rounded-[6px] bg-tx-main text-main text-[13px] md:text-[14px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
             {primaryBtn.label}
           </a>
         )}
