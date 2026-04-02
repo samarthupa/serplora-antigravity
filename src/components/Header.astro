@@ -10,7 +10,7 @@ const navItems = headerEntry?.data?.navItems || [];
 
 const primaryBtn = {
   label: headerEntry?.data?.primaryButton?.label || 'Sign up for free',
-  url: headerEntry?.data?.primaryButton?.url || '#',
+  url: `/signin?returnUrl=${Astro.url.pathname}`,
   show: headerEntry?.data?.primaryButton?.show !== false
 };
 ---
