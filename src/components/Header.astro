@@ -31,6 +31,7 @@ const primaryBtn = {
       )}
       {!logo && <>{siteTitle}<span class="text-blue-500">.</span></>}
     </a>
+    
     {/* Desktop Navigation Links */}
     <ul class="hidden md:flex gap-2 list-none m-0 p-0">
       {navItems.map((item, index) => {
@@ -78,7 +79,7 @@ const primaryBtn = {
         <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
 
-      {/* 🟢 NEW: Dynamic Auth Section (Hidden by default, controlled by JS) */}
+      {/* 🟢 Dynamic Auth Section */}
       <div class="hidden md:flex items-center">
         
         {/* Unauthenticated View: Sign In Button */}
@@ -90,26 +91,28 @@ const primaryBtn = {
           )}
         </div>
 
-        {/* Authenticated View: Profile Dropdown */}
+        {/* Authenticated View: Account Dropdown */}
         <div id="auth-profile-desktop" class="relative group" style="display: none;">
-          <button class="flex items-center gap-2 px-1.5 py-1.5 pr-3 rounded-full border border-subtle bg-surface hover:bg-main transition-colors focus:outline-none cursor-pointer shadow-sm">
-            <div id="profile-avatar-desktop" class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[13px]"></div>
-            <span id="profile-name-desktop" class="text-[14px] font-medium text-tx-main"></span>
-            <svg class="w-3 h-3 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          <button class="flex items-center gap-2 px-4 py-[6px] rounded-[6px] bg-tx-main text-main text-[14px] font-[600] transition-opacity hover:opacity-90 cursor-pointer border-none outline-none leading-none shadow-sm">
+            <span>Account</span>
+            <svg class="w-3.5 h-3.5 text-main" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
           </button>
           
-          <div class="absolute right-0 top-full mt-2 w-64 bg-surface border border-subtle rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200] overflow-hidden">
-            <div class="p-4 border-b border-subtle bg-main/30">
-              <p id="profile-fullname" class="text-[15px] font-[700] text-tx-main truncate leading-tight"></p>
-              <p id="profile-email" class="text-[13px] text-tx-muted truncate mt-0.5"></p>
-              <div class="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface border border-subtle">
-                <svg class="w-3.5 h-3.5 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span id="profile-country" class="text-[11px] font-[600] text-tx-muted uppercase tracking-wider"></span>
-              </div>
+          <div class="absolute right-0 top-full mt-2 w-72 bg-surface border border-subtle rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200] overflow-hidden flex flex-col">
+            
+            <div class="px-4 py-3 border-b border-subtle bg-main/30">
+              <span class="text-[11px] font-[700] text-tx-muted uppercase tracking-wider">Recently Visited</span>
             </div>
-            <button class="signout-btn w-full text-left px-4 py-3 text-[14px] text-red-500 hover:bg-red-500/10 transition-colors font-[600] cursor-pointer">
-              Sign out
-            </button>
+            
+            <ul id="recent-pages-list" class="flex flex-col max-h-[250px] overflow-y-auto custom-scrollbar p-2 gap-1">
+               {/* JS will populate this list */}
+            </ul>
+
+            <div class="border-t border-subtle mt-1 p-2">
+              <button class="signout-btn w-full text-center px-4 py-2.5 text-[14px] text-red-500 rounded-[8px] hover:bg-red-500/10 transition-colors font-[600] cursor-pointer">
+                Sign out
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -159,7 +162,7 @@ const primaryBtn = {
           </div>
         </button>
 
-        {/* 🟢 NEW: Mobile Auth Section */}
+        {/* Mobile Auth Section */}
         <div id="auth-signin-mobile" style="display: none;">
           {primaryBtn.show && (
             <a href={primaryBtn.url} class="flex items-center justify-center w-full py-3 mt-2 rounded-[8px] bg-tx-main text-main text-[16px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none">
@@ -168,23 +171,21 @@ const primaryBtn = {
           )}
         </div>
 
-        <div id="auth-profile-mobile" class="hidden flex-col gap-3 mt-2 bg-main/30 p-4 rounded-xl border border-subtle">
-           <div class="flex items-center gap-3">
-             <div id="profile-avatar-mobile" class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[16px]"></div>
-             <div class="flex flex-col flex-1 overflow-hidden">
-                <span id="profile-fullname-mobile" class="text-[16px] font-[700] text-tx-main truncate"></span>
-                <span id="profile-email-mobile" class="text-[13px] text-tx-muted truncate"></span>
-             </div>
-           </div>
-           <button class="signout-btn w-full py-2.5 mt-2 bg-red-500/10 text-red-500 rounded-lg font-[600] text-[15px] hover:bg-red-500/20 transition-colors">
-             Sign out
-           </button>
+        <div id="auth-profile-mobile" class="hidden flex-col mt-2 border-t border-subtle pt-4 gap-2">
+            <span class="text-[11px] font-[700] text-tx-muted uppercase tracking-wider px-2">Recently Visited</span>
+            <ul id="recent-pages-list-mobile" class="flex flex-col gap-1 mb-2 max-h-[200px] overflow-y-auto px-2">
+               {/* JS will populate this */}
+            </ul>
+            <button class="signout-btn w-full py-3 bg-red-500/10 text-red-500 rounded-lg font-[600] text-[15px] hover:bg-red-500/20 transition-colors">
+              Sign out
+            </button>
         </div>
 
       </div>
     </div>
   </div>
 </header>
+
 {/* Full-Screen Search Overlay Modal */}
 <div id="search-modal" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-xl opacity-0 invisible transition-all duration-300">
   
@@ -465,50 +466,75 @@ const primaryBtn = {
     lastScrollY = currentScrollY;
   }, { passive: true });
 
-  // --- 🟢 NEW: Client-side Authentication UI Logic ---
-  const userJson = localStorage.getItem('serplora_user');
+  // --- 🟢 NEW: Client-side Authentication & Page Tracking Logic ---
   
+  // 1. Track Current Page
+  const currentPath = window.location.pathname;
+  if (!currentPath.includes('/signin')) {
+    // Extract a clean title (e.g. "Python Variables - Serplora" -> "Python Variables")
+    let cleanTitle = document.title.split('-')[0].trim();
+    if (!cleanTitle || cleanTitle === '') cleanTitle = 'Home';
+
+    let history = JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
+    
+    // Remove if it already exists, so we can push it to the top
+    history = history.filter(p => p.url !== currentPath);
+    history.unshift({ url: currentPath, title: cleanTitle });
+    
+    // Keep only the last 10 pages
+    if (history.length > 10) history = history.slice(0, 10);
+    localStorage.setItem('serplora_recent_pages', JSON.stringify(history));
+  }
+
+  // 2. Render Header UI
+  const userJson = localStorage.getItem('serplora_user');
   const signinDesktop = document.getElementById('auth-signin-desktop');
   const profileDesktop = document.getElementById('auth-profile-desktop');
   const signinMobile = document.getElementById('auth-signin-mobile');
   const profileMobile = document.getElementById('auth-profile-mobile');
 
   if (userJson) {
-    const user = JSON.parse(userJson);
-    const initial = user.name.charAt(0).toUpperCase();
-    const firstName = user.name.split(' ')[0];
-
-    // Populate Desktop Profile
-    document.getElementById('profile-avatar-desktop').textContent = initial;
-    document.getElementById('profile-name-desktop').textContent = firstName;
-    document.getElementById('profile-fullname').textContent = user.name;
-    document.getElementById('profile-email').textContent = user.email;
-    document.getElementById('profile-country').textContent = user.country;
-    
-    // Populate Mobile Profile
-    document.getElementById('profile-avatar-mobile').textContent = initial;
-    document.getElementById('profile-fullname-mobile').textContent = user.name;
-    document.getElementById('profile-email-mobile').textContent = user.email;
-
-    // Show Profile, Hide Sign In
+    // Show Account, Hide Sign In
     if (signinDesktop) signinDesktop.style.display = 'none';
     if (profileDesktop) profileDesktop.style.display = 'block';
     if (signinMobile) signinMobile.style.display = 'none';
     if (profileMobile) { profileMobile.classList.remove('hidden'); profileMobile.classList.add('flex'); }
+
+    // Render Recent Pages
+    const history = JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
+    const renderHistory = (containerId) => {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      if (history.length === 0) {
+        container.innerHTML = '<li class="p-3 text-[13px] text-tx-muted text-center">No recent pages</li>';
+        return;
+      }
+      
+      container.innerHTML = history.map(page => `
+        <li>
+          <a href="${page.url}" class="block px-3 py-2.5 rounded-[8px] hover:bg-main text-[14px] text-tx-main truncate transition-colors">
+            ${page.title}
+          </a>
+        </li>
+      `).join('');
+    };
+
+    renderHistory('recent-pages-list');
+    renderHistory('recent-pages-list-mobile');
+
   } else {
-    // Show Sign In, Hide Profile
+    // Show Sign In, Hide Account
     if (signinDesktop) signinDesktop.style.display = 'block';
     if (profileDesktop) profileDesktop.style.display = 'none';
     if (signinMobile) signinMobile.style.display = 'block';
     if (profileMobile) profileMobile.classList.add('hidden');
   }
 
-  // Handle Sign Out
+  // 3. Handle Sign Out
   document.querySelectorAll('.signout-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       localStorage.removeItem('serplora_user');
-      // Optional: Since cookies are HttpOnly, we can clear them by setting an expired date via JS or a fetch request. 
-      // For a static site UI refresh, clearing localStorage and reloading is enough.
       window.location.reload();
     });
   });
