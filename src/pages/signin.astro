@@ -1,0 +1,61 @@
+---
+// src/pages/signin.astro
+// NO prerender flags needed here! This is a static HTML page.
+---
+
+<html lang="en">
+  <head>
+    <title>Sign In</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <div id="login-section">
+      <h2>Sign in to continue</h2>
+      <div id="g_id_onload"
+           data-client_id="YOUR_GOOGLE_CLIENT_ID"
+           data-callback="handleGoogleLogin"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard"></div>
+    </div>
+
+    <div id="country-section" style="display: none;">
+      <h2>Where are you from?</h2>
+      <select id="country">
+        <option value="India">India</option>
+        <option value="United States">United States</option>
+        <option value="United Kingdom">United Kingdom</option>
+      </select>
+      <button id="finish-btn">Finish & Continue</button>
+    </div>
+
+    <script is:inline>
+      let googleToken = "";
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnUrl = urlParams.get('returnUrl') || '/';
+
+      window.handleGoogleLogin = (response) => {
+        googleToken = response.credential;
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('country-section').style.display = 'block';
+      };
+
+      document.getElementById('finish-btn').addEventListener('click', async () => {
+        const country = document.getElementById('country').value;
+        
+        // This fetch automatically routes to your Cloudflare function!
+        const res = await fetch('/api/save-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: googleToken, country })
+        });
+
+        if (res.ok) {
+          window.location.href = returnUrl;
+        } else {
+          alert("Error saving data.");
+        }
+      });
+    </script>
+  </body>
+</html>
