@@ -63,35 +63,55 @@ const primaryBtn = {
     </ul>
 
     {/* Right Area: Actions */}
-    {/* Right Area: Actions */}
     <div class="ml-auto flex items-center flex-1 justify-end gap-3 md:gap-4 pl-2 md:pl-0">
       
-      {/* Search Button - Expanded into a search bar on mobile */}
+      {/* Search Button */}
       <button id="search-trigger" class="flex-1 md:flex-none flex items-center gap-2 px-3 py-2 md:p-2 rounded-[8px] md:rounded-full bg-surface md:bg-transparent border border-subtle md:border-transparent text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer max-w-[250px] md:max-w-none" aria-label="Search">
-        <svg class="w-4 h-4 md:w-5 md:h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
+        <svg class="w-4 h-4 md:w-5 md:h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         <span class="block md:hidden text-[14px] truncate text-left w-full">Search...</span>
         <span class="hidden md:flex text-[11px] font-['JetBrains_Mono',monospace] bg-main px-1.5 py-0.5 rounded border border-subtle opacity-70">⌘K</span>
       </button>
 
-      {/* Theme Toggle Button (Desktop Only) */}
+      {/* Theme Toggle Button */}
       <button class="theme-toggle-btn hidden md:flex p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer" aria-label="Toggle theme">
-        <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-        </svg>
-        <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-        </svg>
+        <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
 
-      {/* Main Button (Hidden on Mobile, Visible on Desktop) */}
-      <div class="hidden md:block">
-        {primaryBtn.show && (
-          <a href={primaryBtn.url} class="px-3 py-2 md:px-4 md:py-[6px] rounded-[6px] bg-tx-main text-main text-[13px] md:text-[14px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
-            {primaryBtn.label}
-          </a>
-        )}
+      {/* 🟢 NEW: Dynamic Auth Section (Hidden by default, controlled by JS) */}
+      <div class="hidden md:flex items-center">
+        
+        {/* Unauthenticated View: Sign In Button */}
+        <div id="auth-signin-desktop" style="display: none;">
+          {primaryBtn.show && (
+            <a href={primaryBtn.url} class="px-4 py-[6px] rounded-[6px] bg-tx-main text-main text-[14px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none">
+              {primaryBtn.label}
+            </a>
+          )}
+        </div>
+
+        {/* Authenticated View: Profile Dropdown */}
+        <div id="auth-profile-desktop" class="relative group" style="display: none;">
+          <button class="flex items-center gap-2 px-1.5 py-1.5 pr-3 rounded-full border border-subtle bg-surface hover:bg-main transition-colors focus:outline-none cursor-pointer shadow-sm">
+            <div id="profile-avatar-desktop" class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[13px]"></div>
+            <span id="profile-name-desktop" class="text-[14px] font-medium text-tx-main"></span>
+            <svg class="w-3 h-3 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          
+          <div class="absolute right-0 top-full mt-2 w-64 bg-surface border border-subtle rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200] overflow-hidden">
+            <div class="p-4 border-b border-subtle bg-main/30">
+              <p id="profile-fullname" class="text-[15px] font-[700] text-tx-main truncate leading-tight"></p>
+              <p id="profile-email" class="text-[13px] text-tx-muted truncate mt-0.5"></p>
+              <div class="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface border border-subtle">
+                <svg class="w-3.5 h-3.5 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span id="profile-country" class="text-[11px] font-[600] text-tx-muted uppercase tracking-wider"></span>
+              </div>
+            </div>
+            <button class="signout-btn w-full text-left px-4 py-3 text-[14px] text-red-500 hover:bg-red-500/10 transition-colors font-[600] cursor-pointer">
+              Sign out
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Mobile Hamburger Toggle */}
@@ -110,25 +130,17 @@ const primaryBtn = {
            return (
              <li>
                <div class="flex items-center justify-between border-b border-subtle">
-                 <a href={item.url || '#'} class="py-3 text-[16px] font-[500] text-tx-main flex-1">
-                   {item.label}
-                 </a>
+                 <a href={item.url || '#'} class="py-3 text-[16px] font-[500] text-tx-main flex-1">{item.label}</a>
                  {hasSubItems && (
                    <button class="mobile-submenu-toggle p-3 -mr-3 text-tx-muted focus:outline-none" aria-expanded="false" aria-label="Toggle submenu">
-                     <svg class="w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
-                     </svg>
+                     <svg class="w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" /></svg>
                    </button>
                  )}
                </div>
                {hasSubItems && (
                  <ul class="mobile-submenu hidden pl-4 py-1 space-y-1 mt-1 mb-2">
                    {item.subItems.map((subItem) => (
-                     <li>
-                       <a href={subItem.url || '#'} class="block py-2 text-[14px] text-tx-muted hover:text-tx-main">
-                         {subItem.label}
-                       </a>
-                     </li>
+                     <li><a href={subItem.url || '#'} class="block py-2 text-[14px] text-tx-muted hover:text-tx-main">{subItem.label}</a></li>
                    ))}
                  </ul>
                )}
@@ -136,31 +148,40 @@ const primaryBtn = {
            );
         })}
       </ul>
-      {/* Mobile Theme Toggle */}
-      {/* Mobile Menu Footer (Theme Toggle & Sign In) */}
+      
+      {/* Mobile Menu Footer */}
       <div class="px-6 py-4 border-t border-subtle mt-auto flex flex-col gap-4 pb-6">
-        
-        {/* Theme Toggle */}
         <button class="theme-toggle-btn flex items-center justify-between w-full py-2 text-[16px] font-[500] text-tx-main focus:outline-none" aria-label="Toggle theme">
           <span>Appearance</span>
           <div class="p-2 rounded-full bg-main text-tx-muted flex items-center justify-center">
-            <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-            </svg>
-            <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-            </svg>
+            <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           </div>
         </button>
 
-        {/* Primary Button (Sign In / Sign Up) */}
-        {primaryBtn.show && (
-          <a href={primaryBtn.url} class="flex items-center justify-center w-full py-3 mt-2 rounded-[8px] bg-tx-main text-main text-[16px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none">
-            {primaryBtn.label}
-          </a>
-        )}
-      </div>
+        {/* 🟢 NEW: Mobile Auth Section */}
+        <div id="auth-signin-mobile" style="display: none;">
+          {primaryBtn.show && (
+            <a href={primaryBtn.url} class="flex items-center justify-center w-full py-3 mt-2 rounded-[8px] bg-tx-main text-main text-[16px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none">
+              {primaryBtn.label}
+            </a>
+          )}
+        </div>
 
+        <div id="auth-profile-mobile" class="hidden flex-col gap-3 mt-2 bg-main/30 p-4 rounded-xl border border-subtle">
+           <div class="flex items-center gap-3">
+             <div id="profile-avatar-mobile" class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[16px]"></div>
+             <div class="flex flex-col flex-1 overflow-hidden">
+                <span id="profile-fullname-mobile" class="text-[16px] font-[700] text-tx-main truncate"></span>
+                <span id="profile-email-mobile" class="text-[13px] text-tx-muted truncate"></span>
+             </div>
+           </div>
+           <button class="signout-btn w-full py-2.5 mt-2 bg-red-500/10 text-red-500 rounded-lg font-[600] text-[15px] hover:bg-red-500/20 transition-colors">
+             Sign out
+           </button>
+        </div>
+
+      </div>
     </div>
   </div>
 </header>
@@ -443,4 +464,52 @@ const primaryBtn = {
     }
     lastScrollY = currentScrollY;
   }, { passive: true });
+
+  // --- 🟢 NEW: Client-side Authentication UI Logic ---
+  const userJson = localStorage.getItem('serplora_user');
+  
+  const signinDesktop = document.getElementById('auth-signin-desktop');
+  const profileDesktop = document.getElementById('auth-profile-desktop');
+  const signinMobile = document.getElementById('auth-signin-mobile');
+  const profileMobile = document.getElementById('auth-profile-mobile');
+
+  if (userJson) {
+    const user = JSON.parse(userJson);
+    const initial = user.name.charAt(0).toUpperCase();
+    const firstName = user.name.split(' ')[0];
+
+    // Populate Desktop Profile
+    document.getElementById('profile-avatar-desktop').textContent = initial;
+    document.getElementById('profile-name-desktop').textContent = firstName;
+    document.getElementById('profile-fullname').textContent = user.name;
+    document.getElementById('profile-email').textContent = user.email;
+    document.getElementById('profile-country').textContent = user.country;
+    
+    // Populate Mobile Profile
+    document.getElementById('profile-avatar-mobile').textContent = initial;
+    document.getElementById('profile-fullname-mobile').textContent = user.name;
+    document.getElementById('profile-email-mobile').textContent = user.email;
+
+    // Show Profile, Hide Sign In
+    if (signinDesktop) signinDesktop.style.display = 'none';
+    if (profileDesktop) profileDesktop.style.display = 'block';
+    if (signinMobile) signinMobile.style.display = 'none';
+    if (profileMobile) { profileMobile.classList.remove('hidden'); profileMobile.classList.add('flex'); }
+  } else {
+    // Show Sign In, Hide Profile
+    if (signinDesktop) signinDesktop.style.display = 'block';
+    if (profileDesktop) profileDesktop.style.display = 'none';
+    if (signinMobile) signinMobile.style.display = 'block';
+    if (profileMobile) profileMobile.classList.add('hidden');
+  }
+
+  // Handle Sign Out
+  document.querySelectorAll('.signout-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      localStorage.removeItem('serplora_user');
+      // Optional: Since cookies are HttpOnly, we can clear them by setting an expired date via JS or a fetch request. 
+      // For a static site UI refresh, clearing localStorage and reloading is enough.
+      window.location.reload();
+    });
+  });
 </script>

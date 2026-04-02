@@ -4,7 +4,6 @@ export async function onRequestPost({ request, env }) {
   try {
     const { token, country } = await request.json();
 
-    // 1. Verify the token securely with Google
     const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
     const googleData = await googleRes.json();
 
@@ -14,15 +13,17 @@ export async function onRequestPost({ request, env }) {
 
     const { email, name } = googleData;
 
-    // 2. Save user to Cloudflare D1 (Using the 'DB' binding we set in the dashboard)
     await env.DB.prepare(`
       INSERT INTO users (email, name, country) 
       VALUES (?, ?, ?)
       ON CONFLICT(email) DO UPDATE SET country = excluded.country
     `).bind(email, name, country).run();
 
-    // 3. Set a browser cookie so the frontend knows the user is logged in
-    return new Response(JSON.stringify({ success: true }), { 
+    // 🟢 NEW: We are now sending the user object back to the frontend
+    return new Response(JSON.stringify({ 
+      success: true, 
+      user: { name, email, country } 
+    }), { 
       status: 200,
       headers: {
         'Content-Type': 'application/json',

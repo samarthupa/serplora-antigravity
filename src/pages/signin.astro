@@ -1,61 +1,96 @@
 ---
 // src/pages/signin.astro
-// NO prerender flags needed here! This is a static HTML page.
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-  <head>
-    <title>Sign In</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-  </head>
-  <body>
-    <div id="login-section">
-      <h2>Sign in to continue</h2>
-      <div id="g_id_onload"
-     data-client_id="237265144318-6tnfoug73ikcs5rucsa1mhvs16hkchdt.apps.googleusercontent.com"
-     data-callback="handleGoogleLogin"
-     data-auto_prompt="false">
-</div>
-      <div class="g_id_signin" data-type="standard"></div>
-    </div>
+<Layout>
+  <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[75vh] font-['Outfit',sans-serif]">
+    
+    <div class="w-full max-w-md bg-surface border border-subtle rounded-2xl shadow-xl p-8 text-center flex flex-col items-center relative overflow-hidden">
+      
+      {/* Subtle background glow */}
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
 
-    <div id="country-section" style="display: none;">
-      <h2>Where are you from?</h2>
-      <select id="country">
-        <option value="India">India</option>
-        <option value="United States">United States</option>
-        <option value="United Kingdom">United Kingdom</option>
-      </select>
-      <button id="finish-btn">Finish & Continue</button>
-    </div>
+      <h1 class="text-2xl md:text-3xl font-[800] text-tx-main mb-2 tracking-tight">Welcome to Serplora</h1>
+      <p class="text-tx-muted text-[15px] mb-8">Sign in securely to continue learning.</p>
 
-    <script is:inline>
-      let googleToken = "";
-      const urlParams = new URLSearchParams(window.location.search);
-      const returnUrl = urlParams.get('returnUrl') || '/';
+      {/* --- GOOGLE SIGN IN SECTION --- */}
+      <div id="login-section" class="w-full flex flex-col items-center gap-4 transition-all duration-300">
+        <div id="g_id_onload"
+             data-client_id="237265144318-6tnfoug73ikcs5rucsa1mhvs16hkchdt.apps.googleusercontent.com"
+             data-callback="handleGoogleLogin"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+      </div>
 
-      window.handleGoogleLogin = (response) => {
-        googleToken = response.credential;
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('country-section').style.display = 'block';
-      };
-
-      document.getElementById('finish-btn').addEventListener('click', async () => {
-        const country = document.getElementById('country').value;
+      {/* --- COUNTRY SELECTION SECTION --- */}
+      <div id="country-section" class="w-full hidden flex-col items-center gap-5 transition-all duration-300 animate-fade-in">
+        <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-2">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
+        <p class="text-tx-main font-semibold text-lg">Where are you from?</p>
         
-        // This fetch automatically routes to your Cloudflare function!
-        const res = await fetch('/api/save-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: googleToken, country })
-        });
+        <select id="country" class="w-full p-3.5 rounded-xl bg-main border border-subtle text-tx-main text-[16px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer">
+          <option value="India">India</option>
+          <option value="United States">United States</option>
+          <option value="United Kingdom">United Kingdom</option>
+        </select>
+        
+        <button id="finish-btn" class="w-full py-3.5 mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[16px] transition-all active:scale-95 shadow-md flex justify-center items-center gap-2">
+          <span>Complete Profile</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        </button>
+      </div>
 
-        if (res.ok) {
-          window.location.href = returnUrl;
-        } else {
-          alert("Error saving data.");
-        }
+    </div>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <script is:inline>
+    let googleToken = "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('returnUrl') || '/';
+
+    window.handleGoogleLogin = (response) => {
+      googleToken = response.credential;
+      document.getElementById('login-section').classList.add('hidden');
+      document.getElementById('country-section').classList.remove('hidden');
+      document.getElementById('country-section').style.display = 'flex';
+    };
+
+    document.getElementById('finish-btn').addEventListener('click', async () => {
+      const country = document.getElementById('country').value;
+      const btn = document.getElementById('finish-btn');
+      
+      // Visual loading state
+      btn.innerHTML = 'Saving...';
+      btn.style.opacity = '0.7';
+      btn.disabled = true;
+      
+      const res = await fetch('/api/save-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: googleToken, country })
       });
-    </script>
-  </body>
-</html>
+
+      if (res.ok) {
+        const data = await res.json();
+        // 🟢 NEW: Save the user data locally so the Header can read it!
+        localStorage.setItem('serplora_user', JSON.stringify(data.user));
+        window.location.href = returnUrl;
+      } else {
+        alert("Error saving data. Please try again.");
+        btn.innerHTML = 'Complete Profile';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    });
+  </script>
+</Layout>
+
+<style>
+  .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
