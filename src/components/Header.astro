@@ -91,30 +91,14 @@ const primaryBtn = {
           )}
         </div>
 
-        {/* Authenticated View: Account Dropdown */}
-        <div id="auth-profile-desktop" class="relative group" style="display: none;">
-          <button class="flex items-center gap-2 px-4 py-[6px] rounded-[6px] bg-tx-main text-main text-[14px] font-[600] transition-opacity hover:opacity-90 cursor-pointer border-none outline-none leading-none shadow-sm">
+        {/* Authenticated View: Account Link */}
+        <div id="auth-profile-desktop" style="display: none;">
+          <a href="/account" class="flex items-center gap-2 px-4 py-[6px] rounded-[6px] bg-tx-main text-main text-[14px] font-[600] transition-opacity hover:opacity-90 shadow-sm border-none outline-none leading-none">
+            <div id="profile-avatar-desktop" class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[11px]"></div>
             <span>Account</span>
-            <svg class="w-3.5 h-3.5 text-main" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
-          </button>
-          
-          <div class="absolute right-0 top-full mt-2 w-72 bg-surface border border-subtle rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200] overflow-hidden flex flex-col">
-            
-            <div class="px-4 py-3 border-b border-subtle bg-main/30">
-              <span class="text-[11px] font-[700] text-tx-muted uppercase tracking-wider">Recently Visited</span>
-            </div>
-            
-            <ul id="recent-pages-list" class="flex flex-col max-h-[250px] overflow-y-auto custom-scrollbar p-2 gap-1">
-               {/* JS will populate this list */}
-            </ul>
-
-            <div class="border-t border-subtle mt-1 p-2">
-              <button class="signout-btn w-full text-center px-4 py-2.5 text-[14px] text-red-500 rounded-[8px] hover:bg-red-500/10 transition-colors font-[600] cursor-pointer">
-                Sign out
-              </button>
-            </div>
-          </div>
+          </a>
         </div>
+
       </div>
 
       {/* Mobile Hamburger Toggle */}
@@ -171,14 +155,10 @@ const primaryBtn = {
           )}
         </div>
 
-        <div id="auth-profile-mobile" class="hidden flex-col mt-2 border-t border-subtle pt-4 gap-2">
-            <span class="text-[11px] font-[700] text-tx-muted uppercase tracking-wider px-2">Recently Visited</span>
-            <ul id="recent-pages-list-mobile" class="flex flex-col gap-1 mb-2 max-h-[200px] overflow-y-auto px-2">
-               {/* JS will populate this */}
-            </ul>
-            <button class="signout-btn w-full py-3 bg-red-500/10 text-red-500 rounded-lg font-[600] text-[15px] hover:bg-red-500/20 transition-colors">
-              Sign out
-            </button>
+        <div id="auth-profile-mobile" class="hidden flex-col gap-3 mt-2 pt-4 border-t border-subtle">
+           <a href="/account" class="flex items-center justify-center w-full py-3 rounded-[8px] bg-tx-main text-main text-[16px] font-[600] transition-opacity hover:opacity-80">
+             My Account
+           </a>
         </div>
 
       </div>
@@ -466,76 +446,55 @@ const primaryBtn = {
     lastScrollY = currentScrollY;
   }, { passive: true });
 
-  // --- 🟢 NEW: Client-side Authentication & Page Tracking Logic ---
+  // --- 🟢 Client-side Authentication & Page Tracking Logic ---
   
-  // 1. Track Current Page
   const currentPath = window.location.pathname;
-  if (!currentPath.includes('/signin')) {
-    // Extract a clean title (e.g. "Python Variables - Serplora" -> "Python Variables")
+  const isExcluded = currentPath.includes('/signin') || currentPath.includes('/account');
+  const userJson = localStorage.getItem('serplora_user');
+
+  if (!isExcluded) {
     let cleanTitle = document.title.split('-')[0].trim();
     if (!cleanTitle || cleanTitle === '') cleanTitle = 'Home';
-
+    
     let history = JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
     
-    // Remove if it already exists, so we can push it to the top
+    // Update local immediately for snappy UI
     history = history.filter(p => p.url !== currentPath);
     history.unshift({ url: currentPath, title: cleanTitle });
-    
-    // Keep only the last 10 pages
     if (history.length > 10) history = history.slice(0, 10);
     localStorage.setItem('serplora_recent_pages', JSON.stringify(history));
+
+    // If logged in, sync this visit to the database!
+    if (userJson) {
+      fetch('/api/sync-history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: currentPath, title: cleanTitle })
+      }).catch(err => console.error('Failed to sync history', err));
+    }
   }
 
-  // 2. Render Header UI
-  const userJson = localStorage.getItem('serplora_user');
+  // Render Header UI
   const signinDesktop = document.getElementById('auth-signin-desktop');
   const profileDesktop = document.getElementById('auth-profile-desktop');
   const signinMobile = document.getElementById('auth-signin-mobile');
   const profileMobile = document.getElementById('auth-profile-mobile');
 
   if (userJson) {
-    // Show Account, Hide Sign In
+    const user = JSON.parse(userJson);
+    const avatarEl = document.getElementById('profile-avatar-desktop');
+    if (avatarEl && user.name) {
+       avatarEl.textContent = user.name.charAt(0).toUpperCase();
+    }
+
     if (signinDesktop) signinDesktop.style.display = 'none';
     if (profileDesktop) profileDesktop.style.display = 'block';
     if (signinMobile) signinMobile.style.display = 'none';
     if (profileMobile) { profileMobile.classList.remove('hidden'); profileMobile.classList.add('flex'); }
-
-    // Render Recent Pages
-    const history = JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
-    const renderHistory = (containerId) => {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      
-      if (history.length === 0) {
-        container.innerHTML = '<li class="p-3 text-[13px] text-tx-muted text-center">No recent pages</li>';
-        return;
-      }
-      
-      container.innerHTML = history.map(page => `
-        <li>
-          <a href="${page.url}" class="block px-3 py-2.5 rounded-[8px] hover:bg-main text-[14px] text-tx-main truncate transition-colors">
-            ${page.title}
-          </a>
-        </li>
-      `).join('');
-    };
-
-    renderHistory('recent-pages-list');
-    renderHistory('recent-pages-list-mobile');
-
   } else {
-    // Show Sign In, Hide Account
     if (signinDesktop) signinDesktop.style.display = 'block';
     if (profileDesktop) profileDesktop.style.display = 'none';
     if (signinMobile) signinMobile.style.display = 'block';
     if (profileMobile) profileMobile.classList.add('hidden');
   }
-
-  // 3. Handle Sign Out
-  document.querySelectorAll('.signout-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      localStorage.removeItem('serplora_user');
-      window.location.reload();
-    });
-  });
 </script>

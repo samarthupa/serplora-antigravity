@@ -1,0 +1,82 @@
+---
+// src/pages/account.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <div class="max-w-[800px] mx-auto px-6 py-12 md:py-20 font-['Outfit',sans-serif] min-h-[75vh]">
+    
+    <header class="mb-10 flex items-center justify-between">
+      <h1 class="text-3xl md:text-4xl font-[800] text-tx-main tracking-tight">Your Account</h1>
+      <button id="signout-btn" class="px-5 py-2.5 rounded-lg bg-red-500/10 text-red-500 font-semibold hover:bg-red-500/20 transition-colors">
+        Sign Out
+      </button>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      {/* Profile Card */}
+      <div class="md:col-span-1 bg-surface border border-subtle rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
+        <div id="acc-avatar" class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-3xl font-bold mb-4 shadow-md"></div>
+        <h2 id="acc-name" class="text-xl font-bold text-tx-main mb-1"></h2>
+        <p id="acc-email" class="text-sm text-tx-muted mb-4"></p>
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-main border border-subtle">
+          <svg class="w-4 h-4 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span id="acc-country" class="text-xs font-bold text-tx-muted uppercase tracking-wider"></span>
+        </div>
+      </div>
+
+      {/* History Card */}
+      <div class="md:col-span-2 bg-surface border border-subtle rounded-2xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-tx-main mb-4 font-['JetBrains_Mono',monospace]">Recently Visited</h3>
+        <ul id="acc-history-list" class="flex flex-col gap-2">
+           {/* Populated by JS */}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <script is:inline>
+    // Security check: If not logged in, boot them to the homepage
+    const userJson = localStorage.getItem('serplora_user');
+    if (!userJson) {
+      window.location.href = '/';
+    } else {
+      const user = JSON.parse(userJson);
+      
+      // Populate Profile Info
+      document.getElementById('acc-avatar').textContent = user.name.charAt(0).toUpperCase();
+      document.getElementById('acc-name').textContent = user.name;
+      document.getElementById('acc-email').textContent = user.email;
+      document.getElementById('acc-country').textContent = user.country || 'Unknown';
+
+      // Populate History (We check the database array attached to the user object, or fallback to local)
+      const history = user.recent_pages || JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
+      const historyList = document.getElementById('acc-history-list');
+      
+      if (history.length === 0) {
+        historyList.innerHTML = '<li class="text-tx-muted py-4">You haven\'t visited any lessons yet.</li>';
+      } else {
+        historyList.innerHTML = history.map(page => `
+          <li>
+            <a href="${page.url}" class="flex items-center justify-between p-4 rounded-xl bg-main border border-transparent hover:border-subtle hover:shadow-sm transition-all group">
+              <span class="text-tx-main font-medium group-hover:text-blue-500 transition-colors">${page.title}</span>
+              <svg class="w-4 h-4 text-tx-muted group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </li>
+        `).join('');
+      }
+
+      // Handle Sign Out
+      document.getElementById('signout-btn').addEventListener('click', () => {
+        localStorage.removeItem('serplora_user');
+        localStorage.removeItem('serplora_recent_pages');
+        
+        // This line deletes the backend cookie so they are truly logged out
+        document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/';
+      });
+    }
+  </script>
+</Layout>

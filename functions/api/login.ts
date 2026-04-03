@@ -1,4 +1,5 @@
 // functions/api/login.ts
+
 export async function onRequestPost({ request, env }) {
   try {
     const { token } = await request.json();
@@ -8,11 +9,13 @@ export async function onRequestPost({ request, env }) {
 
     if (!googleData.email) return new Response("Invalid Token", { status: 400 });
 
-    // Check if user already exists in D1
     const existingUser = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(googleData.email).first();
 
     if (existingUser) {
-      // User exists! Log them in instantly.
+      // 🟢 NEW: Parse their database history and attach it to the user object
+      const history = JSON.parse(existingUser.recent_pages || '[]');
+      existingUser.recent_pages = history;
+
       return new Response(JSON.stringify({ success: true, user: existingUser }), { 
         status: 200,
         headers: {
@@ -21,7 +24,6 @@ export async function onRequestPost({ request, env }) {
         }
       });
     } else {
-      // New user! Tell the frontend to ask for their country.
       return new Response(JSON.stringify({ isNew: true }), { status: 200 });
     }
   } catch (error) {
