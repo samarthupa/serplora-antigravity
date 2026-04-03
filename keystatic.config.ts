@@ -56,11 +56,11 @@ export default config({
         }),
 
         posts: collection({
-            label: 'Blog Posts',
+            label: 'Articles',
             slugField: 'title',
             path: 'src/content/posts/*/',
             format: { contentField: 'content' },
-            previewUrl: '/blog/{slug}',
+            previewUrl: '/articles/{slug}',
             schema: {
                 title: fields.slug({ 
                     name: { label: 'Title' },
