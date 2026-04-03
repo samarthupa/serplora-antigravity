@@ -10,7 +10,6 @@ const seoSchema = z.object({
   robotsFollow: z.boolean().optional(),
 }).optional();
 
-
 // 🟢 Define Categories
 const categories = defineCollection({
   loader: glob({ pattern: "**/*.json", base: "./src/content/categories" }),
@@ -39,7 +38,7 @@ const tutorials = defineCollection({
     category: z.string().nullable().optional(),
     tags: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
     
-    // 🟢 Inject SEO Schema
+    // Inject SEO Schema
     seo: seoSchema,
     
     customJs: z.string().optional(),
@@ -54,7 +53,7 @@ const lessons = defineCollection({
     tutorial: z.string(), 
     order: z.number().default(1),
     
-    // 🟢 Inject SEO Schema
+    // Inject SEO Schema
     seo: seoSchema,
 
     customJs: z.string().optional(),
@@ -69,7 +68,7 @@ const tutorialsPage = defineCollection({
     subheadline: z.string().default('Explore our latest guides and learn step-by-step with state-of-the-art tutorials.'),
     hiddenTutorials: z.array(z.string()).default([]),
     
-    // 🟢 Inject SEO Schema
+    // Inject SEO Schema
     seo: seoSchema,
   }),
 });
@@ -146,7 +145,7 @@ const posts = defineCollection({
     authorName: z.string().default('Serplora Team'),
     authorImage: z.string().optional(),
     
-    // 🟢 Inject SEO Schema
+    // Inject SEO Schema
     seo: seoSchema,
 
     faqs: z.array(z.object({
@@ -165,7 +164,7 @@ const blogPage = defineCollection({
     subheadline: z.string().optional(),
     hiddenPosts: z.array(z.string()).optional().default([]),
     
-    // 🟢 Inject SEO Schema
+    // Inject SEO Schema
     seo: seoSchema,
   })
 });
@@ -177,6 +176,7 @@ const diagnosticsDashboard = defineCollection({
     notice: z.string().optional()
   })
 });
+
 const sidebarAds = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/sidebarAds' }),
   schema: z.object({
@@ -185,6 +185,16 @@ const sidebarAds = defineCollection({
       tutorial: z.string().nullable(),
       htmlContent: z.string()
     })).optional().default([])
+  })
+});
+
+// 🟢 NEW: Home Page Support
+const homePage = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx,mdoc}', base: './src/content/homePage' }),
+  schema: z.object({
+    headline: z.string().optional(),
+    subheadline: z.string().optional(),
+    seo: seoSchema,
   })
 });
 
@@ -201,4 +211,5 @@ export const collections = {
   blogPage, 
   diagnosticsDashboard,
   sidebarAds,
+  homePage, // 🟢 Added homePage export
 };

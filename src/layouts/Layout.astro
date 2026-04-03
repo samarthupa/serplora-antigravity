@@ -26,11 +26,14 @@ const headerEntry = await getEntry('header', 'data');
 const favicon = headerEntry?.data?.favicon || '/favicon.svg'; // Fallback just in case
 const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
 
-// 🟢 NEW: SMART FALLBACKS
+// 🟢 SMART FALLBACKS
+// 1. Title falls back to the page's H1 (titleFallback), then to Site Title
 const finalTitle = seo?.metaTitle || titleFallback || siteTitle;
-// Strip HTML tags from excerpt for the description fallback just in case
+
+// 2. Strip HTML tags from excerpt for the description fallback
 const rawExcerpt = excerptFallback?.replace(/<[^>]*>?/gm, ''); 
-const finalDescription = seo?.metaDescription || rawExcerpt || `Welcome to ${siteTitle}.`;
+// 3. Set description to null if no metaDescription and no excerpt exist
+const finalDescription = seo?.metaDescription || rawExcerpt || null;
 
 // Handle Canonical URL (defaults to the current request URL if blank)
 const canonicalURL = seo?.canonicalUrl || new URL(Astro.url.pathname, Astro.site || Astro.url.origin).toString();
@@ -50,13 +53,16 @@ const robotsParams = [
     
     {/* 🟢 SEO META TAGS */}
     <title>{finalTitle}</title>
-    <meta name="description" content={finalDescription} />
+    
+    {/* Only render description tag if we actually have a description */}
+    {finalDescription && <meta name="description" content={finalDescription} />}
+    
     <link rel="canonical" href={canonicalURL} />
     <meta name="robots" content={robotsParams} />
     
     {/* 🟢 Open Graph (Social Sharing) */}
     <meta property="og:title" content={finalTitle} />
-    <meta property="og:description" content={finalDescription} />
+    {finalDescription && <meta property="og:description" content={finalDescription} />}
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:type" content="website" />
     

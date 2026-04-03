@@ -1,20 +1,38 @@
 ---
 // src/pages/index.astro
+import { getEntry, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+
+// Fetch home page data from Keystatic. Note the ID is now 'index' instead of 'data'
+const homeEntry = await getEntry('homePage', 'index'); 
+const headline = homeEntry?.data?.headline || 'Welcome to Serplora';
+const subheadline = homeEntry?.data?.subheadline || 'Building state-of-the-art tools for the web.';
+
+// 🟢 Render the Markdoc content from the CMS!
+const { Content } = homeEntry ? await render(homeEntry) : { Content: () => null };
 ---
 
-<Layout>
-  <main class="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-    <h1 class="text-5xl font-extrabold tracking-tight mb-4">
-      Welcome to <span class="text-blue-600">Serplora Academy</span>
-    </h1>
-    <p class="text-lg text-slate-600 max-w-2xl mb-8">
-      Your custom Astro architecture is officially online. Zero bloat. 100% control.
-    </p>
-    <div class="flex gap-4">
-      <a href="/keystatic" class="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors">
-        Open CMS Dashboard
-      </a>
+{/* Pass SEO data and fallbacks to Layout */}
+<Layout 
+  seo={homeEntry?.data?.seo}
+  titleFallback={headline}
+  excerptFallback={subheadline}
+>
+  <main class="w-full max-w-4xl mx-auto px-6 py-20 md:py-32 flex flex-col">
+    
+    <header class="mb-16">
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-tx-main mb-6">
+        {headline}
+      </h1>
+      <p class="text-lg md:text-xl text-tx-muted font-medium max-w-2xl leading-relaxed">
+        {subheadline}
+      </p>
+    </header>
+
+    {/* 🟢 This renders the rich text you write inside the Keystatic Editor */}
+    <div class="markdown-content text-[16px] md:text-[20px] leading-[1.7] md:leading-[1.8] font-['Outfit',sans-serif]">
+      {homeEntry && <Content />}
     </div>
+
   </main>
 </Layout>

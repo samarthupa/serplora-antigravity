@@ -14,11 +14,15 @@ const publishedTutorials = allTutorials.filter((tutorial) => {
   if (hiddenTutorialsSingleton.includes(slug)) return false;
   return true;
 });
-
 const generateSlug = (tutorial: any) => tutorial.data.slug || tutorial.id;
 ---
 
-<Layout>
+{/* 🟢 FIXED: Pass the SEO data and fallbacks to the Layout */}
+<Layout 
+  seo={pageEntry?.data?.seo}
+  titleFallback={headline}
+  excerptFallback={subheadline}
+>
   <main class="w-full max-w-4xl mx-auto px-6 py-20 md:py-32 flex flex-col">
     
     {/* Minimalist, High-Impact Header */}

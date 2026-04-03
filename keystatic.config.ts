@@ -26,6 +26,7 @@ const seoSchema = fields.object({
         defaultValue: true 
     }),
 }, { label: 'SEO & Meta Tags' });
+
 export default config({
     storage: {
         kind: 'local', 
@@ -97,6 +98,7 @@ export default config({
                     }),
                     { label: 'FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
                 ),
+                
                 seo: seoSchema,
                 
                 content: fields.markdoc({ 
@@ -216,9 +218,30 @@ export default config({
                 }),
             },
         }),
-    }, // <-- I FIXED THE BRACKET HERE FOR YOU
+    }, 
 
     singletons: {
+        // 🟢 NEW: Home Page Singleton for SEO and Headings
+        homePage: singleton({
+            label: 'Home Page',
+            path: 'src/content/homePage/index', // Changed from data to index
+            format: { contentField: 'content' }, // This activates the Markdoc editor
+            schema: {
+                headline: fields.text({ label: 'Main Headline (H1)', defaultValue: 'Welcome to Serplora' }),
+                subheadline: fields.text({ label: 'Subheadline', multiline: true }),
+                seo: seoSchema,
+                content: fields.markdoc({ 
+                    label: 'Page Content',
+                    options: {
+                        image: {
+                            directory: 'public/images/pages',
+                            publicPath: '/images/pages/'
+                        }
+                    }
+                }),
+            },
+        }),
+
         header: singleton({
             label: 'Site Header',
             path: 'src/content/header/data',
@@ -326,6 +349,7 @@ export default config({
                         itemLabel: props => props.value || 'Select a post',
                     }
                 ),
+                seo: seoSchema, // 🟢 Added to Blog Page
             },
         }),
         tutorialsPage: singleton({
@@ -343,6 +367,7 @@ export default config({
                         itemLabel: props => props.value || 'Select a tutorial',
                     }
                 ),
+                seo: seoSchema, // 🟢 Added to Tutorials Page
             },
         }),
         sidebarAds: singleton({
