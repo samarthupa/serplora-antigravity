@@ -96,11 +96,9 @@ if (adsData?.data) {
     </div>
 
     {/* --- MOBILE SIDEBAR BACKDROP OVERLAY --- */}
-    <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
-
+<div id="mobile-sidebar-backdrop" class="fixed top-[64px] inset-x-0 bottom-0 [.header-hidden_&]:top-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
     {/* --- LEFT SIDEBAR (Sticky, Left-Locked) --- */}
-    <aside id="tutorial-sidebar" class="fixed inset-y-0 left-0 z-[300] lg:z-[150] w-[85vw] max-w-[280px] bg-surface shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[280px] lg:shrink-0 lg:top-[64px] lg:h-[calc(100vh-64px)] [.header-hidden_&]:lg:top-0 [.header-hidden_&]:lg:h-screen overflow-y-auto border-r border-subtle py-5 px-4 lg:py-6 lg:px-2 lg:pr-4 custom-scrollbar lg:bg-surface lg:[box-shadow:-50vw_0px_0px_0px_var(--color-bg-surface)]">
-      <div class="mb-5 px-1.5 mt-2 lg:mt-0 flex justify-between items-center">
+<aside id="tutorial-sidebar" class="fixed top-[64px] h-[calc(100dvh-64px)] left-0 z-[300] lg:z-[150] w-[85vw] max-w-[280px] bg-surface shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[280px] lg:shrink-0 [.header-hidden_&]:top-0 [.header-hidden_&]:h-[100dvh] overflow-y-auto border-r border-subtle py-5 px-4 lg:py-6 lg:px-2 lg:pr-4 custom-scrollbar lg:bg-surface lg:[box-shadow:-50vw_0px_0px_0px_var(--color-bg-surface)]">      <div class="mb-5 px-1.5 mt-2 lg:mt-0 flex justify-between items-center">
         <div>
           <h3 class="text-[11px] uppercase tracking-widest font-['JetBrains_Mono',monospace] text-tx-muted mb-1 font-bold">Tutorial Series</h3>
           <p class="text-[18px] font-black text-tx-main leading-tight">{series.data.title}</p>

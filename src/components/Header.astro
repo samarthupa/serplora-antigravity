@@ -109,58 +109,76 @@ const primaryBtn = {
       </div>
     </div>
 
-    {/* Mobile Navigation Drawer */}
-    <div id="mobile-menu" class="hidden absolute top-[64px] left-0 w-full bg-surface border-b border-subtle shadow-md flex-col max-h-[calc(100vh-64px)] overflow-y-auto z-[190]">
-      <ul class="flex flex-col list-none m-0 px-6 py-4 gap-2">
-        {navItems.map((item) => {
-           const hasSubItems = item.subItems && item.subItems.length > 0;
-           return (
-             <li>
-               <div class="flex items-center justify-between border-b border-subtle">
-                 <a href={item.url || '#'} class="py-3 text-[16px] font-[500] text-tx-main flex-1">{item.label}</a>
+    {/* --- NEW: World-Class Mobile Navigation Drawer --- */}
+    <div id="mobile-menu" class="hidden absolute top-[64px] left-0 w-full bg-surface shadow-xl flex-col h-[calc(100dvh-64px)] overflow-y-auto z-[190]">
+      <div class="flex flex-col h-full px-6 py-6 w-full max-w-[500px] mx-auto">
+        
+        {/* Premium Navigation Links */}
+        <nav class="flex flex-col gap-2 mb-8 mt-4">
+          {navItems.map((item) => {
+             const hasSubItems = item.subItems && item.subItems.length > 0;
+             return (
+               <div class="border-b border-subtle group">
+                 <div class="flex items-center justify-between">
+                   <a href={item.url || '#'} class="text-lg font-[800] tracking-tight text-tx-main hover:opacity-80 transition-opacity flex-1 leading-none">{item.label}</a>
+                   {hasSubItems ? (
+                     <button class="mobile-submenu-toggle p-2 text-tx-muted focus:outline-none" aria-expanded="false" aria-label="Toggle submenu">
+                       <svg class="w-6 h-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                     </button>
+                   ) : (
+                     <a href={item.url || '#'} class="p-2 text-tx-muted opacity-40 group-hover:opacity-100 transition-opacity" aria-label={`Go to ${item.label}`}>
+                       <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7M7 7h10v10" /></svg>
+                     </a>
+                   )}
+                 </div>
                  {hasSubItems && (
-                   <button class="mobile-submenu-toggle p-3 -mr-3 text-tx-muted focus:outline-none" aria-expanded="false" aria-label="Toggle submenu">
-                     <svg class="w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" /></svg>
-                   </button>
+                   <div class="mobile-submenu hidden flex-col gap-4 pb-6 pt-2 pl-2">
+                     {item.subItems.map((subItem) => (
+                       <a href={subItem.url || '#'} class="text-[18px] font-[500] text-tx-muted hover:text-tx-main transition-colors flex items-center gap-2">
+                         <span class="w-1.5 h-1.5 rounded-full bg-blue-500/50"></span>
+                         {subItem.label}
+                       </a>
+                     ))}
+                   </div>
                  )}
                </div>
-               {hasSubItems && (
-                 <ul class="mobile-submenu hidden pl-4 py-1 space-y-1 mt-1 mb-2">
-                   {item.subItems.map((subItem) => (
-                     <li><a href={subItem.url || '#'} class="block py-2 text-[14px] text-tx-muted hover:text-tx-main">{subItem.label}</a></li>
-                   ))}
-                 </ul>
-               )}
-             </li>
-           );
-        })}
-      </ul>
-      
-      {/* Mobile Menu Footer */}
-      <div class="px-6 py-4 border-t border-subtle mt-auto flex flex-col gap-4 pb-6">
-        <button class="theme-toggle-btn flex items-center justify-between w-full py-2 text-[16px] font-[500] text-tx-main focus:outline-none" aria-label="Toggle theme">
-          <span>Appearance</span>
-          <div class="p-2 rounded-full bg-main text-tx-muted flex items-center justify-center">
-            <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-            <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+             );
+          })}
+        </nav>
+        
+        {/* Bottom Dock (Theme & Auth anchored to bottom) */}
+        <div class="mt-auto flex flex-col gap-3 pb-8">
+          
+          {/* Dynamic Theme Switcher */}
+          <button class="theme-toggle-btn flex items-center justify-between w-full p-4 rounded-[16px] bg-main border border-subtle active:scale-[0.98] transition-all focus:outline-none" aria-label="Toggle theme">
+            <div class="flex items-center gap-3 text-tx-muted">
+              <svg class="theme-toggle-light-icon w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+              <svg class="theme-toggle-dark-icon hidden w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+              <span class="text-[16px] font-[600] text-tx-main">Appearance</span>
+            </div>
+            
+            {/* iOS style purely CSS driven pill toggle */}
+            <div class="relative w-[48px] h-[28px] rounded-full bg-surface border border-subtle shrink-0 shadow-inner">
+              <div class="absolute left-1 top-1 w-[18px] h-[18px] rounded-full bg-tx-muted shadow-sm transition-all duration-300 ease-spring dark:translate-x-[20px] dark:bg-blue-500"></div>
+            </div>
+          </button>
+
+          {/* Mobile Auth Section */}
+          <div id="auth-signin-mobile" style="display: none;" class="w-full">
+            {primaryBtn.show && (
+              <a href={primaryBtn.url} class="flex items-center justify-center w-full py-[18px] rounded-[16px] bg-tx-main text-main text-[17px] font-[700] active:scale-[0.98] transition-all border-none outline-none">
+                {primaryBtn.label}
+              </a>
+            )}
           </div>
-        </button>
 
-        {/* Mobile Auth Section */}
-        <div id="auth-signin-mobile" style="display: none;">
-          {primaryBtn.show && (
-            <a href={primaryBtn.url} class="flex items-center justify-center w-full py-3 mt-2 rounded-[8px] bg-tx-main text-main text-[16px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none">
-              {primaryBtn.label}
-            </a>
-          )}
+          <div id="auth-profile-mobile" class="hidden w-full">
+             <a href="/account" class="flex items-center justify-center w-full py-[18px] rounded-[16px] bg-tx-main text-main text-[17px] font-[700] active:scale-[0.98] transition-all shadow-sm">
+               My Account
+             </a>
+          </div>
+
         </div>
-
-        <div id="auth-profile-mobile" class="hidden flex-col gap-3 mt-2 pt-4 border-t border-subtle">
-           <a href="/account" class="flex items-center justify-center w-full py-3 rounded-[8px] bg-tx-main text-main text-[16px] font-[600] transition-opacity hover:opacity-80">
-             My Account
-           </a>
-        </div>
-
       </div>
     </div>
   </div>
@@ -190,6 +208,11 @@ const primaryBtn = {
 </div>
 
 <style is:global>
+  /* 🟢 Custom Spring Easing for Toggle */
+  .ease-spring {
+    transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
   /* 🟢 OVERRIDE: World-Class Minimalist Search Design */
   .pagefind-ui-custom {
     --pagefind-ui-scale: 1;
@@ -393,11 +416,14 @@ const primaryBtn = {
       menu.classList.toggle('hidden');
       menu.classList.toggle('flex');
       
+      // Prevent body scroll when menu is open
       if (menu.classList.contains('hidden')) {
+        document.body.style.overflow = '';
         topBar.style.transform = '';
         midBar.style.opacity = '1';
         botBar.style.transform = '';
       } else {
+        document.body.style.overflow = 'hidden';
         topBar.style.transform = 'translateY(7.5px) rotate(45deg)';
         midBar.style.opacity = '0';
         botBar.style.transform = 'translateY(-7.5px) rotate(-45deg)';
@@ -410,9 +436,10 @@ const primaryBtn = {
     toggle.addEventListener('click', (e) => {
       e.preventDefault();
       const svg = toggle.querySelector('svg');
-      const submenu = toggle.closest('li')?.querySelector('.mobile-submenu');
+      const submenu = toggle.closest('div.group')?.querySelector('.mobile-submenu');
       if (submenu && svg) {
         submenu.classList.toggle('hidden');
+        submenu.classList.toggle('flex');
         if (submenu.classList.contains('hidden')) {
           svg.style.transform = '';
           toggle.setAttribute('aria-expanded', 'false');
@@ -490,7 +517,7 @@ const primaryBtn = {
     if (signinDesktop) signinDesktop.style.display = 'none';
     if (profileDesktop) profileDesktop.style.display = 'block';
     if (signinMobile) signinMobile.style.display = 'none';
-    if (profileMobile) { profileMobile.classList.remove('hidden'); profileMobile.classList.add('flex'); }
+    if (profileMobile) { profileMobile.classList.remove('hidden'); profileMobile.classList.add('block'); }
   } else {
     if (signinDesktop) signinDesktop.style.display = 'block';
     if (profileDesktop) profileDesktop.style.display = 'none';
