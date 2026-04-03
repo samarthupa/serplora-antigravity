@@ -1,0 +1,8 @@
+# Redirect the main blog index to articles
+/blog /articles 301
+
+# Redirect all individual blog posts to their new article URLs
+/blog/* /articles/:splat 301
+
+# Example of a single specific page redirect
+# /about-us /company 301
