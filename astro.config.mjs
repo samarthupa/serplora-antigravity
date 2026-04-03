@@ -11,7 +11,7 @@ const isLocalDev = process.argv.includes('dev');
 export default defineConfig({
   output: 'static', 
 
-  // 👇 1. ADD THIS: Renames the default /_astro/ directory to /assets/
+  // 1. Rename the default _astro folder to assets
   build: {
     assets: 'assets' 
   },
@@ -20,8 +20,7 @@ export default defineConfig({
     react(), 
     markdoc({ allowHTML: true }), 
     pagefind(), // 👈 NEW
-    
-    // Keystatic ONLY runs on your Mac now.
+    // Keystatic ONLY runs locally
     ...(isLocalDev ? [keystatic()] : [])
   ],
 
@@ -36,7 +35,7 @@ export default defineConfig({
     define: {
         'process.env.NODE_ENV': JSON.stringify(isLocalDev ? 'development' : 'production')
     },
-    // 👇 2. ADD THIS: Hides .astro filenames by using purely hashed names
+    // 👇 2. Unconditionally enforce hashed filenames (NO ternary condition here)
     build: {
       rollupOptions: {
         output: {
