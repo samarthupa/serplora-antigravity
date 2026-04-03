@@ -1,6 +1,31 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
 import { KeystaticCodePreview } from './src/components/KeystaticCodePreview';
+
+// 🟢 NEW: Reusable SEO Block
+const seoSchema = fields.object({
+    metaTitle: fields.text({ 
+        label: 'Meta Title', 
+        description: 'Overrides the default page title. Leave blank to auto-generate from the page title.' 
+    }),
+    metaDescription: fields.text({ 
+        label: 'Meta Description', 
+        multiline: true,
+        description: 'Keep it under 160 characters for best results.'
+    }),
+    canonicalUrl: fields.text({ 
+        label: 'Canonical URL', 
+        description: 'Leave blank to use the current auto-generated URL.' 
+    }),
+    robotsIndex: fields.checkbox({ 
+        label: 'Allow Search Engines to Index (index)', 
+        defaultValue: true 
+    }),
+    robotsFollow: fields.checkbox({ 
+        label: 'Allow Search Engines to Follow Links (follow)', 
+        defaultValue: true 
+    }),
+}, { label: 'SEO & Meta Tags' });
 export default config({
     storage: {
         kind: 'local', 
@@ -72,6 +97,7 @@ export default config({
                     }),
                     { label: 'FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
                 ),
+                seo: seoSchema,
                 
                 content: fields.markdoc({ 
                     label: 'Content',
@@ -119,6 +145,7 @@ export default config({
                 }),
 
                 excerpt: fields.text({ label: 'Excerpt', multiline: true }),
+                seo: seoSchema,
                 content: fields.markdoc({ 
                     label: 'Introduction Content',
                     options: {
@@ -160,6 +187,7 @@ export default config({
                     description: 'Order in the sidebar (1, 2, 3...)', 
                     defaultValue: 1 
                 }),
+                seo: seoSchema,
                 
                 content: fields.markdoc({ 
                     label: 'Content',

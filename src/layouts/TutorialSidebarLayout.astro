@@ -4,6 +4,11 @@ import { getEntry } from 'astro:content';
 
 const { series, lessons, currentSlug } = Astro.props;
 
+// 🟢 NEW: Determine the active item to grab the correct SEO data
+const currentActiveData = currentSlug === 'intro' 
+  ? series.data 
+  : lessons.find((l: any) => l.data.urlSlug === currentSlug)?.data || series.data;
+
 // --- Helper: Aggressive Clean Title ---
 const cleanTitle = (title: string) => {
   let cleaned = title.includes('-') ? title.split(' - ')[1].trim() : title;
@@ -58,7 +63,12 @@ if (adsData?.data) {
 }
 ---
 
-<Layout>
+{/* 🟢 NEW: Pass the correctly resolved SEO data into Layout */}
+<Layout 
+  seo={currentActiveData.seo}
+  titleFallback={currentActiveData.title}
+  excerptFallback={currentActiveData.excerpt}
+>
   {/* FIXED BACKGROUND GRID: strictly limited to the top 200px */}
   <div class="absolute top-0 inset-x-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_100%,transparent_100%)] -z-10 h-[200px] pointer-events-none"></div>
 

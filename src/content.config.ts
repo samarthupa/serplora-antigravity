@@ -1,7 +1,17 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// 👇 NEW: Define Categories
+// 🟢 NEW: Define a reusable Zod schema for SEO so Astro doesn't strip the data out
+const seoSchema = z.object({
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+  robotsIndex: z.boolean().optional(),
+  robotsFollow: z.boolean().optional(),
+}).optional();
+
+
+// 🟢 Define Categories
 const categories = defineCollection({
   loader: glob({ pattern: "**/*.json", base: "./src/content/categories" }),
   schema: z.object({
@@ -9,7 +19,7 @@ const categories = defineCollection({
   }),
 });
 
-// 👇 NEW: Define Tags
+// 🟢 Define Tags
 const tags = defineCollection({
   loader: glob({ pattern: "**/*.json", base: "./src/content/tags" }),
   schema: z.object({
@@ -25,9 +35,12 @@ const tutorials = defineCollection({
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
     
-    // 👇 NEW: Support for category and tags
+    // Support for category and tags
     category: z.string().nullable().optional(),
     tags: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
+    
+    // 🟢 Inject SEO Schema
+    seo: seoSchema,
     
     customJs: z.string().optional(),
   }),
@@ -40,6 +53,10 @@ const lessons = defineCollection({
     urlSlug: z.string(),
     tutorial: z.string(), 
     order: z.number().default(1),
+    
+    // 🟢 Inject SEO Schema
+    seo: seoSchema,
+
     customJs: z.string().optional(),
   }),
 });
@@ -51,6 +68,9 @@ const tutorialsPage = defineCollection({
     headline: z.string().default('Tutorials & Guides'),
     subheadline: z.string().default('Explore our latest guides and learn step-by-step with state-of-the-art tutorials.'),
     hiddenTutorials: z.array(z.string()).default([]),
+    
+    // 🟢 Inject SEO Schema
+    seo: seoSchema,
   }),
 });
 
@@ -116,7 +136,7 @@ const posts = defineCollection({
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
     
-    // 👇 NEW: Support for category and tags
+    // Support for category and tags
     category: z.string().nullable().optional(),
     tags: z.array(z.string()).optional().default([]),
 
@@ -125,6 +145,10 @@ const posts = defineCollection({
     image: z.string().optional(),
     authorName: z.string().default('Serplora Team'),
     authorImage: z.string().optional(),
+    
+    // 🟢 Inject SEO Schema
+    seo: seoSchema,
+
     faqs: z.array(z.object({
       question: z.string(),
       answer: z.string()
@@ -140,6 +164,9 @@ const blogPage = defineCollection({
     headline: z.string().optional(),
     subheadline: z.string().optional(),
     hiddenPosts: z.array(z.string()).optional().default([]),
+    
+    // 🟢 Inject SEO Schema
+    seo: seoSchema,
   })
 });
 
@@ -161,10 +188,10 @@ const sidebarAds = defineCollection({
   })
 });
 
-// 8. EXPORT ALL COLLECTIONS 👇 (Make sure to export the new ones!)
+// 8. EXPORT ALL COLLECTIONS (Make sure to export the new ones!)
 export const collections = { 
-  categories, // <-- Exported
-  tags,       // <-- Exported
+  categories, 
+  tags,       
   tutorials,
   lessons, 
   tutorialsPage, 

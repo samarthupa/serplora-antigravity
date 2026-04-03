@@ -14,11 +14,15 @@ const publishedPosts = allPosts.filter((post) => {
   if (hiddenPosts.includes(slug)) return false;
   return true;
 });
-
 const generateSlug = (post: any) => post.data.slug || post.id;
 ---
 
-<Layout>
+{/* 🟢 FIXED: Pass the SEO data and fallbacks into Layout */}
+<Layout 
+  seo={pageEntry?.data?.seo}
+  titleFallback={headline}
+  excerptFallback={subheadline}
+>
   <main class="w-full max-w-4xl mx-auto px-6 py-20 md:py-32 flex flex-col">
     
     {/* Minimalist, High-Impact Header */}

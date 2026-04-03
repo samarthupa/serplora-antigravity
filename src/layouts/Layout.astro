@@ -6,10 +6,40 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import 'photoswipe/style.css';
 
+// 🟢 NEW: Accept dynamic SEO props from individual pages
+interface Props {
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    canonicalUrl?: string;
+    robotsIndex?: boolean;
+    robotsFollow?: boolean;
+  };
+  titleFallback?: string;
+  excerptFallback?: string;
+}
+
+const { seo, titleFallback, excerptFallback } = Astro.props;
+
 // Fetch the header data from Keystatic to get the Favicon and Site Title
 const headerEntry = await getEntry('header', 'data');
 const favicon = headerEntry?.data?.favicon || '/favicon.svg'; // Fallback just in case
 const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
+
+// 🟢 NEW: SMART FALLBACKS
+const finalTitle = seo?.metaTitle || titleFallback || siteTitle;
+// Strip HTML tags from excerpt for the description fallback just in case
+const rawExcerpt = excerptFallback?.replace(/<[^>]*>?/gm, ''); 
+const finalDescription = seo?.metaDescription || rawExcerpt || `Welcome to ${siteTitle}.`;
+
+// Handle Canonical URL (defaults to the current request URL if blank)
+const canonicalURL = seo?.canonicalUrl || new URL(Astro.url.pathname, Astro.site || Astro.url.origin).toString();
+
+// Handle Robots format
+const robotsParams = [
+  seo?.robotsIndex === false ? 'noindex' : 'index',
+  seo?.robotsFollow === false ? 'nofollow' : 'follow'
+].join(', ');
 ---
 
 <!doctype html>
@@ -17,13 +47,24 @@ const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    {/* 🟢 SEO META TAGS */}
+    <title>{finalTitle}</title>
+    <meta name="description" content={finalDescription} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="robots" content={robotsParams} />
+    
+    {/* 🟢 Open Graph (Social Sharing) */}
+    <meta property="og:title" content={finalTitle} />
+    <meta property="og:description" content={finalDescription} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:type" content="website" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     
     <link rel="icon" href={favicon} />
-    
-    <title>{siteTitle}</title>
 
     <script is:inline>
       const theme = (() => {
