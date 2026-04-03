@@ -11,6 +11,11 @@ const isLocalDev = process.argv.includes('dev');
 export default defineConfig({
   output: 'static', 
 
+  // 👇 1. ADD THIS: Renames the default /_astro/ directory to /assets/
+  build: {
+    assets: 'assets' 
+  },
+
   integrations: [
     react(), 
     markdoc({ allowHTML: true }), 
@@ -30,6 +35,16 @@ export default defineConfig({
     },
     define: {
         'process.env.NODE_ENV': JSON.stringify(isLocalDev ? 'development' : 'production')
+    },
+    // 👇 2. ADD THIS: Hides .astro filenames by using purely hashed names
+    build: {
+      rollupOptions: {
+        output: {
+          entryFileNames: 'assets/[hash].js',
+          chunkFileNames: 'assets/[hash].js',
+          assetFileNames: 'assets/[hash][extname]'
+        }
+      }
     }
   },
 });
