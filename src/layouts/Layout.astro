@@ -33,7 +33,7 @@ const finalTitle = seo?.metaTitle || titleFallback || siteTitle;
 // 2. Strip HTML tags from excerpt for the description fallback
 const rawExcerpt = excerptFallback?.replace(/<[^>]*>?/gm, ''); 
 // 3. Set description to null if no metaDescription and no excerpt exist
-const finalDescription = seo?.metaDescription || rawExcerpt || null;
+const finalDescription = seo?.metaDescription || null;
 
 // Handle Canonical URL (defaults to the current request URL if blank)
 const canonicalURL = seo?.canonicalUrl || new URL(Astro.url.pathname, Astro.site || Astro.url.origin).toString();

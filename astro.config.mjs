@@ -9,6 +9,7 @@ import pagefind from 'astro-pagefind';
 const isLocalDev = process.argv.includes('dev');
 
 export default defineConfig({
+  site: 'https://serplora.com',
   output: 'static', 
 
   // Rename the default folder to assets
