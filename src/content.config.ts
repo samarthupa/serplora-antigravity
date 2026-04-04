@@ -188,6 +188,37 @@ const sidebarAds = defineCollection({
   })
 });
 
+const quizzes = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/quizzes" }),
+  schema: z.object({
+    title: z.string().optional(),
+    draft: z.boolean().optional(),
+    excerpt: z.string().optional(),
+    seo: seoSchema,
+  }),
+});
+
+const quizItems = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/quizItems" }),
+  schema: z.object({
+    title: z.string().optional(),
+    urlSlug: z.string(),
+    quizParent: z.string(), 
+    order: z.number().default(1),
+    seo: seoSchema,
+    // 👇 NEW: Validate the questions array
+    questions: z.array(z.object({
+      questionText: z.string(),
+      options: z.array(z.object({
+        text: z.string(),
+        isCorrect: z.boolean().default(false)
+      })),
+      explanation: z.string().optional()
+    })).optional().default([]),
+    bulkQuestionsJson: z.string().optional(),
+  }),
+});
+
 // 🟢 NEW: Home Page Support
 const homePage = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx,mdoc}', base: './src/content/homePage' }),
@@ -204,6 +235,8 @@ export const collections = {
   tags,       
   tutorials,
   lessons, 
+  quizzes,      // <-- ADD THIS
+  quizItems,    // <-- ADD THIS
   tutorialsPage, 
   header, 
   footer, 
@@ -211,5 +244,5 @@ export const collections = {
   blogPage, 
   diagnosticsDashboard,
   sidebarAds,
-  homePage, // 🟢 Added homePage export
+  homePage,
 };

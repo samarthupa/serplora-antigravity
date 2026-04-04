@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// Fetch all quizzes and filter out any that are marked as drafts
+const allQuizzes = await getCollection('quizzes');
+const publishedQuizzes = allQuizzes.filter(quiz => !quiz.data.draft);
+---
+
+<Layout title="All Quizzes" description="Test your knowledge with our interactive quizzes.">
+  <div class="max-w-4xl mx-auto px-4 py-16">
+    
+    <div class="text-center mb-16">
+      <h1 class="text-4xl md:text-6xl font-[800] text-tx-main tracking-tight mb-4">
+        All Quizzes
+      </h1>
+      <p class="text-xl text-slate-500">
+        Choose a topic below to test your knowledge.
+      </p>
+    </div>
+
+    <div class="grid gap-6">
+      {publishedQuizzes.map((quiz) => (
+        <a 
+          href={`/quizzes/${quiz.id}`} 
+          class="block p-8 bg-white border border-slate-200 rounded-2xl hover:border-blue-500 hover:shadow-md transition-all duration-200"
+        >
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">
+            {quiz.data.title}
+          </h2>
+          {quiz.data.excerpt && (
+            <p class="text-slate-600 text-lg">
+              {quiz.data.excerpt}
+            </p>
+          )}
+        </a>
+      ))}
+      
+      {publishedQuizzes.length === 0 && (
+        <p class="text-center text-slate-500 py-12 bg-slate-50 rounded-xl border border-slate-200">
+          No quizzes available yet. Check back later!
+        </p>
+      )}
+    </div>
+
+  </div>
+</Layout>

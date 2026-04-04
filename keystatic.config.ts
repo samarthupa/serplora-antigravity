@@ -218,6 +218,90 @@ export default config({
                 }),
             },
         }),
+
+        quizzes: collection({
+            label: 'Quizzes (Parents)',
+            slugField: 'title',
+            path: 'src/content/quizzes/*/',
+            format: { contentField: 'content' },
+            previewUrl: '/quizzes/{slug}',
+            schema: {
+                title: fields.slug({ 
+                    name: { label: 'Quiz Series Title (e.g. Python Quiz)' },
+                    slug: { label: 'SEO Slug' }
+                }),
+                draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
+                excerpt: fields.text({ label: 'Excerpt', multiline: true }),
+                seo: seoSchema,
+                content: fields.markdoc({ 
+                    label: 'Introduction Content',
+                    options: {
+                        image: { directory: 'public/images/quizzes', publicPath: '/images/quizzes/' }
+                    }
+                }),
+            },
+        }),
+
+       quizItems: collection({
+            label: 'Quiz Items (Children)',
+            slugField: 'title',
+            path: 'src/content/quizItems/*/',
+            format: { contentField: 'content' },
+            schema: {
+                title: fields.slug({ 
+                    name: { label: 'Internal Title (e.g., Python - Variables Quiz)' },
+                    slug: { label: 'Keystatic Folder ID (Do not edit)' }
+                }),
+                urlSlug: fields.text({ 
+                    label: 'URL Slug', 
+                    description: 'e.g. "variables", "if-statements"' 
+                }),
+                quizParent: fields.relationship({
+                    label: 'Belongs to Quiz Series',
+                    collection: 'quizzes',
+                    validation: { isRequired: true }
+                }),
+                order: fields.integer({ 
+                    label: 'Quiz Order', 
+                    description: 'Order in the sidebar (1, 2, 3...)', 
+                    defaultValue: 1 
+                }),
+                seo: seoSchema,
+                
+                // 👇 NEW: Interactive Questions Builder
+                questions: fields.array(
+                    fields.object({
+                        questionText: fields.text({ label: 'Question', multiline: true }),
+                        options: fields.array(
+                            fields.object({
+                                text: fields.text({ label: 'Option Answer' }),
+                                isCorrect: fields.checkbox({ label: 'Is this the CORRECT answer?', defaultValue: false })
+                            }),
+                            { label: 'Answers', itemLabel: props => props.fields.text.value || 'New Option' }
+                        ),
+                        explanation: fields.text({ 
+                            label: 'Explanation (Optional)', 
+                            multiline: true, 
+                            description: 'Shown to the user after they select an answer.' 
+                        })
+                    }),
+                    { label: 'Interactive Quiz Questions', itemLabel: props => props.fields.questionText.value || 'New Question' }
+                ),
+                bulkQuestionsJson: fields.text({
+                    label: 'Bulk Questions (Raw JSON)',
+                    multiline: true,
+                    description: 'PASTE JSON HERE: If you paste a valid JSON array of questions here, it will OVERRIDE the manual question builder above. Great for bulk uploading!'
+                }),
+
+                content: fields.markdoc({ 
+                    label: 'Pre-Quiz Content (Optional text before the quiz starts)',
+                    options: {
+                        image: { directory: 'public/images/quizItems', publicPath: '/images/quizItems/' }
+                    }
+                }),
+            },
+        }),
+
     }, 
 
     singletons: {

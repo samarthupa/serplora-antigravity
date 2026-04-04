@@ -1,0 +1,62 @@
+---
+import { getCollection, render } from 'astro:content';
+import QuizSidebarLayout from '../../../layouts/QuizSidebarLayout.astro';
+import InteractiveQuiz from '../../../components/InteractiveQuiz.astro';
+
+export async function getStaticPaths() {
+  const allQuizzes = await getCollection('quizzes');
+  const allQuizItems = await getCollection('quizItems');
+
+  const paths = allQuizItems.map((item) => {
+    const quizParent = allQuizzes.find(q => q.id === item.data.quizParent);
+    return {
+      params: { quiz: item.data.quizParent, item: item.data.urlSlug },
+      props: { item, quizParent },
+    };
+  });
+
+  return paths.filter(path => path.props.quizParent);
+}
+
+const { item, quizParent } = Astro.props;
+
+const allQuizItems = await getCollection('quizItems');
+const childQuizzes = allQuizItems
+  .filter(i => i.data.quizParent === quizParent.id)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const { Content } = await render(item);
+
+// 👇 NEW: JSON Parsing Logic
+let finalQuestions = item.data.questions || [];
+
+if (item.data.bulkQuestionsJson && item.data.bulkQuestionsJson.trim() !== '') {
+  try {
+    finalQuestions = JSON.parse(item.data.bulkQuestionsJson);
+  } catch (error) {
+    console.error(`🚨 Error parsing bulk JSON for quiz: ${item.data.title}`);
+    // If the JSON is broken, it falls back to the manual 'finalQuestions' automatically
+  }
+}
+---
+
+<QuizSidebarLayout series={quizParent} quizzes={childQuizzes} currentSlug={item.data.urlSlug}>
+  
+  <div data-pagefind-body>
+    <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
+      {item.data.title.includes('-') ? item.data.title.split(' - ')[1] : item.data.title}
+    </h1>
+    
+    <div class="mt-8 markdown-content">
+      <Content />
+    </div>
+
+    {/* 👇 Pass the parsed finalQuestions here! */}
+    <InteractiveQuiz questions={finalQuestions} />
+
+  </div>
+
+  {item.data.customJs && (
+    <script is:inline set:html={item.data.customJs}></script>
+  )}
+</QuizSidebarLayout>

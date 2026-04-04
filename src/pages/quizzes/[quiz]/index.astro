@@ -1,0 +1,39 @@
+---
+import { getCollection, render } from 'astro:content';
+import QuizSidebarLayout from '../../../layouts/QuizSidebarLayout.astro';
+
+export async function getStaticPaths() {
+  const allQuizzes = await getCollection('quizzes');
+  return allQuizzes.map((quiz) => ({
+    params: { quiz: quiz.id },
+    props: { quiz },
+  }));
+}
+
+const { quiz } = Astro.props;
+
+const allQuizItems = await getCollection('quizItems');
+const childQuizzes = allQuizItems
+  .filter(item => item.data.quizParent === quiz.id)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const { Content } = await render(quiz);
+---
+
+<QuizSidebarLayout series={quiz} quizzes={childQuizzes} currentSlug="intro">
+  
+  <div data-pagefind-body>
+    <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
+      {quiz.data.title}: Introduction
+    </h1>
+    
+    {quiz.data.excerpt && (
+      <p class="text-xl text-slate-500 mb-8">{quiz.data.excerpt}</p>
+    )}
+    
+    <div class="mt-8">
+      <Content />
+    </div>
+  </div>
+  
+</QuizSidebarLayout>
