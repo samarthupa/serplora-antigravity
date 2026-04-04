@@ -5,11 +5,6 @@
   "favicon": "/images/favicon/favicon.png",
   "navItems": [
     {
-      "label": "Home",
-      "url": "/",
-      "subItems": []
-    },
-    {
       "label": "Tutorials",
       "url": "/tutorials",
       "subItems": []
@@ -17,6 +12,11 @@
     {
       "label": "Articles",
       "url": "/articles",
+      "subItems": []
+    },
+    {
+      "label": "Quizzes",
+      "url": "/quizzes",
       "subItems": []
     }
   ],
