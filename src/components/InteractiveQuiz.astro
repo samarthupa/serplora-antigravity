@@ -58,7 +58,9 @@ const { questions } = Astro.props;
     <div id="quiz-share-modal" class="fixed inset-0 z-[100] bg-main/80 backdrop-blur-sm hidden items-center justify-center opacity-0 transition-opacity duration-300 p-4">
       <div class="bg-surface border border-subtle rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-300" id="quiz-share-modal-card">
         <h3 class="text-xl font-bold text-tx-main mb-2">Share Results</h3>
-        <p class="text-tx-muted text-sm mb-6">Anyone with this link can view your score and answers for 3 days.</p>
+        <p class="text-tx-muted text-sm mb-6">
+Anyone with this link can view your score and answers for 30 days. Log in to get a shareable link valid for 5 years.
+</p>
         <div class="flex gap-2">
           <input type="text" id="quiz-share-input" readonly class="flex-1 bg-main border border-subtle text-tx-main rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 font-['JetBrains_Mono',monospace]">
           <button type="button" id="quiz-copy-btn" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shrink-0">Copy</button>
@@ -69,7 +71,7 @@ const { questions } = Astro.props;
 
   </div>
 
-  <script is:inline define:vars={{ questions }}>
+<script is:inline define:vars={{ questions }}>
     document.addEventListener('DOMContentLoaded', async () => {
       // Configuration & State
       const shareApiUrl = "https://api.serplora.com/share-quizzes";
@@ -109,7 +111,6 @@ const { questions } = Astro.props;
         progressText.textContent = "Loading shared results...";
         try {
           const res = await fetch(`${shareApiUrl}?id=${hash}`);
-          if(!res.ok) throw new Error("Network response was not ok");
           const apiData = await res.json();
           if (apiData && apiData.files) {
             const content = JSON.parse(apiData.files);
@@ -119,7 +120,7 @@ const { questions } = Astro.props;
             isFinished = true;
           }
         } catch (e) {
-          console.error("Could not load shared quiz data:", e);
+          // Silently fail if shared link is broken
         }
       } else {
         // Restore Local Storage State
@@ -433,23 +434,22 @@ const { questions } = Astro.props;
                 })
               });
               
-              if (!res.ok) {
-                 const errText = await res.text();
-                 throw new Error(`API failed: ${res.status} - ${errText}`);
-              }
-              
               const data = await res.json();
-              modalInput.value = `${window.location.origin}${window.location.pathname}#${data.name}`;
               
-              modal.classList.remove('hidden');
-              modal.classList.add('flex');
-              setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalCard.classList.remove('scale-95');
-              }, 10);
+              // Only open modal if we successfully get a name back
+              if (data.name) {
+                modalInput.value = `${window.location.origin}${window.location.pathname}#${data.name}`;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                  modal.classList.remove('opacity-0');
+                  modalCard.classList.remove('scale-95');
+                }, 10);
+              } else {
+                 alert("Failed to generate share link.");
+              }
             } catch (err) {
-              console.error("Share failed:", err);
-              alert("Failed to generate share link. Check console for details.");
+              alert("Failed to generate share link.");
             }
             btn.innerHTML = originalHTML;
             btn.disabled = false;
