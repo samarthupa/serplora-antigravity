@@ -109,6 +109,7 @@ const { questions } = Astro.props;
         progressText.textContent = "Loading shared results...";
         try {
           const res = await fetch(`${shareApiUrl}?id=${hash}`);
+          if(!res.ok) throw new Error("Network response was not ok");
           const apiData = await res.json();
           if (apiData && apiData.files) {
             const content = JSON.parse(apiData.files);
@@ -118,7 +119,7 @@ const { questions } = Astro.props;
             isFinished = true;
           }
         } catch (e) {
-          console.error("Could not load shared quiz data.", e);
+          console.error("Could not load shared quiz data:", e);
         }
       } else {
         // Restore Local Storage State
@@ -431,6 +432,12 @@ const { questions } = Astro.props;
                   createdAt: Date.now()
                 })
               });
+              
+              if (!res.ok) {
+                 const errText = await res.text();
+                 throw new Error(`API failed: ${res.status} - ${errText}`);
+              }
+              
               const data = await res.json();
               modalInput.value = `${window.location.origin}${window.location.pathname}#${data.name}`;
               
@@ -441,7 +448,8 @@ const { questions } = Astro.props;
                 modalCard.classList.remove('scale-95');
               }, 10);
             } catch (err) {
-              alert("Failed to generate share link.");
+              console.error("Share failed:", err);
+              alert("Failed to generate share link. Check console for details.");
             }
             btn.innerHTML = originalHTML;
             btn.disabled = false;
