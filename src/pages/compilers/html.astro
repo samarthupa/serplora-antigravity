@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CompilerApp from '../../components/compiler/CompilerApp.tsx';
+
+const seo = {
+  metaTitle: "HTML Compiler - Serplora",
+  metaDescription: "Write and run HTML, CSS, and JavaScript directly in your browser."
+};
+
+const starterFiles = [
+  { 
+    id: '1', 
+    name: 'index.html', 
+    content: '<!DOCTYPE html>\n<html>\n<head>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <h1>Hello World</h1>\n  <button onclick="sayHi()">Click Me!</button>\n  <script src="script.js"><\/script>\n</body>\n</html>', 
+    language: 'html' 
+  },
+  { 
+    id: '2', 
+    name: 'style.css', 
+    content: 'h1 { color: #007acc; }\nbutton { padding: 10px; cursor: pointer; }', 
+    language: 'css' 
+  },
+  { 
+    id: '3', 
+    name: 'script.js', 
+    content: 'console.log("App Started Successfully!");\n\nfunction sayHi() {\n  console.warn("User clicked the button!");\n}', 
+    language: 'javascript' 
+  }
+];
+---
+
+<Layout seo={seo}>
+  <div class="max-w-7xl mx-auto px-4 w-full pb-12">
+    <h1 class="text-3xl md:text-4xl font-bold mt-12 mb-4">HTML Compiler</h1>
+    <p class="mb-4 opacity-80">Edit the files on the left to build your web page.</p>
+    
+    <CompilerApp 
+      client:only="react" 
+      title="HTML/CSS/JS Editor"
+      initialFiles={starterFiles}
+    />
+  </div>
+</Layout>
