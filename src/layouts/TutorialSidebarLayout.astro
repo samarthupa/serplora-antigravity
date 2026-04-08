@@ -229,18 +229,37 @@ if (adsData?.data) {
   }
 
   .markdown-content pre { 
-    background-color: #0f172a; border: 1px solid var(--color-border-subtle); border-radius: 0.5rem;
-    padding: 1rem; overflow-x: auto; margin-bottom: 1.5em; 
-    position: relative; font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85em; line-height: 1.6; color: #e2e8f0;
+    background-color: var(--color-bg-surface); 
+    border: 1px solid var(--color-border-subtle); 
+    border-radius: 0.75rem;
+    padding: 1.25rem; 
+    overflow-x: auto; 
+    margin-bottom: 1.75em; 
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    line-height: 1.6;
+    color: var(--color-tx-main);
+    opacity: 0.9;
   }
   
   .markdown-content code { 
-    font-family: 'JetBrains Mono', monospace; font-size: 0.85em; 
-    color: #ef4444; background-color: var(--color-bg-surface); border: 1px solid var(--color-border-subtle);
-    padding: 0.15em 0.3em; border-radius: 0.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em; 
+    color: #3b82f6; 
+    background-color: rgba(59, 130, 246, 0.1); 
+    padding: 0.2em 0.4em; 
+    border-radius: 0.25rem;
   }
-  .markdown-content pre code { color: inherit; background: transparent; border: none; padding: 0; }
+
+  .markdown-content pre code { 
+    background-color: transparent !important; 
+    color: inherit !important; 
+    font-size: inherit !important;
+    padding: 0 !important; 
+    border: none !important; 
+  }
 
   .copy-code-btn {
     position: absolute; top: 8px; right: 8px;

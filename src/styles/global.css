@@ -3,20 +3,19 @@
 /* 1. Define Light Mode Colors (High Contrast) */
 /* Light — warm stone (not blinding white) */
 :root {
-  --color-bg-main:      #f5f0eb;  /* stone-warm, not pure white */
-  --color-bg-surface:   #ede8e2;  /* slightly darker warm surface */
-  --color-text-main:    #1c1917;  /* stone-900, warm near-black */
-  --color-text-muted:   #57534e;  /* stone-600, readable warm gray */
-  --color-border-subtle:#d4cdc6;  /* stone-300 */
+  --color-bg-main:      #f5f0eb;
+  --color-bg-surface:   #ede8e2;
+  --color-text-main:    #1c1917;
+  --color-text-muted:   #44403c;  /* stone-700 — was #57534e, now darker ✓ */
+  --color-border-subtle:#d4cdc6;
 }
 
-/* Dark — warm charcoal (not cold blue-slate) */
 .dark {
-  --color-bg-main:      #1c1917;  /* stone-900 */
-  --color-bg-surface:   #292524;  /* stone-800 */
-  --color-text-main:    #fafaf9;  /* stone-50, warm white */
-  --color-text-muted:   #a8a29e;  /* stone-400 */
-  --color-border-subtle:#44403c;  /* stone-700 */
+  --color-bg-main:      #1c1917;
+  --color-bg-surface:   #292524;
+  --color-text-main:    #fafaf9;
+  --color-text-muted:   #d6d3d1;  /* stone-300 — was #a8a29e, now lighter ✓ */
+  --color-border-subtle:#44403c;
 }
 /* 3. Feed them into Tailwind v4 */
 @theme {
@@ -94,3 +93,13 @@ article img,
 .code-editor-wrapper .cm-content {
     padding-bottom: 2.5rem !important;
 }
+
+
+/* 🟢 Force Interactive Code Editor to inherit the site's surface color */
+  .code-editor-wrapper .cm-editor,
+  .code-editor-wrapper .cm-gutters,
+  .code-editor-wrapper .cm-activeLine,
+  .code-editor-wrapper .cm-activeLineGutter {
+    background-color: transparent !important;
+    border-right: none !important;
+  }

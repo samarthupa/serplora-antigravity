@@ -1,6 +1,7 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
 import { KeystaticCodePreview } from './src/components/KeystaticCodePreview';
+import { KeystaticPreformattedPreview } from './src/components/KeystaticPreformattedPreview';
 
 // 🟢 NEW: Reusable SEO Block
 const seoSchema = fields.object({
@@ -26,6 +27,17 @@ const seoSchema = fields.object({
         defaultValue: true 
     }),
 }, { label: 'SEO & Meta Tags' });
+
+// 🟢 NEW: Reusable Code Blocks for the CMS "/" Menu
+const customCodeBlocks = {
+    preformatted: block({
+        label: '📝 Preformatted Text (<pre>)',
+        ContentView: KeystaticPreformattedPreview, // 🟢 ADD THIS LINE
+        schema: {
+            text: fields.text({ label: 'Raw Text / Terminal Output', multiline: true })
+        }
+    })
+};
 
 export default config({
     storage: {
@@ -108,7 +120,8 @@ export default config({
                             directory: 'public/images/posts',
                             publicPath: '/images/posts/'
                         }
-                    }
+                    },
+                    components: customCodeBlocks
                 }),
                 customJs: fields.text({ 
                     label: 'Custom JavaScript', 
@@ -148,6 +161,7 @@ export default config({
 
                 excerpt: fields.text({ label: 'Excerpt', multiline: true }),
                 seo: seoSchema,
+
                 content: fields.markdoc({ 
                     label: 'Introduction Content',
                     options: {
@@ -155,7 +169,8 @@ export default config({
                             directory: 'public/images/tutorials',
                             publicPath: '/images/tutorials/'
                         }
-                    }
+                    },
+                    components: customCodeBlocks
                 }),
                 customJs: fields.text({ 
                     label: 'Custom JavaScript', 
@@ -201,13 +216,14 @@ export default config({
                     },
                     components: {
                         codeEditor: block({
-                            label: 'Interactive Code Editor',
+                            label: '▶️ Interactive Code Editor',
                             ContentView: KeystaticCodePreview,
                             schema: {
                                 language: fields.text({ label: 'Language (e.g., javascript, python)', defaultValue: 'javascript' }),
                                 code: fields.text({ label: 'Initial Code', multiline: true })
                             }
-                        })
+                        }),
+                        ...customCodeBlocks
                     }
                 }),
 

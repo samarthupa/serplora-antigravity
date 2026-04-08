@@ -1,0 +1,5 @@
+---
+// Note: Markdoc passes the text of a standard code block as 'content'
+const { content, language } = Astro.props;
+---
+<pre><code class={language ? `language-${language}` : ''}>{content}</code></pre>
