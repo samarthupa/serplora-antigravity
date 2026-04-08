@@ -74,26 +74,26 @@ if (adsData?.data) {
     {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
     <div class="lg:hidden w-full flex flex-col">
       <nav aria-label="Breadcrumb" class="pt-6 pb-3 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full">
-        <a href="/quizzes" class="hover:text-blue-500 transition-colors">quizzes</a>
+        <a href="/quizzes" class="hover:text-brand transition-colors">quizzes</a>
         <span class="opacity-40">/</span>
-        <a href={`/quizzes/${series.id}`} class="hover:text-blue-500 transition-colors truncate max-w-[100px]">{series.id}</a>
+        <a href={`/quizzes/${series.id}`} class="hover:text-brand transition-colors truncate max-w-[100px]">{series.id}</a>
         <span class="opacity-40">/</span>
-        <span class="text-blue-500 font-medium truncate max-w-[120px]" aria-current="page">{currentSlug}.md</span>
+        <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{currentSlug}.md</span>
       </nav>
 
       <div class="sticky top-0 bg-main/95 backdrop-blur-md py-2 flex items-center justify-between -mx-4 px-4 sm:-mx-6 sm:px-6">
-        <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-blue-500/50 transition-all active:scale-95 shadow-sm" aria-label="Toggle Menu">
-          <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+        <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95 shadow-sm" aria-label="Toggle Menu">
+          <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
         </button>
 
         <div class="flex items-center gap-2">
           {prevLink && (
-            <a href={prevLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:text-blue-500 transition-colors active:scale-95 shadow-sm" aria-label="Previous Quiz">
+            <a href={prevLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:text-brand transition-colors active:scale-95 shadow-sm" aria-label="Previous Quiz">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
             </a>
           )}
           {nextLink && (
-            <a href={nextLink.url} class="p-2.5 rounded-lg bg-blue-600 border border-blue-600 text-white hover:bg-blue-700 transition-colors active:scale-95 shadow-sm" aria-label="Next Quiz">
+            <a href={nextLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:text-brand transition-colors active:scale-95 shadow-sm" aria-label="Next Quiz">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </a>
           )}
@@ -119,7 +119,7 @@ if (adsData?.data) {
       <nav class="flex flex-col space-y-0.5">
         <a 
           href={`/quizzes/${series.id}`} 
-          class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === 'intro' ? 'text-blue-600 border-blue-500/20 font-bold active-lesson' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}
+          class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === 'intro' ? 'text-brand border-brand/20 font-bold active-lesson' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}
         >
           Introduction
         </a>
@@ -127,7 +127,7 @@ if (adsData?.data) {
         {quizzes.map((quiz: any) => (
           <a 
             href={`/quizzes/${series.id}/${quiz.data.urlSlug}`}
-            class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === quiz.data.urlSlug ? 'text-blue-600 border-blue-500/20 font-bold active-lesson' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}
+            class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === quiz.data.urlSlug ? 'text-brand border-brand/20 font-bold active-lesson' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}
           >
             {cleanTitle(quiz.data.title)}
           </a>
@@ -139,11 +139,11 @@ if (adsData?.data) {
     <main class="flex-1 min-w-0 w-full md:max-w-[720px] md:mx-auto lg:mx-0 lg:max-w-[900px] xl:max-w-[1050px] lg:pl-6 xl:pl-10 lg:pr-8 xl:pr-10 py-6 lg:py-8">      
       
       <nav aria-label="Breadcrumb" class="hidden lg:flex mb-6 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap bg-surface border border-subtle px-3 py-1.5 rounded-md w-fit">
-        <a href="/quizzes" class="hover:text-blue-500 transition-colors">quizzes</a>
+        <a href="/quizzes" class="hover:text-brand transition-colors">quizzes</a>
         <span class="opacity-40">/</span>
-        <a href={`/quizzes/${series.id}`} class="hover:text-blue-500 transition-colors truncate max-w-[150px]">{series.id}</a>
+        <a href={`/quizzes/${series.id}`} class="hover:text-brand transition-colors truncate max-w-[150px]">{series.id}</a>
         <span class="opacity-40">/</span>
-        <span class="text-blue-500 font-medium" aria-current="page">{currentSlug}.md</span>
+        <span class="text-brand font-medium" aria-current="page">{currentSlug}.md</span>
       </nav>
 
       <div class="markdown-content text-[15.5px] md:text-[17px] leading-[1.7] md:leading-[1.8] pb-8">
@@ -152,24 +152,24 @@ if (adsData?.data) {
 
       <div class="mt-8 pt-6 border-t border-subtle flex flex-col sm:flex-row items-center justify-between gap-3">
         {prevLink ? (
-          <a href={prevLink.url} class="group flex items-center gap-3 px-5 py-3.5 rounded-xl bg-surface border border-subtle hover:border-blue-500/50 hover:shadow-sm transition-all w-full sm:w-auto sm:max-w-[48%]">
-            <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-colors">
+          <a href={prevLink.url} class="group flex items-center gap-3 px-5 py-3.5 rounded-xl bg-surface border border-subtle hover:border-brand/50 hover:shadow-sm transition-all w-full sm:w-auto sm:max-w-[48%]">
+            <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-brand/10 group-hover:text-brand transition-colors">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
             </div>
             <div class="flex flex-col text-left overflow-hidden">
               <span class="text-[11px] uppercase tracking-widest text-tx-muted font-bold mb-0.5">Previous</span>
-              <span class="text-[14px] text-tx-main font-semibold group-hover:text-blue-500 transition-colors truncate">{prevLink.title}</span>
+              <span class="text-[14px] text-tx-main font-semibold group-hover:text-brand transition-colors truncate">{prevLink.title}</span>
             </div>
           </a>
         ) : <div class="hidden sm:block"></div>}
 
         {nextLink ? (
-          <a href={nextLink.url} class="group flex items-center justify-end gap-3 px-5 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-blue-500/25 transition-all w-full sm:w-auto sm:max-w-[48%] sm:ml-auto">
+          <a href={nextLink.url} class="group flex items-center justify-end gap-3 px-5 py-3.5 rounded-xl bg-surface border border-subtle hover:border-brand/50 hover:shadow-sm transition-all w-full sm:w-auto sm:max-w-[48%] sm:ml-auto">
             <div class="flex flex-col text-right overflow-hidden">
-              <span class="text-[11px] uppercase tracking-widest text-blue-200 font-bold mb-0.5">Up Next</span>
-              <span class="text-[14px] font-semibold truncate text-white">{nextLink.title}</span>
+              <span class="text-[11px] uppercase tracking-widest text-tx-muted font-bold mb-0.5">Up Next</span>
+              <span class="text-[14px] text-tx-main font-semibold group-hover:text-brand transition-colors truncate">{nextLink.title}</span>
             </div>
-            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-blue-600 transition-colors">
+            <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-brand/10 group-hover:text-brand transition-colors">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </div>
           </a>
@@ -210,41 +210,47 @@ if (adsData?.data) {
   
   .markdown-content p { color: var(--color-tx-muted); margin-bottom: 1.4em; opacity: 0.9; }
   .markdown-content strong { color: var(--color-tx-main); font-weight: 700; }
-  .markdown-content a { color: #3b82f6; text-decoration: none; font-weight: 500; border-bottom: 1px solid transparent; transition: border-color 0.2s;}
-  .markdown-content a:hover { border-bottom-color: #3b82f6; }
+  .markdown-content a { color: var(--color-brand); text-decoration: none; font-weight: 500; border-bottom: 1px solid transparent; transition: border-color 0.2s;}
+  .markdown-content a:hover { border-bottom-color: var(--color-brand); }
   
   .markdown-content ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1.4em; color: var(--color-tx-muted); opacity: 0.9; }
   .markdown-content ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1.4em; color: var(--color-tx-muted); opacity: 0.9; }
   .markdown-content li { margin-bottom: 0.4em; }
 
   .markdown-content blockquote { 
-    border-left: 3px solid #3b82f6; padding-left: 1em; color: var(--color-tx-main); 
+    border-left: 3px solid var(--color-brand); padding-left: 1em; color: var(--color-tx-main); 
     font-style: italic; background-color: var(--color-bg-surface);
     padding-top: 0.75em; padding-bottom: 0.75em; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 1.4em;
   }
 
   .markdown-content pre { 
-    background-color: #0f172a; border: 1px solid var(--color-border-subtle); border-radius: 0.5rem;
-    padding: 1rem; overflow-x: auto; margin-bottom: 1.5em; 
-    position: relative; font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85em; line-height: 1.6; color: #e2e8f0;
+    background-color: var(--color-bg-surface); border: 1px solid var(--color-border-subtle); 
+    border-radius: 0.75rem; padding: 1.25rem; overflow-x: auto; margin-bottom: 1.75em; 
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); position: relative;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85em; line-height: 1.6;
+    color: var(--color-tx-main); opacity: 0.9;
   }
   
   .markdown-content code { 
     font-family: 'JetBrains Mono', monospace; font-size: 0.85em; 
-    color: #ef4444; background-color: var(--color-bg-surface); border: 1px solid var(--color-border-subtle);
-    padding: 0.15em 0.3em; border-radius: 0.25rem;
+    color: var(--color-brand); background-color: var(--color-brand-alpha); 
+    padding: 0.2em 0.4em; border-radius: 0.25rem;
   }
-  .markdown-content pre code { color: inherit; background: transparent; border: none; padding: 0; }
+
+  .markdown-content pre code { 
+    background-color: transparent !important; color: inherit !important; 
+    font-size: inherit !important; padding: 0 !important; border: none !important; 
+  }
 
   .copy-code-btn {
-    position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-    color: #e2e8f0; border-radius: 4px; padding: 3px 8px; font-size: 10px; font-family: 'JetBrains Mono', monospace;
-    cursor: pointer; opacity: 0; transition: all 0.2s ease;
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: #e2e8f0; border-radius: 4px; padding: 3px 8px; font-size: 10px;
+    font-family: 'JetBrains Mono', monospace; cursor: pointer; opacity: 0; transition: all 0.2s ease;
   }
   .markdown-content pre:hover .copy-code-btn { opacity: 1; }
   .copy-code-btn:hover { background: rgba(255,255,255,0.2); }
-  .copy-code-btn.copied { color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+  .copy-code-btn.copied { color: var(--color-brand); border-color: var(--color-brand); background: var(--color-brand-alpha); }
 
   .markdown-content img { border-radius: 0.5rem; border: 1px solid var(--color-border-subtle); margin: 1.5em 0; width: 100%; height: auto; }
 </style>
