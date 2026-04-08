@@ -219,10 +219,12 @@ if (adsData?.data) {
   
   .markdown-content code { 
     font-family: 'JetBrains Mono', monospace; font-size: 0.85em; 
-    color: var(--color-brand); background-color: var(--color-brand-alpha); 
-    padding: 0.2em 0.4em; border-radius: 0.25rem;
+    color: var(--color-tx-main); /* 🟢 Guaranteed WCAG AAA Contrast */
+    background-color: rgba(128, 128, 128, 0.12); /* Neutral background */
+    border: 1px solid rgba(128, 128, 128, 0.2); 
+    padding: 0.15em 0.3em; border-radius: 0.25rem;
   }
-
+  
   .markdown-content pre code { 
     background-color: transparent !important; color: inherit !important; 
     font-size: inherit !important; padding: 0 !important; border: none !important; 
