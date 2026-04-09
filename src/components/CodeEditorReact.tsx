@@ -19,6 +19,7 @@ export default function CodeEditorReact({ code, language }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<{ text: string; isError: boolean } | null>(null);
+  const [isOutputVisible, setIsOutputVisible] = useState(true); // Add this new line
 
   const extensions = [];
   if (language === 'javascript' || language === 'js') extensions.push(javascript());
@@ -100,11 +101,8 @@ export default function CodeEditorReact({ code, language }) {
     if (isRunning) return;
     setIsRunning(true);
     setOutput(null);
+    setIsOutputVisible(true); // Add this so the terminal pops open when running code
     
-    if (window.innerWidth < 768 && !document.fullscreenElement && containerRef.current) {
-      containerRef.current.requestFullscreen().catch(e => console.error(e));
-    }
-
     try {
       const response = await fetch('https://samarthu78-s-python-compiler.hf.space/run', {
         method: 'POST',
@@ -208,22 +206,27 @@ export default function CodeEditorReact({ code, language }) {
 
         </div>
 
-        {/* TERMINAL OUTPUT */}
+       {/* TERMINAL OUTPUT */}
         {output && (
-          <div className={`shrink-0 bg-main border-t border-subtle flex flex-col ${isFullscreen ? 'h-1/3' : 'max-h-[250px]'}`}>
+          <div className={`shrink-0 bg-main border-t border-subtle flex flex-col ${isOutputVisible ? (isFullscreen ? 'h-1/3' : 'max-h-[250px]') : ''}`}>
             {/* Terminal Header */}
-            <div className="flex justify-between items-center px-4 py-2 bg-surface border-b border-subtle">
-              <span className="text-tx-muted text-xs font-mono uppercase">Output Terminal</span>
-              <button onClick={() => setOutput(null)} className="text-tx-muted hover:text-tx-main transition-colors">
-                <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-3.5 h-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            <div className="flex justify-between items-center px-4 pt-3 pb-2">
+              <span className="text-tx-muted text-[11px] font-mono font-semibold uppercase tracking-wider opacity-80">Output</span>
+              <button 
+                onClick={() => setIsOutputVisible(!isOutputVisible)} 
+                className="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded transition-colors"
+              >
+                {isOutputVisible ? 'Hide' : 'Show'}
               </button>
             </div>
             {/* Terminal Body */}
-            <div className="p-4 overflow-y-auto font-mono text-[13px] md:text-[14px] flex-grow">
-              <pre className={`whitespace-pre-wrap m-0 ${output.isError ? 'text-red-500' : 'text-tx-main'}`}>
-                {output.text}
-              </pre>
-            </div>
+            {isOutputVisible && (
+              <div className="px-4 pb-4 pt-1 overflow-y-auto font-mono text-[13px] md:text-[14px] flex-grow bg-main">
+                <pre className={`whitespace-pre-wrap m-0 !bg-transparent !border-none !shadow-none !p-1 ${output.isError ? 'text-red-500' : 'text-tx-main'}`}>
+                  {output.text}
+                </pre>
+              </div>
+            )}
           </div>
         )}
       </div>
