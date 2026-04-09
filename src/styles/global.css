@@ -3,8 +3,8 @@
 
 /* 1. Define Light Mode Colors (High Contrast) */
 :root {
-  --color-bg-main:      #f5f0eb;
-  --color-bg-surface:   #ede8e2;
+  --color-bg-main:      #ffffff;
+  --color-bg-surface:   #f5f5f5;
   --color-text-main:    #1c1917;
   --color-text-muted:   #44403c;  
   --color-border-subtle:#d4cdc6;

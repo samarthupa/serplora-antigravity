@@ -1,3 +1,8 @@
 {
-  "tutorialAds": []
+  "tutorialAds": [
+    {
+      "tutorial": "python",
+      "htmlContent": "This is a Python Compiler. Where you can run and compiler code online. Youneed not to install anything. Use it as you want. thank you."
+    }
+  ]
 }
