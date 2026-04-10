@@ -61,9 +61,14 @@ export default function AceEditorArea({
         <>
           <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-end overflow-x-auto shrink-0 border-b border-gray-300 dark:border-[#252526] scrollbar-hide transition-colors">
             {openTabs.map((file: any) => (
-              <div key={file.id} onClick={() => setActiveFileId(file.id)} className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group ${activeFileId === file.id ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]' : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'}`}>
-                 {file.name}
-                 <div onClick={(e) => handleCloseTab(e, file.id)} className={`w-5 h-5 rounded-[3px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-all ${activeFileId === file.id ? 'opacity-100' : ''}`}>
+              <div 
+                key={file.id} 
+                title={file.name} // Allows seeing the full name on mouse hover
+                onClick={() => setActiveFileId(file.id)} 
+                className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group max-w-[200px] shrink-0 ${activeFileId === file.id ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]' : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'}`}
+              >
+                 <span className="truncate block">{file.name}</span>
+                 <div onClick={(e) => handleCloseTab(e, file.id)} className={`w-5 h-5 shrink-0 rounded-[3px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-all ${activeFileId === file.id ? 'opacity-100' : ''}`}>
                    <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" strokeWidth="1.5"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.5"/></svg>
                  </div>
               </div>
@@ -71,8 +76,8 @@ export default function AceEditorArea({
           </div>
 
           {activeFile && (
-            <div className="h-[22px] bg-white dark:bg-[#1e1e1e] border-b border-gray-300 dark:border-[#3c3c3c] flex items-center px-3 gap-1 text-xs text-gray-500 dark:text-[#858585] shrink-0 transition-colors">
-              <span>project-files</span><span className="text-gray-400 dark:text-[#555]">›</span><span className="text-gray-700 dark:text-[#cccccc]">{activeFile.name}</span>
+            <div className="h-[22px] bg-white dark:bg-[#1e1e1e] border-b border-gray-300 dark:border-[#3c3c3c] flex items-center px-3 gap-1 text-xs text-gray-500 dark:text-[#858585] shrink-0 transition-colors min-w-0">
+              <span className="shrink-0">project-files</span><span className="text-gray-400 dark:text-[#555] shrink-0">›</span><span className="text-gray-700 dark:text-[#cccccc] truncate block">{activeFile.name}</span>
             </div>
           )}
 
@@ -86,8 +91,16 @@ export default function AceEditorArea({
                 name="ace-editor"
                 width="100%"
                 height="100%"
+                showPrintMargin={false} // NEW: Removes the vertical print margin line
                 setOptions={{ fontSize: 14, showLineNumbers: true, tabSize: 2, useWorker: false }}
                 style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
+                commands={[
+    {
+      name: 'saveFile',
+      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
+      exec: () => { alert("File saved!"); }
+    }
+  ]}
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 dark:text-[#3c3c3c]">
