@@ -15,10 +15,8 @@ const primaryBtn = {
 };
 ---
 
-<header id="site-header" class="sticky top-0 z-[200] h-[64px] bg-main backdrop-blur-[8px] flex items-center font-['Outfit',sans-serif] transition-transform duration-300">
-  <div class="max-w-[1200px] mx-auto px-4 w-full flex items-center gap-10">
-    
-   {/* Brand / Logo */}
+<header id="site-header" class="sticky top-0 inset-x-0 w-full z-[200] h-[64px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300">
+  <div class="max-w-[1200px] mx-auto px-4 w-full flex items-center gap-10">   {/* Brand / Logo */}
     <a href="/" class="text-[20px] font-[800] text-tx-main tracking-[-0.5px] shrink-0 outline-none flex items-center gap-2">
       {logo && (
         <>
@@ -110,7 +108,7 @@ const primaryBtn = {
     </div>
 
     {/* --- NEW: World-Class Mobile Navigation Drawer --- */}
-    <div id="mobile-menu" class="hidden absolute top-[64px] left-0 w-full bg-surface shadow-xl flex-col h-[calc(100dvh-64px)] overflow-y-auto z-[190]">
+    <div id="mobile-menu" class="hidden absolute top-[64px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-64px)] overflow-y-auto z-[190]">
       <div class="flex flex-col h-full px-6 py-6 w-full max-w-[500px] mx-auto">
         
         {/* Premium Navigation Links */}
@@ -451,27 +449,41 @@ const primaryBtn = {
     });
   });
 
-  // Smart header logic
+// Smart header logic
   const header = document.getElementById('site-header');
   let lastScrollY = window.scrollY;
+  
   window.addEventListener('scroll', () => {
     if (!header) return;
     const currentScrollY = window.scrollY;
     
-    if (currentScrollY > 64 && menu?.classList.contains('hidden') && searchModal?.classList.contains('hidden')) {
+    // Prevent jitter from minor trackpad movements
+    if (Math.abs(currentScrollY - lastScrollY) < 5) return;
+
+    // Safely check if modals are closed
+    const isMenuClosed = !document.getElementById('mobile-menu')?.classList.contains('flex');
+    const isSearchClosed = document.getElementById('search-modal')?.classList.contains('invisible');
+    
+    if (currentScrollY > 64 && isMenuClosed && isSearchClosed) {
       if (currentScrollY > lastScrollY) {
+        // Scrolling down: Hide
         header.classList.add('-translate-y-full');
         document.documentElement.classList.add('header-hidden'); 
       } else {
+        // Scrolling up: Show
         header.classList.remove('-translate-y-full');
         document.documentElement.classList.remove('header-hidden'); 
       }
-    } else {
+    } else if (currentScrollY <= 64) {
+      // At the absolute top: Show
       header.classList.remove('-translate-y-full');
       document.documentElement.classList.remove('header-hidden');
     }
+    
     lastScrollY = currentScrollY;
   }, { passive: true });
+
+
 
   // --- 🟢 Client-side Authentication & Page Tracking Logic ---
   

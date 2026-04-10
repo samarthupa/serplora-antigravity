@@ -57,8 +57,6 @@ if (adsData?.data) {
 ---
 
 <Layout seo={currentActiveData.seo} titleFallback={currentActiveData.title} excerptFallback={currentActiveData.excerpt}>
-  <div class="absolute top-0 inset-x-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_100%,transparent_100%)] -z-10 h-[200px] pointer-events-none"></div>
-
   {/* Outer Wrapper: max-w-1440px and justify-center perfectly packs the 3 columns in the middle */}
   <div class="flex flex-col lg:flex-row w-full max-w-[1440px] mx-auto justify-center items-start relative font-['Outfit',sans-serif]">
     
@@ -201,14 +199,27 @@ if (adsData?.data) {
     .markdown-content h3 { font-size: 1.4rem; }
   }
   
-  .markdown-content p { color: var(--color-tx-muted); margin-bottom: 1.4em; opacity: 0.9; }
+  .markdown-content p { color: var(--color-tx-main); margin-bottom: 1.4em; opacity: 0.9; }
   .markdown-content strong { color: var(--color-tx-main); font-weight: 700; }
   .markdown-content a { color: var(--color-brand); text-decoration: none; font-weight: 500; border-bottom: 1px solid transparent; transition: border-color 0.2s;}
   .markdown-content a:hover { border-bottom-color: var(--color-brand); }
   
-  .markdown-content ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1.4em; color: var(--color-tx-muted); opacity: 0.9; }
-  .markdown-content ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1.4em; color: var(--color-tx-muted); opacity: 0.9; }
+  .markdown-content ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1.4em; color: var(--color-tx-main); opacity: 0.9; }
+  .markdown-content ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1.4em; color: var(--color-tx-main); opacity: 0.9; }
   .markdown-content li { margin-bottom: 0.4em; }
+
+  /* --- NEW: Dark mode text overrides --- */
+  .dark .markdown-content h1,
+  .dark .markdown-content h2,
+  .dark .markdown-content h3,
+  .dark .markdown-content h4,
+  .dark .markdown-content h5,
+  .dark .markdown-content h6,
+  .dark .markdown-content p,
+  .dark .markdown-content ul,
+  .dark .markdown-content ol {
+    color: var(--color-tx-muted);
+  }
 
   .markdown-content blockquote { 
     border-left: 3px solid var(--color-brand); padding-left: 1em; color: var(--color-tx-main); 

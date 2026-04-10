@@ -50,8 +50,6 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0];
 ---
 
 <Layout seo={entry.data.seo} titleFallback={entry.data.title} excerptFallback={entry.data.excerpt}>
-  <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10 h-[600px] pointer-events-none"></div>
-
   <main class="w-full bg-transparent py-10 md:py-20 font-['Outfit',sans-serif]">
     <article class="max-w-[900px] mx-auto px-6" data-pagefind-body>
       
@@ -173,16 +171,30 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0];
     .markdown-content h3 { font-size: 1.5rem; }
   }
   
-  .markdown-content p, .faq-content p { color: var(--color-tx-muted); margin-bottom: 1.5em; opacity: 0.8; }
+  .markdown-content p, .faq-content p { color: var(--color-tx-main); margin-bottom: 1.5em; opacity: 0.8; }
   .markdown-content p:last-child { margin-bottom: 0; }
   .markdown-content strong, .faq-content strong { color: var(--color-tx-main); font-weight: 700; }
   
   .markdown-content a, .faq-content a { color: var(--color-brand); text-decoration: none; font-weight: 500; }
   .markdown-content a:hover, .faq-content a:hover { text-decoration: underline; }
 
-  .markdown-content ul, .faq-content ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1.5em; color: var(--color-tx-muted); opacity: 0.8; }
-  .markdown-content ol, .faq-content ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1.5em; color: var(--color-tx-muted); opacity: 0.8; }
+  .markdown-content ul, .faq-content ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1.5em; color: var(--color-tx-main); opacity: 0.8; }
+  .markdown-content ol, .faq-content ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1.5em; color: var(--color-tx-main); opacity: 0.8; }
   .markdown-content li, .faq-content li { margin-bottom: 0.5em; padding-left: 0.25em; }
+
+  /* --- NEW: Dark mode text overrides --- */
+  .dark .markdown-content h1,
+  .dark .markdown-content h2,
+  .dark .markdown-content h3,
+  .dark .markdown-content h4,
+  .dark .markdown-content p,
+  .dark .faq-content p,
+  .dark .markdown-content ul,
+  .dark .faq-content ul,
+  .dark .markdown-content ol,
+  .dark .faq-content ol {
+    color: var(--color-tx-muted);
+  }
 
   .markdown-content blockquote { 
     border-left: 4px solid var(--color-brand); padding-left: 1.25em; color: var(--color-tx-main); 
