@@ -18,6 +18,11 @@
       "label": "Quizzes",
       "url": "/quizzes",
       "subItems": []
+    },
+    {
+      "label": "Compilers",
+      "url": "/compilers",
+      "subItems": []
     }
   ],
   "primaryButton": {
