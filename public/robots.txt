@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Point to your master sitemap index
+Sitemap: https://serplora.com/sitemap.xml
