@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
+import { EditorView } from '@codemirror/view';
 
 export default function CodeEditorReact({ code, language }) {
   // Core State
@@ -24,6 +25,8 @@ export default function CodeEditorReact({ code, language }) {
   const extensions = [];
   if (language === 'javascript' || language === 'js') extensions.push(javascript());
   if (language === 'python' || language === 'py') extensions.push(python());
+  
+  extensions.push(EditorView.contentAttributes.of({ 'aria-label': 'Interactive code editor' }));
 
   // 1. Scroll Detection Logic
   useEffect(() => {
