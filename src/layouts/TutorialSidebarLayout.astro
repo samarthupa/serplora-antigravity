@@ -43,15 +43,26 @@ if (currentSlug === 'intro') {
   }
 }
 
+// --- NEW AD RESOLUTION HIERARCHY ---
 const adsData = await getEntry('sidebarAds', 'data');
 let adHtml = null;
 
 if (adsData?.data) {
-  const specificAd = adsData.data.tutorialAds.find((ad: any) => ad.tutorial === series.id);
-  if (specificAd && specificAd.htmlContent) {
-    adHtml = specificAd.htmlContent;
-  } else if (adsData.data.globalAd) {
-    adHtml = adsData.data.globalAd;
+  const { tutorialAdsGroup, globalAd } = adsData.data;
+
+  // 1. Check for Specific Tutorial Override
+  const specificOverride = tutorialAdsGroup?.specificOverrides?.find((ad: any) => ad.target === series.id);
+  
+  if (specificOverride && specificOverride.adContent) {
+    adHtml = specificOverride.adContent;
+  } 
+  // 2. Check for "All Tutorials" Fallback
+  else if (tutorialAdsGroup?.allTutorialsAd) {
+    adHtml = tutorialAdsGroup.allTutorialsAd;
+  } 
+  // 3. Check for Site-Wide Global Fallback
+  else if (globalAd) {
+    adHtml = globalAd;
   }
 }
 ---

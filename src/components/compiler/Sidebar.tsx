@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Sidebar({ activeView, files, setFiles, activeFileId, setActiveFileId, projectName, setProjectName }: any) {
+export default function Sidebar({ activeView, files, setFiles, activeFileId, setActiveFileId, projectName, setProjectName, isMobile }: any) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<string[]>(['root']);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, file: any } | null>(null);
@@ -12,21 +12,18 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
 
-  // NEW: History Stack for Undo/Redo
   const [past, setPast] = useState<any[][]>([]);
   const [future, setFuture] = useState<any[][]>([]);
 
-  // ARCHITECTURE UPGRADE: Custom State Wrapper to save History Snapshots safely
   const updateFilesWithHistory = (newFilesOrUpdater: any) => {
     setFiles((currentFiles: any[]) => {
       const nextFiles = typeof newFilesOrUpdater === 'function' ? newFilesOrUpdater(currentFiles) : newFilesOrUpdater;
       setPast((prev) => [...prev, currentFiles]);
-      setFuture([]); // Clear future on new action
+      setFuture([]); 
       return nextFiles;
     });
   };
 
-  // ARCHITECTURE UPGRADE: Advanced Undo with Content Preserving Merge
   const handleUndo = () => {
     if (past.length === 0) return;
     setFiles((currentFiles: any[]) => {
@@ -34,7 +31,6 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
       setPast(prev => prev.slice(0, -1));
       setFuture(prev => [...prev, currentFiles]);
 
-      // Merge: Restore old structure, but keep the latest typed text content if file still exists
       return previousFiles.map(prevFile => {
          const currentFile = currentFiles.find(f => f.id === prevFile.id);
          return currentFile ? { ...prevFile, content: currentFile.content } : prevFile;
@@ -83,8 +79,6 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
       setExpandedFolders([...expandedFolders, folderId]);
     }
   };
-
-  const collapseAll = () => setExpandedFolders(['root']);
 
   const handleCreate = (isFolder: boolean) => {
     const activeItem = files.find((f:any) => f.id === activeFileId);
@@ -293,7 +287,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
       return (
         <div key={file.id}>
           <div 
-            draggable 
+            draggable={!isMobile} // Disable HTML5 drag-and-drop on mobile touch devices
             onDragStart={(e) => {
               setDraggedFileId(file.id);
               e.dataTransfer.setData('text/plain', file.id);
@@ -324,7 +318,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
               setDraggedFileId(null);
             }}
             style={{ paddingLeft }}
-            className={`group relative flex items-center pr-2 py-0.5 text-[13px] cursor-pointer select-none whitespace-nowrap transition-colors ${
+            className={`group relative flex items-center pr-2 py-2 md:py-0.5 text-[14px] md:text-[13px] cursor-pointer select-none whitespace-nowrap transition-colors ${
               activeFileId === file.id && !file.isFolder ? 'bg-gray-200 dark:bg-[#37373d] text-gray-900 dark:text-white' : 'text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e]'
             }`}
             onClick={() => file.isFolder ? toggleFolder(file.id) : setActiveFileId(file.id)}
@@ -356,12 +350,18 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
               <span className="truncate">{file.name}</span>
             )}
 
+            {/* Force Context Menu Dots to be always visible on Mobile because hover doesn't exist */}
             <div 
-              className="absolute right-1 opacity-0 group-hover:opacity-100 hover:bg-gray-300 dark:hover:bg-[#3c3c3c] rounded p-0.5 transition-opacity"
+              className={`absolute right-1 ${isMobile ? 'opacity-100 p-2' : 'opacity-0 group-hover:opacity-100 p-0.5'} hover:bg-gray-300 dark:hover:bg-[#3c3c3c] rounded transition-opacity`}
               onClick={(e) => {
                 e.stopPropagation();
                 const rect = e.currentTarget.getBoundingClientRect();
-                setContextMenu({ x: rect.right, y: rect.bottom, file });
+                // Ensure menu opens inwards on mobile if near edge
+                setContextMenu({ 
+                  x: isMobile ? rect.right - 150 : rect.right, 
+                  y: rect.bottom, 
+                  file 
+                });
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
@@ -382,11 +382,10 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
 
   return (
     <div 
-      style={{ width: `${sidebarWidth}px` }} 
-      className="bg-gray-50 dark:bg-[#252526] flex flex-col shrink-0 border-r border-gray-300 dark:border-[#3c3c3c] overflow-hidden relative transition-colors focus:outline-none"
+      style={{ width: isMobile ? '100%' : `${sidebarWidth}px` }} 
+      className="bg-gray-50 dark:bg-[#252526] flex flex-col h-full shrink-0 border-r border-gray-300 dark:border-[#3c3c3c] overflow-hidden relative transition-colors focus:outline-none"
       tabIndex={0} 
       onKeyDown={(e) => {
-        // Intercept Undo/Redo specifically for File Structure operations
         if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
           e.preventDefault();
           if (e.shiftKey) handleRedo();
@@ -416,57 +415,39 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
         }
       }}
     >
-      <div className="absolute right-[-2px] top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingSidebar(true)} />
-      {isResizingSidebar && <div className="fixed inset-0 z-[9999] cursor-col-resize" />}
+      {/* Hide Resize handles on Mobile */}
+      {!isMobile && <div className="absolute right-[-2px] top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingSidebar(true)} />}
+      {!isMobile && isResizingSidebar && <div className="fixed inset-0 z-[9999] cursor-col-resize" />}
 
-      <div className="h-[35px] flex items-center px-3 text-[11px] font-bold tracking-[0.08em] uppercase text-gray-600 dark:text-[#cccccc] shrink-0 select-none">
+      <div className="h-[44px] md:h-[35px] flex items-center px-3 text-[12px] md:text-[11px] font-bold tracking-[0.08em] uppercase text-gray-600 dark:text-[#cccccc] shrink-0 select-none">
         {activeView}
         {activeView === 'explorer' && (
-          <div className="ml-auto flex gap-0.5 pr-2">
+          <div className="ml-auto flex gap-1.5 md:gap-0.5 pr-2">
             
             <input type="file" id="file-upload" multiple className="hidden" style={{display: 'none'}} onChange={handleUpload} />
 
-            <div className="w-6 h-6 flex items-center justify-center cursor-pointer rounded-[3px] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] hover:text-gray-800 dark:hover:text-[#cccccc]" title="New File" onClick={() => handleCreate(false)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <div className="w-8 h-8 md:w-6 md:h-6 flex items-center justify-center cursor-pointer rounded-[3px] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] hover:text-gray-800 dark:hover:text-[#cccccc]" title="New File" onClick={() => handleCreate(false)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
             </div>
-            <div className="w-6 h-6 flex items-center justify-center cursor-pointer rounded-[3px] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] hover:text-gray-800 dark:hover:text-[#cccccc]" title="New Folder" onClick={() => handleCreate(true)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+            <div className="w-8 h-8 md:w-6 md:h-6 flex items-center justify-center cursor-pointer rounded-[3px] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] hover:text-gray-800 dark:hover:text-[#cccccc]" title="New Folder" onClick={() => handleCreate(true)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
             </div>
             
-            <div className="w-6 h-6 flex items-center justify-center cursor-pointer rounded-[3px] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] hover:text-gray-800 dark:hover:text-[#cccccc]" title="Upload File(s)" onClick={() => document.getElementById('file-upload')?.click()}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div className="w-8 h-8 md:w-6 md:h-6 flex items-center justify-center cursor-pointer rounded-[3px] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] hover:text-gray-800 dark:hover:text-[#cccccc]" title="Upload File(s)" onClick={() => document.getElementById('file-upload')?.click()}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
             
           </div>
         )}
       </div>
 
-      <div className="flex-1 overflow-auto flex flex-col py-1" onContextMenu={(e) => { if (e.target === e.currentTarget) { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, file: { id: null, isFolder: true, name: projectName, isRoot: true } }); }}}>
+      <div className="flex-1 overflow-auto flex flex-col py-1 pb-[env(safe-area-inset-bottom)]" onContextMenu={(e) => { if (e.target === e.currentTarget) { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, file: { id: null, isFolder: true, name: projectName, isRoot: true } }); }}}>
         {activeView === 'explorer' && (
           <div className="flex-1">
             <div 
-              className="flex items-center px-2 py-0.5 text-[13px] font-bold cursor-pointer select-none whitespace-nowrap text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e] transition-colors" 
+              className="flex items-center px-2 py-2 md:py-0.5 text-[14px] md:text-[13px] font-bold cursor-pointer select-none whitespace-nowrap text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e] transition-colors" 
               onClick={() => toggleFolder('root')} 
               onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setContextMenu({ x: e.clientX, y: e.clientY, file: { id: null, isFolder: true, name: projectName, isRoot: true } }); }}
-              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('bg-[#007acc]/20', 'dark:bg-[#007acc]/30'); }}
-              onDragLeave={(e) => { e.currentTarget.classList.remove('bg-[#007acc]/20', 'dark:bg-[#007acc]/30'); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.currentTarget.classList.remove('bg-[#007acc]/20', 'dark:bg-[#007acc]/30');
-                if (draggedFileId) {
-                  const draggedFile = files.find((f:any) => f.id === draggedFileId);
-                  const isDuplicate = files.some((f:any) => f.parentId === null && f.name.toLowerCase() === draggedFile?.name.toLowerCase() && f.id !== draggedFileId);
-                  
-                  if (isDuplicate) {
-                     alert(`Cannot move "${draggedFile?.name}" to workspace root because a file or folder with that name already exists there.`);
-                     setDraggedFileId(null);
-                     return;
-                  }
-                  
-                  updateFilesWithHistory(files.map((f: any) => f.id === draggedFileId ? { ...f, parentId: null } : f));
-                }
-                setDraggedFileId(null);
-              }}
             >
               <svg className={`w-4 h-4 mr-0.5 text-gray-500 dark:text-[#858585] transition-transform ${expandedFolders.includes('root') ? 'rotate-90' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
               {renamingId === 'root' ? (
@@ -482,11 +463,11 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
         {activeView === 'search' && (
            <div className="flex flex-col h-full overflow-hidden pr-2">
              <div className="px-3 py-2 flex flex-col gap-2 shrink-0">
-               <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white dark:bg-[#3c3c3c] text-gray-800 dark:text-[#cccccc] border border-gray-300 dark:border-[#3c3c3c] focus:border-[#007acc] outline-none px-2 py-1 text-[13px]" />
+               <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white dark:bg-[#3c3c3c] text-gray-800 dark:text-[#cccccc] border border-gray-300 dark:border-[#3c3c3c] focus:border-[#007acc] outline-none px-2 py-2 md:py-1 text-[14px] md:text-[13px]" />
              </div>
              <div className="flex-1 overflow-auto">
                {searchResults.map((file: any) => (
-                 <div key={file.id} onClick={() => setActiveFileId(file.id)} className="px-3 py-1.5 cursor-pointer text-[13px] text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e]">📄 {file.name}</div>
+                 <div key={file.id} onClick={() => setActiveFileId(file.id)} className="px-3 py-3 md:py-1.5 cursor-pointer text-[14px] md:text-[13px] text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e]">📄 {file.name}</div>
                ))}
              </div>
            </div>
@@ -494,20 +475,20 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
       </div>
 
       {contextMenu && (
-        <div className="fixed z-50 bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#454545] shadow-xl rounded-[4px] py-1 w-48 text-[13px] text-gray-800 dark:text-[#cccccc]" style={{ top: contextMenu.y, left: contextMenu.x }} onClick={(e) => e.stopPropagation()}>
-          {contextMenu.file.isFolder && clipboard && <div className="px-6 py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { handlePaste(contextMenu.file.id); setContextMenu(null); }}>Paste</div>}
-          <div className="px-6 py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { handleDownload(contextMenu.file); setContextMenu(null); }}>Download</div>
+        <div className="fixed z-50 bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#454545] shadow-xl rounded-[4px] py-1 w-48 text-[14px] md:text-[13px] text-gray-800 dark:text-[#cccccc]" style={{ top: contextMenu.y, left: contextMenu.x }} onClick={(e) => e.stopPropagation()}>
+          {contextMenu.file.isFolder && clipboard && <div className="px-6 py-2.5 md:py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { handlePaste(contextMenu.file.id); setContextMenu(null); }}>Paste</div>}
+          <div className="px-6 py-2.5 md:py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { handleDownload(contextMenu.file); setContextMenu(null); }}>Download</div>
           <div className="h-[1px] bg-gray-200 dark:bg-[#454545] my-1"></div>
-          {contextMenu.file.isRoot && <div className="px-6 py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setRenamingId('root'); setRenameText(projectName); setContextMenu(null); }}>Rename</div>}
+          {contextMenu.file.isRoot && <div className="px-6 py-2.5 md:py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setRenamingId('root'); setRenameText(projectName); setContextMenu(null); }}>Rename</div>}
           {contextMenu.file.id && (
             <>
-              <div className="px-6 py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setClipboard({ action: 'copy', file: contextMenu.file }); setContextMenu(null); }}>Copy</div>
-              <div className="px-6 py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setClipboard({ action: 'cut', file: contextMenu.file }); setContextMenu(null); }}>Cut</div>
+              <div className="px-6 py-2.5 md:py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setClipboard({ action: 'copy', file: contextMenu.file }); setContextMenu(null); }}>Copy</div>
+              <div className="px-6 py-2.5 md:py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setClipboard({ action: 'cut', file: contextMenu.file }); setContextMenu(null); }}>Cut</div>
               <div className="h-[1px] bg-gray-200 dark:bg-[#454545] my-1"></div>
-              <div className="px-6 py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setRenamingId(contextMenu.file.id); setRenameText(contextMenu.file.name); setContextMenu(null); }}>Rename</div>
-              <div className="px-6 py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { handleDuplicate(contextMenu.file); setContextMenu(null); }}>Duplicate</div>
+              <div className="px-6 py-2.5 md:py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { setRenamingId(contextMenu.file.id); setRenameText(contextMenu.file.name); setContextMenu(null); }}>Rename</div>
+              <div className="px-6 py-2.5 md:py-1 hover:bg-[#007acc] hover:text-white cursor-pointer" onClick={() => { handleDuplicate(contextMenu.file); setContextMenu(null); }}>Duplicate</div>
               <div className="h-[1px] bg-gray-200 dark:bg-[#454545] my-1"></div>
-              <div className="px-6 py-1 hover:bg-red-500 hover:text-white cursor-pointer text-red-500 dark:text-red-400" onClick={() => { handleDelete(contextMenu.file.id); setContextMenu(null); }}>Delete</div>
+              <div className="px-6 py-2.5 md:py-1 hover:bg-red-500 hover:text-white cursor-pointer text-red-500 dark:text-red-400" onClick={() => { handleDelete(contextMenu.file.id); setContextMenu(null); }}>Delete</div>
             </>
           )}
         </div>

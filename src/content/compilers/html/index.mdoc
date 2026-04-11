@@ -1,0 +1,36 @@
+---
+title: HTML Compiler
+draft: false
+seo:
+  robotsIndex: true
+  robotsFollow: true
+starterFiles:
+  - filename: index.html
+    language: html
+    content: |-
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <link rel="stylesheet" href="style.css">
+      </head>
+      <body>
+        <h1>Hello World</h1>
+        <button onclick="sayHi()">Click Me!</button>
+        <script src="script.js"></script>
+      </body>
+      </html>
+  - filename: style.css
+    language: css
+    content: |-
+      h1 { color: #007acc; }
+      button { padding: 10px; cursor: pointer; }
+  - filename: script.js
+    language: javascript
+    content: |-
+      console.log("App Started Successfully!");
+
+      function sayHi() {
+        console.warn("User clicked the button!");
+      }
+---
+hello how are you.

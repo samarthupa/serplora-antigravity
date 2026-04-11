@@ -156,6 +156,21 @@ const posts = defineCollection({
   })
 });
 
+const compilers = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/compilers" }),
+  schema: z.object({
+    title: z.string().optional(),
+    draft: z.boolean().optional(),
+    excerpt: z.string().optional(),
+    seo: seoSchema,
+    starterFiles: z.array(z.object({
+      filename: z.string(),
+      language: z.string(),
+      content: z.string()
+    })).optional().default([]),
+  }),
+});
+
 // 6. Blog Page 
 const blogPage = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/blogPage' }),
@@ -181,10 +196,25 @@ const sidebarAds = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/sidebarAds' }),
   schema: z.object({
     globalAd: z.string().optional(),
-    tutorialAds: z.array(z.object({
-      tutorial: z.string().nullable(),
-      htmlContent: z.string()
-    })).optional().default([])
+    
+    // 🟢 NEW: Match the Keystatic Tutorial Ads Group
+    tutorialAdsGroup: z.object({
+      allTutorialsAd: z.string().optional(),
+      specificOverrides: z.array(z.object({
+        target: z.string().nullable(),
+        adContent: z.string()
+      })).optional().default([])
+    }).optional(),
+
+    // 🟢 NEW: Match the Keystatic Compiler Ads Group
+    compilerAdsGroup: z.object({
+      allCompilersAd: z.string().optional(),
+      specificOverrides: z.array(z.object({
+        target: z.string().nullable(),
+        adContent: z.string()
+      })).optional().default([])
+    }).optional()
+
   })
 });
 
@@ -245,4 +275,5 @@ export const collections = {
   diagnosticsDashboard,
   sidebarAds,
   homePage,
+  compilers,
 };

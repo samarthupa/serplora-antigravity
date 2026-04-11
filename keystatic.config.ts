@@ -235,6 +235,47 @@ export default config({
             },
         }),
 
+        compilers: collection({
+            label: 'Compilers',
+            slugField: 'title',
+            path: 'src/content/compilers/*/',
+            format: { contentField: 'content' }, 
+            previewUrl: '/compilers/{slug}',
+            schema: {
+                title: fields.slug({ 
+                    name: { label: 'Compiler Name (e.g. HTML Compiler)' },
+                    slug: { label: 'SEO Slug' }
+                }),
+                draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
+                excerpt: fields.text({ label: 'Short Description', multiline: true }),
+                seo: seoSchema,
+                
+                // 🌟 MAGIC: You can define the starter files directly in the CMS!
+                starterFiles: fields.array(
+                    fields.object({
+                        filename: fields.text({ label: 'Filename (e.g. index.html or main.py)' }),
+                        language: fields.select({
+                            label: 'Language Mode',
+                            options: [
+                                { label: 'HTML', value: 'html' },
+                                { label: 'CSS', value: 'css' },
+                                { label: 'JavaScript', value: 'javascript' },
+                                { label: 'Python', value: 'python' }
+                            ],
+                            defaultValue: 'html'
+                        }),
+                        content: fields.text({ label: 'Initial Code', multiline: true })
+                    }),
+                    { label: 'Workspace Starter Files', itemLabel: props => props.fields.filename.value || 'New File' }
+                ),
+
+                content: fields.markdoc({ 
+                    label: 'Additional Instructions (Optional markdown below compiler)',
+                    options: { image: { directory: 'public/images/compilers', publicPath: '/images/compilers/' } }
+                }),
+            },
+        }),
+
         quizzes: collection({
             label: 'Quizzes (Parents)',
             slugField: 'title',
@@ -471,34 +512,61 @@ export default config({
             },
         }),
         sidebarAds: singleton({
-            label: 'Sidebar Ads & Banners',
-            path: 'src/content/sidebarAds/data',
-            format: { data: 'json' },
-            schema: {
-                globalAd: fields.text({ 
-                    label: 'Global Default Ad (HTML)', 
-                    multiline: true, 
-                    description: 'This HTML will show up on ALL tutorials by default unless overridden below.' 
-                }),
-                tutorialAds: fields.array(
-                    fields.object({
-                        tutorial: fields.relationship({ 
-                            label: 'Target Tutorial', 
-                            collection: 'tutorials',
-                            description: 'Select the parent tutorial series to target.'
-                        }),
-                        htmlContent: fields.text({ 
-                            label: 'Custom Ad HTML', 
-                            multiline: true,
-                            description: 'This will override the Global Ad for this specific tutorial and its child lessons.'
-                        })
-                    }),
-                    { 
-                        label: 'Tutorial-Specific Overrides', 
-                        itemLabel: props => props.fields.tutorial.value || 'New Tutorial Ad Override' 
-                    }
-                )
-            }
+      label: 'Sidebar Ads Manager',
+      path: 'src/content/sidebarAds/data',
+      format: { data: 'json' },
+      schema: {
+        
+        // 1. SITE-WIDE FALLBACK
+        globalAd: fields.text({
+          label: 'Site-Wide Global Fallback Ad',
+          description: 'Shows up if nothing else is set.',
+          multiline: true,
         }),
+
+        // 2. TUTORIALS ZONE
+        tutorialAdsGroup: fields.object({
+          allTutorialsAd: fields.text({
+            label: 'All Tutorials Ad (Category Fallback)',
+            description: 'Overrides the Global ad for ALL tutorials.',
+            multiline: true,
+          }),
+          specificOverrides: fields.array(
+            fields.object({
+              // MAGIC: This automatically populates a dropdown of all your Keystatic Tutorials!
+              target: fields.relationship({
+                label: 'Select Tutorial to Override',
+                collection: 'tutorials', 
+              }),
+              adContent: fields.text({ label: 'Ad Content', multiline: true }),
+            }),
+            { label: 'Specific Tutorial Overrides', itemLabel: props => `Override: ${props.fields.target.value}` }
+          )
+        }, { label: 'Tutorials Placement' }),
+
+        // 3. COMPILERS ZONE
+        compilerAdsGroup: fields.object({
+          allCompilersAd: fields.text({
+            label: 'All Compilers Ad (Category Fallback)',
+            description: 'Overrides the Global ad for ALL compilers.',
+            multiline: true,
+          }),
+          specificOverrides: fields.array(
+            fields.object({
+              // 🌟 MAGIC: This now reads directly from your new Compilers collection!
+              target: fields.relationship({
+                label: 'Select Compiler to Override',
+                collection: 'compilers',
+              }),
+              adContent: fields.text({ label: 'Ad Content', multiline: true }),
+            }),
+            { label: 'Specific Compiler Overrides', itemLabel: props => `Override: ${props.fields.target.value}` }
+          )
+        }, { label: 'Compilers Placement' })
+
+      },
+    }),
+
+
     },
 });

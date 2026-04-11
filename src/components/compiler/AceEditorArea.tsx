@@ -7,10 +7,12 @@ import "ace-builds/src-noconflict/mode-css";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-tomorrow_night";
-import "ace-builds/src-noconflict/theme-github"; // NEW: Light mode theme
+import "ace-builds/src-noconflict/theme-github";
 
 export default function AceEditorArea({ 
-  isDarkMode, // NEW: Receives theme state
+  isDarkMode, 
+  isMobile,         // NEW: Receives mobile state
+  mobileActiveTab,  // NEW: Receives active mobile tab
   activeFile, files, setFiles, 
   activeFileId, setActiveFileId, 
   openFileIds, setOpenFileIds,
@@ -57,74 +59,81 @@ export default function AceEditorArea({
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors">
       
-      {!isConsoleFullscreen && (
-        <>
-          <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-end overflow-x-auto shrink-0 border-b border-gray-300 dark:border-[#252526] scrollbar-hide transition-colors">
-            {openTabs.map((file: any) => (
-              <div 
-                key={file.id} 
-                title={file.name} // Allows seeing the full name on mouse hover
-                onClick={() => setActiveFileId(file.id)} 
-                className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group max-w-[200px] shrink-0 ${activeFileId === file.id ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]' : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'}`}
-              >
-                 <span className="truncate block">{file.name}</span>
-                 <div onClick={(e) => handleCloseTab(e, file.id)} className={`w-5 h-5 shrink-0 rounded-[3px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-all ${activeFileId === file.id ? 'opacity-100' : ''}`}>
-                   <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" strokeWidth="1.5"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.5"/></svg>
-                 </div>
-              </div>
-            ))}
-          </div>
+      {/* EDITOR SECTION: Hidden via CSS if on Mobile Console tab or if Desktop Console is fullscreen */}
+      <div className={`${(isMobile && mobileActiveTab === 'console') || isConsoleFullscreen ? 'hidden' : 'flex flex-col flex-1'} overflow-hidden`}>
+        <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-end overflow-x-auto shrink-0 border-b border-gray-300 dark:border-[#252526] scrollbar-hide transition-colors">
+          {openTabs.map((file: any) => (
+            <div 
+              key={file.id} 
+              title={file.name}
+              onClick={() => setActiveFileId(file.id)} 
+              className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group max-w-[200px] shrink-0 ${activeFileId === file.id ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]' : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'}`}
+            >
+                <span className="truncate block">{file.name}</span>
+                <div onClick={(e) => handleCloseTab(e, file.id)} className={`w-5 h-5 shrink-0 rounded-[3px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-all ${activeFileId === file.id ? 'opacity-100' : ''}`}>
+                  <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" strokeWidth="1.5"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.5"/></svg>
+                </div>
+            </div>
+          ))}
+        </div>
 
-          {activeFile && (
-            <div className="h-[22px] bg-white dark:bg-[#1e1e1e] border-b border-gray-300 dark:border-[#3c3c3c] flex items-center px-3 gap-1 text-xs text-gray-500 dark:text-[#858585] shrink-0 transition-colors min-w-0">
-              <span className="shrink-0">project-files</span><span className="text-gray-400 dark:text-[#555] shrink-0">›</span><span className="text-gray-700 dark:text-[#cccccc] truncate block">{activeFile.name}</span>
+        {activeFile && (
+          <div className="h-[22px] bg-white dark:bg-[#1e1e1e] border-b border-gray-300 dark:border-[#3c3c3c] flex items-center px-3 gap-1 text-xs text-gray-500 dark:text-[#858585] shrink-0 transition-colors min-w-0">
+            <span className="shrink-0">project-files</span><span className="text-gray-400 dark:text-[#555] shrink-0">›</span><span className="text-gray-700 dark:text-[#cccccc] truncate block">{activeFile.name}</span>
+          </div>
+        )}
+
+        <div className="flex-1 relative bg-white dark:bg-[#1e1e1e]">
+          {activeFile ? (
+            <ReactAce
+              mode={activeFile.language || 'javascript'}
+              theme={isDarkMode ? "tomorrow_night" : "github"}
+              onChange={handleCodeChange}
+              value={activeFile.content}
+              name="ace-editor"
+              width="100%"
+              height="100%"
+              showPrintMargin={false}
+              setOptions={{ fontSize: 14, showLineNumbers: true, tabSize: 2, useWorker: false }}
+              style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
+              commands={[
+                {
+                  name: 'saveFile',
+                  bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
+                  exec: () => { alert("File saved!"); }
+                }
+              ]}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 dark:text-[#3c3c3c]">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 mb-4 opacity-30"><path d="M17.5 2L9.5 10.5L4 6.5L1 8L5 12L1 16L4 17.5L9.5 13.5L17.5 22L23 19.5V4.5L17.5 2Z" fill="currentColor"/><path d="M17.5 7.5V16.5L11 12L17.5 7.5Z" fill="currentColor"/></svg>
             </div>
           )}
+        </div>
+      </div>
 
-          <div className="flex-1 relative bg-white dark:bg-[#1e1e1e]">
-            {activeFile ? (
-              <ReactAce
-                mode={activeFile.language || 'javascript'}
-                theme={isDarkMode ? "tomorrow_night" : "github"} // DYNAMIC THEME!
-                onChange={handleCodeChange}
-                value={activeFile.content}
-                name="ace-editor"
-                width="100%"
-                height="100%"
-                showPrintMargin={false} // NEW: Removes the vertical print margin line
-                setOptions={{ fontSize: 14, showLineNumbers: true, tabSize: 2, useWorker: false }}
-                style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
-                commands={[
-    {
-      name: 'saveFile',
-      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-      exec: () => { alert("File saved!"); }
-    }
-  ]}
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 dark:text-[#3c3c3c]">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 mb-4 opacity-30"><path d="M17.5 2L9.5 10.5L4 6.5L1 8L5 12L1 16L4 17.5L9.5 13.5L17.5 22L23 19.5V4.5L17.5 2Z" fill="currentColor"/><path d="M17.5 7.5V16.5L11 12L17.5 7.5Z" fill="currentColor"/></svg>
+      {/* CONSOLE SECTION: Takes full height on mobile, toggled via CSS */}
+      {isConsoleOpen && (
+        <div style={{ height: (isConsoleFullscreen || isMobile) ? '100%' : `${consoleHeight}px` }} 
+             className={`${(isMobile && mobileActiveTab !== 'console') ? 'hidden' : 'flex'} flex-col bg-gray-50 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] shrink-0 relative transition-colors`}>
+          
+          {/* Disable resize handle on Mobile */}
+          {!isConsoleFullscreen && !isMobile && <div className="absolute left-0 right-0 top-[-2px] h-1.5 cursor-row-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingConsole(true)} />}
+          {isResizingConsole && <div className="fixed inset-0 z-[9999] cursor-row-resize" />}
+
+          <div className="h-[35px] flex items-center border-b border-gray-300 dark:border-[#3c3c3c] px-2 bg-gray-100 dark:bg-[#252526] transition-colors shrink-0">
+            <div className="px-3 h-full flex items-center text-xs cursor-pointer text-gray-800 dark:text-[#cccccc] border-b border-[#007acc]">CONSOLE</div>
+            
+            {/* Hide window controls on mobile since console is always full screen inside its tab */}
+            {!isMobile && (
+              <div className="ml-auto flex gap-1 text-gray-500 dark:text-[#858585]">
+                <svg onClick={() => setIsConsoleFullscreen(!isConsoleFullscreen)} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{isConsoleFullscreen ? <polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/> : <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>}</svg>
+                <svg onClick={() => { setIsConsoleOpen(false); setIsConsoleFullscreen(false); }} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </div>
             )}
           </div>
-        </>
-      )}
-
-      {isConsoleOpen && (
-        <div style={{ height: isConsoleFullscreen ? '100%' : `${consoleHeight}px` }} className={`bg-gray-50 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] flex flex-col shrink-0 relative transition-colors`}>
-          {!isConsoleFullscreen && <div className="absolute left-0 right-0 top-[-2px] h-1.5 cursor-row-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingConsole(true)} />}
-          {isResizingConsole && <div className="fixed inset-0 z-[9999] cursor-row-resize" />}
-
-          <div className="h-[35px] flex items-center border-b border-gray-300 dark:border-[#3c3c3c] px-2 bg-gray-100 dark:bg-[#252526] transition-colors">
-            <div className="px-3 h-full flex items-center text-xs cursor-pointer text-gray-800 dark:text-[#cccccc] border-b border-[#007acc]">CONSOLE</div>
-            <div className="ml-auto flex gap-1 text-gray-500 dark:text-[#858585]">
-               <svg onClick={() => setIsConsoleFullscreen(!isConsoleFullscreen)} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{isConsoleFullscreen ? <polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/> : <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>}</svg>
-               <svg onClick={() => { setIsConsoleOpen(false); setIsConsoleFullscreen(false); }} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </div>
-          </div>
           
-          <div className="flex-1 p-3 font-mono text-[13px] overflow-auto text-gray-800 dark:text-[#cccccc] bg-white dark:bg-[#1e1e1e] transition-colors">
+          <div className="flex-1 p-3 font-mono text-[13px] overflow-auto text-gray-800 dark:text-[#cccccc] bg-white dark:bg-[#1e1e1e] transition-colors pb-[env(safe-area-inset-bottom)]">
             {logs.length === 0 ? (
               <div className="text-gray-400 dark:text-[#858585] italic opacity-80">Console is empty. Click 'Run' to execute code...</div>
             ) : (
@@ -140,7 +149,6 @@ export default function AceEditorArea({
               ))
             )}
           </div>
-
         </div>
       )}
     </div>
