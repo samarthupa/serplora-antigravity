@@ -6,8 +6,10 @@ import AceEditorArea from './AceEditorArea';
 export default function CompilerApp({ title, initialFiles }: any) {
   const compilerRef = useRef<HTMLDivElement>(null);
   
-  // Responsive States
-  const [isMobile, setIsMobile] = useState(false);
+  // Responsive States - FIXED: Synchronous initialization to prevent layout shift
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
   const [mobileActiveTab, setMobileActiveTab] = useState<'files' | 'editor' | 'preview' | 'console'>('editor');
 
   const [isAppFullscreen, setIsAppFullscreen] = useState(false);
@@ -171,8 +173,11 @@ export default function CompilerApp({ title, initialFiles }: any) {
   return (
     <div 
       ref={compilerRef} 
+      // FIXED: Pure CSS responsive classes instead of relying heavily on the isMobile JS variable
       className={`flex flex-col w-full overflow-hidden font-sans transition-colors bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-[#cccccc] ${
-        (isAppFullscreen || isMobile) ? 'h-[100dvh] md:h-screen rounded-none border-none my-0' : 'h-[80vh] border border-gray-300 dark:border-[#3c3c3c] rounded-xl my-8'
+        isAppFullscreen 
+          ? 'h-[100dvh] md:h-screen rounded-none border-none my-0' 
+          : 'h-[100dvh] my-0 rounded-none border-none md:h-[80vh] md:my-8 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c]'
       }`}
     >
       <div className="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] flex items-center select-none shrink-0 transition-colors">
