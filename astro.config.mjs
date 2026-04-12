@@ -40,6 +40,7 @@ export default defineConfig({
     environments: {
       client: {
         build: {
+          target: 'es2022', // 🌟 NEW: Prevent polyfilling legacy JS features to save ~7.5 KiB
           rollupOptions: {
             output: {
               entryFileNames: 'assets/[hash].js',
@@ -53,6 +54,7 @@ export default defineConfig({
     
     // 👇 Keep standard build rules for SSR/server consistency
     build: {
+      target: 'es2022', // 🌟 NEW: Match the standard build target to the client target
       rollupOptions: {
         output: {
           entryFileNames: 'assets/[hash].js',
