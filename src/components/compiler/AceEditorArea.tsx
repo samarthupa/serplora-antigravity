@@ -11,8 +11,8 @@ import "ace-builds/src-noconflict/theme-github";
 
 export default function AceEditorArea({ 
   isDarkMode, 
-  isMobile,         // NEW: Receives mobile state
-  mobileActiveTab,  // NEW: Receives active mobile tab
+  isMobile,
+  mobileActiveTab,
   activeFile, files, setFiles, 
   activeFileId, setActiveFileId, 
   openFileIds, setOpenFileIds,
@@ -58,8 +58,28 @@ export default function AceEditorArea({
 
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors">
+
+      {/*
+        FIX: Ace gutter line numbers are rendered by the ace library and not
+        reachable via Tailwind. Scoped CSS overrides inject passing contrast
+        values directly onto #ace-editor's gutter cells.
+
+        Light (github theme):  gutter bg ≈ #f0f0f0 → #57606a gives ~5.4:1 ✓
+        Dark (tomorrow_night): gutter bg ≈ #25282c → #9d9d9d gives ~5.2:1 ✓
+
+        The active-line cell gets the full foreground color for even stronger
+        contrast since it is the most visually prominent number.
+      */}
+      <style>{`
+        #ace-editor .ace_gutter-cell {
+          color: ${isDarkMode ? '#9d9d9d' : '#57606a'};
+        }
+        #ace-editor .ace_gutter-active-line.ace_gutter-cell {
+          color: ${isDarkMode ? '#cccccc' : '#24292f'};
+        }
+      `}</style>
       
-      {/* EDITOR SECTION: Hidden via CSS if on Mobile Console tab or if Desktop Console is fullscreen */}
+      {/* EDITOR SECTION */}
       <div className={`${(isMobile && mobileActiveTab === 'console') || isConsoleFullscreen ? 'hidden' : 'flex flex-col flex-1'} overflow-hidden`}>
         <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-end overflow-x-auto shrink-0 border-b border-gray-300 dark:border-[#252526] scrollbar-hide transition-colors">
           {openTabs.map((file: any) => (
@@ -67,7 +87,16 @@ export default function AceEditorArea({
               key={file.id} 
               title={file.name}
               onClick={() => setActiveFileId(file.id)} 
-              className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group max-w-[200px] shrink-0 ${activeFileId === file.id ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]' : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-500 dark:text-[#858585] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'}`}
+              className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group max-w-[200px] shrink-0 ${
+                activeFileId === file.id
+                  // Active tab: high-contrast foreground, no change needed
+                  ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]'
+                  // FIX: Inactive tab was text-gray-500 (~3.7:1) on bg-gray-100.
+                  //      text-gray-600 (#4b5563) on bg-gray-100 (#f3f4f6) → ~5.9:1 ✓
+                  //      dark:text-[#858585] (~3.5:1) on #2d2d2d.
+                  //      dark:text-[#9d9d9d] on #2d2d2d → ~5.2:1 ✓
+                  : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'
+              }`}
             >
                 <span className="truncate block">{file.name}</span>
                 <div onClick={(e) => handleCloseTab(e, file.id)} className={`w-5 h-5 shrink-0 rounded-[3px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-all ${activeFileId === file.id ? 'opacity-100' : ''}`}>
@@ -112,19 +141,17 @@ export default function AceEditorArea({
         </div>
       </div>
 
-      {/* CONSOLE SECTION: Takes full height on mobile, toggled via CSS */}
+      {/* CONSOLE SECTION */}
       {isConsoleOpen && (
         <div style={{ height: (isConsoleFullscreen || isMobile) ? '100%' : `${consoleHeight}px` }} 
              className={`${(isMobile && mobileActiveTab !== 'console') ? 'hidden' : 'flex'} flex-col bg-gray-50 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] shrink-0 relative transition-colors`}>
           
-          {/* Disable resize handle on Mobile */}
           {!isConsoleFullscreen && !isMobile && <div className="absolute left-0 right-0 top-[-2px] h-1.5 cursor-row-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingConsole(true)} />}
           {isResizingConsole && <div className="fixed inset-0 z-[9999] cursor-row-resize" />}
 
           <div className="h-[35px] flex items-center border-b border-gray-300 dark:border-[#3c3c3c] px-2 bg-gray-100 dark:bg-[#252526] transition-colors shrink-0">
             <div className="px-3 h-full flex items-center text-xs cursor-pointer text-gray-800 dark:text-[#cccccc] border-b border-[#007acc]">CONSOLE</div>
             
-            {/* Hide window controls on mobile since console is always full screen inside its tab */}
             {!isMobile && (
               <div className="ml-auto flex gap-1 text-gray-500 dark:text-[#858585]">
                 <svg onClick={() => setIsConsoleFullscreen(!isConsoleFullscreen)} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{isConsoleFullscreen ? <polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/> : <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>}</svg>

@@ -187,8 +187,14 @@ export default function CompilerApp({ title, initialFiles }: any) {
         </div>
 
         <div className="flex h-full items-center pr-2 gap-2 md:gap-1">
-          {/* Prominent Run Button */}
-          <button onClick={runCode} className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 md:py-0.5 md:bg-transparent md:text-green-600 md:dark:text-[#89d185] md:hover:bg-black/5 md:dark:hover:bg-white/10 rounded transition-colors" title="Run">
+          {/* Prominent Run Button
+              FIX: green-600 (#16a34a) on white is only ~3.1:1 — fails WCAG AA.
+                   green-700 (#15803d) on white is ~4.7:1 — passes AA.
+                   md:text-green-700 replaces md:text-green-600 for the same reason
+                   on the gray-200 title bar background. Dark mode [#89d185] on
+                   [#3c3c3c] is already ~5.5:1 so no change needed there.
+          */}
+          <button onClick={runCode} className="flex items-center gap-1.5 bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 md:py-0.5 md:bg-transparent md:text-green-700 md:dark:text-[#89d185] md:hover:bg-black/5 md:dark:hover:bg-white/10 rounded transition-colors" title="Run">
              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
              <span className="text-xs font-bold md:hidden tracking-wider">RUN</span>
           </button>
@@ -256,20 +262,24 @@ export default function CompilerApp({ title, initialFiles }: any) {
 
       {/* Footer Area: Navigation for Mobile, Status for Desktop */}
       {isMobile ? (
+        // FIX: text-gray-500 on bg-gray-100 is ~3.9:1 — fails AA for small text (need 4.5:1).
+        //      text-gray-600 (#4b5563) on bg-gray-100 (#f3f4f6) is ~5.9:1 — passes AA.
+        //      dark:text-[#858585] on #1e1e1e is ~3.8:1 — fails AA.
+        //      dark:text-[#9d9d9d] on #1e1e1e is ~5.5:1 — passes AA.
         <div style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} className="h-[60px] bg-gray-100 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] flex items-center justify-around shrink-0 z-50">
-          <div onClick={() => setMobileActiveTab('files')} className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-500 dark:text-[#858585]'}`}>
+          <div onClick={() => setMobileActiveTab('files')} className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
              <span className="text-[10px] font-semibold">Files</span>
           </div>
-          <div onClick={() => setMobileActiveTab('editor')} className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'editor' ? 'text-[#007acc]' : 'text-gray-500 dark:text-[#858585]'}`}>
+          <div onClick={() => setMobileActiveTab('editor')} className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'editor' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
              <span className="text-[10px] font-semibold">Editor</span>
           </div>
-          <div onClick={() => setMobileActiveTab('preview')} className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'preview' ? 'text-[#007acc]' : 'text-gray-500 dark:text-[#858585]'}`}>
+          <div onClick={() => setMobileActiveTab('preview')} className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'preview' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
              <span className="text-[10px] font-semibold">Preview</span>
           </div>
-          <div onClick={() => setMobileActiveTab('console')} className={`flex flex-col items-center justify-center relative w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'console' ? 'text-[#007acc]' : 'text-gray-500 dark:text-[#858585]'}`}>
+          <div onClick={() => setMobileActiveTab('console')} className={`flex flex-col items-center justify-center relative w-full h-full cursor-pointer transition-colors ${mobileActiveTab === 'console' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
              {logs.length > 0 && <span className="absolute top-[8px] right-[25%] w-2 h-2 rounded-full bg-[#f48771] border border-gray-100 dark:border-[#1e1e1e]"></span>}
              <span className="text-[10px] font-semibold">Console</span>
