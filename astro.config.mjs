@@ -12,9 +12,10 @@ export default defineConfig({
   site: 'https://serplora.com',
   output: 'static', 
 
-  // Rename the default folder to assets
   build: {
-    assets: 'assets' 
+    assets: 'assets',
+    // 🟢 FIX 1: Inline CSS to eliminate the 450ms render-blocking request
+    inlineStylesheets: 'always', 
   },
 
   integrations: [
@@ -40,6 +41,8 @@ export default defineConfig({
     environments: {
       client: {
         build: {
+          // 🟢 FIX 2a: Drop legacy polyfills for the client bundle
+          target: 'esnext',
           rollupOptions: {
             output: {
               entryFileNames: 'assets/[hash].js',
@@ -53,6 +56,8 @@ export default defineConfig({
     
     // 👇 Keep standard build rules for SSR/server consistency
     build: {
+      // 🟢 FIX 2b: Drop legacy polyfills for the standard build
+      target: 'esnext',
       rollupOptions: {
         output: {
           entryFileNames: 'assets/[hash].js',
