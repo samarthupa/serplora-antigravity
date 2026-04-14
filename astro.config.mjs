@@ -6,6 +6,7 @@ import react from '@astrojs/react';
 import pagefind from 'astro-pagefind';
 
 // Detect if you are running locally
+// testing gemini
 const isLocalDev = process.argv.includes('dev');
 
 export default defineConfig({

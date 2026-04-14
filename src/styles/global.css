@@ -34,6 +34,7 @@
   --color-tx-muted: var(--color-text-muted);
   --color-subtle: var(--color-border-subtle);
   --color-brand: var(--color-brand);
+   --color-and: var(--color-brand);
   
   /* 👇 Changed back to standard Outfit with double quotes */
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
