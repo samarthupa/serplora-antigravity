@@ -1,7 +1,7 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
-import { KeystaticCodePreview } from './src/components/KeystaticCodePreview';
-import { KeystaticPreformattedPreview } from './src/components/KeystaticPreformattedPreview';
+import { KeystaticCodePreview } from './src/components/keystatic/KeystaticCodePreview';
+import { KeystaticPreformattedPreview } from './src/components/keystatic/KeystaticPreformattedPreview';
 
 // 🟢 NEW: Reusable SEO Block
 const seoSchema = fields.object({

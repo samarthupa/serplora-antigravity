@@ -11,8 +11,8 @@ import '@fontsource/jetbrains-mono/400.css';
 
 import { getEntry } from 'astro:content';
 import '../styles/global.css';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
 import 'photoswipe/style.css';
 
 // 🟢 NEW: Accept dynamic SEO props from individual pages
@@ -102,34 +102,51 @@ const robotsParams = [
       <slot />
     </main>
     <Footer />
-   <script>
-  import PhotoSwipeLightbox from 'photoswipe/lightbox';
-
-  // Wait for the page to load
-  document.addEventListener('DOMContentLoaded', () => {
     
-    // Initialize PhotoSwipe
-    const lightbox = new PhotoSwipeLightbox({
-      gallery: 'main', 
-      children: 'img', 
-      pswpModule: () => import('photoswipe'),
-      bgOpacity: 0.9,
-    });
+    {/* 🟢 Client-Side Scripts (Bundled by Astro) */}
+    <script>
+      import PhotoSwipeLightbox from 'photoswipe/lightbox';
+      import { syncUserHistory } from '../lib/api';
+      import { getLocalUser } from '../lib/auth';
 
-    lightbox.addFilter('itemData', (itemData, index) => {
-      const img = itemData.element;
-      if (img) {
-          itemData.src = img.src;
-          itemData.w = img.naturalWidth || img.width;
-          itemData.h = img.naturalHeight || img.height;
-          itemData.msrc = img.src; 
+      // --- PHOTOSWIPE INITIALIZATION ---
+      document.addEventListener('DOMContentLoaded', () => {
+        const lightbox = new PhotoSwipeLightbox({
+          gallery: 'main', 
+          children: 'img', 
+          pswpModule: () => import('photoswipe'),
+          bgOpacity: 0.9,
+        });
+
+        lightbox.addFilter('itemData', (itemData, index) => {
+          const img = itemData.element;
+          if (img) {
+              itemData.src = img.src;
+              itemData.w = img.naturalWidth || img.width;
+              itemData.h = img.naturalHeight || img.height;
+              itemData.msrc = img.src; 
+          }
+          return itemData;
+        });
+
+        lightbox.init();
+      });
+
+      // --- HISTORY SYNCHRONIZATION ---
+      // Only attempt to sync history if the user is actually logged in
+      const user = getLocalUser();
+      
+      if (user) {
+        // Get the current page title (cleaning up any appended site name like " | Serplora")
+        const pageTitle = document.title.split(' | ')[0]; 
+        const pageUrl = window.location.pathname;
+
+        // Don't track system pages in the history
+        if (pageUrl !== '/account' && pageUrl !== '/signin' && pageUrl !== '/') {
+          syncUserHistory(pageUrl, pageTitle);
+        }
       }
-      return itemData;
-    });
-
-    lightbox.init();
-  });
-</script>
+    </script>
 
   </body>
 </html>

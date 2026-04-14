@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import QuizSidebarLayout from '../../../layouts/QuizSidebarLayout.astro';
-import InteractiveQuiz from '../../../components/InteractiveQuiz.astro';
+import InteractiveQuiz from '../../../components/quiz/InteractiveQuiz.astro';
 
 export async function getStaticPaths() {
   const allQuizzes = await getCollection('quizzes');

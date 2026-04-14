@@ -37,21 +37,22 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </div>
 
-  <script is:inline>
-    // Security check: If not logged in, boot them to the homepage
-    const userJson = localStorage.getItem('serplora_user');
-    if (!userJson) {
+ <script>
+    import { getLocalUser, logoutUser } from '../lib/auth';
+
+    // 1. Fetch user using our new auth library
+    const user = getLocalUser();
+
+    if (!user) {
       window.location.href = '/';
     } else {
-      const user = JSON.parse(userJson);
-      
       // Populate Profile Info
       document.getElementById('acc-avatar').textContent = user.name.charAt(0).toUpperCase();
       document.getElementById('acc-name').textContent = user.name;
       document.getElementById('acc-email').textContent = user.email;
       document.getElementById('acc-country').textContent = user.country || 'Unknown';
 
-      // Populate History (We check the database array attached to the user object, or fallback to local)
+      // Populate History
       const history = user.recent_pages || JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
       const historyList = document.getElementById('acc-history-list');
       
@@ -68,15 +69,8 @@ import Layout from '../layouts/Layout.astro';
         `).join('');
       }
 
-      // Handle Sign Out
-      document.getElementById('signout-btn').addEventListener('click', () => {
-        localStorage.removeItem('serplora_user');
-        localStorage.removeItem('serplora_recent_pages');
-        
-        // This line deletes the backend cookie so they are truly logged out
-        document.cookie = "user_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        window.location.href = '/';
-      });
+      // 2. Use the imported logoutUser function
+      document.getElementById('signout-btn').addEventListener('click', logoutUser);
     }
   </script>
 </Layout>
