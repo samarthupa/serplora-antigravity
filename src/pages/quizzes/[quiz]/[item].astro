@@ -1,12 +1,12 @@
 ---
 import { getCollection, render } from 'astro:content';
-import QuizSidebarLayout from '../../../layouts/QuizSidebarLayout.astro';
+import SidebarSeriesLayout from '../../../layouts/SidebarSeriesLayout.astro';
+// 🟢 FIX 1: Updated the import path to point to the new 'quiz' subfolder
 import InteractiveQuiz from '../../../components/quiz/InteractiveQuiz.astro';
 
 export async function getStaticPaths() {
   const allQuizzes = await getCollection('quizzes');
   const allQuizItems = await getCollection('quizItems');
-
   const paths = allQuizItems.map((item) => {
     const quizParent = allQuizzes.find(q => q.id === item.data.quizParent);
     return {
@@ -14,7 +14,6 @@ export async function getStaticPaths() {
       props: { item, quizParent },
     };
   });
-
   return paths.filter(path => path.props.quizParent);
 }
 
@@ -29,7 +28,6 @@ const { Content } = await render(item);
 
 // 👇 NEW: JSON Parsing Logic
 let finalQuestions = item.data.questions || [];
-
 if (item.data.bulkQuestionsJson && item.data.bulkQuestionsJson.trim() !== '') {
   try {
     finalQuestions = JSON.parse(item.data.bulkQuestionsJson);
@@ -40,7 +38,7 @@ if (item.data.bulkQuestionsJson && item.data.bulkQuestionsJson.trim() !== '') {
 }
 ---
 
-<QuizSidebarLayout series={quizParent} quizzes={childQuizzes} currentSlug={item.data.urlSlug}>
+<SidebarSeriesLayout parent={quizParent} items={childQuizzes} currentSlug={item.data.urlSlug} basePath="quizzes">
   
   <div data-pagefind-body>
     <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
@@ -59,4 +57,6 @@ if (item.data.bulkQuestionsJson && item.data.bulkQuestionsJson.trim() !== '') {
   {item.data.customJs && (
     <script is:inline set:html={item.data.customJs}></script>
   )}
-</QuizSidebarLayout>
+
+{/* 🟢 FIX 2: Corrected the closing tag */}
+</SidebarSeriesLayout>

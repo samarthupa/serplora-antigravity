@@ -1,22 +1,19 @@
 ---
 import { getCollection, render } from 'astro:content';
-import TutorialSidebarLayout from '../../../layouts/TutorialSidebarLayout.astro';
+import SidebarSeriesLayout from '../../../layouts/SidebarSeriesLayout.astro';
 
 export async function getStaticPaths() {
   const allSeries = await getCollection('tutorials');
-
   return allSeries.map((series) => ({
     params: { tutorial: series.id },
     props: { series },
   }));
-
 }
 
 const { series } = Astro.props;
 
 // Fetch all lessons belonging to this series and sort them by 'order'
 const allLessons = await getCollection('lessons');
-
 const seriesLessons = allLessons
   .filter(lesson => lesson.data.tutorial === series.id)
   .sort((a, b) => a.data.order - b.data.order);
@@ -24,12 +21,13 @@ const seriesLessons = allLessons
 const { Content } = await render(series);
 ---
 
-<TutorialSidebarLayout series={series} lessons={seriesLessons} currentSlug="intro">
+{/* 🟢 FIX: Passed 'series' and 'seriesLessons' to match the variables defined above */}
+<SidebarSeriesLayout parent={series} items={seriesLessons} currentSlug="intro" basePath="tutorials">
   
-  {/* 🟢 NEW: Wrap everything in data-pagefind-body so Pagefind knows to index this parent page! */}
+  {/* Wrap everything in data-pagefind-body so Pagefind knows to index this parent page! */}
   <div data-pagefind-body>
     
-    {/* 🟢 NEW: Boost the title weight so the main Introduction ranks highly */}
+    {/* Boost the title weight so the main Introduction ranks highly */}
     <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
       {series.data.title}: Introduction
     </h1>
@@ -41,7 +39,8 @@ const { Content } = await render(series);
     <div class="mt-8">
       <Content />
     </div>
-    
-  </div>
   
-</TutorialSidebarLayout>
+  </div>
+
+{/* 🟢 FIX: Corrected the closing tag */}
+</SidebarSeriesLayout>

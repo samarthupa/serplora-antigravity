@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import QuizSidebarLayout from '../../../layouts/QuizSidebarLayout.astro';
+import SidebarSeriesLayout from '../../../layouts/SidebarSeriesLayout.astro';
 
 export async function getStaticPaths() {
   const allQuizzes = await getCollection('quizzes');
@@ -20,7 +20,7 @@ const childQuizzes = allQuizItems
 const { Content } = await render(quiz);
 ---
 
-<QuizSidebarLayout series={quiz} quizzes={childQuizzes} currentSlug="intro">
+<SidebarSeriesLayout parent={quiz} items={childQuizzes} currentSlug="intro" basePath="quizzes">
   
   <div data-pagefind-body>
     <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
