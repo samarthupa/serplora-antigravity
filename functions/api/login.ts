@@ -1,19 +1,21 @@
 // functions/api/login.ts
+import { createErrorResponse, verifyGoogleToken } from './utils/apiHelper';
+import type { Env, LoginRequest, UserRecord } from './utils/types';
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   try {
-    const { token } = await request.json();
+    const body = (await request.json()) as LoginRequest;
 
-    const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
-    const googleData = await googleRes.json();
+    const googleData = await verifyGoogleToken(body.token);
+    if (!googleData) return createErrorResponse("Invalid or Missing Token", 401);
 
-    if (!googleData.email) return new Response("Invalid Token", { status: 400 });
-
-    const existingUser = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(googleData.email).first();
+    const existingUser = await env.DB.prepare('SELECT * FROM users WHERE email = ?')
+      .bind(googleData.email)
+      .first<UserRecord>();
 
     if (existingUser) {
-      // 🟢 NEW: Parse their database history and attach it to the user object
-      const history = JSON.parse(existingUser.recent_pages || '[]');
+      // Parse database history
+      const history = JSON.parse((existingUser.recent_pages as string) || '[]');
       existingUser.recent_pages = history;
 
       return new Response(JSON.stringify({ success: true, user: existingUser }), { 
@@ -24,9 +26,12 @@ export async function onRequestPost({ request, env }) {
         }
       });
     } else {
-      return new Response(JSON.stringify({ isNew: true }), { status: 200 });
+      return new Response(JSON.stringify({ isNew: true }), { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json' } 
+      });
     }
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Server Error" }), { status: 500 });
+    return createErrorResponse("Server Error", 500);
   }
 }

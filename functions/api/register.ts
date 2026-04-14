@@ -1,21 +1,24 @@
 // functions/api/register.ts
-export async function onRequestPost({ request, env }) {
+import { createErrorResponse, verifyGoogleToken } from './utils/apiHelper';
+import type { Env, RegisterRequest } from './utils/types';
+
+export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   try {
-    const { token, country } = await request.json();
+    const body = (await request.json()) as RegisterRequest;
 
-    const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
-    const googleData = await googleRes.json();
+    if (!body.country) return createErrorResponse("Country is required", 400);
 
-    if (!googleData.email) return new Response("Invalid Token", { status: 400 });
+    const googleData = await verifyGoogleToken(body.token);
+    if (!googleData) return createErrorResponse("Invalid or Missing Token", 401);
 
     // Insert new user into D1
     await env.DB.prepare(`
       INSERT INTO users (email, name, country) VALUES (?, ?, ?)
-    `).bind(googleData.email, googleData.name, country).run();
+    `).bind(googleData.email, googleData.name, body.country).run();
 
     return new Response(JSON.stringify({ 
       success: true, 
-      user: { name: googleData.name, email: googleData.email, country } 
+      user: { name: googleData.name, email: googleData.email, country: body.country } 
     }), { 
       status: 200,
       headers: {
@@ -24,6 +27,6 @@ export async function onRequestPost({ request, env }) {
       }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Server Error" }), { status: 500 });
+    return createErrorResponse("Server Error", 500);
   }
 }
