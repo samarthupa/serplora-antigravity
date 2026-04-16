@@ -63,7 +63,7 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'US';
 
 // Define strict European/UK countries
 const euCountries = ['GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'SE', 'DK', 'IE', 'AT', 'FI', 'PT', 'RO', 'BG', 'HR', 'CY', 'CZ', 'EE', 'GR', 'HU', 'LV', 'LT', 'LU', 'MT', 'PL', 'SK', 'SI'];
-const isEurope = euCountries.includes(country);
+const isEurope = true;
 ---
 
 <!doctype html>
