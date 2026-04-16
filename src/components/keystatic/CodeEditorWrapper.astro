@@ -2,4 +2,4 @@
 import CodeEditorReact from '../ui/CodeEditorReact.tsx';
 const { code, language } = Astro.props;
 ---
-<CodeEditorReact client:only="react" code={code} language={language} />
+<CodeEditorReact client:visible code={code} language={language} />

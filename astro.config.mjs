@@ -14,7 +14,8 @@ export default defineConfig({
 
   // Rename the default folder to assets
   build: {
-    assets: 'assets' 
+    assets: 'assets',
+    inlineStylesheets: 'always'
   },
 
   integrations: [
