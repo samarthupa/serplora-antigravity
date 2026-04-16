@@ -57,13 +57,8 @@ const robotsParams = [
   seo?.robotsFollow === false ? 'nofollow' : 'follow'
 ].join(', ');
 
-// 🟢 CLOUDFLARE GEO-LOGIC
-// Grab the country code (defaults to US for local dev environments)
-const country = Astro.request.headers.get('cf-ipcountry') || 'US';
-
-// Define strict European/UK countries
-const euCountries = ['GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'SE', 'DK', 'IE', 'AT', 'FI', 'PT', 'RO', 'BG', 'HR', 'CY', 'CZ', 'EE', 'GR', 'HU', 'LV', 'LT', 'LU', 'MT', 'PL', 'SK', 'SI'];
-const isEurope = true;
+// 🔴 REMOVED: Server-side Cloudflare geo-logic has been removed from here.
+// It is now handled dynamically in the browser via CookieBanner.astro!
 ---
 
 <!doctype html>
@@ -89,8 +84,8 @@ const isEurope = true;
     
     <link rel="icon" href={favicon} />
 
-    {/* 🟢 GTM INJECTION - Add your actual GTM ID here */}
-    <GoogleTagManager gtmId="GTM-MVZN25KT" isEurope={isEurope} />
+    {/* 🟢 GTM INJECTION - Removed isEurope prop */}
+    <GoogleTagManager gtmId="GTM-MVZN25KT" />
 
     <script is:inline>
       const theme = (() => {
@@ -122,8 +117,9 @@ const isEurope = true;
     </main>
     <Footer />
     
-    {/* 🟢 EU COOKIE BANNER COMPONENT */}
-    {isEurope && <CookieBanner />}
+    {/* 🟢 EU COOKIE BANNER COMPONENT - Rendered unconditionally in HTML */}
+    {/* The JavaScript inside this component will fetch the location and hide/show it */}
+    <CookieBanner />
     
     {/* 🟢 Client-Side Scripts (Bundled by Astro) */}
     <script>

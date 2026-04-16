@@ -1,31 +1,32 @@
 ---
 // src/components/layout/GoogleTagManager.astro
 // Replace 'GTM-XXXXXXX' with your actual GTM Container ID
-const { gtmId = 'GTM-XXXXXXX', isEurope } = Astro.props;
+const { gtmId = 'GTM-MVZN25KT' } = Astro.props;
 ---
 
 <script is:inline>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+  
   gtag('consent', 'default', {
     'ad_storage': 'denied',
     'analytics_storage': 'denied',
     'ad_user_data': 'denied',
     'ad_personalization': 'denied',
-    'wait_for_update': 500
+    // Holds the initial pageview for 500ms to wait for the client-side location check
+    'wait_for_update': 500 
   });
-</script>
 
-{!isEurope && (
-  <script is:inline>
+  // 2. RETURNING USERS: If they previously passed the location check or clicked accept, unlock immediately!
+  if (localStorage.getItem('cookieConsent') === 'granted' || localStorage.getItem('cookieConsent') === 'granted_by_location') {
     gtag('consent', 'update', {
       'ad_storage': 'granted',
       'analytics_storage': 'granted',
       'ad_user_data': 'granted',
       'ad_personalization': 'granted'
     });
-  </script>
-)}
+  }
+</script>
 
 <script is:inline define:vars={{ gtmId }}>
   (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

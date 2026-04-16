@@ -66,21 +66,50 @@
 </style>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     const banner = document.getElementById('cookie-banner');
     const acceptBtn = document.getElementById('accept-cookies');
     const rejectBtn = document.getElementById('reject-cookies');
 
-    // Show banner if no choice has been made yet
-    if (!localStorage.getItem('cookieConsent')) {
+    // 1. If they already made a choice or were auto-granted by location, exit early
+    if (localStorage.getItem('cookieConsent')) return;
+
+    try {
+      // 2. Ask Cloudflare where the user is (Zero latency, runs in the browser)
+      const res = await fetch('/cdn-cgi/trace');
+      const data = await res.text();
+      
+      // Parse the loc=XX line from the text response
+      const locMatch = data.match(/loc=([A-Z]{2})/);
+      const country = locMatch ? locMatch[1] : 'US';
+      
+      const euCountries = ['GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'SE', 'DK', 'IE', 'AT', 'FI', 'PT', 'RO', 'BG', 'HR', 'CY', 'CZ', 'EE', 'GR', 'HU', 'LV', 'LT', 'LU', 'MT', 'PL', 'SK', 'SI'];
+
+      if (euCountries.includes(country)) {
+        // 3a. User is in EU: Show the banner
+        banner.style.display = 'flex';
+      } else {
+        // 3b. User is outside EU: Silently grant tracking
+        if (typeof gtag === 'function') {
+          gtag('consent', 'update', {
+            'ad_storage': 'granted',
+            'analytics_storage': 'granted',
+            'ad_user_data': 'granted',
+            'ad_personalization': 'granted'
+          });
+        }
+        // Save this so we don't have to fetch their location on the next page load
+        localStorage.setItem('cookieConsent', 'granted_by_location');
+      }
+    } catch (e) {
+      // If the fetch fails for any reason (like adblockers blocking the trace), default to safe EU compliance mode
       banner.style.display = 'flex';
     }
 
+    // Button Listeners
     acceptBtn.addEventListener('click', () => {
       localStorage.setItem('cookieConsent', 'granted');
       banner.style.display = 'none';
-      
-      // Tell GTM to unblock tracking
       if (typeof gtag === 'function') {
         gtag('consent', 'update', {
           'ad_storage': 'granted',
