@@ -5,11 +5,14 @@ const { code, language } = Astro.props;
 // 1. Count how many lines of code are in this specific snippet
 const lineCount = code ? code.split('\n').length : 1;
 
-// 2. Calculate the approximate pixel height. 
-// Standard code font is usually ~24px per line + ~40px for the editor's top/bottom padding.
-// (You can adjust these numbers slightly if your specific Ace Editor theme uses taller lines).
-// We wrap it in a Math.max to ensure even 1-line snippets get a minimum decent height.
-const estimatedHeight = Math.max(120, (lineCount * 24) + 40);
+// 2. Calculate the approximate pixel height without limits. 
+// ~24px per line + ~40px for the editor's header
+const rawHeight = (lineCount * 24) + 40;
+
+// 3. Apply floor (min height) AND ceiling (max height)
+// The React component has a max-height of 360px for the code area + 40px header.
+// So we use Math.min to cap the placeholder at 400px, and Math.max to keep it above 120px.
+const estimatedHeight = Math.min(Math.max(120, rawHeight), 400);
 ---
 
 <div 
