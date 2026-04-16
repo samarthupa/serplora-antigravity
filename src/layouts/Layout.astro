@@ -15,6 +15,10 @@ import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import 'photoswipe/style.css';
 
+// 🟢 NEW: Import GTM and Cookie Banner Components
+import GoogleTagManager from '../components/layout/GoogleTagManager.astro';
+import CookieBanner from '../components/ui/CookieBanner.astro';
+
 // 🟢 NEW: Accept dynamic SEO props from individual pages
 interface Props {
   seo?: {
@@ -52,6 +56,14 @@ const robotsParams = [
   seo?.robotsIndex === false ? 'noindex' : 'index',
   seo?.robotsFollow === false ? 'nofollow' : 'follow'
 ].join(', ');
+
+// 🟢 CLOUDFLARE GEO-LOGIC
+// Grab the country code (defaults to US for local dev environments)
+const country = Astro.request.headers.get('cf-ipcountry') || 'US';
+
+// Define strict European/UK countries
+const euCountries = ['GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'SE', 'DK', 'IE', 'AT', 'FI', 'PT', 'RO', 'BG', 'HR', 'CY', 'CZ', 'EE', 'GR', 'HU', 'LV', 'LT', 'LU', 'MT', 'PL', 'SK', 'SI'];
+const isEurope = euCountries.includes(country);
 ---
 
 <!doctype html>
@@ -77,6 +89,9 @@ const robotsParams = [
     
     <link rel="icon" href={favicon} />
 
+    {/* 🟢 GTM INJECTION - Add your actual GTM ID here */}
+    <GoogleTagManager gtmId="GTM-MVZN25KT" isEurope={isEurope} />
+
     <script is:inline>
       const theme = (() => {
         if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
@@ -97,11 +112,18 @@ const robotsParams = [
     </script>
   </head>
   <body class="bg-main text-tx-main font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+    {/* 🟢 GTM NOSCRIPT FALLBACK (Required by Google) */}
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MVZN25KT"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
     <Header />
     <main class="flex-1 w-full flex flex-col">
       <slot />
     </main>
     <Footer />
+    
+    {/* 🟢 EU COOKIE BANNER COMPONENT */}
+    {isEurope && <CookieBanner />}
     
     {/* 🟢 Client-Side Scripts (Bundled by Astro) */}
     <script>
