@@ -5,7 +5,7 @@ import { getEntry } from 'astro:content';
 const { parent, items, currentSlug, basePath } = Astro.props;
 
 // 1. Determine active data for SEO and titles
-const currentActiveData = currentSlug === 'intro' 
+const currentActiveData = currentSlug === 'overview' 
   ? parent.data 
   : items.find((i: any) => i.data.urlSlug === currentSlug)?.data || parent.data;
 
@@ -15,11 +15,15 @@ const cleanTitle = (title: string) => {
   return cleaned.replace(/^[\d.]+\s*/, '').trim(); 
 };
 
+// 🟢 NEW: Breadcrumb Label Helpers
+const parentLabel = parent.data.breadcrumbTitle || parent.data.title;
+const currentLabel = currentActiveData.breadcrumbTitle || cleanTitle(currentActiveData.title);
+
 // 3. Calculate Prev / Next Navigation dynamically
 let prevLink = null;
 let nextLink = null;
 
-if (currentSlug === 'intro') {
+if (currentSlug === 'overview') {
   if (items.length > 0) {
     nextLink = {
       title: cleanTitle(items[0].data.title),
@@ -30,7 +34,7 @@ if (currentSlug === 'intro') {
   const currentIndex = items.findIndex((i: any) => i.data.urlSlug === currentSlug);
   if (currentIndex !== -1) {
     if (currentIndex === 0) {
-      prevLink = { title: 'Introduction', url: `/${basePath}/${parent.id}` };
+      prevLink = { title: 'Course Overview', url: `/${basePath}/${parent.id}` };
     } else {
       prevLink = {
         title: cleanTitle(items[currentIndex - 1].data.title),
@@ -71,9 +75,17 @@ if (adsData?.data) {
         <span class="opacity-40">/</span>
         <a href={`/${basePath}`} class="hover:text-brand transition-colors">{basePath}</a>
         <span class="opacity-40">/</span>
-        <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[100px]">{parent.data.title.toLowerCase()}</a>
-        <span class="opacity-40">/</span>
-        <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{cleanTitle(currentActiveData.title).toLowerCase()}</span>
+        
+        {/* 🟢 UPDATED TO USE parentLabel and currentLabel */}
+        {currentSlug === 'overview' ? (
+          <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{parentLabel.toLowerCase()}</span>
+        ) : (
+          <>
+            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[100px]">{parentLabel.toLowerCase()}</a>
+            <span class="opacity-40">/</span>
+            <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{currentLabel.toLowerCase()}</span>
+          </>
+        )}
       </nav>
 
       <div class="sticky top-0 bg-main/95 backdrop-blur-md py-2 flex items-center justify-between -mx-4 px-4 sm:-mx-6 sm:px-6 z-40">
@@ -113,8 +125,8 @@ if (adsData?.data) {
       </div>
 
       <nav class="flex-1 overflow-y-auto min-h-0 custom-scrollbar flex flex-col space-y-0.5 pr-1.5">
-        <a href={`/${basePath}/${parent.id}`} class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === 'intro' ? 'text-brand border-brand/20 font-bold active-item' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}>
-          Introduction
+        <a href={`/${basePath}/${parent.id}`} class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === 'overview' ? 'text-brand border-brand/20 font-bold active-item' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}>
+          Course Overview
         </a>
 
         {items.map((item: any) => (
@@ -137,9 +149,17 @@ if (adsData?.data) {
         <span class="opacity-40">/</span>
         <a href={`/${basePath}`} class="hover:text-brand transition-colors">{basePath}</a>
         <span class="opacity-40">/</span>
-        <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[150px]">{parent.data.title.toLowerCase()}</a>
-        <span class="opacity-40">/</span>
-        <span class="text-brand font-medium" aria-current="page">{cleanTitle(currentActiveData.title).toLowerCase()}</span>
+        
+        {/* 🟢 UPDATED TO USE parentLabel and currentLabel */}
+        {currentSlug === 'overview' ? (
+          <span class="text-brand font-medium" aria-current="page">{parentLabel.toLowerCase()}</span>
+        ) : (
+          <>
+            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[150px]">{parentLabel.toLowerCase()}</a>
+            <span class="opacity-40">/</span>
+            <span class="text-brand font-medium" aria-current="page">{currentLabel.toLowerCase()}</span>
+          </>
+        )}
       </nav>
 
       <div class="markdown-content text-[15.5px] md:text-[17px] leading-[1.7] md:leading-[1.8] pb-8">
@@ -185,7 +205,6 @@ if (adsData?.data) {
 </Layout>
 
 <style is:global>
-  /* ALL YOUR EXISTING CSS STAYS EXACTLY THE SAME HERE */
   .custom-scrollbar::-webkit-scrollbar { width: 4px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb { background-color: var(--color-border-subtle); border-radius: 20px; }

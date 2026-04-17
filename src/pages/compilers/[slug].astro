@@ -12,6 +12,7 @@ export async function getStaticPaths() {
 }
 
 const { compiler } = Astro.props;
+const breadcrumbLabel = compiler.data.breadcrumbTitle || compiler.data.title || compiler.id;
 
 const starterFiles = (compiler.data.starterFiles || []).map((file, index) => ({
   id: (index + 1).toString(), 
@@ -48,7 +49,7 @@ if (adsData?.data) {
       <span class="opacity-40">/</span>
       <a href="/compilers" class="hover:text-[#007acc] transition-colors">compilers</a>
       <span class="opacity-40">/</span>
-      <span class="text-[#007acc] font-medium" aria-current="page">{compiler.data.title.toLowerCase()}</span>
+      <span class="text-[#007acc] font-medium" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
     </nav>
 
     <div class="flex flex-col lg:flex-row gap-6 lg:gap-[20px]">

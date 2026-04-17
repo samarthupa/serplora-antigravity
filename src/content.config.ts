@@ -31,6 +31,7 @@ const tutorials = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/tutorials" }),
   schema: z.object({
     title: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
     
@@ -49,6 +50,7 @@ const lessons = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/lessons" }),
   schema: z.object({
     title: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
     urlSlug: z.string(),
     tutorial: z.string(), 
     order: z.number().default(1),
@@ -132,6 +134,7 @@ const posts = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/posts" }),
   schema: z.object({
     title: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
     
@@ -160,6 +163,7 @@ const compilers = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/compilers" }),
   schema: z.object({
     title: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
     seo: seoSchema,
@@ -222,6 +226,7 @@ const quizzes = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/quizzes" }),
   schema: z.object({
     title: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
     seo: seoSchema,
@@ -232,6 +237,7 @@ const quizItems = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/quizItems" }),
   schema: z.object({
     title: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
     urlSlug: z.string(),
     quizParent: z.string(), 
     order: z.number().default(1),

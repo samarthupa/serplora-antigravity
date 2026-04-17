@@ -27,6 +27,7 @@ export const posts = collection({
     previewUrl: '/articles/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Title' }, slug: { label: 'SEO Slug' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         category: fields.relationship({ label: 'Category', collection: 'categories', validation: { isRequired: false } }),
         tags: fields.relationship({ label: 'Tags', collection: 'tags', validation: { isRequired: false }, many: true }),
@@ -54,6 +55,7 @@ export const tutorials = collection({
     previewUrl: '/tutorials/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Series Title' }, slug: { label: 'SEO Slug' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         category: fields.relationship({ label: 'Category', collection: 'categories', validation: { isRequired: false } }),
         tags: fields.relationship({ label: 'Tags', collection: 'tags', validation: { isRequired: false }, many: true }),
@@ -71,6 +73,7 @@ export const lessons = collection({
     format: { contentField: 'content' },
     schema: {
         title: fields.slug({ name: { label: 'Internal Title' }, slug: { label: 'Folder ID' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
         urlSlug: fields.text({ label: 'URL Slug' }),
         tutorial: fields.relationship({ label: 'Belongs to Tutorial Series', collection: 'tutorials', validation: { isRequired: true } }),
         order: fields.integer({ label: 'Lesson Order', defaultValue: 1 }),
@@ -99,6 +102,7 @@ export const compilers = collection({
     previewUrl: '/compilers/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Compiler Name' }, slug: { label: 'SEO Slug' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         excerpt: fields.text({ label: 'Short Description', multiline: true }),
         seo: seoSchema,
@@ -122,6 +126,7 @@ export const quizzes = collection({
     previewUrl: '/quizzes/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Quiz Series Title' }, slug: { label: 'SEO Slug' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         excerpt: fields.text({ label: 'Excerpt', multiline: true }),
         seo: seoSchema,
@@ -136,6 +141,7 @@ export const quizItems = collection({
     format: { contentField: 'content' },
     schema: {
         title: fields.slug({ name: { label: 'Internal Title' }, slug: { label: 'Folder ID' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
         urlSlug: fields.text({ label: 'URL Slug' }),
         quizParent: fields.relationship({ label: 'Belongs to Quiz Series', collection: 'quizzes', validation: { isRequired: true } }),
         order: fields.integer({ label: 'Quiz Order', defaultValue: 1 }),

@@ -47,6 +47,7 @@ const { Content } = await render(entry);
 
 const displayDate = entry.data.updatedDate || entry.data.publishDate || new Date();
 const formattedDate = new Date(displayDate).toISOString().split('T')[0];
+const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.id;
 ---
 
 <Layout seo={entry.data.seo} titleFallback={entry.data.title} excerptFallback={entry.data.excerpt}>
@@ -58,7 +59,7 @@ const formattedDate = new Date(displayDate).toISOString().split('T')[0];
         <span class="opacity-40">/</span>
         <a href="/articles" class="hover:text-brand transition-colors">articles</a>
         <span class="opacity-40">/</span>
-        <span class="text-tx-main font-medium truncate" aria-current="page">{entry.data.title ? entry.data.title.toLowerCase() : entry.id}</span>
+        <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
       </nav>
 
       <header class="mb-10 md:mb-12">

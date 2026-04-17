@@ -21,26 +21,54 @@ const seriesLessons = allLessons
 const { Content } = await render(series);
 ---
 
-{/* 🟢 FIX: Passed 'series' and 'seriesLessons' to match the variables defined above */}
-<SidebarSeriesLayout parent={series} items={seriesLessons} currentSlug="intro" basePath="tutorials">
+{/* Pass currentSlug as 'overview' so the layout knows this is the hub */}
+<SidebarSeriesLayout parent={series} items={seriesLessons} currentSlug="overview" basePath="tutorials">
   
-  {/* Wrap everything in data-pagefind-body so Pagefind knows to index this parent page! */}
   <div data-pagefind-body>
-    
-    {/* Boost the title weight so the main Introduction ranks highly */}
-    <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
-      {series.data.title}: Introduction
+    <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-4">
+      {series.data.title}
     </h1>
     
     {series.data.excerpt && (
       <p class="text-xl text-slate-500 mb-8">{series.data.excerpt}</p>
     )}
     
-    <div class="mt-8">
+    <div class="mt-4">
       <Content />
     </div>
-  
+
+    {/* NEW: Course Syllabus / Table of Contents */}
+    <div class="mt-12 mb-8">
+      <h2 class="text-2xl font-bold text-tx-main mb-6 border-b border-subtle pb-2">Course Syllabus</h2>
+      
+      <div class="flex flex-col gap-3">
+        {seriesLessons.length > 0 ? seriesLessons.map((lesson, index) => (
+          <a href={`/tutorials/${series.id}/${lesson.data.urlSlug}`} class="p-4 rounded-xl border border-subtle bg-surface hover:border-brand/50 hover:shadow-sm transition-all flex items-center justify-between group">
+            <div class="flex items-center gap-4">
+              <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center text-tx-muted font-bold group-hover:bg-brand/10 group-hover:text-brand transition-colors">
+                {index + 1}
+              </div>
+              <span class="font-semibold text-[16px] text-tx-main group-hover:text-brand transition-colors">
+                {lesson.data.title.includes('-') ? lesson.data.title.split(' - ')[1] : lesson.data.title}
+              </span>
+            </div>
+            <svg class="w-5 h-5 text-tx-muted group-hover:text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </a>
+        )) : (
+          <p class="text-tx-muted italic">Lessons are being added to this course. Check back soon!</p>
+        )}
+      </div>
+    </div>
+
+    {/* Primary Call to Action */}
+    {seriesLessons.length > 0 && (
+      <div class="mt-8 flex">
+        <a href={`/tutorials/${series.id}/${seriesLessons[0].data.urlSlug}`} class="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-brand text-white font-bold text-[16px] hover:brightness-110 active:scale-95 transition-all shadow-md">
+          Start Learning 
+          <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        </a>
+      </div>
+    )}
   </div>
 
-{/* 🟢 FIX: Corrected the closing tag */}
 </SidebarSeriesLayout>
