@@ -12,6 +12,7 @@ export async function getStaticPaths() {
 
 const { quiz } = Astro.props;
 
+// Fetch all quiz items belonging to this quiz series and sort them by 'order'
 const allQuizItems = await getCollection('quizItems');
 const childQuizzes = allQuizItems
   .filter(item => item.data.quizParent === quiz.id)
@@ -20,20 +21,56 @@ const childQuizzes = allQuizItems
 const { Content } = await render(quiz);
 ---
 
-<SidebarSeriesLayout parent={quiz} items={childQuizzes} currentSlug="intro" basePath="quizzes">
+{/* 🟢 FIXED: currentSlug is now "overview" to match our hub architecture */}
+<SidebarSeriesLayout parent={quiz} items={childQuizzes} currentSlug="overview" basePath="quizzes">
   
   <div data-pagefind-body>
-    <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">
-      {quiz.data.title}: Introduction
+    {/* 🟢 FIXED: Removed the hardcoded ": Introduction" from the title */}
+    <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-4">
+      {quiz.data.title}
     </h1>
     
     {quiz.data.excerpt && (
       <p class="text-xl text-slate-500 mb-8">{quiz.data.excerpt}</p>
     )}
     
-    <div class="mt-8">
+    <div class="mt-4">
       <Content />
     </div>
+
+    {/* 🟢 NEW: Quiz Modules Table of Contents (Just like the Tutorials Hub!) */}
+    <div class="mt-12 mb-8">
+      <h2 class="text-2xl font-bold text-tx-main mb-6 border-b border-subtle pb-2">Quiz Modules</h2>
+      
+      <div class="flex flex-col gap-3">
+        {childQuizzes.length > 0 ? childQuizzes.map((item, index) => (
+          <a href={`/quizzes/${quiz.id}/${item.data.urlSlug}`} class="p-4 rounded-xl border border-subtle bg-surface hover:border-brand/50 hover:shadow-sm transition-all flex items-center justify-between group">
+            <div class="flex items-center gap-4">
+              <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center text-tx-muted font-bold group-hover:bg-brand/10 group-hover:text-brand transition-colors">
+                {index + 1}
+              </div>
+              <span class="font-semibold text-[16px] text-tx-main group-hover:text-brand transition-colors">
+                {item.data.title.includes('-') ? item.data.title.split(' - ')[1] : item.data.title}
+              </span>
+            </div>
+            <svg class="w-5 h-5 text-tx-muted group-hover:text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </a>
+        )) : (
+          <p class="text-tx-muted italic">Questions are being added to this quiz. Check back soon!</p>
+        )}
+      </div>
+    </div>
+
+    {/* Primary Call to Action */}
+    {childQuizzes.length > 0 && (
+      <div class="mt-8 flex">
+        <a href={`/quizzes/${quiz.id}/${childQuizzes[0].data.urlSlug}`} class="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-brand text-white font-bold text-[16px] hover:brightness-110 active:scale-95 transition-all shadow-md">
+          Start Quiz
+          <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        </a>
+      </div>
+    )}
   </div>
   
-</QuizSidebarLayout>
+{/* 🟢 FIXED: Matching closing tag! */}
+</SidebarSeriesLayout>
