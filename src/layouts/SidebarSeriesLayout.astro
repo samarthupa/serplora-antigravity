@@ -15,7 +15,11 @@ const cleanTitle = (title: string) => {
   return cleaned.replace(/^[\d.]+\s*/, '').trim(); 
 };
 
-// 3. Calculate Prev / Next Navigation dynamically
+// 3. Calculate Breadcrumb Titles (Use custom field if available, fallback to cleaned title)
+const parentBreadcrumb = (parent.data.breadcrumbTitle || parent.data.title).toLowerCase();
+const currentBreadcrumb = (currentActiveData.breadcrumbTitle || cleanTitle(currentActiveData.title)).toLowerCase();
+
+// 4. Calculate Prev / Next Navigation dynamically
 let prevLink = null;
 let nextLink = null;
 
@@ -30,7 +34,7 @@ if (currentSlug === 'overview') {
   const currentIndex = items.findIndex((i: any) => i.data.urlSlug === currentSlug);
   if (currentIndex !== -1) {
     if (currentIndex === 0) {
-      prevLink = { title: 'Course Overview', url: `/${basePath}/${parent.id}` };
+      prevLink = { title: cleanTitle(parent.data.title), url: `/${basePath}/${parent.id}` };
     } else {
       prevLink = {
         title: cleanTitle(items[currentIndex - 1].data.title),
@@ -46,7 +50,7 @@ if (currentSlug === 'overview') {
   }
 }
 
-// 4. Resolve Sidebar Ads safely
+// 5. Resolve Sidebar Ads safely
 const adsData = await getEntry('sidebarAds', 'data');
 let adHtml = null;
 if (adsData?.data) {
@@ -73,12 +77,12 @@ if (adsData?.data) {
         <span class="opacity-40">/</span>
         
         {currentSlug === 'overview' ? (
-          <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{parent.data.title.toLowerCase()}</span>
+          <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{parentBreadcrumb}</span>
         ) : (
           <>
-            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[100px]">{parent.data.title.toLowerCase()}</a>
+            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[100px]">{parentBreadcrumb}</a>
             <span class="opacity-40">/</span>
-            <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{cleanTitle(currentActiveData.title).toLowerCase()}</span>
+            <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{currentBreadcrumb}</span>
           </>
         )}
       </nav>
@@ -121,7 +125,7 @@ if (adsData?.data) {
 
       <nav class="flex-1 overflow-y-auto min-h-0 custom-scrollbar flex flex-col space-y-0.5 pr-1.5">
         <a href={`/${basePath}/${parent.id}`} class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === 'overview' ? 'text-brand border-brand/20 font-bold active-item' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}>
-          Course Overview
+          {cleanTitle(parent.data.title)}
         </a>
 
         {items.map((item: any) => (
@@ -146,12 +150,12 @@ if (adsData?.data) {
         <span class="opacity-40">/</span>
         
         {currentSlug === 'overview' ? (
-          <span class="text-brand font-medium" aria-current="page">{parent.data.title.toLowerCase()}</span>
+          <span class="text-brand font-medium" aria-current="page">{parentBreadcrumb}</span>
         ) : (
           <>
-            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[150px]">{parent.data.title.toLowerCase()}</a>
+            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[150px]">{parentBreadcrumb}</a>
             <span class="opacity-40">/</span>
-            <span class="text-brand font-medium" aria-current="page">{cleanTitle(currentActiveData.title).toLowerCase()}</span>
+            <span class="text-brand font-medium" aria-current="page">{currentBreadcrumb}</span>
           </>
         )}
       </nav>
