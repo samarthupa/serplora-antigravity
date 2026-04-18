@@ -140,7 +140,7 @@ const posts = defineCollection({
     
     // Support for category and tags
     category: z.string().nullable().optional(),
-    tags: z.array(z.string()).optional().default([]),
+    tags: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
 
     publishDate: z.coerce.date().optional(),
     updatedDate: z.coerce.date().optional(),

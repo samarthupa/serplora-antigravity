@@ -106,11 +106,6 @@ export default function AceEditorArea({
           ))}
         </div>
 
-        {activeFile && (
-          <div className="h-[22px] bg-white dark:bg-[#1e1e1e] border-b border-gray-300 dark:border-[#3c3c3c] flex items-center px-3 gap-1 text-xs text-gray-500 dark:text-[#858585] shrink-0 transition-colors min-w-0">
-            <span className="shrink-0">project-files</span><span className="text-gray-400 dark:text-[#555] shrink-0">›</span><span className="text-gray-700 dark:text-[#cccccc] truncate block">{activeFile.name}</span>
-          </div>
-        )}
 
         <div className="flex-1 relative bg-white dark:bg-[#1e1e1e]">
           {activeFile ? (

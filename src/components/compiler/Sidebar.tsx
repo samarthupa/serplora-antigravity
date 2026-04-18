@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 export default function Sidebar({ activeView, files, setFiles, activeFileId, setActiveFileId, projectName, setProjectName, isMobile }: any) {
-  const [searchQuery, setSearchQuery] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<string[]>(['root']);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, file: any } | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -374,11 +373,6 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
     });
   };
 
-  const searchResults = files.filter((file: any) => {
-    if (!searchQuery || file.isFolder) return false;
-    const q = searchQuery.toLowerCase();
-    return file.name.toLowerCase().includes(q) || (file.content && file.content.toLowerCase().includes(q));
-  });
 
   return (
     <div 
@@ -458,19 +452,6 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
             </div>
             {expandedFolders.includes('root') && renderTree(null, 1)}
           </div>
-        )}
-
-        {activeView === 'search' && (
-           <div className="flex flex-col h-full overflow-hidden pr-2">
-             <div className="px-3 py-2 flex flex-col gap-2 shrink-0">
-               <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white dark:bg-[#3c3c3c] text-gray-800 dark:text-[#cccccc] border border-gray-300 dark:border-[#3c3c3c] focus:border-[#007acc] outline-none px-2 py-2 md:py-1 text-[14px] md:text-[13px]" />
-             </div>
-             <div className="flex-1 overflow-auto">
-               {searchResults.map((file: any) => (
-                 <div key={file.id} onClick={() => setActiveFileId(file.id)} className="px-3 py-3 md:py-1.5 cursor-pointer text-[14px] md:text-[13px] text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e]">📄 {file.name}</div>
-               ))}
-             </div>
-           </div>
         )}
       </div>
 

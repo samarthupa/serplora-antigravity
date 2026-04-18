@@ -1,10 +1,9 @@
 {
+  "globalAd": "hello  hello  hello  hello  hello  hello  hello  hello ",
   "tutorialAdsGroup": {
-    "allTutorialsAd": "hello",
     "specificOverrides": []
   },
   "compilerAdsGroup": {
-    "allCompilersAd": "I love yo",
     "specificOverrides": []
   }
 }

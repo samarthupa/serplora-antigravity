@@ -42,8 +42,7 @@ if (adsData?.data) {
 ---
 
 <Layout seo={compiler.data.seo} titleFallback={compiler.data.title} excerptFallback={compiler.data.excerpt}>
-  <div class="w-full max-w-[1440px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8">
-    
+<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8 compiler-wrapper">    
     <nav aria-label="Breadcrumb" class="font-['JetBrains_Mono',monospace] text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-2 mb-4">
       <a href="/" class="hover:text-[#007acc] transition-colors">home</a>
       <span class="opacity-40">/</span>
@@ -52,9 +51,7 @@ if (adsData?.data) {
       <span class="text-[#007acc] font-medium" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
     </nav>
 
-    <div class="flex flex-col lg:flex-row gap-6 lg:gap-[20px]">
-      
-      <div class="flex-1 min-w-0 flex flex-col gap-4">
+    <div class="flex-1 min-w-0 flex flex-col gap-4">
         
         {/* THE COMPILER APP WITH FALLBACK */}
         <div class="relative w-full z-10">
@@ -63,15 +60,11 @@ if (adsData?.data) {
             title={compiler.data.title}
             initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'untitled.txt', content: '// Write your code here', language: 'text' }]}
           >
-            {/* 🌟 THE FIX: The Skeleton Fallback loader! 
-                This perfectly matches your React component's dimensions so the layout never shifts. */}
             <div 
               slot="fallback" 
-              class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[80vh] md:my-8 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+              class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
             >
-              {/* Fake App Bar */}
               <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
-              {/* Fake Internal Split */}
               <div class="flex flex-1 w-full">
                 <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
                 <div class="hidden md:block w-[240px] bg-gray-50 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
@@ -80,6 +73,16 @@ if (adsData?.data) {
             </div>
           </CompilerApp>
         </div>
+
+        {/* 🟢 AD MOVED HERE: Directly below the compiler */}
+        {sidebarAdHtml && (
+          <div class="w-full flex justify-center mt-2 mb-4">
+            <div 
+              class="sidebar-ad-container bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#3c3c3c] rounded-lg overflow-hidden shadow-sm block" 
+              set:html={sidebarAdHtml} 
+            />
+          </div>
+        )}
 
         {/* Title and Description */}
         <div class="mt-4 lg:mt-6 pb-4 border-b border-gray-200 dark:border-[#3c3c3c]">
@@ -94,20 +97,6 @@ if (adsData?.data) {
           <Content />
         </div>
         
-      </div>
-
-      {/* RIGHT COLUMN: Ad Sidebar */}
-      {sidebarAdHtml && (
-        <aside class="w-full lg:w-[150px] shrink-0 mt-8 lg:mt-[37px]">
-          <div class="sticky top-[88px]">
-            <div 
-              class="sidebar-ad-container w-full bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#3c3c3c] rounded-lg overflow-hidden shadow-sm block" 
-              set:html={sidebarAdHtml} 
-            />
-          </div>
-        </aside>
-      )}
-
     </div>
   </div>
 </Layout>
@@ -117,4 +106,12 @@ if (adsData?.data) {
   .sidebar-ad-container img { width: 100%; height: auto; display: block; }
   .sidebar-ad-container a { text-decoration: none; display: block; }
   .sidebar-ad-container a:hover img { opacity: 0.95; transition: opacity 0.2s ease-in-out; }
+
+  /* Custom 1400px Padding Override */
+  @media (min-width: 1400px) {
+    .compiler-wrapper {
+      padding-left: 50px !important;
+      padding-right: 50px !important;
+    }
+  }
 </style>
