@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import JSZip from 'jszip';
 
 export default function Sidebar({ activeView, files, setFiles, activeFileId, setActiveFileId, projectName, setProjectName, isMobile }: any) {
   const [expandedFolders, setExpandedFolders] = useState<string[]>(['root']);
@@ -192,28 +193,47 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
     }
   };
 
-  const handleDownload = (file: any) => {
+  const handleDownload = async (file: any) => {
     if (!file.id || file.isFolder) {
-      const getFolderFiles = (parentId: string | null) => {
-          let result: any[] = [];
-          files.forEach((f: any) => {
-              if (f.parentId === parentId) {
-                  result.push(f);
-                  if (f.isFolder) result = result.concat(getFolderFiles(f.id));
-              }
-          });
-          return result;
+      const zip = new JSZip();
+
+      const addFilesToZip = (targetParentId: string | null, currentZipFolder: JSZip) => {
+        // 🌟 THE FIX: Treat 'undefined' and 'null' as the exact same root level
+        files.filter((f: any) => (f.parentId || null) === (targetParentId || null)).forEach((f: any) => {
+          if (f.isFolder) {
+            const newFolder = currentZipFolder.folder(f.name);
+            if (newFolder) addFilesToZip(f.id, newFolder);
+          } else {
+            currentZipFolder.file(f.name, f.content || '');
+          }
+        });
       };
-      const folderContents = getFolderFiles(file.id);
-      const fileName = file.id ? `${file.name}-backup.json` : `${projectName.replace(/\s+/g, '-').toLowerCase()}-backup.json`;
+
+      // Pass root (null) if it's the main workspace, otherwise pass folder ID
+      addFilesToZip(file.id || null, zip); 
+      
+      // 🟢 NEW: Prevent downloading an empty ZIP if something goes wrong
+      if (Object.keys(zip.files).length === 0) {
+         alert("No files found to download!");
+         return;
+      }
+
+      const fileName = file.id ? `${file.name}.zip` : `${projectName.replace(/\s+/g, '-').toLowerCase()}.zip`;
+      
+      const blob = await zip.generateAsync({ 
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 }
+      });
+      
       const element = document.createElement("a");
-      const fileBlob = new Blob([JSON.stringify({ folder: file.name, contents: folderContents }, null, 2)], {type: 'application/json'});
-      element.href = URL.createObjectURL(fileBlob);
+      element.href = URL.createObjectURL(blob);
       element.download = fileName;
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
     } else {
+      // Single file download
       const element = document.createElement("a");
       const fileBlob = new Blob([file.content], {type: 'text/plain'});
       element.href = URL.createObjectURL(fileBlob);
@@ -317,7 +337,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
               setDraggedFileId(null);
             }}
             style={{ paddingLeft }}
-            className={`group relative flex items-center pr-2 py-2 md:py-0.5 text-[14px] md:text-[13px] cursor-pointer select-none whitespace-nowrap transition-colors ${
+            className={`group relative flex items-center pr-2 py-2 md:py-1 text-[16px] md:text-[15px] cursor-pointer select-none whitespace-nowrap transition-colors ${
               activeFileId === file.id && !file.isFolder ? 'bg-gray-200 dark:bg-[#37373d] text-gray-900 dark:text-white' : 'text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e]'
             }`}
             onClick={() => file.isFolder ? toggleFolder(file.id) : setActiveFileId(file.id)}
@@ -439,7 +459,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
         {activeView === 'explorer' && (
           <div className="flex-1">
             <div 
-              className="flex items-center px-2 py-2 md:py-0.5 text-[14px] md:text-[13px] font-bold cursor-pointer select-none whitespace-nowrap text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e] transition-colors" 
+              className="group relative flex items-center px-2 py-2 md:py-0.5 text-[14px] md:text-[13px] font-bold cursor-pointer select-none whitespace-nowrap text-gray-700 dark:text-[#cccccc] hover:bg-gray-200/50 dark:hover:bg-[#2a2d2e] transition-colors" 
               onClick={() => toggleFolder('root')} 
               onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setContextMenu({ x: e.clientX, y: e.clientY, file: { id: null, isFolder: true, name: projectName, isRoot: true } }); }}
             >
@@ -449,6 +469,22 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
               ) : (
                 <span className="ml-1">{projectName ? projectName.toUpperCase() : 'WORKSPACE'}</span>
               )}
+
+              {/* 🟢 NEW: Three Dots for Root Folder */}
+              <div 
+                className={`absolute right-1 ${isMobile ? 'opacity-100 p-2' : 'opacity-0 group-hover:opacity-100 p-0.5'} hover:bg-gray-300 dark:hover:bg-[#3c3c3c] rounded transition-opacity`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setContextMenu({ 
+                    x: isMobile ? rect.right - 150 : rect.right, 
+                    y: rect.bottom, 
+                    file: { id: null, isFolder: true, name: projectName, isRoot: true } 
+                  });
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+              </div>
             </div>
             {expandedFolders.includes('root') && renderTree(null, 1)}
           </div>

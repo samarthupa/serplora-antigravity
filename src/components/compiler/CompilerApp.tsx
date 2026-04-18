@@ -128,58 +128,69 @@ export default function CompilerApp({ title, initialFiles }: any) {
     }
   };
 
-  const runCode = () => {
+ const runCode = () => {
     const htmlFile = files.find((f: any) => f.name.endsWith('.html'));
     if (!htmlFile) {
       setLogs([{ method: 'error', data: 'No HTML file found to run.', time: new Date().toLocaleTimeString() }]);
-      if (isMobile) setMobileActiveTab('console'); // Go to console to see error on mobile
+      if (isMobile) setMobileActiveTab('console');
       return;
     }
 
-    let rawHtml = htmlFile.content;
+    // 🌟 1. DOMParser Implementation
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlFile.content, 'text/html');
 
-    rawHtml = rawHtml.replace(/<link\s+[^>]*href=["']([^"']*\.css)["'][^>]*>/gi, (match: string, filename: string) => {
-      const cssFile = files.find((f: any) => f.name === filename);
-      return cssFile ? `<style>\n${cssFile.content}\n</style>` : match;
+    // Safely inject CSS
+    doc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href) {
+        const cssFile = files.find((f: any) => f.name === href);
+        if (cssFile) {
+          const style = document.createElement('style');
+          style.innerHTML = `\n/* Source: ${href} */\n${cssFile.content}`;
+          link.replaceWith(style);
+        }
+      }
     });
 
-    rawHtml = rawHtml.replace(/<script\s+[^>]*src=["']([^"']*\.js)["'][^>]*>[\s\S]*?<\/script>/gi, (match: string, filename: string) => {
-      const jsFile = files.find((f: any) => f.name === filename);
-      return jsFile ? `<script>\n${jsFile.content}\n<\/script>` : match;
+    // Safely inject JS
+    doc.querySelectorAll('script[src]').forEach((script) => {
+      const src = script.getAttribute('src');
+      if (src) {
+        const jsFile = files.find((f: any) => f.name === src);
+        if (jsFile) {
+          script.removeAttribute('src');
+          script.innerHTML = `\n/* Source: ${src} */\n${jsFile.content}`;
+        }
+      }
     });
 
-    const consoleInterceptor = `
-      <script>
-        (function() {
-          const originalConsole = window.console;
-          window.console = {
-            log: function(...args) { originalConsole.log(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'log', data: args.map(String).join(' ') }, '*'); },
-            error: function(...args) { originalConsole.error(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'error', data: args.map(String).join(' ') }, '*'); },
-            warn: function(...args) { originalConsole.warn(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'warn', data: args.map(String).join(' ') }, '*'); },
-            info: function(...args) { originalConsole.info(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'info', data: args.map(String).join(' ') }, '*'); }
-          };
-          window.onerror = function(message, source, lineno, colno, error) {
-            window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'error', data: message + ' at line ' + lineno }, '*');
-            return false;
-          };
-        })();
-      </script>
+    // Inject Console Interceptor
+    const consoleInterceptor = document.createElement('script');
+    consoleInterceptor.innerHTML = `
+      (function() {
+        const originalConsole = window.console;
+        window.console = {
+          log: function(...args) { originalConsole.log(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'log', data: args.map(String).join(' ') }, '*'); },
+          error: function(...args) { originalConsole.error(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'error', data: args.map(String).join(' ') }, '*'); },
+          warn: function(...args) { originalConsole.warn(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'warn', data: args.map(String).join(' ') }, '*'); },
+          info: function(...args) { originalConsole.info(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'info', data: args.map(String).join(' ') }, '*'); }
+        };
+        window.onerror = function(message, source, lineno, colno, error) {
+          window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'error', data: message + ' at line ' + lineno }, '*');
+          return false;
+        };
+      })();
     `;
-
-    if (rawHtml.includes('<head>')) {
-      rawHtml = rawHtml.replace('<head>', '<head>\n' + consoleInterceptor);
-    } else {
-      rawHtml = consoleInterceptor + '\n' + rawHtml;
-    }
+    
+    if (doc.head) doc.head.insertBefore(consoleInterceptor, doc.head.firstChild);
+    else doc.insertBefore(consoleInterceptor, doc.firstChild);
 
     setLogs([]); 
-    setPreviewContent(rawHtml);
+    setPreviewContent("<!DOCTYPE html>\n" + doc.documentElement.outerHTML);
     setIsPreviewOpen(true);
     
-    // Switch to preview tab automatically on mobile
-    if (isMobile) {
-      setMobileActiveTab('preview');
-    }
+    if (isMobile) setMobileActiveTab('preview');
   };
 
   const toggleFullscreen = () => {
@@ -313,28 +324,35 @@ export default function CompilerApp({ title, initialFiles }: any) {
                 </div>
               )}
             </div>
-            <iframe srcDoc={previewContent} className="flex-1 w-full border-none bg-white" title="preview" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
+            {/* 🌟 2. Iframe Fix */}
+            <iframe 
+              srcDoc={previewContent} 
+              className="flex-1 w-full border-none bg-white" 
+              title="preview" 
+              sandbox="allow-scripts allow-same-origin allow-modals"
+              style={{ pointerEvents: isResizingPreview ? 'none' : 'auto' }}
+            ></iframe>
           </div>
         )}
       </div>
 
-{/* Footer Area: Status Bar (Responsive) */}
-      <div className="h-[22px] bg-[#3c3c3c] flex items-center px-2 text-xs text-white select-none shrink-0 z-50">
+        {/* Footer Area: Status Bar (Responsive & Theme Friendly) */}
+      <div className="h-[22px] bg-gray-200 dark:bg-[#3c3c3c] transition-colors flex items-center px-2 text-xs text-gray-700 dark:text-[#cccccc] select-none shrink-0 z-50">
         
         {/* Hidden on mobile, visible on desktop */}
-        <div className="hidden md:flex items-center h-full px-2 cursor-pointer hover:bg-white/15 gap-1.5 opacity-90 text-[11px] tracking-wide">
+        <div className="hidden md:flex items-center h-full px-2 cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 gap-1.5 text-[11px] tracking-wide transition-colors">
            {getActiveFilePath()}
         </div>
 
         <div className="ml-auto flex items-center h-full">
            {/* Visible on both mobile and desktop */}
-           <div className="px-2 h-full flex items-center cursor-pointer hover:bg-white/15">
+           <div className="px-2 h-full flex items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">
              Ln {activeFile?.content ? activeFile.content.split('\n').length : 0}, Ch {activeFile?.content ? activeFile.content.length : 0}
            </div>
            
            {/* Hidden on mobile, visible on desktop */}
-           <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-white/15">UTF-8</div>
-           <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-white/15">{activeFile?.language?.toUpperCase() || 'TEXT'}</div>
+           <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">UTF-8</div>
+           <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">{activeFile?.language?.toUpperCase() || 'TEXT'}</div>
         </div>
       </div>
     </div>

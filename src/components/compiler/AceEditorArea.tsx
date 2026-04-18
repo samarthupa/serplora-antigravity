@@ -36,11 +36,10 @@ export default function AceEditorArea({
     };
   }, [isResizingConsole]);
 
-  const handleCodeChange = (newValue: string) => {
-    if (!activeFile) return;
+  const handleCodeChange = (newValue: string, fileId: string) => {
     setFiles((prevFiles: any) => 
       prevFiles.map((file: any) => 
-        file.id === activeFile.id ? { ...file, content: newValue } : file
+        file.id === fileId ? { ...file, content: newValue } : file
       )
     );
   };
@@ -108,26 +107,35 @@ export default function AceEditorArea({
 
 
         <div className="flex-1 relative bg-white dark:bg-[#1e1e1e]">
-          {activeFile ? (
-            <ReactAce
-              mode={activeFile.language || 'javascript'}
-              theme={isDarkMode ? "tomorrow_night" : "github"}
-              onChange={handleCodeChange}
-              value={activeFile.content}
-              name="ace-editor"
-              width="100%"
-              height="100%"
-              showPrintMargin={false}
-              setOptions={{ fontSize: 14, showLineNumbers: true, tabSize: 2, useWorker: false }}
-              style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
-              commands={[
-                {
-                  name: 'saveFile',
-                  bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-                  exec: () => { alert("File saved!"); }
-                }
-              ]}
-            />
+          {/* 🌟 4. Editor Memory: Render all open tabs but hide inactive ones */}
+          {openTabs.length > 0 ? (
+            openTabs.map((tabFile: any) => (
+              <div 
+                key={tabFile.id} 
+                className="absolute inset-0"
+                style={{ display: activeFileId === tabFile.id ? 'block' : 'none' }}
+              >
+                <ReactAce
+                  mode={tabFile.language || 'javascript'}
+                  theme={isDarkMode ? "tomorrow_night" : "github"}
+                  onChange={(val) => handleCodeChange(val, tabFile.id)}
+                  value={tabFile.content}
+                  name={`ace-editor-${tabFile.id}`}
+                  width="100%"
+                  height="100%"
+                  showPrintMargin={false}
+                  setOptions={{ fontSize: 14, showLineNumbers: true, tabSize: 2, useWorker: false }}
+                  style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
+                  commands={[
+                    {
+                      name: 'saveFile',
+                      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
+                      exec: () => { alert("File saved!"); }
+                    }
+                  ]}
+                />
+              </div>
+            ))
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 dark:text-[#3c3c3c]">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 mb-4 opacity-30"><path d="M17.5 2L9.5 10.5L4 6.5L1 8L5 12L1 16L4 17.5L9.5 13.5L17.5 22L23 19.5V4.5L17.5 2Z" fill="currentColor"/><path d="M17.5 7.5V16.5L11 12L17.5 7.5Z" fill="currentColor"/></svg>
