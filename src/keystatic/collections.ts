@@ -81,14 +81,7 @@ export const lessons = collection({
         content: fields.markdoc({ 
             label: 'Content',
             options: { image: { directory: 'public/images/lessons', publicPath: '/images/lessons/' } },
-            components: {
-                codeEditor: block({
-                    label: '▶️ Interactive Code Editor',
-                    ContentView: KeystaticCodePreview,
-                    schema: { language: fields.text({ label: 'Language', defaultValue: 'javascript' }), code: fields.text({ label: 'Initial Code', multiline: true }) }
-                }),
-                ...customCodeBlocks
-            }
+            components: customCodeBlocks // Much cleaner!
         }),
         customJs: fields.text({ label: 'Custom JavaScript', multiline: true }),
     },

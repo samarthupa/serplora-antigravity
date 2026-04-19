@@ -1,5 +1,13 @@
 {
-  "headline": "Our Articles",
+  "headline": "Articles and Guides",
   "subheadline": "Read the latest updates, stories, and announcements.",
-  "hiddenPosts": []
+  "hiddenPosts": [],
+  "postsPerPage": 10,
+  "paginationTitleTemplate": " - Page {page}",
+  "noindexPaginated": false,
+  "seo": {
+    "metaTitle": "Articles and Guides - Serplora Academy",
+    "robotsIndex": true,
+    "robotsFollow": true
+  }
 }

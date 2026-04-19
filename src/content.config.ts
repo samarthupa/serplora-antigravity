@@ -183,6 +183,11 @@ const blogPage = defineCollection({
     subheadline: z.string().optional(),
     hiddenPosts: z.array(z.string()).optional().default([]),
     
+    // 🟢 NEW: Validate Pagination Settings
+    postsPerPage: z.number().default(9),
+    paginationTitleTemplate: z.string().default(' - Page {page}'),
+    noindexPaginated: z.boolean().default(true),
+    
     // Inject SEO Schema
     seo: seoSchema,
   })

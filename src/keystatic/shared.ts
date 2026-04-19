@@ -1,6 +1,7 @@
 import { fields } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
 import { KeystaticPreformattedPreview } from '../components/keystatic/KeystaticPreformattedPreview';
+import { KeystaticCodePreview } from '../components/keystatic/KeystaticCodePreview';
 
 export const seoSchema = fields.object({
     metaTitle: fields.text({ label: 'Meta Title', description: 'Overrides the default page title. Leave blank to auto-generate.' }),
@@ -16,6 +17,14 @@ export const customCodeBlocks = {
         ContentView: KeystaticPreformattedPreview,
         schema: {
             text: fields.text({ label: 'Raw Text / Terminal Output', multiline: true })
+        }
+    }),
+    codeEditor: block({
+        label: '▶️ Interactive Code Editor',
+        ContentView: KeystaticCodePreview,
+        schema: { 
+            language: fields.text({ label: 'Language', defaultValue: 'javascript' }), 
+            code: fields.text({ label: 'Initial Code', multiline: true }) 
         }
     })
 };

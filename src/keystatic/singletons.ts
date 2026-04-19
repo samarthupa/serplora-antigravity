@@ -51,6 +51,24 @@ export const blogPage = singleton({
         headline: fields.text({ label: 'Headline', defaultValue: 'Our Blog' }),
         subheadline: fields.text({ label: 'Subheadline', multiline: true }),
         hiddenPosts: fields.array(fields.relationship({ label: 'Blog Post', collection: 'posts' }), { label: 'Hide Specific Posts' }),
+        
+        // 🟢 NEW: Pagination Settings
+        postsPerPage: fields.integer({ 
+            label: 'Posts Per Page', 
+            defaultValue: 9, 
+            validation: { min: 1 } 
+        }),
+        paginationTitleTemplate: fields.text({ 
+            label: 'Pagination Title Template', 
+            defaultValue: ' - Page {page}', 
+            description: 'Appended to the meta title on page 2+ (Use {page} as a variable).' 
+        }),
+        noindexPaginated: fields.checkbox({ 
+            label: 'Noindex Paginated Pages', 
+            defaultValue: true, 
+            description: 'Tell Google not to index Page 2, Page 3, etc. (Recommended to save crawl budget).' 
+        }),
+        
         seo: seoSchema,
     },
 });

@@ -1,5 +1,9 @@
 {
-  "headline": "Tutorials & Guides",
+  "headline": "Tutorials",
   "subheadline": "Explore our latest guides and learn step-by-step with state-of-the-art tutorials.",
-  "hiddenTutorials": []
+  "hiddenTutorials": [],
+  "seo": {
+    "robotsIndex": true,
+    "robotsFollow": true
+  }
 }
