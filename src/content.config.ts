@@ -265,6 +265,15 @@ const homePage = defineCollection({
   })
 });
 
+// 🟢 NEW: Define the Root Pages collection for Astro
+const pages = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/pages" }),
+  schema: z.object({
+    title: z.string().optional(),
+    seo: seoSchema, // Don't strip SEO data!
+  })
+});
+
 // 8. EXPORT ALL COLLECTIONS (Make sure to export the new ones!)
 export const collections = { 
   categories, 
@@ -282,4 +291,5 @@ export const collections = {
   sidebarAds,
   homePage,
   compilers,
+  pages,
 };

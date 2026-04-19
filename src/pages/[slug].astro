@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+// 1. Generate static paths for every page in the Keystatic "pages" collection
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  
+  return pages.map((page) => {
+    // We split it to only grab "folder-name" so the URL stays clean (e.g., /about).
+    const cleanSlug = page.id.split('/')[0];
+    
+    return {
+      params: { slug: cleanSlug }, 
+      props: { page },
+    };
+  });
+}
+
+// 2. Get the page data for the current route
+const { page } = Astro.props;
+const { Content } = await render(page);
+---
+
+<Layout 
+  seo={page.data.seo} 
+  titleFallback={page.data.title}
+>
+  <main class="w-full bg-transparent py-10 md:py-20 font-['Outfit',sans-serif] min-h-[70vh]">
+    <article class="max-w-[900px] mx-auto px-6">
+      
+      <header class="mb-10 md:mb-12 border-b border-subtle pb-8">
+        <h1 class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-4">
+          {page.data.title}
+        </h1>
+      </header>
+
+      <div class="markdown-content text-[16px] md:text-[20px] leading-[1.7] md:leading-[1.8] pb-16 font-['Outfit',sans-serif]">
+        <Content />
+      </div>
+
+    </article>
+  </main>
+</Layout>
+
+<style is:global>
+  .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 {
+    color: var(--color-tx-main); font-weight: 800; letter-spacing: -0.025em; margin-top: 2em; margin-bottom: 0.75em;
+  }
+  .markdown-content h2 { font-size: 1.75rem; line-height: 1.3; }
+  .markdown-content h3 { font-size: 1.4rem; line-height: 1.3; }
+  
+  @media (min-width: 768px) {
+    .markdown-content h2 { font-size: 2rem; }
+    .markdown-content h3 { font-size: 1.5rem; }
+  }
+  
+  .markdown-content p { color: var(--color-tx-main); margin-bottom: 1.5em; opacity: 0.8; }
+  .markdown-content p:last-child { margin-bottom: 0; }
+  .markdown-content strong { color: var(--color-tx-main); font-weight: 700; }
+  
+  .markdown-content a { color: var(--color-brand); text-decoration: none; font-weight: 500; }
+  .markdown-content a:hover { text-decoration: underline; }
+
+  .markdown-content ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1.5em; color: var(--color-tx-main); opacity: 0.8; }
+  .markdown-content ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1.5em; color: var(--color-tx-main); opacity: 0.8; }
+  .markdown-content li { margin-bottom: 0.5em; padding-left: 0.25em; }
+
+  /* Dark mode text overrides */
+  .dark .markdown-content h1,
+  .dark .markdown-content h2,
+  .dark .markdown-content h3,
+  .dark .markdown-content h4,
+  .dark .markdown-content p,
+  .dark .markdown-content ul,
+  .dark .markdown-content ol {
+    color: var(--color-tx-muted);
+  }
+</style>

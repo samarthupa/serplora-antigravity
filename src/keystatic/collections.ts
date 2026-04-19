@@ -94,6 +94,22 @@ export const lessons = collection({
     },
 });
 
+export const pages = collection({
+  label: 'Root Pages',
+  slugField: 'title',
+  path: 'src/content/pages/*/',
+  format: { contentField: 'content' },
+  schema: {
+    // 🟢 Fix: Added slug label to expose the URL editing
+    title: fields.slug({ name: { label: 'Title' }, slug: { label: 'SEO Slug' } }),
+    
+    // 🟢 Fix: Injected your global SEO schema
+    seo: seoSchema,
+    
+    content: fields.markdoc({ label: 'Content' }),
+  },
+});
+
 export const compilers = collection({
     label: 'Compilers',
     slugField: 'title',

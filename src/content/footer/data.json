@@ -1,24 +1,27 @@
 {
   "brand": {
-    "show": false,
-    "text": ""
+    "show": false
   },
-  "description": "Building state-of-the-art tools for the web.",
+  "description": "Learn, write, and run code in one platform.",
   "columns": [
     {
       "title": "Product",
       "links": [
         {
-          "label": "Features",
-          "url": "#"
-        },
-        {
-          "label": "Pricing",
-          "url": "#"
+          "label": "Compilers",
+          "url": "/compilers"
         },
         {
           "label": "Tutorials",
           "url": "/tutorials"
+        },
+        {
+          "label": "Quizzes",
+          "url": "/quizzes"
+        },
+        {
+          "label": "Articles and Guides",
+          "url": "/articles"
         }
       ]
     },
@@ -27,15 +30,19 @@
       "links": [
         {
           "label": "About Us",
-          "url": "#"
+          "url": "/about"
         },
         {
-          "label": "Contact",
-          "url": "#"
+          "label": "Contact Us",
+          "url": "/contact"
         },
         {
-          "label": "Careers",
-          "url": "#"
+          "label": "Privacy Policy",
+          "url": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Service (ToS)",
+          "url": "/tos"
         }
       ]
     }
