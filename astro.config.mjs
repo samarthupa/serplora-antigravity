@@ -11,9 +11,13 @@ const isLocalDev = process.argv.includes('dev');
 export default defineConfig({
   site: 'https://serplora.com',
   output: 'static', 
+  
+  // 👇 1. Tell Astro to build links without trailing slashes
+  trailingSlash: 'never',
 
-  // Rename the default folder to assets
   build: {
+    // 👇 2. Output flat files (e.g., articles.html) so Cloudflare handles the redirects automatically
+    format: 'file', 
     assets: 'assets',
     inlineStylesheets: 'always'
   },
