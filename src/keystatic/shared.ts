@@ -1,7 +1,9 @@
+// src/keystatic/shared.ts
 import { fields } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
 import { KeystaticPreformattedPreview } from '../components/keystatic/KeystaticPreformattedPreview';
 import { KeystaticCodePreview } from '../components/keystatic/KeystaticCodePreview';
+import { KeystaticHtmlPreview } from '../components/keystatic/KeystaticHtmlPreview'; // 🟢 NEW IMPORT
 
 export const seoSchema = fields.object({
     metaTitle: fields.text({ label: 'Meta Title', description: 'Overrides the default page title. Leave blank to auto-generate.' }),
@@ -26,5 +28,27 @@ export const customCodeBlocks = {
             language: fields.text({ label: 'Language', defaultValue: 'javascript' }), 
             code: fields.text({ label: 'Initial Code', multiline: true }) 
         }
+    }),
+    // 🟢 NEW: Raw HTML Block
+    rawHtml: block({
+        label: '🌐 Raw HTML',
+        ContentView: KeystaticHtmlPreview,
+        schema: {
+            html: fields.text({ label: 'HTML Code', multiline: true })
+        }
     })
+};
+
+// Global Editor Factory
+export const createGlobalEditor = (label: string, imageFolder?: string) => {
+    return fields.markdoc({
+        label,
+        components: customCodeBlocks, // Globally applied to all editors!
+        options: imageFolder ? {
+            image: {
+                directory: `public/images/${imageFolder}`,
+                publicPath: `/images/${imageFolder}/`,
+            }
+        } : undefined,
+    });
 };

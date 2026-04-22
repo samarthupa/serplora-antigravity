@@ -1,15 +1,14 @@
+// src/keystatic/singletons.ts
 import { singleton, fields } from '@keystatic/core';
-import { seoSchema } from './shared';
+import { seoSchema, createGlobalEditor } from './shared';
 
 export const homePage = singleton({
     label: 'Home Page',
     path: 'src/content/homePage/index',
     format: { contentField: 'content' },
     schema: {
-        headline: fields.text({ label: 'Main Headline', defaultValue: 'Welcome to Serplora' }),
-        subheadline: fields.text({ label: 'Subheadline', multiline: true }),
         seo: seoSchema,
-        content: fields.markdoc({ label: 'Page Content', options: { image: { directory: 'public/images/pages', publicPath: '/images/pages/' } } }),
+        content: createGlobalEditor('Page Content', 'pages'),
     },
 });
 

@@ -1,0 +1,9 @@
+---
+// src/components/ui/RawHtml.astro
+interface Props {
+  html: string;
+}
+const { html } = Astro.props;
+---
+{/* set:html tells Astro to render the string as actual DOM elements instead of text */}
+<Fragment set:html={html} />

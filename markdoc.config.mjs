@@ -1,3 +1,4 @@
+// markdoc.config.mjs
 import { defineMarkdocConfig, component } from '@astrojs/markdoc/config';
 
 export default defineMarkdocConfig({
@@ -22,6 +23,13 @@ export default defineMarkdocConfig({
       render: component('./src/components/ui/PreformattedText.astro'),
       attributes: {
         text: { type: String }
+      }
+    },
+    // 🟢 NEW: Raw HTML Tag
+    rawHtml: {
+      render: component('./src/components/ui/RawHtml.astro'),
+      attributes: {
+        html: { type: String }
       }
     }
   }

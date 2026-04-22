@@ -1,7 +1,6 @@
+// src/keystatic/collections.ts
 import { collection, fields } from '@keystatic/core';
-import { block } from '@keystatic/core/content-components';
-import { seoSchema, customCodeBlocks } from './shared';
-import { KeystaticCodePreview } from '../components/keystatic/KeystaticCodePreview';
+import { seoSchema, createGlobalEditor } from './shared';
 
 export const categories = collection({
     label: 'Categories',
@@ -27,7 +26,7 @@ export const posts = collection({
     previewUrl: '/articles/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Title' }, slug: { label: 'SEO Slug' } }),
-        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         category: fields.relationship({ label: 'Category', collection: 'categories', validation: { isRequired: false } }),
         tags: fields.relationship({ label: 'Tags', collection: 'tags', validation: { isRequired: false }, many: true }),
@@ -42,7 +41,7 @@ export const posts = collection({
             { label: 'FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
         ),
         seo: seoSchema,
-        content: fields.markdoc({ label: 'Content', options: { image: { directory: 'public/images/posts', publicPath: '/images/posts/' } }, components: customCodeBlocks }),
+        content: createGlobalEditor('Content', 'posts'),
         customJs: fields.text({ label: 'Custom JavaScript', multiline: true }),
     },
 });
@@ -55,13 +54,13 @@ export const tutorials = collection({
     previewUrl: '/tutorials/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Series Title' }, slug: { label: 'SEO Slug' } }),
-        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         category: fields.relationship({ label: 'Category', collection: 'categories', validation: { isRequired: false } }),
         tags: fields.relationship({ label: 'Tags', collection: 'tags', validation: { isRequired: false }, many: true }),
         excerpt: fields.text({ label: 'Excerpt', multiline: true }),
         seo: seoSchema,
-        content: fields.markdoc({ label: 'Introduction Content', options: { image: { directory: 'public/images/tutorials', publicPath: '/images/tutorials/' } }, components: customCodeBlocks }),
+        content: createGlobalEditor('Introduction Content', 'tutorials'),
         customJs: fields.text({ label: 'Custom JavaScript', multiline: true }),
     },
 });
@@ -73,16 +72,12 @@ export const lessons = collection({
     format: { contentField: 'content' },
     schema: {
         title: fields.slug({ name: { label: 'Internal Title' }, slug: { label: 'Folder ID' } }),
-        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         urlSlug: fields.text({ label: 'URL Slug' }),
         tutorial: fields.relationship({ label: 'Belongs to Tutorial Series', collection: 'tutorials', validation: { isRequired: true } }),
         order: fields.integer({ label: 'Lesson Order', defaultValue: 1 }),
         seo: seoSchema,
-        content: fields.markdoc({ 
-            label: 'Content',
-            options: { image: { directory: 'public/images/lessons', publicPath: '/images/lessons/' } },
-            components: customCodeBlocks // Much cleaner!
-        }),
+        content: createGlobalEditor('Content', 'lessons'),
         customJs: fields.text({ label: 'Custom JavaScript', multiline: true }),
     },
 });
@@ -93,13 +88,9 @@ export const pages = collection({
   path: 'src/content/pages/*/',
   format: { contentField: 'content' },
   schema: {
-    // 🟢 Fix: Added slug label to expose the URL editing
     title: fields.slug({ name: { label: 'Title' }, slug: { label: 'SEO Slug' } }),
-    
-    // 🟢 Fix: Injected your global SEO schema
     seo: seoSchema,
-    
-    content: fields.markdoc({ label: 'Content' }),
+    content: createGlobalEditor('Content', 'pages'),
   },
 });
 
@@ -111,7 +102,7 @@ export const compilers = collection({
     previewUrl: '/compilers/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Compiler Name' }, slug: { label: 'SEO Slug' } }),
-        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         excerpt: fields.text({ label: 'Short Description', multiline: true }),
         seo: seoSchema,
@@ -123,7 +114,7 @@ export const compilers = collection({
             }),
             { label: 'Workspace Starter Files', itemLabel: props => props.fields.filename.value || 'New File' }
         ),
-        content: fields.markdoc({ label: 'Instructions', options: { image: { directory: 'public/images/compilers', publicPath: '/images/compilers/' } } }),
+        content: createGlobalEditor('Instructions', 'compilers'),
     },
 });
 
@@ -135,11 +126,11 @@ export const quizzes = collection({
     previewUrl: '/quizzes/{slug}',
     schema: {
         title: fields.slug({ name: { label: 'Quiz Series Title' }, slug: { label: 'SEO Slug' } }),
-        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         excerpt: fields.text({ label: 'Excerpt', multiline: true }),
         seo: seoSchema,
-        content: fields.markdoc({ label: 'Introduction Content', options: { image: { directory: 'public/images/quizzes', publicPath: '/images/quizzes/' } } }),
+        content: createGlobalEditor('Introduction Content', 'quizzes'),
     },
 });
 
@@ -150,7 +141,7 @@ export const quizItems = collection({
     format: { contentField: 'content' },
     schema: {
         title: fields.slug({ name: { label: 'Internal Title' }, slug: { label: 'Folder ID' } }),
-        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }), // 🟢 NEW
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         urlSlug: fields.text({ label: 'URL Slug' }),
         quizParent: fields.relationship({ label: 'Belongs to Quiz Series', collection: 'quizzes', validation: { isRequired: true } }),
         order: fields.integer({ label: 'Quiz Order', defaultValue: 1 }),
@@ -164,6 +155,6 @@ export const quizItems = collection({
             { label: 'Interactive Questions', itemLabel: props => props.fields.questionText.value || 'New Question' }
         ),
         bulkQuestionsJson: fields.text({ label: 'Bulk Questions (Raw JSON)', multiline: true }),
-        content: fields.markdoc({ label: 'Pre-Quiz Content', options: { image: { directory: 'public/images/quizItems', publicPath: '/images/quizItems/' } } }),
+        content: createGlobalEditor('Pre-Quiz Content', 'quizItems'),
     },
 });

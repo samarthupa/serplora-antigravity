@@ -3,34 +3,23 @@
 import { getEntry, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 
-// Fetch home page data from Keystatic. Note the ID is now 'index' instead of 'data'
+// Fetch home page data from Keystatic.
 const homeEntry = await getEntry('homePage', 'index'); 
-const headline = homeEntry?.data?.headline || 'Welcome to Serplora';
-const subheadline = homeEntry?.data?.subheadline || 'Building state-of-the-art tools for the web.';
 
-// 🟢 Render the Markdoc content from the CMS!
+// Render the content from the CMS!
 const { Content } = homeEntry ? await render(homeEntry) : { Content: () => null };
 ---
 
-{/* Pass SEO data and fallbacks to Layout */}
+{/* Pass SEO data to Layout, using basic fallbacks since the dynamic header is gone */}
 <Layout 
   seo={homeEntry?.data?.seo}
-  titleFallback={headline}
-  excerptFallback={subheadline}
+  titleFallback="Serplora"
+  excerptFallback="Serplora - Building state-of-the-art tools for the web."
 >
   <main class="w-full max-w-4xl mx-auto px-6 py-20 md:py-32 flex flex-col">
     
-    <header class="mb-16">
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-tx-main mb-6">
-        {headline}
-      </h1>
-      <p class="text-lg md:text-xl text-tx-muted font-medium max-w-2xl leading-relaxed">
-        {subheadline}
-      </p>
-    </header>
-
-    {/* 🟢 This renders the rich text you write inside the Keystatic Editor */}
-    <div class="markdown-content text-[16px] md:text-[20px] leading-[1.7] md:leading-[1.8] font-['Outfit',sans-serif]">
+    {/* This renders the custom HTML/Rich Text you write inside the Keystatic Editor */}
+    <div class="html-content">
       {homeEntry && <Content />}
     </div>
 
