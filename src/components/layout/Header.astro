@@ -20,11 +20,11 @@ const primaryBtn = {
     <a href="/" class="text-[20px] font-[800] text-tx-main tracking-[-0.5px] shrink-0 outline-none flex items-center gap-2">
       {logo && (
         <>
-          {/* Light theme logo: hides when dark mode is active */}
-          <img src={logo} alt={siteTitle} class="h-10 w-auto object-contain dark:hidden" />
-          
-          {/* Dark theme logo: shows ONLY when dark mode is active */}
-          <img src={logoDark} alt={siteTitle} class="h-10 w-auto object-contain hidden dark:block" />
+          {/* Light theme logo */}
+<img src={logo} alt={siteTitle} width="160" height="40" class="h-10 w-auto object-contain dark:hidden" />
+
+{/* Dark theme logo */}
+<img src={logoDark} alt={siteTitle} width="160" height="40" class="h-10 w-auto object-contain hidden dark:block" />
         </>
       )}
       {!logo && <>{siteTitle}<span class="text-blue-500">.</span></>}
