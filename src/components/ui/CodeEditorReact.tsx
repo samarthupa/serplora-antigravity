@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
@@ -20,13 +20,26 @@ export default function CodeEditorReact({ code, language }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<{ text: string; isError: boolean } | null>(null);
-  const [isOutputVisible, setIsOutputVisible] = useState(true); // Add this new line
+  const [isOutputVisible, setIsOutputVisible] = useState(true);
 
-  const extensions = [];
-  if (language === 'javascript' || language === 'js') extensions.push(javascript());
-  if (language === 'python' || language === 'py') extensions.push(python());
-  
-  extensions.push(EditorView.contentAttributes.of({ 'aria-label': 'Interactive code editor' }));
+  // Memoize extensions to prevent internal CodeMirror resets on scroll
+  const extensions = useMemo(() => {
+    const exts = [];
+    if (language === 'javascript' || language === 'js') exts.push(javascript());
+    if (language === 'python' || language === 'py') exts.push(python());
+    
+    exts.push(EditorView.contentAttributes.of({ 'aria-label': 'Interactive code editor' }));
+    return exts;
+  }, [language]);
+
+  // Force layout recalculation when lazy-loaded into the viewport
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // 1. Scroll Detection Logic
   useEffect(() => {
@@ -104,7 +117,7 @@ export default function CodeEditorReact({ code, language }) {
     if (isRunning) return;
     setIsRunning(true);
     setOutput(null);
-    setIsOutputVisible(true); // Add this so the terminal pops open when running code
+    setIsOutputVisible(true);
     
     try {
       const response = await fetch('https://samarthu78-s-python-compiler.hf.space/run', {
