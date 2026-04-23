@@ -276,33 +276,19 @@ if (adsData?.data) {
 
     const codeBlocks = document.querySelectorAll('.markdown-content pre');
     codeBlocks.forEach((preBlock) => {
-      // Target the inner <code> tag to extract text accurately
-      const codeElement = preBlock.querySelector('code');
-      
-      // Use textContent instead of innerText to prevent the browser from forcing a layout recalculation
-      const textToCopy = codeElement ? codeElement.textContent : preBlock.textContent;
-      
+      const textToCopy = preBlock.innerText || preBlock.textContent;
       const copyButton = document.createElement('button');
       copyButton.className = 'copy-code-btn';
       copyButton.textContent = 'Copy';
-      
-      // Hide the button from layout calculations and screen readers to prevent micro-shifts
-      copyButton.setAttribute('aria-hidden', 'true');
-      
       preBlock.appendChild(copyButton);
 
       copyButton.addEventListener('click', async () => {
         try {
-          await navigator.clipboard.writeText(textToCopy.trim());
+          await navigator.clipboard.writeText(textToCopy);
           copyButton.textContent = 'Copied!';
           copyButton.classList.add('copied');
-          setTimeout(() => { 
-            copyButton.textContent = 'Copy'; 
-            copyButton.classList.remove('copied'); 
-          }, 2000);
-        } catch (err) { 
-          copyButton.textContent = 'Error'; 
-        }
+          setTimeout(() => { copyButton.textContent = 'Copy'; copyButton.classList.remove('copied'); }, 2000);
+        } catch (err) { copyButton.textContent = 'Error'; }
       });
     });
   });
