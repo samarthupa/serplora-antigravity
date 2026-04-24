@@ -400,6 +400,9 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
       className="bg-gray-50 dark:bg-[#252526] flex flex-col h-full shrink-0 border-r border-gray-300 dark:border-[#3c3c3c] overflow-hidden relative transition-colors focus:outline-none"
       tabIndex={0} 
       onKeyDown={(e) => {
+        // 🟢 FIX: Ignore all global shortcuts (like Backspace/Delete) if typing in an input
+        if (renamingId !== null || (e.target as HTMLElement).tagName === 'INPUT') return;
+
         if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
           e.preventDefault();
           if (e.shiftKey) handleRedo();

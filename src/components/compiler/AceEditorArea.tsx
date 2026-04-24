@@ -84,13 +84,22 @@ export default function AceEditorArea({
           min-width: 34px !important;
         }
         .mobile-slim-gutter .ace_scroller {
-          left: 34px !important; /* Pulls the code area left to fill the saved space */
+          left: 34px !important;
         }
         .mobile-slim-gutter .ace_gutter-cell {
-          padding-left: 4px !important; /* Removes wasted left space */
-          padding-right: 12px !important; /* Just enough room for the fold arrow */
-          font-size: 11px !important; /* Slightly smaller numbers so they fit perfectly */
-          color: ${isDarkMode ? '#858585' : '#888888'} !important; /* Ensures they stay visible */
+          padding-left: 4px !important;
+          padding-right: 12px !important;
+          font-size: 11px !important;
+          color: ${isDarkMode ? '#858585' : '#888888'} !important;
+        }
+
+        /* 🟢 Hides the horizontal scrollbar ONLY for the file tabs */
+        .scrollbar-hide {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;     /* Firefox */
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;             /* Chrome, Safari, and Opera */
         }
       `}</style>
       

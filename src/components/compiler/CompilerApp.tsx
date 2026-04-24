@@ -255,7 +255,7 @@ export default function CompilerApp({ title, initialFiles }: any) {
     >
      <div className="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] flex items-center select-none shrink-0 transition-colors">
         
-        <div className="flex md:hidden items-center justify-evenly flex-1 px-1">
+        <div className="flex md:hidden items-center justify-between flex-1 px-1">
           {/* 🟢 FIXED: Toggle mobile active tab logic + SVG path */}
           <div onClick={() => setMobileActiveTab(prev => prev === 'files' ? 'editor' : 'files')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
