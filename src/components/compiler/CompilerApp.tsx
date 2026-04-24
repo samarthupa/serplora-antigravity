@@ -39,6 +39,9 @@ export default function CompilerApp({ title, initialFiles }: any) {
   const [projectName, setProjectName] = useState(title || 'Workspace');
   const activeFile = files.find((f: any) => f.id === activeFileId);
 
+  // 🛑 NEW: State for our custom reset confirmation modal
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
   const getActiveFilePath = () => {
     if (!activeFile) return '';
     const path = [activeFile.name];
@@ -145,15 +148,20 @@ export default function CompilerApp({ title, initialFiles }: any) {
     return () => observer.disconnect();
   }, [isPreviewOpen, mobileActiveTab]);
 
+  // 🛑 FIXED: Open custom modal instead of browser confirm
   const handleReset = () => {
-    if (window.confirm("Are you sure you want to reset the compiler? All your changes will be lost.")) {
-      setFiles(initialFiles);
-      setActiveFileId(initialFiles[0]?.id);
-      setOpenFileIds(initialFiles.filter((f: any) => !f.isFolder).map((f: any) => f.id));
-      setProjectName(title || 'Workspace');
-      setPreviewContent('');
-      setLogs([]);
-    }
+    setShowResetConfirm(true);
+  };
+
+  // 🛑 FIXED: Execute the actual reset logic
+  const executeReset = () => {
+    setFiles(initialFiles);
+    setActiveFileId(initialFiles[0]?.id);
+    setOpenFileIds(initialFiles.filter((f: any) => !f.isFolder).map((f: any) => f.id));
+    setProjectName(title || 'Workspace');
+    setPreviewContent('');
+    setLogs([]);
+    setShowResetConfirm(false); // Hide the modal after resetting
   };
 
   const runCode = () => {
@@ -218,6 +226,9 @@ export default function CompilerApp({ title, initialFiles }: any) {
   };
 
   useEffect(() => {
+    // 🛑 Prevent auto-run on mobile devices
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return;
+
     const initTimer = setTimeout(() => {
       runCode();
     }, 150);
@@ -238,15 +249,18 @@ export default function CompilerApp({ title, initialFiles }: any) {
       ref={compilerRef} 
       className={`flex flex-col w-full overflow-hidden font-sans transition-colors bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-[#cccccc] ${
         isAppFullscreen 
-          ? 'h-[100dvh] md:h-screen rounded-none border-none my-0 z-50' 
-          : 'h-[100dvh] my-0 rounded-none border border-gray-300 dark:border-[#3c3c3c] md:h-[calc(100vh-100px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c]'
+          ? 'h-[100dvh] md:h-screen rounded-none border-none my-0 z-50 relative' 
+          : 'h-[100dvh] my-0 rounded-none border border-gray-300 dark:border-[#3c3c3c] md:h-[calc(100vh-100px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] relative'
       }`}
     >
      <div className="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] flex items-center select-none shrink-0 transition-colors">
         
         <div className="flex md:hidden items-center justify-evenly flex-1 px-1">
-          <div onClick={() => setMobileActiveTab('files')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
-             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          {/* 🟢 FIXED: Toggle mobile active tab logic + SVG path */}
+          <div onClick={() => setMobileActiveTab(prev => prev === 'files' ? 'editor' : 'files')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
           </div>
           <div onClick={() => setMobileActiveTab('editor')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'editor' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -357,6 +371,32 @@ export default function CompilerApp({ title, initialFiles }: any) {
            <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">{activeFile?.language?.toUpperCase() || 'TEXT'}</div>
         </div>
       </div>
+
+      {/* 🛑 CUSTOM RESET CONFIRMATION MODAL */}
+      {showResetConfirm && (
+        <div className="absolute inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#3c3c3c] p-6 rounded-lg shadow-xl max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Reset Compiler?</h3>
+            <p className="text-sm text-gray-600 dark:text-[#cccccc] mb-6">
+              Are you sure you want to reset the compiler? All your unsaved changes will be lost.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setShowResetConfirm(false)} 
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-[#cccccc] hover:bg-gray-100 dark:hover:bg-[#3c3c3c] rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={executeReset} 
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition-colors shadow-sm"
+              >
+                Yes, Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

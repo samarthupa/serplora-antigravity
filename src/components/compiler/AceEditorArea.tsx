@@ -76,6 +76,22 @@ export default function AceEditorArea({
         #ace-editor .ace_gutter-active-line.ace_gutter-cell {
           color: ${isDarkMode ? '#cccccc' : '#24292f'};
         }
+
+        /* 📱 Mobile Slim Gutter Overrides - Compact Mode */
+        .mobile-slim-gutter .ace_gutter,
+        .mobile-slim-gutter .ace_gutter-layer {
+          width: 34px !important;
+          min-width: 34px !important;
+        }
+        .mobile-slim-gutter .ace_scroller {
+          left: 34px !important; /* Pulls the code area left to fill the saved space */
+        }
+        .mobile-slim-gutter .ace_gutter-cell {
+          padding-left: 4px !important; /* Removes wasted left space */
+          padding-right: 12px !important; /* Just enough room for the fold arrow */
+          font-size: 11px !important; /* Slightly smaller numbers so they fit perfectly */
+          color: ${isDarkMode ? '#858585' : '#888888'} !important; /* Ensures they stay visible */
+        }
       `}</style>
       
       {/* EDITOR SECTION */}
@@ -124,7 +140,15 @@ export default function AceEditorArea({
                   width="100%"
                   height="100%"
                   showPrintMargin={false}
-                  setOptions={{ fontSize: 14, showLineNumbers: true, tabSize: 2, useWorker: false }}
+                  className={isMobile ? 'mobile-slim-gutter' : ''}
+                  setOptions={{ 
+                    fontSize: 14, 
+                    showLineNumbers: true,  /* 🟢 MUST BE TRUE: Keeps numbers and fold widgets alive */
+                    showGutter: true, 
+                    showFoldWidgets: true, 
+                    tabSize: 2, 
+                    useWorker: false 
+                  }}
                   style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
                   commands={[
                     {
@@ -144,8 +168,9 @@ export default function AceEditorArea({
         </div>
       </div>
 
-      {/* CONSOLE SECTION */}
-      {isConsoleOpen && (
+     {/* CONSOLE SECTION */}
+      {/* 🟢 Ensure the console renders if the mobile tab is active, bypassing the desktop toggle state */}
+      {(isConsoleOpen || (isMobile && mobileActiveTab === 'console')) && (
         <div style={{ height: (isConsoleFullscreen || isMobile) ? '100%' : `${consoleHeight}px` }} 
              className={`${(isMobile && mobileActiveTab !== 'console') ? 'hidden' : 'flex'} flex-col bg-gray-50 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] shrink-0 relative transition-colors`}>
           
