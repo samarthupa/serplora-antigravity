@@ -390,21 +390,25 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
               <svg className="w-4 h-4 ml-4 mr-1.5 text-blue-600 dark:text-[#519aba] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
             )}
 
-            {renamingId === file.id ? (
-              <input 
-                autoFocus
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 w-[80%]"
-                value={renameText}
-                onChange={(e) => setRenameText(e.target.value)}
-                onBlur={handleRenameSubmit}
-                onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
-                onClick={(e) => e.stopPropagation()} 
-              />
-            ) : (
+            {renamingId === 'root' ? (
+                <input 
+                  autoFocus 
+                  type="text"
+                  name="rename_workspace_ignore_autofill"
+                  autoComplete="nope"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-form-type="other"
+                  data-lpignore="true"
+                  className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 ml-1 w-[80%]" 
+                  value={renameText} 
+                  onChange={(e) => setRenameText(e.target.value)} 
+                  onBlur={handleRenameSubmit} 
+                  onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()} 
+                  onClick={(e) => e.stopPropagation()} 
+                />
+              ) : (
               <span className="truncate">{file.name}</span>
             )}
 
