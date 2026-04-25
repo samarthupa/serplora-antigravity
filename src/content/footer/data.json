@@ -49,12 +49,16 @@
   ],
   "socialLinks": [
     {
+      "platform": "youtube",
+      "url": "https://www.youtube.com/@serplora"
+    },
+    {
       "platform": "twitter",
-      "url": "#"
+      "url": "https://x.com/serplora_acad"
     },
     {
       "platform": "github",
-      "url": "#"
+      "url": "https://github.com/serplora-academy"
     }
   ],
   "copyrightText": "© 2026 Serplora. All rights reserved."
