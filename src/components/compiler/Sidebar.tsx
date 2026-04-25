@@ -393,15 +393,9 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
             {renamingId === file.id ? (
               <input 
                 autoFocus
-                type="text"
-                name="rename_file_ignore_autofill"
-                autoComplete="nope"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-                data-form-type="other"
-                data-lpignore="true"
-                className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 w-[80%]"
+                type="search" /* 🟢 THE HACK: Browsers won't inject credit cards into searches */
+                autoComplete="off"
+                className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 w-[80%] [&::-webkit-search-cancel-button]:hidden" /* 🟢 Hides the default search 'X' icon */
                 value={renameText}
                 onChange={(e) => setRenameText(e.target.value)}
                 onBlur={handleRenameSubmit}
@@ -513,11 +507,9 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
               {renamingId === 'root' ? (
                 <input 
                   autoFocus 
+                  type="search"
                   autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 ml-1 w-[80%]" 
+                  className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 ml-1 w-[80%] [&::-webkit-search-cancel-button]:hidden" 
                   value={renameText} 
                   onChange={(e) => setRenameText(e.target.value)} 
                   onBlur={handleRenameSubmit} 
