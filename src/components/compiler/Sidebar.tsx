@@ -93,7 +93,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
     
     updateFilesWithHistory([...files, newItem]);
     setRenamingId(newId);
-    setRenameText(isFolder ? 'New Folder' : 'New File');
+    setRenameText(isFolder ? 'new_folder' : 'untitled.html');
   };
 
   const handleRenameSubmit = () => {
@@ -159,11 +159,29 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
   };
 
   const handleDuplicate = (fileToDuplicate: any) => {
-    let newName = `${fileToDuplicate.name} copy`;
-    let counter = 1;
+    let nameWithoutExt = fileToDuplicate.name;
+    let ext = '';
+    
+    if (!fileToDuplicate.isFolder) {
+      const dotIndex = fileToDuplicate.name.lastIndexOf('.');
+      if (dotIndex !== -1 && dotIndex !== 0) {
+        nameWithoutExt = fileToDuplicate.name.substring(0, dotIndex);
+        ext = fileToDuplicate.name.substring(dotIndex);
+      }
+    }
+
+    // 🟢 FIXED: Extract the base name and any trailing numbers
+    const match = nameWithoutExt.match(/^(.*?)(\d*)$/);
+    const baseName = match ? match[1] : nameWithoutExt;
+    // If it already has a number, increment it. Otherwise, start at 2.
+    let counter = match && match[2] ? parseInt(match[2], 10) + 1 : 2;
+
+    let newName = `${baseName}${counter}${ext}`;
+    
+    // Check if it exists, incrementing if necessary
     while (files.some((f:any) => f.parentId === fileToDuplicate.parentId && f.name.toLowerCase() === newName.toLowerCase())) {
-        newName = `${fileToDuplicate.name} copy ${counter}`;
         counter++;
+        newName = `${baseName}${counter}${ext}`;
     }
 
     const newId = Date.now().toString() + Math.random().toString(36).substring(7);
@@ -183,12 +201,29 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
       updateFilesWithHistory(files.map((f:any) => f.id === clipboard.file.id ? { ...f, parentId: targetParentId } : f));
       setClipboard(null); 
     } else {
-      let newName = `${clipboard.file.name} copy`;
-      let counter = 1;
-      while (files.some((f:any) => f.parentId === targetParentId && f.name.toLowerCase() === newName.toLowerCase())) {
-          newName = `${clipboard.file.name} copy ${counter}`;
-          counter++;
+      
+      let nameWithoutExt = clipboard.file.name;
+      let ext = '';
+      if (!clipboard.file.isFolder) {
+        const dotIndex = clipboard.file.name.lastIndexOf('.');
+        if (dotIndex !== -1 && dotIndex !== 0) {
+          nameWithoutExt = clipboard.file.name.substring(0, dotIndex);
+          ext = clipboard.file.name.substring(dotIndex);
+        }
       }
+
+      // 🟢 FIXED: Apply the exact same numbered logic for pasting
+      const match = nameWithoutExt.match(/^(.*?)(\d*)$/);
+      const baseName = match ? match[1] : nameWithoutExt;
+      let counter = match && match[2] ? parseInt(match[2], 10) + 1 : 2;
+
+      let newName = `${baseName}${counter}${ext}`;
+      
+      while (files.some((f:any) => f.parentId === targetParentId && f.name.toLowerCase() === newName.toLowerCase())) {
+          counter++;
+          newName = `${baseName}${counter}${ext}`;
+      }
+      
       updateFilesWithHistory([...files, { ...clipboard.file, id: newId, parentId: targetParentId, name: newName }]);
     }
   };
@@ -358,6 +393,10 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
             {renamingId === file.id ? (
               <input 
                 autoFocus
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 w-[80%]"
                 value={renameText}
                 onChange={(e) => setRenameText(e.target.value)}
@@ -468,7 +507,19 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
             >
               <svg className={`w-4 h-4 mr-0.5 text-gray-500 dark:text-[#858585] transition-transform ${expandedFolders.includes('root') ? 'rotate-90' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
               {renamingId === 'root' ? (
-                <input autoFocus className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 ml-1 w-[80%]" value={renameText} onChange={(e) => setRenameText(e.target.value)} onBlur={handleRenameSubmit} onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()} onClick={(e) => e.stopPropagation()} />
+                <input 
+                  autoFocus 
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 ml-1 w-[80%]" 
+                  value={renameText} 
+                  onChange={(e) => setRenameText(e.target.value)} 
+                  onBlur={handleRenameSubmit} 
+                  onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()} 
+                  onClick={(e) => e.stopPropagation()} 
+                />
               ) : (
                 <span className="ml-1">{projectName ? projectName.toUpperCase() : 'WORKSPACE'}</span>
               )}

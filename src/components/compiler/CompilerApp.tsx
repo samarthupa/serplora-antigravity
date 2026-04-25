@@ -203,7 +203,16 @@ export default function CompilerApp({ title, initialFiles }: any) {
   };
 
   const runCode = () => {
-    const htmlFile = files.find((f: any) => f.name.endsWith('.html'));
+    // 🟢 FIXED: Try to run the currently active file first. 
+    // If they are editing a .js or .css file, fallback to index.html or the first available HTML file.
+    let htmlFile = null;
+    
+    if (activeFile && activeFile.name.endsWith('.html')) {
+      htmlFile = activeFile;
+    } else {
+      htmlFile = files.find((f: any) => f.name === 'index.html') || files.find((f: any) => f.name.endsWith('.html'));
+    }
+
     if (!htmlFile) {
       setLogs([{ method: 'error', data: 'No HTML file found to run.', time: new Date().toLocaleTimeString() }]);
       if (isMobile) setMobileActiveTab('console');
