@@ -393,9 +393,10 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
             {renamingId === file.id ? (
               <input 
                 autoFocus
-                type="search" /* 🟢 THE HACK: Browsers won't inject credit cards into searches */
+                type="search" 
+                enterKeyHint="done" /* 🟢 THE FIX: Forces the keyboard to show 'Done' or 'Enter' instead of 'Search' */
                 autoComplete="off"
-                className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 w-[80%] [&::-webkit-search-cancel-button]:hidden" /* 🟢 Hides the default search 'X' icon */
+                className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 w-[80%] [&::-webkit-search-cancel-button]:hidden" 
                 value={renameText}
                 onChange={(e) => setRenameText(e.target.value)}
                 onBlur={handleRenameSubmit}
@@ -508,6 +509,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
                 <input 
                   autoFocus 
                   type="search"
+                  enterKeyHint="done" /* 🟢 THE FIX */
                   autoComplete="off"
                   className="bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-[#007acc] outline-none text-[13px] px-1 ml-1 w-[80%] [&::-webkit-search-cancel-button]:hidden" 
                   value={renameText} 
