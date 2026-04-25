@@ -1,6 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content'; // 🟢 Added getEntry
+
+// 🟢 NEW: Fetch data from Keystatic Singleton
+const pageEntry = await getEntry('compilersPage', 'data');
+const headline = pageEntry?.data?.headline || 'Online Compilers';
+const subheadline = pageEntry?.data?.subheadline || 'Write, run, and test code directly in your browser without any installation or setup.';
+const breadcrumbLabel = pageEntry?.data?.breadcrumbTitle || headline || 'compilers';
 
 // Fetch all compilers that are not drafts
 const allCompilers = await getCollection('compilers');
@@ -14,6 +20,12 @@ const seo = {
 
 <Layout seo={seo}>
   <div class="w-full max-w-[1000px] mx-auto px-4 sm:px-6 py-12 md:py-20 font-['Outfit',sans-serif]">
+  {/* 🟢 NEW: Breadcrumb UI */}
+    <nav aria-label="Breadcrumb" class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2">
+      <a href="/" class="hover:text-brand transition-colors">home</a>
+      <span class="opacity-40">/</span>
+      <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
+    </nav>
     
     <div class="text-center mb-12">
       <h1 class="text-3xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">Online Compilers</h1>

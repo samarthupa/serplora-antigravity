@@ -1,0 +1,10 @@
+{
+  "headline": "All Quizzes",
+  "breadcrumbTitle": "quizzes",
+  "subheadline": "Choose a topic below to test your knowledge.",
+  "seo": {
+    "metaTitle": "Online Quizzes",
+    "robotsIndex": true,
+    "robotsFollow": true
+  }
+}

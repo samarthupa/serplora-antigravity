@@ -7,6 +7,7 @@ export const homePage = singleton({
     path: 'src/content/homePage/index',
     format: { contentField: 'content' },
     schema: {
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)' }),
         seo: seoSchema,
         content: createGlobalEditor('Page Content', 'pages'),
     },
@@ -48,6 +49,7 @@ export const blogPage = singleton({
     format: { data: 'json' },
     schema: {
         headline: fields.text({ label: 'Headline', defaultValue: 'Our Blog' }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         subheadline: fields.text({ label: 'Subheadline', multiline: true }),
         hiddenPosts: fields.array(fields.relationship({ label: 'Blog Post', collection: 'posts' }), { label: 'Hide Specific Posts' }),
         
@@ -78,8 +80,35 @@ export const tutorialsPage = singleton({
     format: { data: 'json' },
     schema: {
         headline: fields.text({ label: 'Headline', defaultValue: 'Tutorials & Guides' }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         subheadline: fields.text({ label: 'Subheadline', multiline: true }),
         hiddenTutorials: fields.array(fields.relationship({ label: 'Tutorial', collection: 'tutorials' }), { label: 'Hide Specific Tutorials' }),
+        seo: seoSchema,
+    },
+});
+
+// 🟢 NEW: Quizzes Index Page Singleton
+export const quizzesPage = singleton({
+    label: 'Quizzes Index Page',
+    path: 'src/content/quizzesPage/data',
+    format: { data: 'json' },
+    schema: {
+        headline: fields.text({ label: 'Headline', defaultValue: 'All Quizzes' }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
+        subheadline: fields.text({ label: 'Subheadline', multiline: true, defaultValue: 'Choose a topic below to test your knowledge.' }),
+        seo: seoSchema,
+    },
+});
+
+// 🟢 NEW: Compilers Index Page Singleton
+export const compilersPage = singleton({
+    label: 'Compilers Index Page',
+    path: 'src/content/compilersPage/data',
+    format: { data: 'json' },
+    schema: {
+        headline: fields.text({ label: 'Headline', defaultValue: 'Online Compilers' }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
+        subheadline: fields.text({ label: 'Subheadline', multiline: true, defaultValue: 'Write, run, and test code directly in your browser without any installation or setup.' }),
         seo: seoSchema,
     },
 });

@@ -1,6 +1,13 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+
+
+// 🟢 NEW: Fetch data from Keystatic Singleton
+const pageEntry = await getEntry('quizzesPage', 'data');
+const headline = pageEntry?.data?.headline || 'All Quizzes';
+const subheadline = pageEntry?.data?.subheadline || 'Choose a topic below to test your knowledge.';
+const breadcrumbLabel = pageEntry?.data?.breadcrumbTitle || headline || 'quizzes';
 
 // Fetch all quizzes and filter out any that are marked as drafts
 const allQuizzes = await getCollection('quizzes');
@@ -9,6 +16,12 @@ const publishedQuizzes = allQuizzes.filter(quiz => !quiz.data.draft);
 
 <Layout title="All Quizzes" description="Test your knowledge with our interactive quizzes.">
   <div class="max-w-4xl mx-auto px-4 py-16">
+  {/* 🟢 NEW: Breadcrumb UI */}
+    <nav aria-label="Breadcrumb" class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2">
+      <a href="/" class="hover:text-brand transition-colors">home</a>
+      <span class="opacity-40">/</span>
+      <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
+    </nav>
     
     <div class="text-center mb-16">
       <h1 class="text-4xl md:text-6xl font-[800] text-tx-main tracking-tight mb-4">

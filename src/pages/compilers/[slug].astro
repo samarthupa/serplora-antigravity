@@ -22,6 +22,9 @@ const starterFiles = (compiler.data.starterFiles || []).map((file, index) => ({
 }));
 
 const { Content } = await render(compiler);
+// 🟢 NEW: Fetch the home page data
+const homeEntry = await getEntry('homePage', 'index');
+const rootBreadcrumb = homeEntry?.data?.breadcrumbTitle || 'home';
 
 // Dynamic Ad Fetching Logic
 const adsData = await getEntry('sidebarAds', 'data');
@@ -43,12 +46,14 @@ if (adsData?.data) {
 
 <Layout seo={compiler.data.seo} titleFallback={compiler.data.title} excerptFallback={compiler.data.excerpt}>
 <div class="w-full max-w-[1920px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8 compiler-wrapper">    
-<nav aria-label="Breadcrumb" class="font-['JetBrains_Mono',monospace] text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-2 mb-[30px]">      <a href="/" class="hover:text-[#007acc] transition-colors">home</a>
-      <span class="opacity-40">/</span>
-      <a href="/compilers" class="hover:text-[#007acc] transition-colors">compilers</a>
-      <span class="opacity-40">/</span>
-      <span class="text-[#007acc] font-medium" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
-    </nav>
+<nav aria-label="Breadcrumb" class="mb-6 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted flex flex-wrap items-center gap-2">
+        {/* 🟢 FIXED */}
+        <a href="/" class="hover:text-brand transition-colors">{rootBreadcrumb.toLowerCase()}</a>
+        <span class="opacity-40">/</span>
+        <a href="/compilers" class="hover:text-brand transition-colors">compilers</a>
+        <span class="opacity-40">/</span>
+        <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
+      </nav>
 
     <div class="flex-1 min-w-0 flex flex-col gap-4">
         

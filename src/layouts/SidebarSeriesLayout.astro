@@ -4,6 +4,10 @@ import { getEntry } from 'astro:content';
 
 const { parent, items, currentSlug, basePath } = Astro.props;
 
+// 🟢 NEW: Fetch the home page data
+const homeEntry = await getEntry('homePage', 'index');
+const rootBreadcrumb = homeEntry?.data?.breadcrumbTitle || 'home';
+
 // 1. Determine active data for SEO and titles
 const currentActiveData = currentSlug === 'overview' 
   ? parent.data 
@@ -71,7 +75,7 @@ if (adsData?.data) {
     {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
     <div class="lg:hidden w-full flex flex-col px-4 sm:px-6 pt-4">
       <nav aria-label="Breadcrumb" class="pt-4 pb-4 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full">
-        <a href="/" class="hover:text-brand transition-colors">home</a>
+        <a href="/" class="hover:text-brand transition-colors">{rootBreadcrumb.toLowerCase()}</a>
         <span class="opacity-40">/</span>
         <a href={`/${basePath}`} class="hover:text-brand transition-colors">{basePath}</a>
         <span class="opacity-40">/</span>
@@ -144,7 +148,7 @@ if (adsData?.data) {
     {/* Main Content */}
     <main class="flex-1 min-w-0 w-full max-w-[800px] px-4 sm:px-6 lg:px-6 xl:px-12 py-6 lg:py-8">       
       <nav aria-label="Breadcrumb" class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap bg-surface border border-subtle px-3 py-1.5 rounded-md w-fit">
-        <a href="/" class="hover:text-brand transition-colors">home</a>
+        <a href="/" class="hover:text-brand transition-colors">{rootBreadcrumb.toLowerCase()}</a>
         <span class="opacity-40">/</span>
         <a href={`/${basePath}`} class="hover:text-brand transition-colors">{basePath}</a>
         <span class="opacity-40">/</span>

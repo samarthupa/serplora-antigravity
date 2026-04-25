@@ -67,6 +67,7 @@ const tutorialsPage = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/tutorialsPage' }),
   schema: z.object({
     headline: z.string().default('Tutorials & Guides'),
+    breadcrumbTitle: z.string().optional(), // 🟢 ADD THIS HERE
     subheadline: z.string().default('Explore our latest guides and learn step-by-step with state-of-the-art tutorials.'),
     hiddenTutorials: z.array(z.string()).default([]),
     
@@ -180,6 +181,7 @@ const blogPage = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/blogPage' }),
   schema: z.object({
     headline: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 ADD THIS HERE
     subheadline: z.string().optional(),
     hiddenPosts: z.array(z.string()).optional().default([]),
     
@@ -265,6 +267,29 @@ const homePage = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx,mdoc}', base: './src/content/homePage' }),
   schema: z.object({
     headline: z.string().optional(),
+    breadcrumbTitle: z.string().optional(), // 🟢 ADD THIS HERE
+    subheadline: z.string().optional(),
+    seo: seoSchema,
+  })
+});
+
+// 🟢 NEW: Quizzes Page
+const quizzesPage = defineCollection({
+  loader: glob({ pattern: 'data.json', base: './src/content/quizzesPage' }),
+  schema: z.object({
+    headline: z.string().optional(),
+    breadcrumbTitle: z.string().optional(),
+    subheadline: z.string().optional(),
+    seo: seoSchema,
+  })
+});
+
+// 🟢 NEW: Compilers Page
+const compilersPage = defineCollection({
+  loader: glob({ pattern: 'data.json', base: './src/content/compilersPage' }),
+  schema: z.object({
+    headline: z.string().optional(),
+    breadcrumbTitle: z.string().optional(),
     subheadline: z.string().optional(),
     seo: seoSchema,
   })
@@ -297,4 +322,6 @@ export const collections = {
   homePage,
   compilers,
   pages,
+  quizzesPage,   // 🟢 ADD THIS
+  compilersPage, // 🟢 ADD THIS
 };

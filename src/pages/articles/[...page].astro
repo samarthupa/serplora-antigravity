@@ -54,9 +54,13 @@ export async function getStaticPaths() {
 }
 
 const { page, pageEntry } = Astro.props;
+// 🟢 NEW: Fetch the home page data to get the custom root breadcrumb
+const homeEntry = await getEntry('homePage', 'index');
+const rootBreadcrumb = homeEntry?.data?.breadcrumbTitle || 'home';
 
 const headline = pageEntry?.data?.headline || 'Writing & Updates';
 const subheadline = pageEntry?.data?.subheadline || 'Thoughts, stories, and ideas from our team.';
+const breadcrumbLabel = pageEntry?.data?.breadcrumbTitle || headline || 'articles';
 
 const isPaginated = page.currentPage > 1;
 let customSeo = pageEntry?.data?.seo ? { ...pageEntry.data.seo } : {};
@@ -95,6 +99,14 @@ const paginationList = getPaginationWindow(page.currentPage, page.lastPage);
   </Fragment>
 
   <main class="w-full max-w-4xl mx-auto px-6 py-20 md:py-32 flex flex-col">
+
+    {/* 🟢 NEW: Breadcrumb UI */}
+  <nav aria-label="Breadcrumb" class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2">
+    {/* 🟢 FIXED: Replaced "home" with rootBreadcrumb */}
+    <a href="/" class="hover:text-brand transition-colors">{rootBreadcrumb.toLowerCase()}</a>
+    <span class="opacity-40">/</span>
+    <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
+  </nav>
     
     <header class="mb-20 md:mb-28">
       <div class="w-12 h-1 bg-tx-main mb-8 rounded-full opacity-20"></div>

@@ -5,6 +5,7 @@ import Layout from '../../layouts/Layout.astro';
 const pageEntry = await getEntry('tutorialsPage', 'data');
 const headline = pageEntry?.data?.headline || 'Guides & Tutorials';
 const subheadline = pageEntry?.data?.subheadline || 'Deep dives and step-by-step technical guides.';
+const breadcrumbLabel = pageEntry?.data?.breadcrumbTitle || headline || 'tutorials';
 const hiddenTutorialsSingleton = pageEntry?.data?.hiddenTutorials || [];
 
 const allTutorials = await getCollection('tutorials');
@@ -24,6 +25,12 @@ const generateSlug = (tutorial: any) => tutorial.data.slug || tutorial.id;
   excerptFallback={subheadline}
 >
   <main class="w-full max-w-4xl mx-auto px-6 py-20 md:py-32 flex flex-col">
+  {/* 🟢 NEW: Breadcrumb UI */}
+    <nav aria-label="Breadcrumb" class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2">
+      <a href="/" class="hover:text-brand transition-colors">home</a>
+      <span class="opacity-40">/</span>
+      <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
+    </nav>
     
     {/* Minimalist, High-Impact Header */}
     <header class="mb-20 md:mb-28">
