@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro'; // 🟢 NEW: Import the component
 
 
 // 🟢 NEW: Fetch data from Keystatic Singleton
@@ -14,47 +15,59 @@ const allQuizzes = await getCollection('quizzes');
 const publishedQuizzes = allQuizzes.filter(quiz => !quiz.data.draft);
 ---
 
-<Layout title="All Quizzes" description="Test your knowledge with our interactive quizzes.">
-  <div class="max-w-4xl mx-auto px-4 py-16">
-  {/* 🟢 NEW: Breadcrumb UI */}
-    <nav aria-label="Breadcrumb" class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2">
-      <a href="/" class="hover:text-brand transition-colors">home</a>
-      <span class="opacity-40">/</span>
-      <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
-    </nav>
+<Layout 
+  seo={pageEntry?.data?.seo}
+  titleFallback={headline}
+  excerptFallback={subheadline}
+>
+ {/* The container now uses the Compilers' max-width, padding, and font */}
+  <div class="w-full max-w-[1000px] mx-auto px-4 sm:px-6 py-12 md:py-20 font-['Outfit',sans-serif]">
     
-    <div class="text-center mb-16">
-      <h1 class="text-4xl md:text-6xl font-[800] text-tx-main tracking-tight mb-4">
-        All Quizzes
-      </h1>
-      <p class="text-xl text-slate-500">
-        Choose a topic below to test your knowledge.
+    {/* Breadcrumb UI (Keep your dynamic setup here) */}
+    {/* 🟢 FIXED: Replaced with smart component */}
+    <Breadcrumb current={breadcrumbLabel} />
+    
+    {/* Header Section (Exactly like Compilers) */}
+    <div class="text-center mb-12">
+      <h1 class="text-3xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">{headline}</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-400 max-w-[600px] mx-auto">
+        {subheadline}
       </p>
     </div>
 
-    <div class="grid gap-6">
+    {/* Grid Section (2 columns on desktop, 1 on mobile, just like Compilers) */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {publishedQuizzes.map((quiz) => (
         <a 
           href={`/quizzes/${quiz.id}`} 
-          class="block p-8 bg-white border border-slate-200 rounded-2xl hover:border-blue-500 hover:shadow-md transition-all duration-200"
+          class="group block p-6 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#3c3c3c] rounded-2xl hover:border-[#007acc] dark:hover:border-[#007acc] transition-all shadow-sm hover:shadow-md"
         >
-          <h2 class="text-2xl font-bold text-slate-900 mb-2">
+          {/* Floating Icon Box (I swapped the code icon for a Quiz/Clipboard Check icon) */}
+          <div class="w-12 h-12 rounded-xl bg-[#007acc]/10 text-[#007acc] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
+          
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-[#007acc] transition-colors">
             {quiz.data.title}
           </h2>
+          
           {quiz.data.excerpt && (
-            <p class="text-slate-600 text-lg">
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
               {quiz.data.excerpt}
             </p>
           )}
         </a>
       ))}
-      
-      {publishedQuizzes.length === 0 && (
-        <p class="text-center text-slate-500 py-12 bg-slate-50 rounded-xl border border-slate-200">
-          No quizzes available yet. Check back later!
-        </p>
-      )}
     </div>
+
+    {/* Fallback empty state styling updated to match the new dark mode theme */}
+    {publishedQuizzes.length === 0 && (
+      <p class="text-center text-gray-500 dark:text-gray-400 py-12 bg-gray-50 dark:bg-[#1e1e1e] rounded-xl border border-gray-200 dark:border-[#3c3c3c] mt-6">
+        No quizzes available yet. Check back later!
+      </p>
+    )}
 
   </div>
 </Layout>

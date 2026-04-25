@@ -1,0 +1,90 @@
+---
+// src/components/ui/Breadcrumb.astro
+import { getEntry } from 'astro:content';
+
+interface Props {
+  // If passed, it automatically fetches that section's custom title from the CMS
+  section?: 'articles' | 'tutorials' | 'quizzes' | 'compilers';
+  // For deep nesting (like a specific tutorial series)
+  parents?: { label: string; url: string }[];
+  // The current active page title
+  current: string;
+  // Allows you to override CSS classes for mobile vs desktop layouts
+  class?: string;
+}
+
+const { 
+  section, 
+  parents = [], 
+  current, 
+  class: className = "mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2" 
+} = Astro.props;
+
+// 1. Dynamically Fetch Root (Home) Title
+const homeEntry = await getEntry('homePage', 'index');
+const rootLabel = homeEntry?.data?.breadcrumbTitle || 'home';
+
+// 2. Dynamically Fetch Section Title from CMS based on the 'section' prop
+let sectionLabel = null;
+let sectionUrl = null;
+
+if (section === 'articles') {
+  const page = await getEntry('blogPage', 'data');
+  sectionLabel = page?.data?.breadcrumbTitle || page?.data?.headline || 'articles';
+  sectionUrl = '/articles';
+} else if (section === 'tutorials') {
+  const page = await getEntry('tutorialsPage', 'data');
+  sectionLabel = page?.data?.breadcrumbTitle || page?.data?.headline || 'tutorials';
+  sectionUrl = '/tutorials';
+} else if (section === 'quizzes') {
+  const page = await getEntry('quizzesPage', 'data');
+  sectionLabel = page?.data?.breadcrumbTitle || page?.data?.headline || 'quizzes';
+  sectionUrl = '/quizzes';
+} else if (section === 'compilers') {
+  const page = await getEntry('compilersPage', 'data');
+  sectionLabel = page?.data?.breadcrumbTitle || page?.data?.headline || 'compilers';
+  sectionUrl = '/compilers';
+}
+---
+
+<nav aria-label="Breadcrumb" data-pagefind-ignore>
+  {/* We move your flex classes onto the <ol> so it formats perfectly */}
+  <ol class={className}>
+    
+    {/* Root Breadcrumb */}
+    <li>
+      <a href="/" class="hover:text-brand transition-colors">{rootLabel.toLowerCase()}</a>
+    </li>
+    <li class="opacity-40" aria-hidden="true">/</li>
+    
+    {/* Auto-Fetched Section Breadcrumb (e.g., Articles, Quizzes) */}
+    {sectionLabel && sectionUrl && (
+      <>
+        <li class="flex items-center">
+          <a href={sectionUrl} class="hover:text-brand transition-colors truncate max-w-[150px] block">
+            {sectionLabel.toLowerCase()}
+          </a>
+        </li>
+        <li class="opacity-40" aria-hidden="true">/</li>
+      </>
+    )}
+
+    {/* Custom Parents (For Tutorial Hubs -> specific lessons) */}
+    {parents.map((parent) => (
+      <>
+        <li class="flex items-center">
+          <a href={parent.url} class="hover:text-brand transition-colors truncate max-w-[150px] block">
+            {parent.label.toLowerCase()}
+          </a>
+        </li>
+        <li class="opacity-40" aria-hidden="true">/</li>
+      </>
+    ))}
+    
+    {/* Current Page */}
+    <li class="text-tx-main font-medium truncate max-w-[200px] sm:max-w-[300px]" aria-current="page">
+      {current.toLowerCase()}
+    </li>
+    
+  </ol>
+</nav>

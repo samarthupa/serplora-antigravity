@@ -2,6 +2,7 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import { BM25Utils } from 'relatinator';
 import Layout from '../../layouts/Layout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 
 export const prerender = true;
 
@@ -45,10 +46,6 @@ export async function getStaticPaths() {
 const { entry, relatedPosts } = Astro.props;
 const { Content } = await render(entry);
 
-// 🟢 NEW: Fetch the home page data to get the custom root breadcrumb
-const homeEntry = await getEntry('homePage', 'index');
-const rootBreadcrumb = homeEntry?.data?.breadcrumbTitle || 'home';
-
 const displayDate = entry.data.updatedDate || entry.data.publishDate || new Date();
 const formattedDate = new Date(displayDate).toISOString().split('T')[0];
 const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.id;
@@ -58,14 +55,7 @@ const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.
   <main class="w-full bg-transparent py-10 md:py-20 font-['Outfit',sans-serif]">
     <article class="max-w-[900px] mx-auto px-6" data-pagefind-body>
       
-      <nav aria-label="Breadcrumb" data-pagefind-ignore class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2">
-        {/* 🟢 FIXED: Using rootBreadcrumb */}
-        <a href="/" class="hover:text-brand transition-colors">{rootBreadcrumb.toLowerCase()}</a>
-        <span class="opacity-40">/</span>
-        <a href="/articles" class="hover:text-brand transition-colors">articles</a>
-        <span class="opacity-40">/</span>
-        <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
-      </nav>
+      <Breadcrumb section="articles" current={breadcrumbLabel} />
 
       <header class="mb-10 md:mb-12">
         <h1 data-pagefind-weight="10" class="text-3xl md:text-5xl font-[800] text-tx-main tracking-tight leading-[1.2] md:leading-[1.15] mb-6">

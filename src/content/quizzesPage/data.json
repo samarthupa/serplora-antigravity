@@ -1,9 +1,9 @@
 {
-  "headline": "All Quizzes",
+  "headline": "Quizzes and MCQs",
   "breadcrumbTitle": "quizzes",
   "subheadline": "Choose a topic below to test your knowledge.",
   "seo": {
-    "metaTitle": "Online Quizzes",
+    "metaTitle": "Online Quizzes - Test your Knowledge",
     "robotsIndex": true,
     "robotsFollow": true
   }

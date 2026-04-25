@@ -1,12 +1,9 @@
 ---
 import Layout from './Layout.astro';
 import { getEntry } from 'astro:content';
+import Breadcrumb from '../components/ui/Breadcrumb.astro';
 
 const { parent, items, currentSlug, basePath } = Astro.props;
-
-// 🟢 NEW: Fetch the home page data
-const homeEntry = await getEntry('homePage', 'index');
-const rootBreadcrumb = homeEntry?.data?.breadcrumbTitle || 'home';
 
 // 1. Determine active data for SEO and titles
 const currentActiveData = currentSlug === 'overview' 
@@ -74,22 +71,21 @@ if (adsData?.data) {
     
     {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
     <div class="lg:hidden w-full flex flex-col px-4 sm:px-6 pt-4">
-      <nav aria-label="Breadcrumb" class="pt-4 pb-4 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full">
-        <a href="/" class="hover:text-brand transition-colors">{rootBreadcrumb.toLowerCase()}</a>
-        <span class="opacity-40">/</span>
-        <a href={`/${basePath}`} class="hover:text-brand transition-colors">{basePath}</a>
-        <span class="opacity-40">/</span>
-        
-        {currentSlug === 'overview' ? (
-          <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{parentBreadcrumb}</span>
-        ) : (
-          <>
-            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[100px]">{parentBreadcrumb}</a>
-            <span class="opacity-40">/</span>
-            <span class="text-brand font-medium truncate max-w-[120px]" aria-current="page">{currentBreadcrumb}</span>
-          </>
-        )}
-      </nav>
+      
+      {currentSlug === 'overview' ? (
+        <Breadcrumb 
+          section={basePath as any} 
+          current={parentBreadcrumb} 
+          class="pt-4 pb-4 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full" 
+        />
+      ) : (
+        <Breadcrumb 
+          section={basePath as any} 
+          parents={[{ label: parentBreadcrumb, url: `/${basePath}/${parent.id}` }]} 
+          current={currentBreadcrumb} 
+          class="pt-4 pb-4 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full" 
+        />
+      )}
 
       <div class="sticky top-0 bg-main/95 backdrop-blur-md py-2 flex items-center justify-between -mx-4 px-4 sm:-mx-6 sm:px-6 z-40">
         <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95 shadow-sm" aria-label="Toggle Menu">
@@ -147,22 +143,20 @@ if (adsData?.data) {
 
     {/* Main Content */}
     <main class="flex-1 min-w-0 w-full max-w-[800px] px-4 sm:px-6 lg:px-6 xl:px-12 py-6 lg:py-8">       
-      <nav aria-label="Breadcrumb" class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap bg-surface border border-subtle px-3 py-1.5 rounded-md w-fit">
-        <a href="/" class="hover:text-brand transition-colors">{rootBreadcrumb.toLowerCase()}</a>
-        <span class="opacity-40">/</span>
-        <a href={`/${basePath}`} class="hover:text-brand transition-colors">{basePath}</a>
-        <span class="opacity-40">/</span>
-        
-        {currentSlug === 'overview' ? (
-          <span class="text-brand font-medium" aria-current="page">{parentBreadcrumb}</span>
-        ) : (
-          <>
-            <a href={`/${basePath}/${parent.id}`} class="hover:text-brand transition-colors truncate max-w-[150px]">{parentBreadcrumb}</a>
-            <span class="opacity-40">/</span>
-            <span class="text-brand font-medium" aria-current="page">{currentBreadcrumb}</span>
-          </>
-        )}
-      </nav>
+      {currentSlug === 'overview' ? (
+        <Breadcrumb 
+          section={basePath as any} 
+          current={parentBreadcrumb} 
+          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap px-3 py-1.5 rounded-md w-fit" 
+        />
+      ) : (
+        <Breadcrumb 
+          section={basePath as any} 
+          parents={[{ label: parentBreadcrumb, url: `/${basePath}/${parent.id}` }]} 
+          current={currentBreadcrumb} 
+          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap px-3 py-1.5 rounded-md w-fit" 
+        />
+      )}
 
       <div class="markdown-content text-[15.5px] md:text-[17px] leading-[1.7] md:leading-[1.8] pb-8">
         <slot />

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getCollection, getEntry } from 'astro:content'; // 🟢 Added getEntry
+import Breadcrumb from '../../components/ui/Breadcrumb.astro'; // 🟢 NEW: Import the component
 
 // 🟢 NEW: Fetch data from Keystatic Singleton
 const pageEntry = await getEntry('compilersPage', 'data');
@@ -11,26 +12,24 @@ const breadcrumbLabel = pageEntry?.data?.breadcrumbTitle || headline || 'compile
 // Fetch all compilers that are not drafts
 const allCompilers = await getCollection('compilers');
 const liveCompilers = allCompilers.filter(compiler => !compiler.data.draft);
-
-const seo = {
-  metaTitle: "Web Compilers - Serplora",
-  metaDescription: "Write, run, and test code directly in your browser with our state-of-the-art compilers."
-};
 ---
 
-<Layout seo={seo}>
+<Layout 
+  seo={pageEntry?.data?.seo}
+  titleFallback={headline}
+  excerptFallback={subheadline}
+>
   <div class="w-full max-w-[1000px] mx-auto px-4 sm:px-6 py-12 md:py-20 font-['Outfit',sans-serif]">
-  {/* 🟢 NEW: Breadcrumb UI */}
-    <nav aria-label="Breadcrumb" class="mb-8 md:mb-10 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center gap-2">
-      <a href="/" class="hover:text-brand transition-colors">home</a>
-      <span class="opacity-40">/</span>
-      <span class="text-tx-main font-medium truncate" aria-current="page">{breadcrumbLabel.toLowerCase()}</span>
-    </nav>
+    
+    {/* 🟢 FIXED: Replaced with smart component */}
+    <Breadcrumb current={breadcrumbLabel} />
     
     <div class="text-center mb-12">
-      <h1 class="text-3xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">Online Compilers</h1>
+      <h1 class="text-3xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
+        {headline}
+      </h1>
       <p class="text-lg text-gray-600 dark:text-gray-400 max-w-[600px] mx-auto">
-        Write, run, and test code directly in your browser without any installation or setup.
+         {subheadline}
       </p>
     </div>
 
