@@ -148,6 +148,39 @@ export default function CompilerApp({ title, initialFiles }: any) {
     return () => observer.disconnect();
   }, [isPreviewOpen, mobileActiveTab]);
 
+  // 🛑 Prevent accidental refresh/close if real code changes were made
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // 1. Check if any "real" changes exist
+      const hasRealChanges = files.some((currentFile: any) => {
+        const originalFile = initialFiles.find((f: any) => f.id === currentFile.id);
+        
+        // If a file was added that wasn't there originally
+        if (!originalFile) return true; 
+
+        // If the file was renamed
+        if (currentFile.name !== originalFile.name) return true;
+
+        // If the code content changed (using .trim() to ignore blank lines at the start/end)
+        const currentContent = currentFile.content?.trim() || '';
+        const originalContent = originalFile.content?.trim() || '';
+        if (currentContent !== originalContent) return true;
+
+        return false;
+      }) || files.length !== initialFiles.length; // Also triggers if a file was deleted
+
+      // 2. If changes exist, trigger the browser's native warning dialog
+      if (hasRealChanges) {
+        e.preventDefault();
+        e.returnValue = ''; // Required for modern browsers like Chrome
+        return ''; // Required for older browsers
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [files, initialFiles]);
+
   // 🛑 FIXED: Open custom modal instead of browser confirm
   const handleReset = () => {
     setShowResetConfirm(true);
@@ -162,6 +195,11 @@ export default function CompilerApp({ title, initialFiles }: any) {
     setPreviewContent('');
     setLogs([]);
     setShowResetConfirm(false); // Hide the modal after resetting
+
+    // 🟢 NEW: Instantly switch back to the editor view on mobile
+    if (isMobile) {
+      setMobileActiveTab('editor');
+    }
   };
 
   const runCode = () => {
@@ -266,7 +304,9 @@ export default function CompilerApp({ title, initialFiles }: any) {
              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </div>
           <div onClick={runCode} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'preview' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
-             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+             <svg className="w-5 h-5 pl-0.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <polygon points="5 3 19 12 5 21"/>
+</svg>
           </div>
           <div onClick={() => setMobileActiveTab('console')} className={`relative cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'console' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
@@ -276,7 +316,10 @@ export default function CompilerApp({ title, initialFiles }: any) {
              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           </div>
           <div className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors">
-             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+</svg>
           </div>
           <div onClick={toggleFullscreen} className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors">
              {isAppFullscreen ? (
@@ -343,13 +386,7 @@ export default function CompilerApp({ title, initialFiles }: any) {
               >
                 {!isMobile && <div className="absolute left-[-2px] top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingPreview(true)} />}
                 {isResizingPreview && <div className="fixed inset-0 z-[9999] cursor-col-resize" />}
-                
-                <div className="h-[35px] bg-gray-100 dark:bg-[#252526] border-b border-gray-300 dark:border-[#3c3c3c] flex items-center px-3 shrink-0 transition-colors">
-                  <div className="text-[11px] font-mono tracking-wider text-gray-500 dark:text-[#858585]">
-                    {previewDims.w}px × {previewDims.h}px
-                  </div>
-                </div>
-                
+                                
                 <iframe 
                   srcDoc={previewContent} 
                   className="flex-1 w-full border-none bg-white" 
@@ -362,7 +399,10 @@ export default function CompilerApp({ title, initialFiles }: any) {
         </div>
       </div>
 
-      <div className="h-[22px] bg-gray-200 dark:bg-[#3c3c3c] transition-colors flex items-center px-2 text-xs text-gray-700 dark:text-[#cccccc] select-none shrink-0 z-50">
+     {/* 🟢 FIXED: Added w-full and justify-between to split left/right sides */}
+      <div className="h-[22px] w-full bg-gray-200 dark:bg-[#3c3c3c] transition-colors flex items-center justify-between px-2 text-xs text-gray-700 dark:text-[#cccccc] select-none shrink-0 z-50">
+        
+        {/* Left Side: Editor Info */}
         <div className="flex items-center h-full">
            <div className="px-2 h-full flex items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">
              Ln {activeFile?.content ? activeFile.content.split('\n').length : 0}, Ch {activeFile?.content ? activeFile.content.length : 0}
@@ -370,6 +410,15 @@ export default function CompilerApp({ title, initialFiles }: any) {
            <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">UTF-8</div>
            <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">{activeFile?.language?.toUpperCase() || 'TEXT'}</div>
         </div>
+
+        {/* 🟢 Right Side: Preview Dimensions (Only shows when preview is active) */}
+        {(isPreviewOpen || (isMobile && mobileActiveTab === 'preview')) && (
+          <div className="flex items-center h-full">
+             <div className="px-2 h-full flex items-center font-mono text-[11px] tracking-wider cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">
+               Preview: {previewDims.w}px × {previewDims.h}px
+             </div>
+          </div>
+        )}
       </div>
 
       {/* 🛑 CUSTOM RESET CONFIRMATION MODAL */}

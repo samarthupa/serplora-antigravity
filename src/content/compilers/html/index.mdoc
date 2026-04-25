@@ -14,15 +14,17 @@ starterFiles:
         <link rel="stylesheet" href="style.css">
       </head>
       <body>
-        <h1>Hello World</h1>
-        <button onclick="sayHi()">Click Me!</button>
+        <h1>Online HTML Editor and Compiler</h1>
+      <button onclick="sayHi()">Click Me to Test Console!</button>
+      <p>You can open the console by clicking the ">" button.</p>
         <script src="script.js"></script>
       </body>
       </html>
   - filename: style.css
     language: css
-    content: |-
-      h1 { color: #007acc; }
+    content: |
+      body{background: #f5f5f5; padding: 20px;}
+      h1 { color: #000; }
       button { padding: 10px; cursor: pointer; }
   - filename: script.js
     language: javascript
