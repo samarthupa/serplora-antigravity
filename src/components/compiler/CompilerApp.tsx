@@ -6,8 +6,6 @@ import AceEditorArea from './AceEditorArea';
 export default function CompilerApp({ title, initialFiles }: any) {
   const compilerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null); 
-  
-  // Reference specifically for the isolated Editor + Preview area
   const splitViewRef = useRef<HTMLDivElement>(null); 
   
   const [isMobile, setIsMobile] = useState(() => 
@@ -33,7 +31,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
   const [previewContent, setPreviewContent] = useState('');
   const [previewWidth, setPreviewWidth] = useState<number | string>('50%');
   const [isResizingPreview, setIsResizingPreview] = useState(false);
-  
   const [previewDims, setPreviewDims] = useState({ w: 0, h: 0 });
 
   const [projectName, setProjectName] = useState(title || 'Workspace');
@@ -46,6 +43,19 @@ export default function CompilerApp({ title, initialFiles }: any) {
   const [shareUrl, setShareUrl] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [isLoadingShared, setIsLoadingShared] = useState(false);
+
+  // 🟢 NEW: Optimization States for Run and Share
+  const [lastRunFingerprint, setLastRunFingerprint] = useState<string | null>(null);
+  const [lastSharedState, setLastSharedState] = useState<{ fingerprint: string, url: string } | null>(null);
+
+  // 🟢 NEW: Centralized fingerprinting to detect real code changes (ignoring leading/trailing whitespace)
+  const generateCodeFingerprint = (targetFiles: any[]) => {
+    return targetFiles
+      .filter((f: any) => !f.isFolder)
+      .sort((a: any, b: any) => a.id.localeCompare(b.id)) // Consistent order
+      .map((f: any) => `${f.name}:${f.content?.trim() || ''}`) // Trim ignores empty lines at start/end
+      .join('|');
+  };
 
   const getActiveFilePath = () => {
     if (!activeFile) return '';
@@ -109,7 +119,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  // Check for shared URL hash on initial load
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const hash = window.location.hash.substring(1);
@@ -125,7 +134,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
         
         if (Array.isArray(data)) {
            setFiles(data);
-           // Find the first actual file (not a folder) to set as active
            const firstFile = data.find((f: any) => !f.isFolder);
            if (firstFile) {
              setActiveFileId(firstFile.id);
@@ -143,7 +151,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
     loadSharedData();
   }, []);
 
-  // Resize calculation for Editor vs Preview
   useEffect(() => {
     if (!isResizingPreview) return;
     const handleMouseMove = (e: MouseEvent) => {
@@ -156,7 +163,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
             : prev;
             
         currentPixelWidth = Math.min(currentPixelWidth, maxAllowedWidth);
-        
         const newWidth = currentPixelWidth - e.movementX;
         
         return Math.min(maxAllowedWidth, Math.max(200, newWidth));
@@ -185,20 +191,13 @@ export default function CompilerApp({ title, initialFiles }: any) {
     return () => observer.disconnect();
   }, [isPreviewOpen, mobileActiveTab]);
 
-  // Prevent accidental refresh/close if real code changes were made
+  // 🟢 FIXED: Replaced heavy object mapping with the clean Fingerprint logic
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const hasRealChanges = files.some((currentFile: any) => {
-        const originalFile = initialFiles.find((f: any) => f.id === currentFile.id);
-        if (!originalFile) return true; 
-        if (currentFile.name !== originalFile.name) return true;
-        const currentContent = currentFile.content?.trim() || '';
-        const originalContent = originalFile.content?.trim() || '';
-        if (currentContent !== originalContent) return true;
-        return false;
-      }) || files.length !== initialFiles.length; 
-
-      if (hasRealChanges) {
+      const initialFingerprint = generateCodeFingerprint(initialFiles);
+      const currentFingerprint = generateCodeFingerprint(files);
+      
+      if (initialFingerprint !== currentFingerprint) {
         e.preventDefault();
         e.returnValue = ''; 
         return ''; 
@@ -220,6 +219,11 @@ export default function CompilerApp({ title, initialFiles }: any) {
     setProjectName(title || 'Workspace');
     setPreviewContent('');
     setLogs([]);
+    
+    // Clear the optimized states so the run/share buttons work from scratch
+    setLastRunFingerprint(null);
+    setLastSharedState(null);
+    
     setShowResetConfirm(false);
 
     if (isMobile) {
@@ -228,6 +232,16 @@ export default function CompilerApp({ title, initialFiles }: any) {
   };
 
   const handleShare = async () => {
+    const currentFingerprint = generateCodeFingerprint(files);
+
+    // 🟢 NEW: Check if we already shared this exact code state
+    if (lastSharedState && lastSharedState.fingerprint === currentFingerprint) {
+      setShareUrl(lastSharedState.url);
+      setShowShareModal(true);
+      setIsCopied(false);
+      return; 
+    }
+
     setIsSharing(true);
     try {
       const response = await fetch("https://api.serplora.com/share-compilers", {
@@ -240,6 +254,10 @@ export default function CompilerApp({ title, initialFiles }: any) {
       const { id } = await response.json();
       
       const newUrl = `${window.location.origin}${window.location.pathname}#${id}`;
+      
+      // Save the new URL and the state fingerprint
+      setLastSharedState({ fingerprint: currentFingerprint, url: newUrl });
+
       window.history.pushState({}, '', newUrl);
       setShareUrl(newUrl);
       setShowShareModal(true);
@@ -259,6 +277,15 @@ export default function CompilerApp({ title, initialFiles }: any) {
   };
 
   const runCode = () => {
+    const currentFingerprint = generateCodeFingerprint(files);
+
+    // 🟢 NEW: Check if code has changed since last run
+    if (currentFingerprint === lastRunFingerprint) {
+      setIsPreviewOpen(true);
+      if (isMobile) setMobileActiveTab('preview');
+      return; 
+    }
+
     let htmlFile = null;
     
     if (activeFile && activeFile.name.endsWith('.html')) {
@@ -318,6 +345,9 @@ export default function CompilerApp({ title, initialFiles }: any) {
     
     if (doc.head) doc.head.insertBefore(consoleInterceptor, doc.head.firstChild);
     else doc.insertBefore(consoleInterceptor, doc.firstChild);
+
+    // Save the new fingerprint
+    setLastRunFingerprint(currentFingerprint);
 
     setLogs([]); 
     setPreviewContent("<!DOCTYPE html>\n" + doc.documentElement.outerHTML);
