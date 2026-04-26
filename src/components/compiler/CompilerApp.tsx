@@ -7,7 +7,7 @@ export default function CompilerApp({ title, initialFiles }: any) {
   const compilerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null); 
   
-  // 🟢 NEW: Reference specifically for the isolated Editor + Preview area
+  // Reference specifically for the isolated Editor + Preview area
   const splitViewRef = useRef<HTMLDivElement>(null); 
   
   const [isMobile, setIsMobile] = useState(() => 
@@ -39,8 +39,13 @@ export default function CompilerApp({ title, initialFiles }: any) {
   const [projectName, setProjectName] = useState(title || 'Workspace');
   const activeFile = files.find((f: any) => f.id === activeFileId);
 
-  // 🛑 NEW: State for our custom reset confirmation modal
+  // Modals & Sharing States
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+  const [isLoadingShared, setIsLoadingShared] = useState(false);
 
   const getActiveFilePath = () => {
     if (!activeFile) return '';
@@ -104,16 +109,48 @@ export default function CompilerApp({ title, initialFiles }: any) {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  // 🟢 FIXED: The math now calculates based ONLY on the isolated splitViewRef container.
+  // Check for shared URL hash on initial load
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash.substring(1);
+    if (!hash) return;
+
+    const loadSharedData = async () => {
+      setIsLoadingShared(true);
+      try {
+        const response = await fetch(`https://api.serplora.com/share-compilers?id=${hash}`);
+        if (!response.ok) throw new Error("Not found");
+        
+        const data = await response.json();
+        
+        if (Array.isArray(data)) {
+           setFiles(data);
+           // Find the first actual file (not a folder) to set as active
+           const firstFile = data.find((f: any) => !f.isFolder);
+           if (firstFile) {
+             setActiveFileId(firstFile.id);
+             setOpenFileIds([firstFile.id]);
+           }
+        }
+      } catch (error) {
+        alert("Could not load the shared code snippet. It may have expired or been removed.");
+        window.history.replaceState(null, '', window.location.pathname);
+      } finally {
+        setIsLoadingShared(false);
+      }
+    };
+
+    loadSharedData();
+  }, []);
+
+  // Resize calculation for Editor vs Preview
   useEffect(() => {
     if (!isResizingPreview) return;
     const handleMouseMove = (e: MouseEvent) => {
       setPreviewWidth(prev => {
-        // Use the strict available space of the split container, not the whole app
         const containerWidth = splitViewRef.current?.getBoundingClientRect().width || window.innerWidth;
         const maxAllowedWidth = containerWidth - 10; 
 
-        // Clamp the starting pixel width in case the sidebar was toggled
         let currentPixelWidth = typeof prev === 'string' 
             ? containerWidth / 2 
             : prev;
@@ -148,32 +185,23 @@ export default function CompilerApp({ title, initialFiles }: any) {
     return () => observer.disconnect();
   }, [isPreviewOpen, mobileActiveTab]);
 
-  // 🛑 Prevent accidental refresh/close if real code changes were made
+  // Prevent accidental refresh/close if real code changes were made
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // 1. Check if any "real" changes exist
       const hasRealChanges = files.some((currentFile: any) => {
         const originalFile = initialFiles.find((f: any) => f.id === currentFile.id);
-        
-        // If a file was added that wasn't there originally
         if (!originalFile) return true; 
-
-        // If the file was renamed
         if (currentFile.name !== originalFile.name) return true;
-
-        // If the code content changed (using .trim() to ignore blank lines at the start/end)
         const currentContent = currentFile.content?.trim() || '';
         const originalContent = originalFile.content?.trim() || '';
         if (currentContent !== originalContent) return true;
-
         return false;
-      }) || files.length !== initialFiles.length; // Also triggers if a file was deleted
+      }) || files.length !== initialFiles.length; 
 
-      // 2. If changes exist, trigger the browser's native warning dialog
       if (hasRealChanges) {
         e.preventDefault();
-        e.returnValue = ''; // Required for modern browsers like Chrome
-        return ''; // Required for older browsers
+        e.returnValue = ''; 
+        return ''; 
       }
     };
 
@@ -181,12 +209,10 @@ export default function CompilerApp({ title, initialFiles }: any) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [files, initialFiles]);
 
-  // 🛑 FIXED: Open custom modal instead of browser confirm
   const handleReset = () => {
     setShowResetConfirm(true);
   };
 
-  // 🛑 FIXED: Execute the actual reset logic
   const executeReset = () => {
     setFiles(initialFiles);
     setActiveFileId(initialFiles[0]?.id);
@@ -194,17 +220,45 @@ export default function CompilerApp({ title, initialFiles }: any) {
     setProjectName(title || 'Workspace');
     setPreviewContent('');
     setLogs([]);
-    setShowResetConfirm(false); // Hide the modal after resetting
+    setShowResetConfirm(false);
 
-    // 🟢 NEW: Instantly switch back to the editor view on mobile
     if (isMobile) {
       setMobileActiveTab('editor');
     }
   };
 
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      const response = await fetch("https://api.serplora.com/share-compilers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(files) 
+      });
+
+      if (!response.ok) throw new Error("Share failed");
+      const { id } = await response.json();
+      
+      const newUrl = `${window.location.origin}${window.location.pathname}#${id}`;
+      window.history.pushState({}, '', newUrl);
+      setShareUrl(newUrl);
+      setShowShareModal(true);
+      setIsCopied(false);
+    } catch (error) {
+      alert("Failed to generate share link.");
+      console.error(error);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   const runCode = () => {
-    // 🟢 FIXED: Try to run the currently active file first. 
-    // If they are editing a .js or .css file, fallback to index.html or the first available HTML file.
     let htmlFile = null;
     
     if (activeFile && activeFile.name.endsWith('.html')) {
@@ -273,7 +327,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
   };
 
   useEffect(() => {
-    // 🛑 Prevent auto-run on mobile devices
     if (typeof window !== 'undefined' && window.innerWidth < 768) return;
 
     const initTimer = setTimeout(() => {
@@ -303,7 +356,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
      <div className="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] flex items-center select-none shrink-0 transition-colors">
         
         <div className="flex md:hidden items-center justify-between flex-1 px-1">
-          {/* 🟢 FIXED: Toggle mobile active tab logic + SVG path */}
           <div onClick={() => setMobileActiveTab(prev => prev === 'files' ? 'editor' : 'files')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -314,8 +366,8 @@ export default function CompilerApp({ title, initialFiles }: any) {
           </div>
           <div onClick={runCode} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'preview' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5 pl-0.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-  <polygon points="5 3 19 12 5 21"/>
-</svg>
+                <polygon points="5 3 19 12 5 21"/>
+             </svg>
           </div>
           <div onClick={() => setMobileActiveTab('console')} className={`relative cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'console' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
@@ -324,11 +376,18 @@ export default function CompilerApp({ title, initialFiles }: any) {
           <div onClick={handleReset} className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors">
              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           </div>
-          <div className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-</svg>
+          <div onClick={!isSharing ? handleShare : undefined} className={`cursor-pointer p-1.5 transition-colors ${isSharing ? 'text-[#007acc] animate-pulse' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
+            {isSharing ? (
+              <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+            )}
           </div>
           <div onClick={toggleFullscreen} className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors">
              {isAppFullscreen ? (
@@ -360,14 +419,21 @@ export default function CompilerApp({ title, initialFiles }: any) {
 
       <div className="flex flex-1 overflow-hidden relative">
         <div className="hidden md:flex">
-          <ActivityBar activeView={activeView} setActiveView={setActiveView} isConsoleOpen={isConsoleOpen} setIsConsoleOpen={setIsConsoleOpen} handleReset={handleReset}/>
+          <ActivityBar 
+            activeView={activeView} 
+            setActiveView={setActiveView} 
+            isConsoleOpen={isConsoleOpen} 
+            setIsConsoleOpen={setIsConsoleOpen} 
+            handleReset={handleReset}
+            handleShare={handleShare}
+            isSharing={isSharing}
+          />
         </div>
 
         <div className={`${isMobile ? (mobileActiveTab === 'files' ? 'flex absolute inset-0 w-full z-20' : 'hidden') : (activeView ? 'flex relative' : 'hidden')} bg-gray-50 dark:bg-[#252526]`}>
             <Sidebar projectName={projectName} setProjectName={setProjectName} activeView={isMobile ? 'explorer' : activeView} files={files} setFiles={setFiles} activeFileId={activeFileId} setActiveFileId={(id: string) => { setActiveFileId(id); if (isMobile) setMobileActiveTab('editor'); }} isMobile={isMobile} />
         </div>
         
-        {/* 🟢 FIXED: Wrapped the Editor and Preview cleanly so they know exactly how much space they have to share */}
         <div ref={splitViewRef} className="flex flex-1 overflow-hidden relative">
             <div className={`${isMobile ? ((mobileActiveTab === 'editor' || mobileActiveTab === 'console') ? 'flex w-full absolute inset-0 z-10' : 'hidden') : 'flex flex-1 relative'} overflow-hidden`}>
                 <AceEditorArea 
@@ -388,7 +454,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
                 ref={previewRef}
                 style={{ 
                   width: isMobile ? '100%' : (typeof previewWidth === 'number' ? `${previewWidth}px` : previewWidth),
-                  // The max-width prevents the preview from breaking out of bounds when the sidebar opens
                   maxWidth: isMobile ? '100%' : 'calc(100% - 10px)' 
                 }} 
                 className={`${isMobile ? (mobileActiveTab === 'preview' ? 'flex w-full absolute inset-0 z-30' : 'hidden') : 'flex relative'} bg-white flex-col shrink-0 ${isMobile ? '' : 'border-l border-gray-300 dark:border-[#3c3c3c]'}`}
@@ -408,10 +473,7 @@ export default function CompilerApp({ title, initialFiles }: any) {
         </div>
       </div>
 
-     {/* 🟢 FIXED: Added w-full and justify-between to split left/right sides */}
       <div className="h-[22px] w-full bg-gray-200 dark:bg-[#3c3c3c] transition-colors flex items-center justify-between px-2 text-xs text-gray-700 dark:text-[#cccccc] select-none shrink-0 z-50">
-        
-        {/* Left Side: Editor Info */}
         <div className="flex items-center h-full">
            <div className="px-2 h-full flex items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">
              Ln {activeFile?.content ? activeFile.content.split('\n').length : 0}, Ch {activeFile?.content ? activeFile.content.length : 0}
@@ -420,7 +482,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
            <div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">{activeFile?.language?.toUpperCase() || 'TEXT'}</div>
         </div>
 
-        {/* 🟢 Right Side: Preview Dimensions (Only shows when preview is active) */}
         {(isPreviewOpen || (isMobile && mobileActiveTab === 'preview')) && (
           <div className="flex items-center h-full">
              <div className="px-2 h-full flex items-center font-mono text-[11px] tracking-wider cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">
@@ -430,7 +491,6 @@ export default function CompilerApp({ title, initialFiles }: any) {
         )}
       </div>
 
-      {/* 🛑 CUSTOM RESET CONFIRMATION MODAL */}
       {showResetConfirm && (
         <div className="absolute inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#3c3c3c] p-6 rounded-lg shadow-xl max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200">
@@ -453,6 +513,47 @@ export default function CompilerApp({ title, initialFiles }: any) {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {showShareModal && (
+        <div className="absolute inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#3c3c3c] p-6 rounded-lg shadow-xl max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Share Workspace</h3>
+            <div className="flex gap-2 mb-6">
+              <input 
+                type="text" 
+                readOnly 
+                value={shareUrl} 
+                className="flex-1 bg-gray-50 dark:bg-[#3c3c3c] border border-gray-300 dark:border-[#555] text-gray-900 dark:text-white text-sm rounded px-3 py-2 outline-none focus:border-[#007acc]"
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+              />
+              <button 
+                onClick={copyToClipboard}
+                className={`px-4 py-2 text-sm font-medium text-white rounded transition-colors ${isCopied ? 'bg-green-600' : 'bg-[#007acc] hover:bg-[#005f9e]'}`}
+              >
+                {isCopied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <div className="flex justify-end">
+              <button 
+                onClick={() => setShowShareModal(false)} 
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-[#cccccc] hover:bg-gray-100 dark:hover:bg-[#3c3c3c] rounded transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isLoadingShared && (
+        <div className="absolute inset-0 z-[99999] flex flex-col items-center justify-center bg-white dark:bg-[#1e1e1e]">
+           <svg className="w-10 h-10 text-[#007acc] animate-spin mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+           </svg>
+           <div className="text-gray-600 dark:text-[#cccccc] font-medium tracking-wide">Loading Workspace...</div>
         </div>
       )}
     </div>
