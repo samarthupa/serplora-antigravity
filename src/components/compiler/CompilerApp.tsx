@@ -134,10 +134,17 @@ export default function CompilerApp({ title, initialFiles }: any) {
         
         if (Array.isArray(data)) {
            setFiles(data);
+           
+           // ✅ FIX STEP 1: Extract ALL file IDs (ignoring folders) and open them all as tabs
+           const allFileIds = data
+             .filter((f: any) => !f.isFolder)
+             .map((f: any) => f.id);
+           setOpenFileIds(allFileIds);
+
+           // ✅ FIX STEP 2: Find the first actual file to set as the actively viewed tab
            const firstFile = data.find((f: any) => !f.isFolder);
            if (firstFile) {
              setActiveFileId(firstFile.id);
-             setOpenFileIds([firstFile.id]);
            }
         }
       } catch (error) {
