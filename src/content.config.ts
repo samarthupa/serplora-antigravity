@@ -164,10 +164,17 @@ const compilers = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/compilers" }),
   schema: z.object({
     title: z.string().optional(),
-    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
+    breadcrumbTitle: z.string().optional(), 
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
+    
+    // 🟢 NEW: Add the language validation so Astro doesn't strip it out
+    language: z.enum(['html', 'python', 'cpp', 'java']).default('html'),
+    
+    showConsole: z.boolean().default(true), // 🟢 NEW: Tell Astro to expect this boolean
+    
     seo: seoSchema,
+    
     starterFiles: z.array(z.object({
       filename: z.string(),
       language: z.string(),

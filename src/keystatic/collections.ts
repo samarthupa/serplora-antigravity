@@ -105,11 +105,37 @@ export const compilers = collection({
         breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         excerpt: fields.text({ label: 'Short Description', multiline: true }),
+        
+        // 🟢 NEW: Root language selector to route to the correct Workspace
+        language: fields.select({
+            label: 'Compiler Engine (Execution Environment)',
+            description: 'Which workspace should this load?',
+            options: [
+                { label: 'HTML / Web', value: 'html' },
+                { label: 'Python (Interactive)', value: 'python' },
+                { label: 'C++ (Interactive)', value: 'cpp' },
+                { label: 'Java (Interactive)', value: 'java' }
+            ],
+            defaultValue: 'html',
+        }),
+
+        // 🟢 NEW: Add the console toggle checkbox
+        showConsole: fields.checkbox({ 
+            label: 'Enable Browser Console', 
+            description: 'Check to show the browser console UI (useful for HTML/JS). Uncheck to hide it for backend languages like Python.',
+            defaultValue: true 
+        }),
+
         seo: seoSchema,
+
         starterFiles: fields.array(
             fields.object({
                 filename: fields.text({ label: 'Filename' }),
-                language: fields.select({ label: 'Language Mode', options: [{ label: 'HTML', value: 'html' }, { label: 'CSS', value: 'css' }, { label: 'JavaScript', value: 'javascript' }, { label: 'Python', value: 'python' }], defaultValue: 'html' }),
+                // 🟢 UPDATED: Changed from a strict dropdown to a flexible text field so you can type "c_cpp", "java", etc. for Ace Editor.
+                language: fields.text({ 
+                    label: 'Editor Highlighting Language', 
+                    description: 'Used by Ace Editor (e.g. python, html, javascript, c_cpp)' 
+                }),
                 content: fields.text({ label: 'Initial Code', multiline: true })
             }),
             { label: 'Workspace Starter Files', itemLabel: props => props.fields.filename.value || 'New File' }

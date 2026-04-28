@@ -18,7 +18,8 @@ export default function AceEditorArea({
   openFileIds, setOpenFileIds,
   isConsoleOpen, setIsConsoleOpen, 
   isConsoleFullscreen, setIsConsoleFullscreen,
-  logs 
+  logs,
+  showConsole = true // 🟢 Add Prop
 }: any) {
   
   const [consoleHeight, setConsoleHeight] = useState(180);
@@ -179,7 +180,7 @@ export default function AceEditorArea({
 
      {/* CONSOLE SECTION */}
       {/* 🟢 Ensure the console renders if the mobile tab is active, bypassing the desktop toggle state */}
-      {(isConsoleOpen || (isMobile && mobileActiveTab === 'console')) && (
+      {showConsole && (isConsoleOpen || (isMobile && mobileActiveTab === 'console')) && (
         <div style={{ height: (isConsoleFullscreen || isMobile) ? '100%' : `${consoleHeight}px` }} 
              className={`${(isMobile && mobileActiveTab !== 'console') ? 'hidden' : 'flex'} flex-col bg-gray-50 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] shrink-0 relative transition-colors`}>
           

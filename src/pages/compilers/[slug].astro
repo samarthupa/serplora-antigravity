@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import CompilerApp from '../../components/compiler/CompilerApp.tsx';
+// Replace CompilerApp with the new Language Workspaces
+import HtmlWorkspace from '../../components/compiler/HtmlWorkspace.tsx';
+import PythonWorkspace from '../../components/compiler/PythonWorkspace.tsx';
+
 import { getCollection, getEntry, render } from 'astro:content';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 
@@ -14,6 +17,9 @@ export async function getStaticPaths() {
 
 const { compiler } = Astro.props;
 const breadcrumbLabel = compiler.data.breadcrumbTitle || compiler.data.title || compiler.id;
+
+// Extract the language to determine which compiler to load (defaults to html)
+const compilerLang = compiler.data.language || 'html'; 
 
 const starterFiles = (compiler.data.starterFiles || []).map((file, index) => ({
   id: (index + 1).toString(), 
@@ -49,25 +55,47 @@ if (adsData?.data) {
 
     <div class="flex-1 min-w-0 flex flex-col gap-4">
         
-        {/* THE COMPILER APP WITH FALLBACK */}
+        {/* DYNAMIC COMPILER ROUTING */}
         <div class="relative w-full z-10">
-          <CompilerApp 
-            client:only="react" 
-            title={compiler.data.title}
-            initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'untitled.txt', content: '// Write your code here', language: 'text' }]}
-          >
-            <div 
-              slot="fallback" 
-              class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+          {compilerLang === 'python' ? (
+            <PythonWorkspace 
+              client:only="react" 
+              title={compiler.data.title}
+              initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'main.py', content: '# Write your Python code here', language: 'python' }]}
+              showConsole={compiler.data.showConsole} // 🟢 Pass prop
             >
-              <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
-              <div class="flex flex-1 w-full">
-                <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
-                <div class="hidden md:block w-[240px] bg-gray-50 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
-                <div class="flex-1 bg-white dark:bg-[#1e1e1e]"></div>
+              <div 
+                slot="fallback" 
+                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+              >
+                <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
+                <div class="flex flex-1 w-full">
+                  <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
+                  <div class="hidden md:block w-[240px] bg-gray-50 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
+                  <div class="flex-1 bg-white dark:bg-[#1e1e1e]"></div>
+                </div>
               </div>
-            </div>
-          </CompilerApp>
+            </PythonWorkspace>
+          ) : (
+            <HtmlWorkspace 
+              client:only="react" 
+              title={compiler.data.title}
+              initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'index.html', content: '', language: 'html' }]}
+              showConsole={compiler.data.showConsole}
+            >
+              <div 
+                slot="fallback" 
+                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+              >
+                <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
+                <div class="flex flex-1 w-full">
+                  <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
+                  <div class="hidden md:block w-[240px] bg-gray-50 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
+                  <div class="flex-1 bg-white dark:bg-[#1e1e1e]"></div>
+                </div>
+              </div>
+            </HtmlWorkspace>
+          )}
         </div>
 
         {/* 🟢 AD MOVED HERE: Directly below the compiler */}

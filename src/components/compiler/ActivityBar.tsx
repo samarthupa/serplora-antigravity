@@ -1,7 +1,7 @@
 import React from 'react';
 
-export default function ActivityBar({ activeView, setActiveView, isConsoleOpen, setIsConsoleOpen, handleReset, handleShare, isSharing }: any) {
-  return (
+export default function ActivityBar({ activeView, setActiveView, isConsoleOpen, setIsConsoleOpen, handleReset, handleShare, isSharing, showConsole = true }: any) {
+    return (
     <div className="w-12 bg-gray-100 dark:bg-[#333333] flex flex-col items-center pt-1 shrink-0 border-r border-gray-300 dark:border-[#252526] transition-colors">
       
       {/* TOP SECTION */}
@@ -47,14 +47,16 @@ export default function ActivityBar({ activeView, setActiveView, isConsoleOpen, 
         </div>
         
         {/* Console Icon */}
-        <div 
-          className={`w-12 h-12 flex items-center justify-center cursor-pointer relative transition-colors ${isConsoleOpen ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-[#858585] hover:text-gray-800 dark:hover:text-[#cccccc]'}`} 
-          title="Console" 
-          onClick={() => setIsConsoleOpen(!isConsoleOpen)}
-        >
-          {isConsoleOpen && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#007acc]"></div>}
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
+        {showConsole && (
+          <div 
+            className={`w-12 h-12 flex items-center justify-center cursor-pointer relative transition-colors ${isConsoleOpen ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-[#858585] hover:text-gray-800 dark:hover:text-[#cccccc]'}`} 
+            title="Console" 
+            onClick={() => setIsConsoleOpen(!isConsoleOpen)}
+          >
+            {isConsoleOpen && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#007acc]"></div>}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        )}
       </div>
       
     </div>
