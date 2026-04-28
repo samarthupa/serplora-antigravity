@@ -8,6 +8,7 @@ import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-tomorrow_night";
 import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/ext-searchbox";
 
 export default function AceEditorArea({ 
   isDarkMode, 
@@ -153,20 +154,13 @@ export default function AceEditorArea({
                   className={isMobile ? 'mobile-slim-gutter' : ''}
                   setOptions={{ 
                     fontSize: 14, 
-                    showLineNumbers: true,  /* 🟢 MUST BE TRUE: Keeps numbers and fold widgets alive */
+                    showLineNumbers: true, 
                     showGutter: true, 
                     showFoldWidgets: true, 
                     tabSize: 2, 
                     useWorker: false 
                   }}
                   style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
-                  commands={[
-                    {
-                      name: 'saveFile',
-                      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-                      exec: () => { alert("File saved!"); }
-                    }
-                  ]}
                 />
               </div>
             ))
