@@ -14,9 +14,10 @@ export default function CodeEditorReact({ code, language }: any) {
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Refs for DOM nodes
+  // Refs for DOM nodes & Editor
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<any>(null); // NEW: Ref to control the CodeMirror instance
 
   // New Feature States
   const [isCopied, setIsCopied] = useState(false);
@@ -89,7 +90,7 @@ export default function CodeEditorReact({ code, language }: any) {
     return () => observer.disconnect();
   }, []);
 
-  // 3. Native Fullscreen Listener (Detects if user presses ESC key)
+  // 3. Native Fullscreen Listener
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -110,6 +111,32 @@ export default function CodeEditorReact({ code, language }: any) {
     
     if (userJson) {
       setIsEditable(true);
+      
+      // Wait a fraction of a second for React to flip readOnly to false
+      setTimeout(() => {
+        const view = editorRef.current?.view;
+        if (view) {
+          const length = view.state.doc.length;
+          
+          // Check if the code already ends with a newline
+          const endsWithNewline = length > 0 && view.state.doc.sliceString(length - 1, length) === '\n';
+          
+          if (!endsWithNewline && length > 0) {
+            // Append a newline and move cursor to the very end
+            view.dispatch({
+              changes: { from: length, insert: '\n' },
+              selection: { anchor: length + 1 }
+            });
+          } else {
+            // Just move cursor to the very end
+            view.dispatch({ selection: { anchor: length } });
+          }
+          
+          // Force the blinking pipe cursor to focus
+          view.focus();
+        }
+      }, 50);
+
     } else {
       setShowAuthModal(true);
     }
@@ -134,6 +161,8 @@ export default function CodeEditorReact({ code, language }: any) {
   const handleRun = async () => {
     if (isRunning || value === lastRunCode) return;
 
+    // Lock the editor back up immediately when they click run
+    setIsEditable(false); 
     setLastRunCode(value); 
     clearLogs();
     setIsOutputVisible(true);
@@ -217,6 +246,7 @@ export default function CodeEditorReact({ code, language }: any) {
         {/* The actual code area */}
         <div className="relative bg-surface">
           <CodeMirror
+            ref={editorRef} // NEW: Linked to the programmatic controller
             value={value}
             readOnly={!isEditable} 
             height={isFullscreen ? "100%" : "auto"}
