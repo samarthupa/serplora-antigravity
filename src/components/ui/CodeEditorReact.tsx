@@ -126,13 +126,11 @@ export default function CodeEditorReact({ code, language }: any) {
             view.dispatch({
               changes: { from: length, insert: '\n' },
               selection: { anchor: length + 1 },
-              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
             });
           } else {
             // Just move cursor to the very end
             view.dispatch({ 
               selection: { anchor: length },
-              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
             });
           }
           
@@ -262,7 +260,7 @@ export default function CodeEditorReact({ code, language }: any) {
             className="text-[14px] md:text-[15px] h-full"
           />
           
-          {isScrollable && !isAtBottom && !isFullscreen && (
+          {isScrollable && !isAtBottom && !isFullscreen && !isEditable && (
             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-surface via-surface/80 to-transparent pointer-events-none flex items-end justify-center pb-3 transition-opacity duration-300 z-10 opacity-100 group-hover:opacity-0">
             </div>
           )}
