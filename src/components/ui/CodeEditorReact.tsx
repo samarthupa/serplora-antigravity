@@ -125,11 +125,15 @@ export default function CodeEditorReact({ code, language }: any) {
             // Append a newline and move cursor to the very end
             view.dispatch({
               changes: { from: length, insert: '\n' },
-              selection: { anchor: length + 1 }
+              selection: { anchor: length + 1 },
+              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
             });
           } else {
             // Just move cursor to the very end
-            view.dispatch({ selection: { anchor: length } });
+            view.dispatch({ 
+              selection: { anchor: length },
+              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
+            });
           }
           
           // Force the blinking pipe cursor to focus
