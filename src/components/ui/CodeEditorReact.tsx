@@ -11,13 +11,13 @@ export default function CodeEditorReact({ code, language }: any) {
   // Core State
   const [value, setValue] = useState(code || '');
   const [isScrollable, setIsScrollable] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Refs for DOM nodes
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<any>(null);
+  const gradientRef = useRef<HTMLDivElement>(null); // NEW: Direct DOM ref for performance
 
   // New Feature States
   const [isCopied, setIsCopied] = useState(false);
@@ -55,11 +55,10 @@ export default function CodeEditorReact({ code, language }: any) {
     const timer = setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
     }, 50);
-    
     return () => clearTimeout(timer);
   }, []);
 
-  // 1. Scroll Detection Logic
+  // 1. Scroll Detection Logic (Refactored for High Performance)
   useEffect(() => {
     const lineCount = value.split('\n').length;
     setIsScrollable(lineCount > 18);
@@ -72,11 +71,14 @@ export default function CodeEditorReact({ code, language }: any) {
 
     const handleScroll = () => {
       const reachedBottom = Math.abs(scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop) < 2;
-      setIsAtBottom(reachedBottom);
+      // Direct DOM manipulation prevents React from re-rendering the editor and causing cursor jumping
+      if (gradientRef.current) {
+        gradientRef.current.style.opacity = reachedBottom ? '0' : '1';
+      }
     };
 
     handleScroll();
-    scroller.addEventListener('scroll', handleScroll);
+    scroller.addEventListener('scroll', handleScroll, { passive: true });
     return () => scroller.removeEventListener('scroll', handleScroll);
   }, [value, isScrollable, isFullscreen]);
 
@@ -260,6 +262,7 @@ export default function CodeEditorReact({ code, language }: any) {
             ref={editorRef}
             value={value}
             readOnly={!isEditable} 
+            editable={isEditable} // FIX: Prevents mobile keyboard from popping up
             height={isFullscreen ? "100%" : "auto"}
             maxHeight={isFullscreen ? "none" : "360px"}
             extensions={extensions}
@@ -269,8 +272,11 @@ export default function CodeEditorReact({ code, language }: any) {
             className={`text-[14px] md:text-[15px] ${isFullscreen ? 'h-full' : ''}`}
           />
           
-          {isScrollable && !isAtBottom && !isFullscreen && !isEditable && (
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-surface via-surface/80 to-transparent pointer-events-none flex items-end justify-center pb-3 transition-opacity duration-300 z-10 opacity-100 group-hover:opacity-0">
+          {isScrollable && !isFullscreen && !isEditable && (
+            <div 
+              ref={gradientRef}
+              className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-surface via-surface/80 to-transparent pointer-events-none flex items-end justify-center pb-3 transition-opacity duration-300 z-10 opacity-100 group-hover:opacity-0"
+            >
             </div>
           )}
         </div>
@@ -330,7 +336,7 @@ export default function CodeEditorReact({ code, language }: any) {
 
       {/* MINIMAL AUTHENTICATION MODAL POPUP */}
       {showAuthModal && (
-        <div className="absolute inset-0 z-[50] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
           <div className="bg-surface border border-subtle pt-8 pb-6 px-6 rounded-lg shadow-xl max-w-sm w-full text-center relative">
             
             {/* CUT/CLOSE BUTTON */}
