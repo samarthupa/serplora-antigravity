@@ -126,11 +126,13 @@ export default function CodeEditorReact({ code, language }: any) {
             view.dispatch({
               changes: { from: length, insert: '\n' },
               selection: { anchor: length + 1 },
+              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
             });
           } else {
             // Just move cursor to the very end
             view.dispatch({ 
               selection: { anchor: length },
+              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
             });
           }
           
