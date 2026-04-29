@@ -14,10 +14,10 @@ export default function CodeEditorReact({ code, language }: any) {
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Refs for DOM nodes & Editor
+  // Refs for DOM nodes
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<any>(null); // NEW: Ref to control the CodeMirror instance
+  const editorRef = useRef<any>(null);
 
   // New Feature States
   const [isCopied, setIsCopied] = useState(false);
@@ -112,31 +112,24 @@ export default function CodeEditorReact({ code, language }: any) {
     if (userJson) {
       setIsEditable(true);
       
-      // Wait a fraction of a second for React to flip readOnly to false
       setTimeout(() => {
         const view = editorRef.current?.view;
         if (view) {
           const length = view.state.doc.length;
-          
-          // Check if the code already ends with a newline
           const endsWithNewline = length > 0 && view.state.doc.sliceString(length - 1, length) === '\n';
           
           if (!endsWithNewline && length > 0) {
-            // Append a newline and move cursor to the very end
             view.dispatch({
               changes: { from: length, insert: '\n' },
               selection: { anchor: length + 1 },
-              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
+              scrollIntoView: true
             });
           } else {
-            // Just move cursor to the very end
             view.dispatch({ 
               selection: { anchor: length },
-              scrollIntoView: true // <--- NEW: Auto-scrolls to the bottom
+              scrollIntoView: true
             });
           }
-          
-          // Force the blinking pipe cursor to focus
           view.focus();
         }
       }, 50);
@@ -144,6 +137,12 @@ export default function CodeEditorReact({ code, language }: any) {
     } else {
       setShowAuthModal(true);
     }
+  };
+
+  const handleReset = () => {
+    setValue(code || '');
+    setLastRunCode(null);
+    clearLogs();
   };
 
   const toggleFullscreen = async () => {
@@ -163,9 +162,8 @@ export default function CodeEditorReact({ code, language }: any) {
 
   // TRIGGER WEBSOCKET EXECUTION
   const handleRun = async () => {
-    if (isRunning || value === lastRunCode) return;
+    if (isRunning || value.trim() === (lastRunCode || '').trim()) return;
 
-    // Lock the editor back up immediately when they click run
     setIsEditable(false); 
     setLastRunCode(value); 
     clearLogs();
@@ -208,7 +206,7 @@ export default function CodeEditorReact({ code, language }: any) {
           {(language === 'python' || language === 'py') && (
             <button 
               onClick={handleRun} 
-              disabled={isRunning || value === lastRunCode}
+              disabled={isRunning || value.trim() === (lastRunCode || '').trim()}
               className="flex items-center px-3 py-1.5 text-xs font-semibold text-tx-main disabled:opacity-50 rounded-md transition-colors"
             >
               {isRunning ? (
@@ -221,6 +219,15 @@ export default function CodeEditorReact({ code, language }: any) {
                   <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
                 </svg>
               )}
+            </button>
+          )}
+
+          {/* RESET BUTTON */}
+          {isEditable && (
+            <button onClick={handleReset} className="p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" title="Reset Code">
+              <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
             </button>
           )}
 
@@ -245,12 +252,12 @@ export default function CodeEditorReact({ code, language }: any) {
       </div>
       
       {/* EDITOR BODY */}
-      <div className={`relative group code-editor-wrapper ${isFullscreen ? 'flex-grow flex flex-col min-h-0' : ''}`} ref={scrollerRef}>
+      <div className={`relative group code-editor-wrapper ${isFullscreen ? 'flex-1 flex flex-col min-h-0' : ''}`} ref={scrollerRef}>
         
         {/* The actual code area */}
-        <div className="relative bg-surface">
+        <div className={`relative bg-surface ${isFullscreen ? 'flex-1 min-h-0' : ''}`}>
           <CodeMirror
-            ref={editorRef} // NEW: Linked to the programmatic controller
+            ref={editorRef}
             value={value}
             readOnly={!isEditable} 
             height={isFullscreen ? "100%" : "auto"}
@@ -259,7 +266,7 @@ export default function CodeEditorReact({ code, language }: any) {
             onChange={(val) => setValue(val)}
             theme={isDarkMode ? "dark" : "light"}
             basicSetup={{ lineNumbers: true, foldGutter: true, indentOnInput: true }}
-            className="text-[14px] md:text-[15px] h-full"
+            className={`text-[14px] md:text-[15px] ${isFullscreen ? 'h-full' : ''}`}
           />
           
           {isScrollable && !isAtBottom && !isFullscreen && !isEditable && (
