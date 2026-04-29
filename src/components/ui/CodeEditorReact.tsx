@@ -254,10 +254,10 @@ export default function CodeEditorReact({ code, language }: any) {
       </div>
       
       {/* EDITOR BODY */}
-      <div className={`relative group code-editor-wrapper ${isFullscreen ? 'flex-1 flex flex-col min-h-0' : ''}`} ref={scrollerRef}>
+      <div className={`relative group code-editor-wrapper ${isFullscreen ? 'flex-1 flex flex-col min-h-0 overflow-hidden' : ''}`} ref={scrollerRef}>
         
         {/* The actual code area */}
-        <div className={`relative bg-surface ${isFullscreen ? 'flex-1 min-h-0' : ''}`}>
+        <div className={`relative bg-surface ${isFullscreen ? 'flex-1 min-h-0 overflow-auto' : ''}`}>
           <CodeMirror
             ref={editorRef}
             value={value}
@@ -269,7 +269,7 @@ export default function CodeEditorReact({ code, language }: any) {
             onChange={(val) => setValue(val)}
             theme={isDarkMode ? "dark" : "light"}
             basicSetup={{ lineNumbers: true, foldGutter: true, indentOnInput: true }}
-            className={`text-[14px] md:text-[15px] ${isFullscreen ? 'h-full' : ''}`}
+            className="text-[14px] md:text-[15px]"
           />
           
           {isScrollable && !isFullscreen && !isEditable && (
