@@ -4,7 +4,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { EditorView } from '@codemirror/view';
 
-// 🟢 IMPORT THE WEBSOCKET HOOK
+// IMPORT THE WEBSOCKET HOOK
 import { useRemoteRunner } from '../compiler/adapters/useRemoteRunner';
 
 export default function CodeEditorReact({ code, language }: any) {
@@ -12,19 +12,24 @@ export default function CodeEditorReact({ code, language }: any) {
   const [value, setValue] = useState(code || '');
   const [isScrollable, setIsScrollable] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true); 
-  
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
   // Refs for DOM nodes
-  const containerRef = useRef<HTMLDivElement>(null); 
-  const scrollerRef = useRef<HTMLDivElement>(null);  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
   // New Feature States
   const [isCopied, setIsCopied] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isOutputVisible, setIsOutputVisible] = useState(true);
   const [inputVal, setInputVal] = useState('');
+  
+  // Auth & Execution Logic States
+  const [isEditable, setIsEditable] = useState(false);
+  const [lastRunCode, setLastRunCode] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // 🟢 CONNECT TO THE WEBSOCKET BACKEND
+  // CONNECT TO THE WEBSOCKET BACKEND
   const { 
     logs, 
     isRunning, 
@@ -100,14 +105,18 @@ export default function CodeEditorReact({ code, language }: any) {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleReset = () => {
-    setValue(code || '');
-    clearLogs();
+  const handleEdit = () => {
+    const userJson = localStorage.getItem('serplora_user');
+    
+    if (userJson) {
+      setIsEditable(true);
+    } else {
+      setShowAuthModal(true);
+    }
   };
 
   const toggleFullscreen = async () => {
     if (!containerRef.current) return;
-
     if (!document.fullscreenElement) {
       try {
         await containerRef.current.requestFullscreen();
@@ -121,18 +130,19 @@ export default function CodeEditorReact({ code, language }: any) {
     }
   };
 
-  // 🟢 TRIGGER WEBSOCKET EXECUTION
+  // TRIGGER WEBSOCKET EXECUTION
   const handleRun = async () => {
-    if (isRunning) return;
+    if (isRunning || value === lastRunCode) return;
+
+    setLastRunCode(value); 
     clearLogs();
     setIsOutputVisible(true);
     
-    // We mock the file structure expected by useRemoteRunner
     const mockFiles = [{ name: 'main.py', content: value, isFolder: false }];
     await execute(mockFiles, null);
   };
 
-  // 🟢 HANDLE TERMINAL INPUT SUBMISSION
+  // HANDLE TERMINAL INPUT SUBMISSION
   const onTerminalInputSubmit = () => {
     if (!isWaitingForInput) return;
     handleInputSubmit(inputVal);
@@ -142,7 +152,7 @@ export default function CodeEditorReact({ code, language }: any) {
   return (
     <div 
       ref={containerRef} 
-      className={isFullscreen ? "bg-surface w-full h-full flex flex-col m-0" : "relative my-8 rounded-[0.75rem] overflow-hidden border border-subtle shadow-sm bg-surface flex flex-col"}
+      className={isFullscreen ? "bg-surface w-full h-full flex flex-col m-0 relative z-[9999]" : "relative my-8 rounded-[0.75rem] overflow-hidden border border-subtle shadow-sm bg-surface"}
     >
       {/* HEADER & CONTROLS */}
       <div className="bg-surface px-4 py-2 border-b border-subtle flex justify-between items-center shrink-0">
@@ -152,29 +162,33 @@ export default function CodeEditorReact({ code, language }: any) {
         
         <div className="flex items-center space-x-1 sm:space-x-2">
           
-          {/* RESET BUTTON */}
-          <button onClick={handleReset} className="p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" title="Reset Code">
-            <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-          </button>
+          {/* EDIT BUTTON */}
+          {!isEditable && (
+            <button onClick={handleEdit} className="p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" title="Edit Code">
+              <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+              </svg>
+            </button>
+          )}
 
           {/* RUN BUTTON */}
           {(language === 'python' || language === 'py') && (
             <button 
-  onClick={handleRun} 
-  disabled={isRunning}
-  className="flex items-center px-3 py-1.5 text-xs font-semibold text-tx-main disabled:opacity-50 rounded-md transition-colors"
->
-  {isRunning ? (
-    <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-      <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
-    </svg>
-  )}
-</button>
+              onClick={handleRun} 
+              disabled={isRunning || value === lastRunCode}
+              className="flex items-center px-3 py-1.5 text-xs font-semibold text-tx-main disabled:opacity-50 rounded-md transition-colors"
+            >
+              {isRunning ? (
+                <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                  <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
           )}
 
           {/* COPY BUTTON */}
@@ -198,12 +212,13 @@ export default function CodeEditorReact({ code, language }: any) {
       </div>
       
       {/* EDITOR BODY */}
-      <div className="relative group code-editor-wrapper flex-grow flex flex-col min-h-0" ref={scrollerRef}>
+      <div className={`relative group code-editor-wrapper ${isFullscreen ? 'flex-grow flex flex-col min-h-0' : ''}`} ref={scrollerRef}>
         
         {/* The actual code area */}
-        <div className="flex-grow overflow-auto relative bg-surface">
+        <div className="relative bg-surface">
           <CodeMirror
             value={value}
+            readOnly={!isEditable} 
             height={isFullscreen ? "100%" : "auto"}
             maxHeight={isFullscreen ? "none" : "360px"}
             extensions={extensions}
@@ -213,15 +228,13 @@ export default function CodeEditorReact({ code, language }: any) {
             className="text-[14px] md:text-[15px] h-full"
           />
           
-          {/* Smart Scroll Indicator Overlay */}
           {isScrollable && !isAtBottom && !isFullscreen && (
             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-surface via-surface/80 to-transparent pointer-events-none flex items-end justify-center pb-3 transition-opacity duration-300 z-10 opacity-100 group-hover:opacity-0">
             </div>
           )}
-
         </div>
 
-       {/* 🟢 NEW REAL-TIME TERMINAL OUTPUT */}
+        {/* REAL-TIME TERMINAL OUTPUT */}
         {(logs.length > 0) && (
           <div className={`shrink-0 bg-main border-t border-subtle flex flex-col ${isOutputVisible ? (isFullscreen ? 'h-1/3' : 'max-h-[250px]') : ''}`}>
             
@@ -229,7 +242,7 @@ export default function CodeEditorReact({ code, language }: any) {
             <div className="flex justify-between items-center px-4 pt-3 pb-2">
               <span className="text-tx-muted text-[11px] font-mono font-semibold uppercase tracking-wider opacity-80">Output</span>
               <button 
-                onClick={() => setIsOutputVisible(!isOutputVisible)} 
+                onClick={() => setIsOutputVisible(!isOutputVisible)}
                 className="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded transition-colors"
               >
                 {isOutputVisible ? 'Hide' : 'Show'}
@@ -241,9 +254,7 @@ export default function CodeEditorReact({ code, language }: any) {
               <div className="px-4 pb-4 pt-1 overflow-y-auto font-mono text-[13px] md:text-[14px] flex-grow bg-main leading-[1.7] whitespace-pre-wrap custom-scrollbar">
                 
                 {logs.map((log: any) => {
-                  // 🟢 Return null for 'sys' logs to completely hide "Connecting..." and "Finished" messages
-                  if (log.type === 'sys') return null; 
-                  
+                  if (log.type === 'sys') return null;
                   if (log.type === 'err') return <div key={log.id} className="text-red-500 transition-colors">{log.content}</div>;
                   if (log.type === 'input-context') return <span key={log.id} className="text-tx-muted opacity-80 transition-colors">{log.content}</span>;
                   if (log.type === 'image') {
@@ -251,7 +262,6 @@ export default function CodeEditorReact({ code, language }: any) {
                     return <img key={log.id} src={imgSrc} alt="Terminal Output" className="max-w-full rounded mt-[10px] bg-white block" />;
                   }
                   
-                  // Default standard output (rendered as an inline span)
                   return <span key={log.id} className="text-tx-main transition-colors">{log.content}</span>;
                 })}
 
@@ -276,6 +286,32 @@ export default function CodeEditorReact({ code, language }: any) {
           </div>
         )}
       </div>
+
+      {/* MINIMAL AUTHENTICATION MODAL POPUP */}
+      {showAuthModal && (
+        <div className="absolute inset-0 z-[50] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="bg-surface border border-subtle pt-8 pb-6 px-6 rounded-lg shadow-xl max-w-sm w-full text-center relative">
+            
+            {/* CUT/CLOSE BUTTON */}
+            <button 
+              onClick={() => setShowAuthModal(false)} 
+              className="absolute top-3 right-3 text-tx-muted hover:text-tx-main transition-colors focus:outline-none"
+              aria-label="Close"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {/* EXACT REQUIRED TEXT */}
+            <p className="text-[15px] text-tx-main m-0 leading-relaxed">
+              <a href={`/signin?returnUrl=${encodeURIComponent(window.location.pathname + window.location.hash)}`} className="text-brand font-semibold hover:underline">Log in</a> to modify the code and rerun it.
+            </p>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
