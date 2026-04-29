@@ -122,12 +122,12 @@ export function useRemoteRunner(wsUrl: string) {
       };
 
       ws.onerror = (error) => {
-        addLog('err', '\n// WebSocket Connection Error.');
+        addLog('err', '\n// Time exceeded. Reset the compiler and try again.');
         cleanup();
       };
 
     } catch (err) {
-      addLog('err', "Failed to establish WebSocket connection.");
+      addLog('err', "Failed to establish connection.");
       cleanup();
     }
     

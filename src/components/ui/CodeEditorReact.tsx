@@ -4,7 +4,10 @@ import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { EditorView } from '@codemirror/view';
 
-export default function CodeEditorReact({ code, language }) {
+// 🟢 IMPORT THE WEBSOCKET HOOK
+import { useRemoteRunner } from '../compiler/adapters/useRemoteRunner';
+
+export default function CodeEditorReact({ code, language }: any) {
   // Core State
   const [value, setValue] = useState(code || '');
   const [isScrollable, setIsScrollable] = useState(false);
@@ -12,15 +15,24 @@ export default function CodeEditorReact({ code, language }) {
   const [isDarkMode, setIsDarkMode] = useState(true); 
   
   // Refs for DOM nodes
-  const containerRef = useRef(null); 
-  const scrollerRef = useRef(null);  
+  const containerRef = useRef<HTMLDivElement>(null); 
+  const scrollerRef = useRef<HTMLDivElement>(null);  
 
   // New Feature States
   const [isCopied, setIsCopied] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
-  const [output, setOutput] = useState<{ text: string; isError: boolean } | null>(null);
   const [isOutputVisible, setIsOutputVisible] = useState(true);
+  const [inputVal, setInputVal] = useState('');
+
+  // 🟢 CONNECT TO THE WEBSOCKET BACKEND
+  const { 
+    logs, 
+    isRunning, 
+    isWaitingForInput, 
+    execute, 
+    clearLogs, 
+    handleInputSubmit 
+  } = useRemoteRunner('wss://api.serplora.com/python');
 
   // Memoize extensions to prevent internal CodeMirror resets on scroll
   const extensions = useMemo(() => {
@@ -64,14 +76,10 @@ export default function CodeEditorReact({ code, language }) {
 
   // 2. Watch for Light/Dark mode changes
   useEffect(() => {
-    // Initial check
     setIsDarkMode(document.documentElement.classList.contains('dark'));
-    
-    // Watch for class changes on the html tag
     const observer = new MutationObserver(() => {
       setIsDarkMode(document.documentElement.classList.contains('dark'));
     });
-    
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
   }, []);
@@ -94,7 +102,7 @@ export default function CodeEditorReact({ code, language }) {
 
   const handleReset = () => {
     setValue(code || '');
-    setOutput(null);
+    clearLogs();
   };
 
   const toggleFullscreen = async () => {
@@ -113,35 +121,22 @@ export default function CodeEditorReact({ code, language }) {
     }
   };
 
+  // 🟢 TRIGGER WEBSOCKET EXECUTION
   const handleRun = async () => {
     if (isRunning) return;
-    setIsRunning(true);
-    setOutput(null);
+    clearLogs();
     setIsOutputVisible(true);
     
-    try {
-      const response = await fetch('https://samarthu78-s-python-compiler.hf.space/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: value })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        if (data.error) {
-           setOutput({ text: data.error, isError: true });
-        } else {
-           setOutput({ text: data.output || data.result || 'Successfully executed with no output.', isError: false });
-        }
-      } else {
-        setOutput({ text: data.error || 'Execution failed on server.', isError: true });
-      }
-    } catch (err) {
-      setOutput({ text: 'Failed to connect to the compiler. Is the server awake?', isError: true });
-    } finally {
-      setIsRunning(false);
-    }
+    // We mock the file structure expected by useRemoteRunner
+    const mockFiles = [{ name: 'main.py', content: value, isFolder: false }];
+    await execute(mockFiles, null);
+  };
+
+  // 🟢 HANDLE TERMINAL INPUT SUBMISSION
+  const onTerminalInputSubmit = () => {
+    if (!isWaitingForInput) return;
+    handleInputSubmit(inputVal);
+    setInputVal('');
   };
 
   return (
@@ -165,17 +160,21 @@ export default function CodeEditorReact({ code, language }) {
           {/* RUN BUTTON */}
           {(language === 'python' || language === 'py') && (
             <button 
-              onClick={handleRun} 
-              disabled={isRunning}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-tx-main bg-[rgba(128,128,128,0.08)] hover:bg-[rgba(128,128,128,0.15)] border border-subtle disabled:opacity-50 rounded-md transition-colors"
-            >
-              {isRunning ? (
-                <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" /></svg>
-              )}
-              {isRunning ? 'Running...' : 'Run'}
-            </button>
+  onClick={handleRun} 
+  disabled={isRunning}
+  className="flex items-center px-3 py-1.5 text-xs font-semibold text-tx-main disabled:opacity-50 rounded-md transition-colors"
+>
+  {isRunning ? (
+    <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+    </svg>
+  )}
+</button>
           )}
 
           {/* COPY BUTTON */}
@@ -222,9 +221,10 @@ export default function CodeEditorReact({ code, language }) {
 
         </div>
 
-       {/* TERMINAL OUTPUT */}
-        {output && (
+       {/* 🟢 NEW REAL-TIME TERMINAL OUTPUT */}
+        {(logs.length > 0) && (
           <div className={`shrink-0 bg-main border-t border-subtle flex flex-col ${isOutputVisible ? (isFullscreen ? 'h-1/3' : 'max-h-[250px]') : ''}`}>
+            
             {/* Terminal Header */}
             <div className="flex justify-between items-center px-4 pt-3 pb-2">
               <span className="text-tx-muted text-[11px] font-mono font-semibold uppercase tracking-wider opacity-80">Output</span>
@@ -235,12 +235,42 @@ export default function CodeEditorReact({ code, language }) {
                 {isOutputVisible ? 'Hide' : 'Show'}
               </button>
             </div>
+
             {/* Terminal Body */}
             {isOutputVisible && (
-              <div className="px-4 pb-4 pt-1 overflow-y-auto font-mono text-[13px] md:text-[14px] flex-grow bg-main">
-                <pre className={`whitespace-pre-wrap m-0 !bg-transparent !border-none !shadow-none !p-1 ${output.isError ? 'text-red-500' : 'text-tx-main'}`}>
-                  {output.text}
-                </pre>
+              <div className="px-4 pb-4 pt-1 overflow-y-auto font-mono text-[13px] md:text-[14px] flex-grow bg-main leading-[1.7] whitespace-pre-wrap custom-scrollbar">
+                
+                {logs.map((log: any) => {
+                  // 🟢 Return null for 'sys' logs to completely hide "Connecting..." and "Finished" messages
+                  if (log.type === 'sys') return null; 
+                  
+                  if (log.type === 'err') return <div key={log.id} className="text-red-500 transition-colors">{log.content}</div>;
+                  if (log.type === 'input-context') return <span key={log.id} className="text-tx-muted opacity-80 transition-colors">{log.content}</span>;
+                  if (log.type === 'image') {
+                    const imgSrc = log.content.startsWith('data:image') ? log.content : `data:image/png;base64,${log.content}`;
+                    return <img key={log.id} src={imgSrc} alt="Terminal Output" className="max-w-full rounded mt-[10px] bg-white block" />;
+                  }
+                  
+                  // Default standard output (rendered as an inline span)
+                  return <span key={log.id} className="text-tx-main transition-colors">{log.content}</span>;
+                })}
+
+                {/* Inline Interactive Input Box */}
+                {isWaitingForInput && (
+                  <span className="inline-flex items-center max-w-full">
+                    <input 
+                      type="text"
+                      value={inputVal}
+                      onChange={(e) => setInputVal(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') onTerminalInputSubmit();
+                      }}
+                      className="bg-transparent border-none outline-none shadow-none text-tx-main font-inherit text-[14px] font-bold border-b border-gray-400 p-0 m-0 min-w-[10px] transition-colors"
+                      style={{ width: `${Math.max(1, inputVal.length) + 1}ch`, borderRadius: 0, appearance: 'none' }}
+                      autoFocus
+                    />
+                  </span>
+                )}
               </div>
             )}
           </div>
