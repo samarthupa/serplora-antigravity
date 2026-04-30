@@ -116,6 +116,19 @@ export default function CodeEditorReact({ code, language }: any) {
     }
   };
 
+  const handleOpenInCompiler = () => {
+    // 1. Determine the destination based on the language
+    const targetPath = (language === 'python' || language === 'py') 
+      ? '/compilers/python' 
+      : '/compilers/html';
+
+    // 2. Save the code to local storage temporarily
+    localStorage.setItem('serplora_transfer_code', value);
+
+    // 3. Open the compiler page in a new tab, passing a ?transfer=true flag
+    window.open(`${targetPath}?transfer=true`, '_blank');
+  };
+
   // TRIGGER WEBSOCKET EXECUTION
   const handleRun = async () => {
     if (isRunning || value.trim() === (lastRunCode || '').trim()) return;
@@ -186,6 +199,18 @@ export default function CodeEditorReact({ code, language }: any) {
               <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
             )}
           </button>
+
+          {/* OPEN IN COMPILER BUTTON */}
+          <button 
+            onClick={handleOpenInCompiler} 
+            className="p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" 
+            title="Open in Full Compiler"
+          >
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </button>
+
         </div>
       </div>
       
@@ -197,8 +222,8 @@ export default function CodeEditorReact({ code, language }: any) {
           <CodeMirror
             ref={editorRef}
             value={value}
-            readOnly={isRunning} // Locks only while running
-            editable={true}      // Always editable now
+            readOnly={true} // Locks only while running
+            editable={false}      // Always editable now
             height={isFullscreen ? "100%" : "auto"}
             maxHeight={isFullscreen ? "none" : "360px"}
             extensions={extensions}

@@ -191,6 +191,36 @@ export default function CompilerShell({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [files, initialFiles]);
 
+  // Catch Transferred Code from Inline Editor
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Check if the URL has the transfer flag
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('transfer') === 'true') {
+      const transferredCode = localStorage.getItem('serplora_transfer_code');
+
+      if (transferredCode) {
+        setFiles((prevFiles: any[]) => {
+          const newFiles = [...prevFiles];
+          // Find the first editable file (like main.py or index.html) to inject the code into
+          const targetIndex = newFiles.findIndex(f => !f.isFolder);
+          
+          if (targetIndex !== -1) {
+            newFiles[targetIndex] = { ...newFiles[targetIndex], content: transferredCode };
+          }
+          return newFiles;
+        });
+
+        // Clean up the URL so refreshing the page doesn't wipe out user progress
+        window.history.replaceState(null, '', window.location.pathname);
+        
+        // Clean up LocalStorage
+        localStorage.removeItem('serplora_transfer_code');
+      }
+    }
+  }, []); // Empty dependency array ensures this runs exactly once on mount
+
   const handleReset = () => setShowResetConfirm(true);
 
   const executeReset = () => {
