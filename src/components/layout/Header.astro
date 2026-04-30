@@ -16,14 +16,19 @@ const primaryBtn = {
 ---
 
 <header id="site-header" class="sticky top-0 inset-x-0 w-full z-[200] h-[64px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300">
-  <div class="max-w-[1200px] mx-auto px-2 w-full flex items-center gap-4 md:gap-10">
+  <div class="max-w-[1200px] mx-auto px-4 w-full flex items-center gap-4 md:gap-10">
     
     {/* --- MOBILE: Hamburger Toggle (Leftmost) --- */}
-    <button type="button" class="md:hidden flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer shrink-0 bg-transparent border-none p-0 -ml-1" id="mobile-menu-btn" aria-label="Toggle mobile menu">
-      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
-      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
-      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
-    </button>
+<button 
+  type="button" 
+  class="md:hidden flex flex-col justify-center items-start w-8 h-8 focus:outline-none gap-[5px] cursor-pointer shrink-0 bg-transparent border-none p-0 -ml-1" 
+  id="mobile-menu-btn" 
+  aria-label="Toggle mobile menu"
+>
+  <span class="block w-4 h-[2px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
+  <span class="block w-6 h-[2px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
+  <span class="block w-6 h-[2px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
+</button>
 
     {/* Brand / Logo */}
     <a href="/" class="text-[20px] font-[800] text-tx-main tracking-[-0.5px] shrink-0 outline-none flex items-center gap-2">
@@ -72,7 +77,7 @@ const primaryBtn = {
     </ul>
 
     {/* Right Area: Actions */}
-    <div class="ml-auto flex items-center flex-1 justify-end gap-3 md:gap-4 pl-2 md:pl-0">
+    <div class="ml-auto flex items-center flex-1 justify-end gap-4 md:gap-4 pl-2 md:pl-0">
       
       {/* Search Button (Icon only on mobile) */}
       <button id="search-trigger" class="flex items-center justify-center md:justify-start gap-2 w-9 h-9 md:w-auto md:h-auto md:px-3 md:py-2 rounded-full md:rounded-[8px] text-tx-muted focus:outline-none cursor-pointer shrink-0" aria-label="Search">
