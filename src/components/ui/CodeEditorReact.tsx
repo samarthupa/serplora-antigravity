@@ -203,7 +203,7 @@ export default function CodeEditorReact({ code, language }: any) {
           {/* OPEN IN COMPILER BUTTON */}
           <button 
             onClick={handleOpenInCompiler} 
-            className="p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" 
+            className="ml-2 sm:ml-2 p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" 
             title="Open in Full Compiler"
           >
             <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
