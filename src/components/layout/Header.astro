@@ -17,8 +17,15 @@ const primaryBtn = {
 
 <header id="site-header" class="sticky top-0 inset-x-0 w-full z-[200] h-[64px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 border-b border-subtle/50">
   <div class="max-w-[1200px] mx-auto px-4 w-full flex items-center gap-3 md:gap-10">
+    
+    {/* --- MOBILE: Hamburger Toggle (Leftmost) --- */}
+    <button type="button" class="md:hidden flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer shrink-0 bg-transparent border-none p-0 -ml-1" id="mobile-menu-btn" aria-label="Toggle mobile menu">
+      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
+      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
+      <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
+    </button>
 
-    {/* Brand / Logo (Leftmost) */}
+    {/* Brand / Logo */}
     <a href="/" class="text-[20px] font-[800] text-tx-main tracking-[-0.5px] shrink-0 outline-none flex items-center gap-2">
       {logo && (
         <>
@@ -64,54 +71,46 @@ const primaryBtn = {
       })}
     </ul>
 
-    {/* Right Area: Actions (Search -> Auth -> Hamburger) */}
-    <div class="ml-auto flex items-center justify-end gap-4 md:gap-4 flex-1">
+    {/* Right Area: Actions */}
+    <div class="ml-auto flex items-center flex-1 justify-end gap-3 md:gap-4 pl-2 md:pl-0">
       
-      {/* Search Button */}
-      <button id="search-trigger" class="flex items-center justify-center md:justify-start gap-2 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-2 rounded-full md:rounded-[8px] text-tx-muted hover:text-tx-main transition-colors focus:outline-none cursor-pointer shrink-0" aria-label="Search">
+      {/* Search Button (Icon only on mobile) */}
+      <button id="search-trigger" class="flex items-center justify-center md:justify-start gap-2 w-9 h-9 md:w-auto md:h-auto md:px-3 md:py-2 rounded-full md:rounded-[8px] text-tx-muted focus:outline-none cursor-pointer shrink-0" aria-label="Search">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         <span class="hidden md:block text-[14px] truncate text-left w-full">Search...</span>
-        <span class="hidden md:flex text-[11px] font-['JetBrains_Mono',monospace] bg-main px-1.5 py-0.5 rounded border border-subtle opacity-70">⌘K</span>
       </button>
 
-      {/* Theme Toggle Button (Hidden on Mobile, kept in menu) */}
+      {/* Theme Toggle Button (Hidden on Mobile, kept in drawer) */}
       <button class="theme-toggle-btn hidden md:flex p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer" aria-label="Toggle theme">
         <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
 
-      {/* --- UNIFIED AUTH SECTION --- */}
+      {/* --- UNIFIED AUTH SECTION (Shows on Desktop AND Mobile) --- */}
       <div class="flex items-center">
         
-        {/* Unauthenticated View: Sign In Text (Mobile) / Button (Desktop) */}
+        {/* Unauthenticated View: Sign In (Text on Mobile, Button on Desktop) */}
         <div id="auth-signin-header" style="display: none;">
           {primaryBtn.show && (
-            <a href={primaryBtn.url} class="md:px-4 md:py-[6px] md:rounded-[6px] md:bg-tx-main md:text-main text-tx-main text-[16px] md:text-[14px] font-[600] transition-opacity hover:opacity-80 cursor-pointer border-none outline-none leading-none whitespace-nowrap">
+            <a href={primaryBtn.url} class="flex items-center justify-center md:px-4 md:py-[6px] md:rounded-[6px] md:bg-tx-main text-tx-main md:text-main text-[15px] md:text-[14px] font-[600] transition-opacity hover:opacity-80 cursor-pointer outline-none leading-none whitespace-nowrap">
               <span class="md:hidden">Sign in</span>
               <span class="hidden md:inline">{primaryBtn.label}</span>
             </a>
           )}
         </div>
 
-        {/* Authenticated View: Avatar (Mobile) / Pill (Desktop) */}
+        {/* Authenticated View: Avatar (No text on mobile, Text on desktop) */}
         <div id="auth-profile-header" style="display: none;">
-          <a href="/account" class="flex items-center justify-center md:px-4 md:py-[6px] md:rounded-[6px] md:bg-tx-main md:text-main text-[14px] font-[600] transition-opacity hover:opacity-90 md:shadow-sm border-none outline-none leading-none">
-            <div id="profile-avatar-header" class="w-8 h-8 md:w-5 md:h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[13px] md:text-[11px] shadow-sm md:shadow-none border border-subtle md:border-none"></div>
+          <a href="/account" class="flex items-center justify-center md:px-4 md:py-[6px] md:rounded-[6px] md:bg-tx-main text-tx-main md:text-main text-[14px] font-[600] transition-opacity hover:opacity-90 md:shadow-sm outline-none leading-none">
+            <div id="profile-avatar-header" class="w-8 h-8 md:w-5 md:h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[13px] md:text-[11px] shadow-sm md:shadow-none shrink-0"></div>
             <span class="hidden md:inline ml-2">Account</span>
           </a>
         </div>
+        
       </div>
-
-      {/* --- MOVED: Mobile Hamburger Toggle (Rightmost) --- */}
-      <button type="button" class="md:hidden flex flex-col justify-center items-center w-8 h-8 focus:outline-none gap-[5px] cursor-pointer shrink-0 bg-transparent border-none p-0 ml-1" id="mobile-menu-btn" aria-label="Toggle mobile menu">
-        <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
-        <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-opacity duration-300" id="ham-mid"></span>
-        <span class="block w-6 h-[2.5px] bg-tx-main rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
-      </button>
-
     </div>
 
-    {/* Mobile Navigation Drawer */}
+    {/* Mobile Navigation Drawer (Hamburger Menu) */}
     <div id="mobile-menu" class="hidden absolute top-[64px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-64px)] overflow-y-auto z-[190]">
       <div class="flex flex-col h-full px-6 py-6 w-full max-w-[500px] mx-auto">
         
