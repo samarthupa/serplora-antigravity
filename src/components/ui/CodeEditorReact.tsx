@@ -3,8 +3,6 @@ import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { EditorView } from '@codemirror/view';
-
-// IMPORT THE WEBSOCKET HOOK
 import { useRemoteRunner } from '../compiler/adapters/useRemoteRunner';
 
 export default function CodeEditorReact({ code, language }: any) {
@@ -17,30 +15,26 @@ export default function CodeEditorReact({ code, language }: any) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<any>(null);
-  const gradientRef = useRef<HTMLDivElement>(null); // NEW: Direct DOM ref for performance
+  const gradientRef = useRef<HTMLDivElement>(null);
 
-  // New Feature States
+  // Feature States
   const [isCopied, setIsCopied] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isOutputVisible, setIsOutputVisible] = useState(true);
   const [inputVal, setInputVal] = useState('');
-  
-  // Auth & Execution Logic States
-  const [isEditable, setIsEditable] = useState(false);
   const [lastRunCode, setLastRunCode] = useState<string | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // CONNECT TO THE WEBSOCKET BACKEND
-  const { 
-    logs, 
-    isRunning, 
-    isWaitingForInput, 
-    execute, 
-    clearLogs, 
-    handleInputSubmit 
+  const {
+    logs,
+    isRunning,
+    isWaitingForInput,
+    execute,
+    clearLogs,
+    handleInputSubmit
   } = useRemoteRunner('wss://api.serplora.com/python');
 
-  // Memoize extensions to prevent internal CodeMirror resets on scroll
+  // Memoize extensions
   const extensions = useMemo(() => {
     const exts = [];
     if (language === 'javascript' || language === 'js') exts.push(javascript());
@@ -50,7 +44,7 @@ export default function CodeEditorReact({ code, language }: any) {
     return exts;
   }, [language]);
 
-  // Force layout recalculation when lazy-loaded into the viewport
+  // Force layout recalculation
   useEffect(() => {
     const timer = setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
@@ -58,7 +52,7 @@ export default function CodeEditorReact({ code, language }: any) {
     return () => clearTimeout(timer);
   }, []);
 
-  // 1. Scroll Detection Logic (Refactored for High Performance)
+  // Scroll Detection Logic
   useEffect(() => {
     const lineCount = value.split('\n').length;
     setIsScrollable(lineCount > 18);
@@ -71,18 +65,17 @@ export default function CodeEditorReact({ code, language }: any) {
 
     const handleScroll = () => {
       const reachedBottom = Math.abs(scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop) < 2;
-      // Direct DOM manipulation prevents React from re-rendering the editor and causing cursor jumping
       if (gradientRef.current) {
         gradientRef.current.style.opacity = reachedBottom ? '0' : '1';
       }
     };
-
+    
     handleScroll();
     scroller.addEventListener('scroll', handleScroll, { passive: true });
     return () => scroller.removeEventListener('scroll', handleScroll);
   }, [value, isScrollable, isFullscreen]);
 
-  // 2. Watch for Light/Dark mode changes
+  // Light/Dark mode changes
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains('dark'));
     const observer = new MutationObserver(() => {
@@ -92,7 +85,7 @@ export default function CodeEditorReact({ code, language }: any) {
     return () => observer.disconnect();
   }, []);
 
-  // 3. Native Fullscreen Listener
+  // Native Fullscreen Listener
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -101,50 +94,11 @@ export default function CodeEditorReact({ code, language }: any) {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // 4. Action Handlers
+  // Action Handlers
   const handleCopy = async () => {
     await navigator.clipboard.writeText(value);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
-  };
-
-  const handleEdit = () => {
-    const userJson = localStorage.getItem('serplora_user');
-    
-    if (userJson) {
-      setIsEditable(true);
-      
-      setTimeout(() => {
-        const view = editorRef.current?.view;
-        if (view) {
-          const length = view.state.doc.length;
-          const endsWithNewline = length > 0 && view.state.doc.sliceString(length - 1, length) === '\n';
-          
-          if (!endsWithNewline && length > 0) {
-            view.dispatch({
-              changes: { from: length, insert: '\n' },
-              selection: { anchor: length + 1 },
-              scrollIntoView: true
-            });
-          } else {
-            view.dispatch({ 
-              selection: { anchor: length },
-              scrollIntoView: true
-            });
-          }
-          view.focus();
-        }
-      }, 50);
-
-    } else {
-      setShowAuthModal(true);
-    }
-  };
-
-  const handleReset = () => {
-    setValue(code || '');
-    setLastRunCode(null);
-    clearLogs();
   };
 
   const toggleFullscreen = async () => {
@@ -165,9 +119,8 @@ export default function CodeEditorReact({ code, language }: any) {
   // TRIGGER WEBSOCKET EXECUTION
   const handleRun = async () => {
     if (isRunning || value.trim() === (lastRunCode || '').trim()) return;
-
-    setIsEditable(false); 
-    setLastRunCode(value); 
+    
+    setLastRunCode(value);
     clearLogs();
     setIsOutputVisible(true);
     
@@ -183,8 +136,8 @@ export default function CodeEditorReact({ code, language }: any) {
   };
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={isFullscreen ? "bg-surface w-full h-full flex flex-col m-0 relative z-[9999]" : "relative my-8 rounded-[0.75rem] overflow-hidden border border-subtle shadow-sm bg-surface"}
     >
       {/* HEADER & CONTROLS */}
@@ -195,21 +148,13 @@ export default function CodeEditorReact({ code, language }: any) {
         
         <div className="flex items-center space-x-1 sm:space-x-2">
           
-          {/* EDIT BUTTON */}
-          {!isEditable && (
-            <button onClick={handleEdit} className="p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" title="Edit Code">
-              <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-              </svg>
-            </button>
-          )}
-
           {/* RUN BUTTON */}
           {(language === 'python' || language === 'py') && (
-            <button 
-              onClick={handleRun} 
+            <button
+              onClick={handleRun}
               disabled={isRunning || value.trim() === (lastRunCode || '').trim()}
               className="flex items-center px-3 py-1.5 text-xs font-semibold text-tx-main disabled:opacity-50 rounded-md transition-colors"
+              title="Run Code"
             >
               {isRunning ? (
                 <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -221,15 +166,6 @@ export default function CodeEditorReact({ code, language }: any) {
                   <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
                 </svg>
               )}
-            </button>
-          )}
-
-          {/* RESET BUTTON */}
-          {isEditable && (
-            <button onClick={handleReset} className="p-1.5 text-tx-muted hover:text-tx-main hover:bg-[rgba(128,128,128,0.08)] rounded-md transition-colors" title="Reset Code">
-              <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-              </svg>
             </button>
           )}
 
@@ -261,8 +197,8 @@ export default function CodeEditorReact({ code, language }: any) {
           <CodeMirror
             ref={editorRef}
             value={value}
-            readOnly={!isEditable} 
-            editable={isEditable} // FIX: Prevents mobile keyboard from popping up
+            readOnly={isRunning} // Locks only while running
+            editable={true}      // Always editable now
             height={isFullscreen ? "100%" : "auto"}
             maxHeight={isFullscreen ? "none" : "360px"}
             extensions={extensions}
@@ -272,7 +208,7 @@ export default function CodeEditorReact({ code, language }: any) {
             className="text-[14px] md:text-[15px]"
           />
           
-          {isScrollable && !isFullscreen && !isEditable && (
+          {isScrollable && !isFullscreen && (
             <div 
               ref={gradientRef}
               className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-surface via-surface/80 to-transparent pointer-events-none flex items-end justify-center pb-3 transition-opacity duration-300 z-10 opacity-100 group-hover:opacity-0"
@@ -333,32 +269,6 @@ export default function CodeEditorReact({ code, language }: any) {
           </div>
         )}
       </div>
-
-      {/* MINIMAL AUTHENTICATION MODAL POPUP */}
-      {showAuthModal && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-surface border border-subtle pt-8 pb-6 px-6 rounded-lg shadow-xl max-w-sm w-full text-center relative">
-            
-            {/* CUT/CLOSE BUTTON */}
-            <button 
-              onClick={() => setShowAuthModal(false)} 
-              className="absolute top-3 right-3 text-tx-muted hover:text-tx-main transition-colors focus:outline-none"
-              aria-label="Close"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            
-            {/* EXACT REQUIRED TEXT */}
-            <p className="text-[15px] text-tx-main m-0 leading-relaxed">
-              <a href={`/signin?returnUrl=${encodeURIComponent(window.location.pathname + window.location.hash)}`} className="text-brand font-semibold hover:underline">Log in</a> to modify the code and rerun it.
-            </p>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
