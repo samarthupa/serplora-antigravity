@@ -11,6 +11,20 @@ export const seoSchema = fields.object({
     canonicalUrl: fields.text({ label: 'Canonical URL', description: 'Leave blank to use the current auto-generated URL.' }),
     robotsIndex: fields.checkbox({ label: 'Allow Search Engines to Index (index)', defaultValue: true }),
     robotsFollow: fields.checkbox({ label: 'Allow Search Engines to Follow Links (follow)', defaultValue: true }),
+
+    schemaType: fields.select({
+      label: 'Structured Data (Schema.org)',
+      description: 'Select the primary schema type for this page.',
+      options: [
+        { label: 'None (Global Organization only)', value: 'none' },
+        { label: 'Article / Blog Post', value: 'BlogPosting' },
+        { label: 'Technical Article / Guide', value: 'TechArticle' },
+        { label: 'Software / Compiler Tool', value: 'WebApplication' },
+        { label: 'Quiz / Multiple Choice', value: 'Quiz' }
+      ],
+      defaultValue: 'none',
+    }),
+    
 }, { label: 'SEO & Meta Tags' });
 
 export const customCodeBlocks = {

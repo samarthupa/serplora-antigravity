@@ -1,4 +1,5 @@
 ---
+// src/layouts/SidebarSeriesLayout.astro
 import Layout from './Layout.astro';
 import { getEntry } from 'astro:content';
 import Breadcrumb from '../components/ui/Breadcrumb.astro';
@@ -66,7 +67,13 @@ if (adsData?.data) {
 }
 ---
 
-<Layout seo={currentActiveData.seo} titleFallback={currentActiveData.title} excerptFallback={currentActiveData.excerpt}>
+{/* 🟢 NEW: schemaData prop added here to pass the payload to Layout.astro */}
+<Layout 
+  seo={currentActiveData.seo} 
+  titleFallback={currentActiveData.title} 
+  excerptFallback={currentActiveData.excerpt}
+  schemaData={currentActiveData}
+>
   <div class="flex flex-col lg:flex-row w-full max-w-[1440px] mx-auto justify-center items-start relative font-['Outfit',sans-serif]">
     
     {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
@@ -142,7 +149,7 @@ if (adsData?.data) {
     </aside>
 
     {/* Main Content */}
-    <main class="flex-1 min-w-0 w-full max-w-[800px] px-4 sm:px-6 lg:px-6 xl:px-12 py-6 lg:py-8">       
+    <main class="flex-1 min-w-0 w-full max-w-[800px] px-4 sm:px-6 lg:px-6 xl:px-12 py-6 lg:py-8">      
       {currentSlug === 'overview' ? (
         <Breadcrumb 
           section={basePath as any} 
@@ -291,3 +298,4 @@ if (adsData?.data) {
     });
   });
 </script>
+</Layout>

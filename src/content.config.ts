@@ -8,6 +8,7 @@ const seoSchema = z.object({
   canonicalUrl: z.string().optional(),
   robotsIndex: z.boolean().optional(),
   robotsFollow: z.boolean().optional(),
+  schemaType: z.string().optional().default('none'), // <-- ADD THIS LINE
 }).optional();
 
 // 🟢 Define Categories

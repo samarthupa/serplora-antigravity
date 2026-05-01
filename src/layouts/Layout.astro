@@ -15,11 +15,12 @@ import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import 'photoswipe/style.css';
 
-// 🟢 NEW: Import GTM and Cookie Banner Components
+// 🟢 Import GTM, Cookie Banner, and new Schema Injector
 import GoogleTagManager from '../components/layout/GoogleTagManager.astro';
 import CookieBanner from '../components/ui/CookieBanner.astro';
+import SchemaInjector from '../schemas/SchemaInjector.astro';
 
-// 🟢 NEW: Accept dynamic SEO props from individual pages
+// 🟢 Accept dynamic SEO props from individual pages
 interface Props {
   seo?: {
     metaTitle?: string;
@@ -27,12 +28,14 @@ interface Props {
     canonicalUrl?: string;
     robotsIndex?: boolean;
     robotsFollow?: boolean;
+    schemaType?: string; // <-- NEW: Accepts the schema type from CMS
   };
   titleFallback?: string;
   excerptFallback?: string;
+  schemaData?: any; // <-- NEW: Accepts the raw page data for the schema compiler
 }
 
-const { seo, titleFallback, excerptFallback } = Astro.props;
+const { seo, titleFallback, excerptFallback, schemaData } = Astro.props;
 
 // Fetch the header data from Keystatic to get the Favicon and Site Title
 const headerEntry = await getEntry('header', 'data');
@@ -56,9 +59,6 @@ const robotsParams = [
   seo?.robotsIndex === false ? 'noindex' : 'index',
   seo?.robotsFollow === false ? 'nofollow' : 'follow'
 ].join(', ');
-
-// 🔴 REMOVED: Server-side Cloudflare geo-logic has been removed from here.
-// It is now handled dynamically in the browser via CookieBanner.astro!
 ---
 
 <!doctype html>
@@ -83,6 +83,12 @@ const robotsParams = [
     <meta property="og:type" content="website" />
     
     <link rel="icon" href={favicon} />
+
+    {/* 🟢 DYNAMIC SCHEMA INJECTION */}
+    <SchemaInjector 
+       schemaType={seo?.schemaType} 
+       schemaData={{ title: finalTitle, description: finalDescription, ...schemaData }} 
+    />
 
     {/* 🟢 GTM INJECTION - Removed isEurope prop */}
     <GoogleTagManager gtmId="GTM-MVZN25KT" />

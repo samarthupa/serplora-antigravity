@@ -1,0 +1,27 @@
+---
+// src/schemas/SchemaInjector.astro
+import { getGlobalSchema, getArticleSchema, getWebAppSchema, getQuizSchema } from './generators';
+
+const { schemaType, schemaData } = Astro.props;
+const currentUrl = Astro.url.href;
+
+let graph: any[] = [...getGlobalSchema()];
+
+// Append specific schemas based on Keystatic selection
+if (schemaData) {
+  if (schemaType === 'TechArticle' || schemaType === 'BlogPosting') {
+    graph.push(getArticleSchema(schemaType, schemaData, currentUrl));
+  } else if (schemaType === 'WebApplication') {
+    graph.push(getWebAppSchema(schemaData, currentUrl));
+  } else if (schemaType === 'Quiz') {
+    graph.push(getQuizSchema(schemaData, currentUrl));
+  }
+}
+
+const jsonLD = {
+  "@context": "https://schema.org",
+  "@graph": graph
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLD)} />
