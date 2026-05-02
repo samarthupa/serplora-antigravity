@@ -12,13 +12,6 @@ export function getGlobalSchema() {
       "url": SITE_URL,
       "logo": `${SITE_URL}/images/logo/logo.svg`
     },
-    {
-      "@type": "Person",
-      "@id": `${SITE_URL}/#samarth`,
-      "name": "Samarth Upadhyay",
-      "jobTitle": "Senior SEO Analyst",
-      "url": `${SITE_URL}/about`
-    },
     // --- NEW: Explicitly define the WebSite to prevent blank CreativeWork nodes ---
     {
       "@type": "WebSite",
