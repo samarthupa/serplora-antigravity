@@ -18,6 +18,14 @@ export function getGlobalSchema() {
       "name": "Samarth Upadhyay",
       "jobTitle": "Senior SEO Analyst",
       "url": `${SITE_URL}/about`
+    },
+    // --- NEW: Explicitly define the WebSite to prevent blank CreativeWork nodes ---
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      "url": SITE_URL,
+      "name": "Serplora Academy",
+      "publisher": { "@id": `${SITE_URL}/#organization` }
     }
   ];
 }
@@ -35,7 +43,11 @@ export function getArticleSchema(type: string, data: any, url: string) {
     "dateModified": data.updatedDate ? new Date(data.updatedDate).toISOString() : undefined,
     "image": data.image ? `${SITE_URL}${data.image}` : undefined,
     "publisher": { "@id": `${SITE_URL}/#organization` },
-    "mainEntityOfPage": { "@id": url }
+    // --- UPDATED: Explicitly define this as a WebPage ---
+    "mainEntityOfPage": { 
+      "@type": "WebPage", 
+      "@id": url 
+    }
   };
 }
 
