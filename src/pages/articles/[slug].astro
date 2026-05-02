@@ -46,12 +46,24 @@ export async function getStaticPaths() {
 const { entry, relatedPosts } = Astro.props;
 const { Content } = await render(entry);
 
+// 🟢 BULLETPROOF AUTHOR FETCHING & ROUTING
+// 1. Grab the author ID (Astro's config will ensure it defaults to 'editorial-team' if missing)
+const authorId = entry.data.author || 'editorial-team';
+const authorEntry = await getEntry('authors', authorId);
+
+// 2. Safely grab the data
+const authorName = authorEntry?.data?.name || "Editorial Team";
+const authorAvatar = authorEntry?.data?.avatar || null;
+
+// 3. CUSTOM ROUTING LOGIC: If the author is the team, send them to the hub!
+const authorLink = authorId === 'editorial-team' ? '/authors' : `/authors/${authorId}`;
+
 const displayDate = entry.data.updatedDate || entry.data.publishDate || new Date();
 const formattedDate = new Date(displayDate).toISOString().split('T')[0];
 const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.id;
 ---
 
-<Layout seo={entry.data.seo} titleFallback={entry.data.title} excerptFallback={entry.data.excerpt}>
+<Layout seo={entry.data.seo} titleFallback={entry.data.title} excerptFallback={entry.data.excerpt} schemaData={entry.data}>
   <main class="w-full bg-transparent py-10 md:py-20 font-['Outfit',sans-serif]">
     <article class="max-w-[900px] mx-auto px-6" data-pagefind-body>
       
@@ -72,20 +84,21 @@ const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.
         </figure>
       )}
 
+      {/* Relational Author HTML Block */}
       <div data-pagefind-ignore class="flex flex-wrap items-center gap-x-8 gap-y-4 py-5 border-y border-subtle mb-12 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px]">
-        <div class="flex items-center gap-3">
-          {entry.data.authorImage ? (
-            <img src={entry.data.authorImage} alt={entry.data.authorName} class="w-9 h-9 rounded-md object-cover border border-subtle" />
+        <a href={authorLink} class="flex items-center gap-3 group">
+          {authorAvatar ? (
+            <img src={authorAvatar} alt={authorName} class="w-9 h-9 rounded-md object-cover border border-subtle group-hover:border-brand transition-colors" />
           ) : (
-            <div class="w-9 h-9 rounded-md bg-main border border-subtle flex items-center justify-center font-bold text-tx-main text-[14px]">
-              {entry.data.authorName.charAt(0)}
+            <div class="w-9 h-9 rounded-md bg-main border border-subtle group-hover:border-brand transition-colors flex items-center justify-center font-bold text-tx-main text-[14px]">
+              {authorName.charAt(0)}
             </div>
           )}
           <div class="flex flex-col">
             <span class="text-tx-muted text-[10px] uppercase tracking-wider">Author</span>
-            <span class="text-tx-main font-medium">{entry.data.authorName}</span>
+            <span class="text-tx-main font-medium group-hover:text-brand transition-colors">{authorName}</span>
           </div>
-        </div>
+        </a>
         
         <div class="w-[1px] h-8 bg-subtle hidden sm:block"></div>
         
@@ -130,7 +143,7 @@ const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.
         <section data-pagefind-ignore class="mt-16">
         <h3 class="text-xl font-[800] text-tx-main mb-6 tracking-tight font-['JetBrains_Mono',monospace]">ls ./related-articles</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {relatedPosts.map((post) => (
+            {relatedPosts.map((post: any) => (
               <a href={`/articles/${post.id}`} class="group flex flex-col bg-surface rounded-[12px] border border-subtle p-4 md:p-5 hover:border-brand/50 hover:shadow-md hover:shadow-brand/5 transition-all duration-300">
                 {post.data.image && (
                   <img src={post.data.image} alt={post.data.title} class="w-full h-32 md:h-36 object-cover rounded-[8px] mb-4 border border-subtle" />
@@ -178,7 +191,6 @@ const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.
   .markdown-content ol, .faq-content ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1.5em; color: var(--color-tx-main); opacity: 0.8; }
   .markdown-content li, .faq-content li { margin-bottom: 0.5em; padding-left: 0.25em; }
 
-  /* --- NEW: Dark mode text overrides --- */
   .dark .markdown-content h1,
   .dark .markdown-content h2,
   .dark .markdown-content h3,
@@ -208,8 +220,8 @@ const breadcrumbLabel = entry.data.breadcrumbTitle || entry.data.title || entry.
   
   .markdown-content code { 
     font-family: 'JetBrains Mono', monospace; font-size: 0.85em; 
-    color: var(--color-tx-main); /* 🟢 Guaranteed WCAG AAA Contrast */
-    background-color: rgba(128, 128, 128, 0.12); /* Neutral background */
+    color: var(--color-tx-main);
+    background-color: rgba(128, 128, 128, 0.12);
     border: 1px solid rgba(128, 128, 128, 0.2); 
     padding: 0.15em 0.3em; border-radius: 0.25rem;
   }

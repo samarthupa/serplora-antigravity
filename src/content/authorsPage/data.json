@@ -1,0 +1,14 @@
+{
+  "headline": "Editorial Team",
+  "breadcrumbTitle": "Authors",
+  "subheadline": "Meet the team of developers and technical writers building the future of online education.",
+  "postsPerPage": 1,
+  "paginationTitleTemplate": " - Page {page}",
+  "noindexPaginated": true,
+  "seo": {
+    "metaTitle": "Serplora Academy Editorial Team",
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "schemaType": "none"
+  }
+}

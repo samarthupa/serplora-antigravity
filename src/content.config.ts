@@ -1,3 +1,4 @@
+// src/content.config.ts
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
@@ -8,8 +9,21 @@ const seoSchema = z.object({
   canonicalUrl: z.string().optional(),
   robotsIndex: z.boolean().optional(),
   robotsFollow: z.boolean().optional(),
-  schemaType: z.string().optional().default('none'), // <-- ADD THIS LINE
+  schemaType: z.string().optional().default('none'),
 }).optional();
+
+// 🟢 NEW: Define Authors Collection
+const authors = defineCollection({
+  loader: glob({ pattern: "**/*.json", base: "./src/content/authors" }),
+  schema: z.object({
+    name: z.string(),
+    avatar: z.string().optional(),
+    bio: z.string().optional(),
+    twitter: z.string().optional(),
+    linkedin: z.string().optional(),
+    seo: seoSchema,
+  }),
+});
 
 // 🟢 Define Categories
 const categories = defineCollection({
@@ -147,8 +161,9 @@ const posts = defineCollection({
     publishDate: z.coerce.date().optional(),
     updatedDate: z.coerce.date().optional(),
     image: z.string().optional(),
-    authorName: z.string().default('Serplora Team'),
-    authorImage: z.string().optional(),
+    
+    // 🟢 UPDATED: Relational Author ID
+    author: z.string().default('editorial-team'),
     
     // Inject SEO Schema
     seo: seoSchema,
@@ -312,14 +327,34 @@ const pages = defineCollection({
   })
 });
 
+// 🟢 NEW: Authors Page Singleton Support
+// 🟢 NEW: Authors Page Singleton Support
+const authorsPage = defineCollection({
+  loader: glob({ pattern: 'data.json', base: './src/content/authorsPage' }),
+  schema: z.object({
+    headline: z.string().optional(),
+    breadcrumbTitle: z.string().optional(),
+    subheadline: z.string().optional(),
+    
+    // 🟢 NEW: Validate Pagination Settings
+    postsPerPage: z.number().default(9),
+    paginationTitleTemplate: z.string().default(' - Page {page}'),
+    noindexPaginated: z.boolean().default(true),
+    
+    seo: seoSchema,
+  })
+});
+
 // 8. EXPORT ALL COLLECTIONS (Make sure to export the new ones!)
 export const collections = { 
+  authors,
+  authorsPage,   // 🟢 ADD THIS
   categories, 
   tags,       
   tutorials,
   lessons, 
-  quizzes,      // <-- ADD THIS
-  quizItems,    // <-- ADD THIS
+  quizzes,      
+  quizItems,    
   tutorialsPage, 
   header, 
   footer, 
@@ -330,6 +365,6 @@ export const collections = {
   homePage,
   compilers,
   pages,
-  quizzesPage,   // 🟢 ADD THIS
-  compilersPage, // 🟢 ADD THIS
+  quizzesPage,   
+  compilersPage, 
 };

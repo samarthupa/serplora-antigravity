@@ -113,6 +113,37 @@ export const compilersPage = singleton({
     },
 });
 
+// 🟢 NEW: Authors Index Page Singleton
+export const authorsPage = singleton({
+    label: 'Authors Index Page',
+    path: 'src/content/authorsPage/data',
+    format: { data: 'json' },
+    schema: {
+        headline: fields.text({ label: 'Headline', defaultValue: 'Our Authors' }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)', description: 'A shorter title used specifically for navigation paths.' }),
+        subheadline: fields.text({ label: 'Subheadline', multiline: true, defaultValue: 'Meet the team of developers and technical writers building the future of online education.' }),
+        
+        // 🟢 NEW: Pagination Settings
+        postsPerPage: fields.integer({ 
+            label: 'Posts Per Page', 
+            defaultValue: 9, 
+            validation: { min: 1 } 
+        }),
+        paginationTitleTemplate: fields.text({ 
+            label: 'Pagination Title Template', 
+            defaultValue: ' - Page {page}', 
+            description: 'Appended to the meta title on page 2+ (Use {page} as a variable).' 
+        }),
+        noindexPaginated: fields.checkbox({ 
+            label: 'Noindex Paginated Pages', 
+            defaultValue: true, 
+            description: 'Tell Google not to index Page 2, Page 3, etc. (Recommended to save crawl budget).' 
+        }),
+        
+        seo: seoSchema,
+    },
+});
+
 export const sidebarAds = singleton({
     label: 'Sidebar Ads Manager',
     path: 'src/content/sidebarAds/data',

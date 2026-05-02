@@ -18,6 +18,23 @@ export const tags = collection({
     schema: { title: fields.slug({ name: { label: 'Tag Name' } }) }
 });
 
+// --- NEW: Authors Collection ---
+export const authors = collection({
+    label: 'Authors',
+    slugField: 'name',
+    path: 'src/content/authors/*',
+    format: { data: 'json' },
+    schema: {
+        name: fields.slug({ name: { label: 'Name' } }),
+        avatar: fields.image({ label: 'Avatar', directory: 'public/images/avatars', publicPath: '/images/avatars/' }),
+        bio: fields.text({ label: 'Short Bio', multiline: true }),
+        twitter: fields.text({ label: 'Twitter URL (Optional)' }),
+        linkedin: fields.text({ label: 'LinkedIn URL (Optional)' }),
+        seo: seoSchema
+    }
+});
+// -------------------------------
+
 export const posts = collection({
     label: 'Articles',
     slugField: 'title',
@@ -30,8 +47,16 @@ export const posts = collection({
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         category: fields.relationship({ label: 'Category', collection: 'categories', validation: { isRequired: false } }),
         tags: fields.relationship({ label: 'Tags', collection: 'tags', validation: { isRequired: false }, many: true }),
-        authorName: fields.text({ label: 'Author Name', defaultValue: 'Serplora Team' }),
-        authorImage: fields.image({ label: 'Author Avatar', directory: 'public/images/avatars', publicPath: '/images/avatars/' }),
+        
+        // --- UPDATED: Relational Author Field ---
+        author: fields.relationship({ 
+            label: 'Author', 
+            collection: 'authors', 
+            validation: { isRequired: true },
+            defaultValue: 'editorial-team' // <-- Auto-selects for new posts
+        }),
+        // ----------------------------------------
+
         publishDate: fields.date({ label: 'Publish Date', defaultValue: { kind: 'today' } }),
         updatedDate: fields.date({ label: 'Last Modified Date (Optional)' }),
         image: fields.image({ label: 'Featured Image', directory: 'public/images/posts', publicPath: '/images/posts/' }),

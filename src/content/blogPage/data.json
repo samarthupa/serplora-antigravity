@@ -3,12 +3,13 @@
   "breadcrumbTitle": "articles",
   "subheadline": "Read the latest updates, stories, and announcements.",
   "hiddenPosts": [],
-  "postsPerPage": 10,
+  "postsPerPage": 1,
   "paginationTitleTemplate": " - Page {page}",
   "noindexPaginated": false,
   "seo": {
     "metaTitle": "Articles and Guides - Serplora Academy",
     "robotsIndex": true,
-    "robotsFollow": true
+    "robotsFollow": true,
+    "schemaType": "none"
   }
 }
