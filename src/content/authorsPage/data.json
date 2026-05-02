@@ -2,7 +2,7 @@
   "headline": "Editorial Team",
   "breadcrumbTitle": "Authors",
   "subheadline": "Meet the team of developers and technical writers building the future of online education.",
-  "postsPerPage": 1,
+  "postsPerPage": 10,
   "paginationTitleTemplate": " - Page {page}",
   "noindexPaginated": true,
   "seo": {

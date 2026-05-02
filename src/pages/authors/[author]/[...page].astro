@@ -117,8 +117,9 @@ const titleFallback = isPaginated
       )}
       
       <div class="flex flex-col text-center md:text-left">
+        {/* 🟢 FIXED H1: Now appends (Page X) if paginated */}
         <h1 class="text-4xl md:text-5xl font-extrabold text-tx-main tracking-tight mb-4">
-          {author.data.name}
+          {isPaginated ? `${author.data.name} (Page ${pageData.currentPage})` : author.data.name}
         </h1>
         {author.data.bio && (
           <p class="text-lg text-tx-muted leading-relaxed mb-6 max-w-2xl">
@@ -147,7 +148,7 @@ const titleFallback = isPaginated
     {/* Articles by Author */}
     <div>
       <h3 class="text-2xl font-bold text-tx-main mb-8 tracking-tight font-['JetBrains_Mono',monospace]">
-        ls ./articles-by-{author.id}
+   Articles
       </h3>
       
       {pageData.data.length === 0 ? (

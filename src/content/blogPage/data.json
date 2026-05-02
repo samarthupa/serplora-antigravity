@@ -3,7 +3,7 @@
   "breadcrumbTitle": "articles",
   "subheadline": "Read the latest updates, stories, and announcements.",
   "hiddenPosts": [],
-  "postsPerPage": 1,
+  "postsPerPage": 10,
   "paginationTitleTemplate": " - Page {page}",
   "noindexPaginated": false,
   "seo": {
