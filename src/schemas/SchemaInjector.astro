@@ -1,6 +1,6 @@
 ---
 // src/schemas/SchemaInjector.astro
-import { getGlobalSchema, getArticleSchema, getWebAppSchema, getQuizSchema } from './generators';
+import { getGlobalSchema, getArticleSchema, getWebAppSchema, getQuizSchema, getAuthorSchema } from './generators';
 
 const { schemaType, schemaData } = Astro.props;
 const currentUrl = Astro.url.href;
@@ -15,6 +15,8 @@ if (schemaData) {
     graph.push(getWebAppSchema(schemaData, currentUrl));
   } else if (schemaType === 'Quiz') {
     graph.push(getQuizSchema(schemaData, currentUrl));
+  } else if (schemaType === 'ProfilePage') { // 🟢 ADD THIS BLOCK
+    graph.push(getAuthorSchema(schemaData, currentUrl));
   }
 }
 

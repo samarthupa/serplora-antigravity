@@ -104,3 +104,29 @@ export function getQuizSchema(data: any, url: string) {
     }) : undefined
   };
 }
+
+// 5. Author / Profile Schema
+export function getAuthorSchema(data: any, url: string) {
+  return {
+    "@type": "ProfilePage",
+    "@id": `${url}#webpage`,
+    "url": url,
+    "name": `${data.name} - Author Profile`,
+    "isPartOf": { "@id": `${SITE_URL}/#website` },
+    "mainEntity": {
+      "@type": "Person",
+      "@id": `${SITE_URL}/authors/${data.id}#person`,
+      "name": data.name,
+      "description": data.bio || data.description,
+      "image": data.avatar ? `${SITE_URL}${data.avatar}` : undefined,
+      // Automatically grabs any links that exist and ignores the ones that don't
+      "sameAs": [
+        data.twitter,
+        data.linkedin,
+        data.github,
+        data.kaggle,
+        data.website
+      ].filter(Boolean) 
+    }
+  };
+}

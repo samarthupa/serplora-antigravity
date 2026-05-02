@@ -30,6 +30,9 @@ export const authors = collection({
         bio: fields.text({ label: 'Short Bio', multiline: true }),
         twitter: fields.text({ label: 'Twitter URL (Optional)' }),
         linkedin: fields.text({ label: 'LinkedIn URL (Optional)' }),
+        github: fields.text({ label: 'GitHub URL (Optional)' }),
+        kaggle: fields.text({ label: 'Kaggle URL (Optional)' }),
+        website: fields.text({ label: 'Personal Website URL (Optional)' }),
         seo: seoSchema
     }
 });
