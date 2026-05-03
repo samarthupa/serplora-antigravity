@@ -9,7 +9,7 @@
   --color-text-muted:   #44403c;  
   --color-border-subtle:#d4cdc6;
   
-  /* 🟢 LIGHT MODE BRAND: Deep Sapphire (Guaranteed WCAG AAA Pass) */
+  /* LIGHT MODE BRAND: Deep Sapphire (Guaranteed WCAG AAA Pass) */
   --color-brand:        #1d4ed8; 
   --color-brand-alpha:  rgba(29, 78, 216, 0.1);
 }
@@ -21,7 +21,7 @@
   --color-text-muted:   #e7e5e4; 
   --color-border-subtle:#44403c;
   
-  /* 🟢 DARK MODE BRAND: Bright Sky Blue (Guaranteed WCAG AAA Pass) */
+  /* DARK MODE BRAND: Bright Sky Blue (Guaranteed WCAG AAA Pass) */
   --color-brand:        #60a5fa; 
   --color-brand-alpha:  rgba(96, 165, 250, 0.15);
 }
@@ -35,93 +35,159 @@
   --color-subtle: var(--color-border-subtle);
   --color-brand: var(--color-brand);
   
-  /* 👇 Changed back to standard Outfit with double quotes */
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
+
 /* Make all images responsive */
 article img, 
 .prose img {
     max-width: 100%;
     height: auto;
-    border-radius: 0.5rem; /* Optional: adds nice rounded corners */
-    cursor: zoom-in;       /* Changes the mouse pointer to a magnifying glass */
+    border-radius: 0.5rem;
+    cursor: zoom-in;
     margin-left: auto;
     margin-right: auto;
     display: block;
 }
+
 /* --- CUSTOM TOOLTIPS --- */
-  .markdown-content abbr[data-tooltip] {
-    text-decoration: underline dotted #3b82f6;
-    cursor: help;
-    position: relative;
-  }
-  .markdown-content abbr[data-tooltip]::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%) translateY(4px);
-    
-    /* 🟢 DYNAMIC COLORS: Invert the text and background variables */
-    background: var(--color-text-main);
-    color: var(--color-bg-main);
-    
-    font-size: 1rem;
-    font-style: normal;
-    font-weight: normal;
-    line-height: 1.5;
-    padding: 8px 12px;
-    border-radius: 6px;
-    white-space: normal;
-    width: max-content;
-    max-width: 280px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Softened shadow for both modes */
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    z-index: 100;
-  }
-  .markdown-content abbr[data-tooltip]::before {
-    content: "";
-    position: absolute;
-    bottom: calc(100% + 2px);
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    
-    /* 🟢 MATCH POINTER TO BACKGROUND: Uses your text variable */
-    border-top-color: var(--color-text-main);
-    
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    z-index: 100;
-  }
-  .markdown-content abbr[data-tooltip]:hover::after,
-  .markdown-content abbr[data-tooltip]:hover::before {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  /* Creates ~2 extra lines of space at the bottom of the CodeMirror content */
+.markdown-content abbr[data-tooltip] {
+  text-decoration: underline dotted #3b82f6;
+  cursor: help;
+  position: relative;
+}
+.markdown-content abbr[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--color-text-main);
+  color: var(--color-bg-main);
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: normal;
+  width: max-content;
+  max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100;
+}
+.markdown-content abbr[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-text-main);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+}
+.markdown-content abbr[data-tooltip]:hover::after,
+.markdown-content abbr[data-tooltip]:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Creates ~2 extra lines of space at the bottom of the CodeMirror content */
 .code-editor-wrapper .cm-content {
     padding-bottom: 2.5rem !important;
 }
 
+/* Force Interactive Code Editor to inherit the site's surface color & fix contrast */
+.code-editor-wrapper .cm-editor,
+.code-editor-wrapper .cm-gutters,
+.code-editor-wrapper .cm-activeLine,
+.code-editor-wrapper .cm-activeLineGutter {
+  background-color: transparent !important;
+  border-right: none !important;
+}
 
-/* 🟢 Force Interactive Code Editor to inherit the site's surface color & fix contrast */
-  .code-editor-wrapper .cm-editor,
-  .code-editor-wrapper .cm-gutters,
-  .code-editor-wrapper .cm-activeLine,
-  .code-editor-wrapper .cm-activeLineGutter {
-    background-color: transparent !important;
-    border-right: none !important;
-  }
+.code-editor-wrapper .cm-gutters {
+  color: var(--color-tx-muted) !important;
+}
+
+.code-editor-wrapper .cm-content {
+  color: var(--color-tx-main);
+}
+
+/* --- RESPONSIVE TABLE STYLING --- */
+.table-scroll-wrapper {
+  width: 100%;
+  max-height: 80vh; 
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 2em 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.5rem; /* Ensures the outer border has your nice corners */
   
-  .code-editor-wrapper .cm-gutters {
-    color: var(--color-tx-muted) !important;
+  background: 
+    linear-gradient(to right, var(--color-bg-main) 30%, transparent),
+    linear-gradient(to left, var(--color-bg-main) 30%, transparent) 100% 0,
+    radial-gradient(farthest-side at 0 50%, rgba(128,128,128,0.15), transparent),
+    radial-gradient(farthest-side at 100% 50%, rgba(128,128,128,0.15), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-color: var(--color-bg-main);
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  color: var(--color-tx-main);
+  width: 100%; /* Ensures tables fill the container naturally on desktop */
+}
+
+/* Top Headers */
+.markdown-content thead th {
+  line-height: 1.4; 
+  font-weight: 600;
+  background-color: var(--color-bg-surface);
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--color-border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  text-align: left; /* Aligns markdown table headers nicely */
+}
+
+/* Data Cells */
+.markdown-content td {
+  padding: 14px 10px; /* Your custom padding */
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background-color 0.15s ease;
+  white-space: normal; 
+  overflow-wrap: break-word; 
+  line-height: 1.5; 
+  font-weight: normal; 
+}
+
+/* 🟢 MOBILE FIX: Forces scroll via min-width, but caps cell expansion via max-width */
+@media (max-width: 768px) {
+  .markdown-content td {
+    min-width: 180px; /* Guarantees the table is wide enough to trigger horizontal scroll */
+    max-width: 500px; /* Prevents cells from becoming infinitely wide if text is very long */
+    white-space: normal; /* Ensures text is allowed to wrap when it hits max-width */
   }
-  
-  .code-editor-wrapper .cm-content {
-    color: var(--color-tx-main);
-  }
+}
+
+/* Hover Effect */
+.markdown-content tbody tr:hover td {
+  background-color: rgba(128, 128, 128, 0.05); 
+}
+
+/* Cleanup */
+.markdown-content tbody tr:last-child td {
+  border-bottom: none;
+}

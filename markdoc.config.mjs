@@ -9,6 +9,10 @@ export default defineMarkdocConfig({
         content: { type: String },
         language: { type: String }
       }
+    },
+    // 🟢 NEW: Intercept all CMS tables and wrap them in the custom scroll component
+    table: {
+      render: component('./src/components/ui/MarkdownTable.astro'),
     }
   },
   tags: {
@@ -25,7 +29,6 @@ export default defineMarkdocConfig({
         text: { type: String }
       }
     },
-    // 🟢 NEW: Raw HTML Tag
     rawHtml: {
       render: component('./src/components/ui/RawHtml.astro'),
       attributes: {

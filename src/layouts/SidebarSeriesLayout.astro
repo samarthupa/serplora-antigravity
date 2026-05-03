@@ -94,7 +94,7 @@ if (adsData?.data) {
         />
       )}
 
-      <div class="sticky top-0 bg-main/95 backdrop-blur-md py-2 flex items-center justify-between -mx-4 px-4 sm:-mx-6 sm:px-6 z-40">
+      <div class="bg-main/95 backdrop-blur-md py-2 flex items-center justify-between -mx-4 px-4 sm:-mx-6 sm:px-6">
         <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95 shadow-sm" aria-label="Toggle Menu">
           <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
         </button>
@@ -106,7 +106,7 @@ if (adsData?.data) {
             </a>
           )}
           {nextLink && (
-            <a href={nextLink.url} class="p-2.5 rounded-lg bg-brand border border-brand text-white hover:brightness-90 transition-all active:scale-95 shadow-sm" aria-label="Next">
+            <a href={nextLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-white hover:brightness-90 transition-all active:scale-95 shadow-sm" aria-label="Next">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </a>
           )}
@@ -117,7 +117,7 @@ if (adsData?.data) {
     <div id="mobile-sidebar-backdrop" class="fixed top-[64px] inset-x-0 bottom-0 [.header-hidden_&]:top-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
     
     {/* Left Sidebar */}
-    <aside id="series-sidebar" class="fixed top-[64px] h-[calc(100dvh-64px)] left-0 z-[300] lg:z-[150] w-[85vw] max-w-[260px] bg-main shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[260px] lg:shrink-0 [.header-hidden_&]:top-0 [.header-hidden_&]:h-[100dvh] border-r border-subtle py-5 px-4 lg:pt-16 lg:pb-6 lg:px-4 lg:bg-transparent lg:shadow-none flex flex-col">       
+    <aside id="series-sidebar" class="fixed top-[64px] h-[calc(100dvh-64px)] left-0 z-[150] lg:z-[150] w-[85vw] max-w-[260px] bg-main shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[260px] lg:shrink-0 [.header-hidden_&]:top-0 [.header-hidden_&]:h-[100dvh] border-r border-subtle py-5 px-4 lg:pt-16 lg:pb-6 lg:px-4 lg:bg-transparent lg:shadow-none flex flex-col">       
       <div class="mb-5 px-1.5 flex justify-between items-center shrink-0">
         <div>
           <h3 class="text-[11px] uppercase tracking-widest font-['JetBrains_Mono',monospace] text-tx-muted mb-1 font-bold">
