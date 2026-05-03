@@ -83,14 +83,14 @@ if (adsData?.data) {
         <Breadcrumb 
           section={basePath as any} 
           current={parentBreadcrumb} 
-          class="pt-4 pb-4 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full" 
+          class="pt-4 pb-4 mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full" 
         />
       ) : (
         <Breadcrumb 
           section={basePath as any} 
           parents={[{ label: parentBreadcrumb, url: `/${basePath}/${parent.id}` }]} 
           current={currentBreadcrumb} 
-          class="pt-4 pb-4 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full" 
+          class="pt-4 pb-4 mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap md:max-w-[720px] md:mx-auto md:w-full" 
         />
       )}
 
@@ -154,14 +154,14 @@ if (adsData?.data) {
         <Breadcrumb 
           section={basePath as any} 
           current={parentBreadcrumb} 
-          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap px-3 py-1.5 rounded-md w-fit" 
+          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap py-1.5 rounded-md w-fit" 
         />
       ) : (
         <Breadcrumb 
           section={basePath as any} 
           parents={[{ label: parentBreadcrumb, url: `/${basePath}/${parent.id}` }]} 
           current={currentBreadcrumb} 
-          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap px-3 py-1.5 rounded-md w-fit" 
+          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap py-1.5 rounded-md w-fit" 
         />
       )}
 
