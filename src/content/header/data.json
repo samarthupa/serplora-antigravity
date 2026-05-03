@@ -2,7 +2,7 @@
   "siteTitle": "Serplora Acad",
   "logo": "/images/logo/logo.svg",
   "logoDark": "/images/logo/logoDark.svg",
-  "favicon": "/images/favicon/favicon.svg",
+  "favicon": "/images/favicon/favicon.png",
   "navItems": [
     {
       "label": "Tutorials",

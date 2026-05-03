@@ -44,6 +44,15 @@ export function useHtmlRunner() {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlFile.content, 'text/html');
 
+    // NEW: Force all links to open in a new tab
+const baseTag = document.createElement('base');
+baseTag.target = "_blank";
+if (doc.head) {
+  doc.head.insertBefore(baseTag, doc.head.firstChild);
+} else {
+  doc.insertBefore(baseTag, doc.firstChild);
+}
+
     // Inject CSS
     doc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
       const href = link.getAttribute('href');

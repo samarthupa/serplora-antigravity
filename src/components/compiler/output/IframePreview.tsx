@@ -33,13 +33,13 @@ export default function IframePreview({
       {/* Resizing Overlay to prevent iframe pointer-events stealing the mouse */}
       {isResizingPreview && <div className="fixed inset-0 z-[9999] cursor-col-resize" />}
                       
-      <iframe 
-        srcDoc={previewContent} 
-        className="flex-1 w-full border-none bg-white" 
-        title="preview" 
-        sandbox="allow-scripts allow-same-origin allow-modals"
-        style={{ pointerEvents: isResizingPreview ? 'none' : 'auto' }}
-      ></iframe>
+      <iframe
+  srcDoc={previewContent}
+  className="flex-1 w-full border-none bg-white"
+  title="preview"
+  sandbox="allow-scripts allow-same-origin allow-modals allow-popups allow-popups-to-escape-sandbox"
+  style={{ pointerEvents: isResizingPreview ? 'none' : 'auto' }}
+></iframe>
     </div>
   );
 }
