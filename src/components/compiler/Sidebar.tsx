@@ -16,40 +16,43 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
   const [future, setFuture] = useState<any[][]>([]);
 
   const updateFilesWithHistory = (newFilesOrUpdater: any) => {
-    setFiles((currentFiles: any[]) => {
-      const nextFiles = typeof newFilesOrUpdater === 'function' ? newFilesOrUpdater(currentFiles) : newFilesOrUpdater;
-      setPast((prev) => [...prev, currentFiles]);
-      setFuture([]); 
-      return nextFiles;
-    });
+    // Calculate the next files using the current closure's 'files' state
+    const nextFiles = typeof newFilesOrUpdater === 'function' ? newFilesOrUpdater(files) : newFilesOrUpdater;
+    
+    setPast([...past, files]);
+    setFuture([]);
+    setFiles(nextFiles);
   };
 
   const handleUndo = () => {
     if (past.length === 0) return;
-    setFiles((currentFiles: any[]) => {
-      const previousFiles = past[past.length - 1];
-      setPast(prev => prev.slice(0, -1));
-      setFuture(prev => [...prev, currentFiles]);
-
-      return previousFiles.map(prevFile => {
-         const currentFile = currentFiles.find(f => f.id === prevFile.id);
-         return currentFile ? { ...prevFile, content: currentFile.content } : prevFile;
-      });
+    
+    const previousFiles = past[past.length - 1];
+    setPast(past.slice(0, -1));
+    setFuture([...future, files]);
+    
+    // Preserve current content for the undone files so you don't lose typed code
+    const nextFiles = previousFiles.map((prevFile: any) => {
+       const currentFile = files.find((f: any) => f.id === prevFile.id);
+       return currentFile ? { ...prevFile, content: currentFile.content } : prevFile;
     });
+    
+    setFiles(nextFiles);
   };
 
   const handleRedo = () => {
     if (future.length === 0) return;
-    setFiles((currentFiles: any[]) => {
-      const nextFiles = future[future.length - 1];
-      setFuture(prev => prev.slice(0, -1));
-      setPast(prev => [...prev, currentFiles]);
-
-      return nextFiles.map(nextFile => {
-         const currentFile = currentFiles.find(f => f.id === nextFile.id);
-         return currentFile ? { ...nextFile, content: currentFile.content } : nextFile;
-      });
+    
+    const nextFilesState = future[future.length - 1];
+    setFuture(future.slice(0, -1));
+    setPast([...past, files]);
+    
+    const nextFiles = nextFilesState.map((nextFile: any) => {
+       const currentFile = files.find((f: any) => f.id === nextFile.id);
+       return currentFile ? { ...nextFile, content: currentFile.content } : nextFile;
     });
+    
+    setFiles(nextFiles);
   };
 
   useEffect(() => {
@@ -60,11 +63,19 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
 
   useEffect(() => {
     if (!isResizingSidebar) return;
+    
+    document.body.style.userSelect = 'none';
+
     const handleMouseMove = (e: MouseEvent) => setSidebarWidth(prev => Math.max(150, Math.min(600, prev + e.movementX)));
-    const handleMouseUp = () => setIsResizingSidebar(false);
+    const handleMouseUp = () => {
+      document.body.style.userSelect = '';
+      setIsResizingSidebar(false);
+    };
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     return () => {
+      document.body.style.userSelect = '';
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -85,15 +96,45 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
     const parentId = activeItem ? (activeItem.isFolder ? activeItem.id : (activeItem.parentId || null)) : null;
     if (parentId && !expandedFolders.includes(parentId)) setExpandedFolders([...expandedFolders, parentId]);
     
+    // 1. Calculate the proposed name FIRST
+    let baseName = isFolder ? 'new_folder' : 'untitled';
+    let ext = ''; 
+    
+    if (!isFolder) {
+      ext = '.html'; // Fallback
+      if (activeItem && !activeItem.isFolder && activeItem.name.includes('.')) {
+        ext = activeItem.name.substring(activeItem.name.lastIndexOf('.'));
+      } else {
+        const anyFile = files.find((f:any) => !f.isFolder && f.name.includes('.'));
+        if (anyFile) {
+          ext = anyFile.name.substring(anyFile.name.lastIndexOf('.'));
+        }
+      }
+    }
+
+    let proposedName = `${baseName}${ext}`;
+    let counter = 2; 
+    
+    while (files.some((f:any) => f.parentId === parentId && f.name.toLowerCase() === proposedName.toLowerCase())) {
+      proposedName = `${baseName}${counter}${ext}`;
+      counter++;
+    }
+
+    // 2. Create the item with the correct name immediately (No more empty strings!)
     const newId = Date.now().toString() + Math.random().toString(36).substring(7);
     const newItem = {
-      id: newId, name: '', isFolder, parentId: parentId,
-      content: isFolder ? undefined : '', language: isFolder ? undefined : 'javascript'
+      id: newId, 
+      name: proposedName, // <-- This is the fix!
+      isFolder, 
+      parentId: parentId,
+      content: isFolder ? undefined : '', 
+      language: isFolder ? undefined : 'javascript'
     };
     
+    // 3. Now push it to history
     updateFilesWithHistory([...files, newItem]);
     setRenamingId(newId);
-    setRenameText(isFolder ? 'new_folder' : 'untitled.html');
+    setRenameText(proposedName);
   };
 
   const handleRenameSubmit = () => {
@@ -102,27 +143,34 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
       setRenamingId(null);
       return;
     }
-
+    
     const trimmedName = renameText.trim();
     const fileBeingRenamed = files.find((f: any) => f.id === renamingId);
-
+    
     if (!fileBeingRenamed) {
       setRenamingId(null);
       return;
     }
 
+    // NEW: If the name hasn't changed, exit gracefully without saving to history
+    if (trimmedName === fileBeingRenamed.name) {
+      setRenamingId(null);
+      return;
+    }
+
     if (trimmedName === '') {
-      if (fileBeingRenamed.name === '') updateFilesWithHistory(files.filter((f: any) => f.id !== renamingId));
+      // If they delete all text, just cancel the rename instead of saving a blank name
+      setRenamingId(null);
+      return;
     } else {
       const isDuplicate = files.some((f: any) => f.parentId === fileBeingRenamed.parentId && f.id !== renamingId && f.name.toLowerCase() === trimmedName.toLowerCase());
       
       if (isDuplicate) {
         alert(`A file or folder named "${trimmedName}" already exists at this location.`);
-        if (fileBeingRenamed.name === '') updateFilesWithHistory(files.filter((f: any) => f.id !== renamingId));
         setRenamingId(null);
         return;
       }
-
+      
       updateFilesWithHistory(files.map((f: any) => {
         if (f.id === renamingId) {
           let updatedFile = { ...f, name: trimmedName };
@@ -134,6 +182,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
         return f;
       }));
     }
+    
     setRenamingId(null);
   };
 
@@ -519,7 +568,7 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
                   onClick={(e) => e.stopPropagation()} 
                 />
               ) : (
-                <span className="ml-1">{projectName ? projectName.toUpperCase() : 'WORKSPACE'}</span>
+                <span className="ml-1">{projectName ? projectName : 'Workspace'}</span>
               )}
 
               {/* 🟢 NEW: Three Dots for Root Folder */}

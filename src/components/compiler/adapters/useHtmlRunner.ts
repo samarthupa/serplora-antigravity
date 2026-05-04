@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export type HtmlLog = {
   method: string;
@@ -10,10 +10,14 @@ export function useHtmlRunner() {
   const [previewContent, setPreviewContent] = useState('');
   const [logs, setLogs] = useState<HtmlLog[]>([]);
 
+  // 🌟 NEW: Generate a unique ID for this specific compiler instance
+  const workspaceIdRef = useRef(Math.random().toString(36).substring(2, 15));
+
   // Listen for console logs coming from the injected iframe script
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'CONSOLE_LOG') {
+      // 🌟 NEW: Strictly filter messages so we only process logs from OUR iframe
+      if (event.data && event.data.type === 'CONSOLE_LOG' && event.data.workspaceId === workspaceIdRef.current) {
         setLogs((prevLogs) => [
           ...prevLogs, 
           { method: event.data.method, data: event.data.data, time: new Date().toLocaleTimeString([], {hour12: false}) }
@@ -112,14 +116,57 @@ export function useHtmlRunner() {
     consoleInterceptor.innerHTML = `
       (function() {
         const originalConsole = window.console;
+        // 🌟 NEW: Embed the unique ID into the iframe's memory
+        const currentWorkspaceId = "${workspaceIdRef.current}";
+
+        // 🌟 NEW: Safe Serialization Logic
+        function serialize(arg) {
+          if (arg === null) return 'null';
+          if (arg === undefined) return 'undefined';
+          if (typeof arg === 'function') return arg.toString();
+          if (arg instanceof Error) return arg.stack || arg.message;
+          
+          // Format HTML elements cleanly instead of crashing
+          if (arg instanceof HTMLElement) {
+            return '<' + arg.tagName.toLowerCase() + 
+                   (arg.id ? ' id="' + arg.id + '"' : '') + 
+                   (arg.className ? ' class="' + arg.className + '"' : '') + 
+                   '>...';
+          }
+          
+          if (typeof arg === 'object') {
+            try {
+              // Add a 2-space indent so objects look beautiful in the terminal
+              return JSON.stringify(arg, null, 2); 
+            } catch (e) {
+              // Fallback for circular references so the compiler never crashes
+              return '[Circular or Unserializable Object]'; 
+            }
+          }
+          return String(arg);
+        }
+
         window.console = {
-          log: function(...args) { originalConsole.log(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'log', data: args.map(String).join(' ') }, '*'); },
-          error: function(...args) { originalConsole.error(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'error', data: args.map(String).join(' ') }, '*'); },
-          warn: function(...args) { originalConsole.warn(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'warn', data: args.map(String).join(' ') }, '*'); },
-          info: function(...args) { originalConsole.info(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'info', data: args.map(String).join(' ') }, '*'); }
+          log: function(...args) { 
+            originalConsole.log(...args); 
+            window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'log', data: args.map(serialize).join(' ') }, '*'); 
+          },
+          error: function(...args) { 
+            originalConsole.error(...args); 
+            window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'error', data: args.map(serialize).join(' ') }, '*'); 
+          },
+          warn: function(...args) { 
+            originalConsole.warn(...args); 
+            window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'warn', data: args.map(serialize).join(' ') }, '*'); 
+          },
+          info: function(...args) { 
+            originalConsole.info(...args); 
+            window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'info', data: args.map(serialize).join(' ') }, '*'); 
+          }
         };
+
         window.onerror = function(message, source, lineno, colno, error) {
-          window.parent.postMessage({ type: 'CONSOLE_LOG', method: 'error', data: message + ' at line ' + lineno }, '*');
+          window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'error', data: message + ' at line ' + lineno }, '*');
           return false;
         };
       })();

@@ -2,19 +2,32 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { TerminalLog } from '../output/TerminalPreview';
 
 export function useRemoteRunner(wsUrl: string) {
-  const [logs, setLogs] = useState<TerminalLog[]>([]);
+  // 🌟 NEW: Terminal Memory Dictionary (stores logs per file ID)
+  const [logsByFile, setLogsByFile] = useState<Record<string, TerminalLog[]>>({});
   const [isRunning, setIsRunning] = useState(false);
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
   
-  // Persistent refs for the active socket and the ping timer
+  // Persistent refs for the active socket, ping timer, and active process
   const wsRef = useRef<WebSocket | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const runningFileIdRef = useRef<string | null>(null); // 🌟 Tracks the active process
 
   const addLog = (type: TerminalLog['type'], content: string) => {
-    setLogs((prev) => [...prev, { id: Math.random().toString(36).substring(2, 9), type, content }]);
+    const fileId = runningFileIdRef.current;
+    if (!fileId) return;
+
+    setLogsByFile((prev) => {
+      const currentLogs = prev[fileId] || [];
+      return {
+        ...prev,
+        [fileId]: [...currentLogs, { id: Math.random().toString(36).substring(2, 9), type, content }]
+      };
+    });
   };
 
-  const clearLogs = () => setLogs([]);
+  const clearLogs = (fileId: string) => {
+    setLogsByFile((prev) => ({ ...prev, [fileId]: [] }));
+  };
 
   // --- 1. CLEANUP UTILITY ---
   const cleanup = useCallback(() => {
@@ -27,6 +40,7 @@ export function useRemoteRunner(wsUrl: string) {
     }
     setIsRunning(false);
     setIsWaitingForInput(false);
+    runningFileIdRef.current = null;
   }, []);
 
   // Ensure connection dies if the component unmounts
@@ -60,8 +74,10 @@ export function useRemoteRunner(wsUrl: string) {
   const execute = async (files: any[], activeFile: any) => {
     if (isRunning) return false;
 
-    let targetFile = files.find((f: any) => !f.name.endsWith('.txt')) || activeFile;
+    let targetFile = activeFile || files.find((f: any) => !f.name.endsWith('.txt'));
     if (!targetFile) {
+      // If nothing found, log error to the first file's console to show the user
+      runningFileIdRef.current = files[0]?.id;
       addLog('err', 'No executable file found.');
       return false;
     }
@@ -69,15 +85,19 @@ export function useRemoteRunner(wsUrl: string) {
     cleanup(); // Hard reset any lingering state
     setIsRunning(true);
     setIsWaitingForInput(false); 
-    setLogs([{ id: Math.random().toString(36).substring(2, 9), type: 'sys', content: '// Connecting to server... Executing...\n' }]);
+    runningFileIdRef.current = targetFile.id; // 🌟 Lock memory to this file
+
+    // 🌟 Reset logs for this specific file on a fresh run
+    setLogsByFile((prev) => ({
+      ...prev,
+      [targetFile.id]: [{ id: Math.random().toString(36).substring(2, 9), type: 'sys', content: '// Connecting to server... Executing...\n' }]
+    }));
 
     try {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        // (Removed the second addLog here)
-        
         // 1. Send the initial code payload
         ws.send(JSON.stringify({ code: targetFile.content }));
 
@@ -96,7 +116,6 @@ export function useRemoteRunner(wsUrl: string) {
           if (msg.type === 'output') {
             parseAndRenderOutput(msg.data);
           } else if (msg.type === 'input_request') {
-            // 🟢 RULE 2: Open the input box ONLY when requested by backend
             setIsWaitingForInput(true);
           } else if (msg.type === 'status' && msg.data === 'completed') {
             addLog('sys', '\n// Execution Finished');
@@ -136,10 +155,7 @@ export function useRemoteRunner(wsUrl: string) {
 
   // --- 4. INTERACTIVE INPUT HANDLER ---
   const handleInputSubmit = (value: string) => {
-    // 🟢 RULE 3: Hide the box the precise millisecond they hit Enter
     setIsWaitingForInput(false); 
-    
-    // 🟢 RULE 4: Echo keystrokes to the UI (added \n so subsequent output drops to a new line)
     addLog('std', value + '\n'); 
     
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -151,12 +167,13 @@ export function useRemoteRunner(wsUrl: string) {
 
   // --- 5. MANUAL ABORT ---
   const abort = () => {
+    if (!isRunning) return;
     addLog('sys', '\n// Execution Terminated manually.');
     cleanup();
   };
 
   return {
-    logs,
+    logsByFile,
     isRunning,
     isWaitingForInput,
     execute,

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactAce from 'react-ace';
+import ace from "ace-builds";
 
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-html";
@@ -20,19 +21,34 @@ export default function AceEditorArea({
   isConsoleOpen, setIsConsoleOpen, 
   isConsoleFullscreen, setIsConsoleFullscreen,
   logs,
-  showConsole = true // 🟢 Add Prop
+  showConsole = true
 }: any) {
   
   const [consoleHeight, setConsoleHeight] = useState(180);
   const [isResizingConsole, setIsResizingConsole] = useState(false);
 
+  // 🌟 NEW: Refs to manage the single editor and memory-efficient sessions
+  const editorRef = useRef<any>(null);
+  const sessionsRef = useRef<{ [key: string]: any }>({});
+  const isTypingRef = useRef<{ [key: string]: boolean }>({});
+
   useEffect(() => {
     if (!isResizingConsole) return;
+    
+    // 🌟 Disable text selection globally while dragging
+    document.body.style.userSelect = 'none';
+
     const handleMouseMove = (e: MouseEvent) => setConsoleHeight(prev => Math.max(35, prev - e.movementY));
-    const handleMouseUp = () => setIsResizingConsole(false);
+    const handleMouseUp = () => {
+      // 🌟 Restore text selection when done
+      document.body.style.userSelect = '';
+      setIsResizingConsole(false);
+    };
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     return () => {
+      document.body.style.userSelect = ''; // Safety cleanup
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -46,12 +62,67 @@ export default function AceEditorArea({
     );
   };
 
+  // 🌟 NEW: Effect 1 - Create and swap EditSessions when the tab changes
+  useEffect(() => {
+    if (!editorRef.current || !activeFileId) return;
+    const editor = editorRef.current.editor; // Access the native ace editor instance
+    const activeFile = files.find((f: any) => f.id === activeFileId);
+    if (!activeFile) return;
+
+    const EditSession = ace.require('ace/edit_session').EditSession;
+    const UndoManager = ace.require('ace/undomanager').UndoManager;
+    const mode = `ace/mode/${activeFile.language || 'javascript'}`;
+
+    // If we haven't created a session for this file yet, build it
+    if (!sessionsRef.current[activeFileId]) {
+      const session = new EditSession(activeFile.content || '');
+      session.setUndoManager(new UndoManager()); // Preserves undo/redo history natively
+      session.setMode(mode);
+      
+      // Listen for typing to update React state
+      session.on('change', () => {
+        isTypingRef.current[activeFileId] = true;
+        handleCodeChange(session.getValue(), activeFileId);
+        isTypingRef.current[activeFileId] = false;
+      });
+
+      sessionsRef.current[activeFileId] = session;
+    } else {
+      // If it exists, just make sure the language mode is correct (e.g. if the file was renamed)
+      sessionsRef.current[activeFileId].setMode(mode);
+    }
+
+    // Swap the physical editor view to the active session
+    if (editor.getSession() !== sessionsRef.current[activeFileId]) {
+      editor.setSession(sessionsRef.current[activeFileId]);
+    }
+    
+    editor.focus();
+  }, [activeFileId, files.find((f: any) => f.id === activeFileId)?.language]);
+
+  // 🌟 NEW: Effect 2 - Sync external changes (like Undo/Redo from the sidebar or loaded saves) into the session
+  useEffect(() => {
+    files.forEach((file: any) => {
+      const session = sessionsRef.current[file.id];
+      if (session && !isTypingRef.current[file.id]) {
+        if (session.getValue() !== (file.content || '')) {
+          session.setValue(file.content || '');
+        }
+      }
+    });
+  }, [files]);
+
   const handleCloseTab = (e: any, fileId: string) => {
     e.stopPropagation(); 
     const newOpenFiles = openFileIds.filter((id: string) => id !== fileId);
     setOpenFileIds(newOpenFiles);
     if (activeFileId === fileId) {
       setActiveFileId(newOpenFiles.length > 0 ? newOpenFiles[newOpenFiles.length - 1] : null);
+    }
+    
+    // 🌟 NEW: Clear the session from memory when closed to prevent memory leaks
+    if (sessionsRef.current[fileId]) {
+      delete sessionsRef.current[fileId];
     }
   };
 
@@ -60,17 +131,6 @@ export default function AceEditorArea({
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors">
 
-      {/*
-        FIX: Ace gutter line numbers are rendered by the ace library and not
-        reachable via Tailwind. Scoped CSS overrides inject passing contrast
-        values directly onto #ace-editor's gutter cells.
-
-        Light (github theme):  gutter bg ≈ #f0f0f0 → #57606a gives ~5.4:1 ✓
-        Dark (tomorrow_night): gutter bg ≈ #25282c → #9d9d9d gives ~5.2:1 ✓
-
-        The active-line cell gets the full foreground color for even stronger
-        contrast since it is the most visually prominent number.
-      */}
       <style>{`
         #ace-editor .ace_gutter-cell {
           color: ${isDarkMode ? '#9d9d9d' : '#57606a'};
@@ -79,7 +139,6 @@ export default function AceEditorArea({
           color: ${isDarkMode ? '#cccccc' : '#24292f'};
         }
 
-        /* 📱 Mobile Slim Gutter Overrides - Compact Mode */
         .mobile-slim-gutter .ace_gutter,
         .mobile-slim-gutter .ace_gutter-layer {
           width: 34px !important;
@@ -95,13 +154,12 @@ export default function AceEditorArea({
           color: ${isDarkMode ? '#858585' : '#888888'} !important;
         }
 
-        /* 🟢 Hides the horizontal scrollbar ONLY for the file tabs */
         .scrollbar-hide {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;     /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none; 
         }
         .scrollbar-hide::-webkit-scrollbar {
-          display: none;             /* Chrome, Safari, and Opera */
+          display: none; 
         }
       `}</style>
       
@@ -115,12 +173,7 @@ export default function AceEditorArea({
               onClick={() => setActiveFileId(file.id)} 
               className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group max-w-[200px] shrink-0 ${
                 activeFileId === file.id
-                  // Active tab: high-contrast foreground, no change needed
                   ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]'
-                  // FIX: Inactive tab was text-gray-500 (~3.7:1) on bg-gray-100.
-                  //      text-gray-600 (#4b5563) on bg-gray-100 (#f3f4f6) → ~5.9:1 ✓
-                  //      dark:text-[#858585] (~3.5:1) on #2d2d2d.
-                  //      dark:text-[#9d9d9d] on #2d2d2d → ~5.2:1 ✓
                   : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'
               }`}
             >
@@ -132,38 +185,30 @@ export default function AceEditorArea({
           ))}
         </div>
 
-
         <div className="flex-1 relative bg-white dark:bg-[#1e1e1e]">
-          {/* 🌟 4. Editor Memory: Render all open tabs but hide inactive ones */}
+          {/* 🌟 NEW: Only ONE ReactAce instance is rendered! */}
           {openTabs.length > 0 ? (
-            openTabs.map((tabFile: any) => (
-              <div 
-                key={tabFile.id} 
-                className="absolute inset-0"
-                style={{ display: activeFileId === tabFile.id ? 'block' : 'none' }}
-              >
-                <ReactAce
-                  mode={tabFile.language || 'javascript'}
-                  theme={isDarkMode ? "tomorrow_night" : "github"}
-                  onChange={(val) => handleCodeChange(val, tabFile.id)}
-                  value={tabFile.content}
-                  name={`ace-editor-${tabFile.id}`}
-                  width="100%"
-                  height="100%"
-                  showPrintMargin={false}
-                  className={isMobile ? 'mobile-slim-gutter' : ''}
-                  setOptions={{ 
-                    fontSize: 14, 
-                    showLineNumbers: true, 
-                    showGutter: true, 
-                    showFoldWidgets: true, 
-                    tabSize: 2, 
-                    useWorker: false 
-                  }}
-                  style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
-                />
-              </div>
-            ))
+            <div className="absolute inset-0">
+              <ReactAce
+                ref={editorRef}
+                name="ace-editor"
+                theme={isDarkMode ? "tomorrow_night" : "github"}
+                width="100%"
+                height="100%"
+                showPrintMargin={false}
+                className={isMobile ? 'mobile-slim-gutter' : ''}
+                // IMPORTANT: value and onChange are removed so we can control the session natively
+                setOptions={{ 
+                  fontSize: 14, 
+                  showLineNumbers: true, 
+                  showGutter: true, 
+                  showFoldWidgets: true, 
+                  tabSize: 2, 
+                  useWorker: false 
+                }}
+                style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
+              />
+            </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 dark:text-[#3c3c3c]">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 mb-4 opacity-30"><path d="M17.5 2L9.5 10.5L4 6.5L1 8L5 12L1 16L4 17.5L9.5 13.5L17.5 22L23 19.5V4.5L17.5 2Z" fill="currentColor"/><path d="M17.5 7.5V16.5L11 12L17.5 7.5Z" fill="currentColor"/></svg>
@@ -173,7 +218,6 @@ export default function AceEditorArea({
       </div>
 
      {/* CONSOLE SECTION */}
-      {/* 🟢 Ensure the console renders if the mobile tab is active, bypassing the desktop toggle state */}
       {showConsole && (isConsoleOpen || (isMobile && mobileActiveTab === 'console')) && (
         <div style={{ height: (isConsoleFullscreen || isMobile) ? '100%' : `${consoleHeight}px` }} 
              className={`${(isMobile && mobileActiveTab !== 'console') ? 'hidden' : 'flex'} flex-col bg-gray-50 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] shrink-0 relative transition-colors`}>
