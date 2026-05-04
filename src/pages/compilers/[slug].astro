@@ -65,9 +65,9 @@ if (adsData?.data) {
               showConsole={compiler.data.showConsole} // 🟢 Pass prop
             >
               <div 
-                slot="fallback" 
-                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
-              >
+  slot="fallback" 
+  class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:min-h-[600px] md:max-h-[1080px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+>
                 <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
                 <div class="flex flex-1 w-full">
                   <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
@@ -83,10 +83,10 @@ if (adsData?.data) {
               initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'index.html', content: '', language: 'html' }]}
               showConsole={compiler.data.showConsole}
             >
-              <div 
-                slot="fallback" 
-                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
-              >
+             <div 
+  slot="fallback" 
+  class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] max-h-[600px] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:min-h-[700px] md:max-h-[1440px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+>
                 <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
                 <div class="flex flex-1 w-full">
                   <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>

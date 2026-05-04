@@ -329,10 +329,10 @@ export default function CompilerShell({
     <div 
       ref={compilerRef} 
       className={`flex flex-col w-full overflow-hidden font-sans transition-colors bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-[#cccccc] ${
-        isAppFullscreen 
-          ? 'h-[100dvh] md:h-screen rounded-none border-none my-0 z-50 relative' 
-          : 'h-[100dvh] my-0 rounded-none border border-gray-300 dark:border-[#3c3c3c] md:h-[calc(100vh-100px)] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] relative'
-      }`}
+  isAppFullscreen
+    ? 'h-[100dvh] md:h-screen rounded-none border-none my-0 z-50 relative'
+    : 'h-[100dvh] max-h-[600px] my-0 rounded-none border border-gray-300 dark:border-[#3c3c3c] md:h-[calc(100vh-100px)] md:min-h-[700px] md:max-h-[1440px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] relative'
+}`}
     >
      <div className="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] flex items-center select-none shrink-0 transition-colors">
         <div className="flex md:hidden items-center justify-between flex-1 px-1">

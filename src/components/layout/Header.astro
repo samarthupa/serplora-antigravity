@@ -13,7 +13,7 @@ const primaryBtn = {
   url: `/signin?returnUrl=${Astro.url.pathname}`,
   show: headerEntry?.data?.primaryButton?.show !== false
 };
----
+---z
 
 <header id="site-header" class="sticky top-0 inset-x-0 w-full z-[200] h-[64px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300">
   <div class="max-w-[1200px] mx-auto px-4 w-full flex items-center gap-2 md:gap-10">
@@ -21,13 +21,13 @@ const primaryBtn = {
     {/* --- MOBILE: Hamburger Toggle (Leftmost) --- */}
     <button 
       type="button" 
-      class="md:hidden flex flex-col justify-center items-center w-[40px] h-[40px] rounded-[10px] hover:bg-tx-muted/10 transition-colors focus:outline-none gap-[5px] cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main" 
+      class="md:hidden flex flex-col justify-center items-center w-[40px] h-[40px] rounded-[10px] hover:bg-tx-muted/10 transition-colors focus:outline-none gap-[4px] cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main" 
       id="mobile-menu-btn" 
       aria-label="Toggle mobile menu"
     >
-      <span class="block w-[20px] h-[1.8px] bg-current rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
-      <span class="block w-[20px] h-[1.8px] bg-current rounded-sm transition-opacity duration-300" id="ham-mid"></span>
-      <span class="block w-[20px] h-[1.8px] bg-current rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
+      <span class="block w-[16px] h-[1.8px] bg-current rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
+      <span class="block w-[16px] h-[1.8px] bg-current rounded-sm transition-opacity duration-300" id="ham-mid"></span>
+      <span class="block w-[16px] h-[1.8px] bg-current rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
     </button>
 
     {/* Brand / Logo */}
