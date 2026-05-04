@@ -1,3 +1,4 @@
+// src/components/ui/CodeEditorReact.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -26,13 +27,16 @@ export default function CodeEditorReact({ code, language }: any) {
 
   // CONNECT TO THE WEBSOCKET BACKEND
   const {
-    logs,
+    logsByFile,
     isRunning,
     isWaitingForInput,
     execute,
     clearLogs,
     handleInputSubmit
   } = useRemoteRunner('wss://api.serplora.com/python');
+
+  // Safely extract logs for this standalone editor
+  const logs = logsByFile['standalone-editor'] || [];
 
   // Memoize extensions
   const extensions = useMemo(() => {
@@ -134,10 +138,10 @@ export default function CodeEditorReact({ code, language }: any) {
     if (isRunning || value.trim() === (lastRunCode || '').trim()) return;
     
     setLastRunCode(value);
-    clearLogs();
+    clearLogs('standalone-editor');
     setIsOutputVisible(true);
     
-    const mockFiles = [{ name: 'main.py', content: value, isFolder: false }];
+    const mockFiles = [{ id: 'standalone-editor', name: 'main.py', content: value, isFolder: false }];
     await execute(mockFiles, null);
   };
 
