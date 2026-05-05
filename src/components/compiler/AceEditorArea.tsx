@@ -10,6 +10,8 @@ import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-tomorrow_night";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
+// 🌟 NEW: Import required for autocomplete
+import "ace-builds/src-noconflict/ext-language_tools"; 
 
 export default function AceEditorArea({ 
   isDarkMode, 
@@ -21,7 +23,8 @@ export default function AceEditorArea({
   isConsoleOpen, setIsConsoleOpen, 
   isConsoleFullscreen, setIsConsoleFullscreen,
   logs,
-  showConsole = true
+  showConsole = true,
+  editorSettings // 🌟 NEW: Accept settings from CompilerShell
 }: any) {
   
   const [consoleHeight, setConsoleHeight] = useState(180);
@@ -112,6 +115,20 @@ export default function AceEditorArea({
     });
   }, [files]);
 
+  // 🌟 NEW: Safely apply settings via Ace's native API without unmounting the editor
+  useEffect(() => {
+    if (!editorRef.current || !editorSettings) return;
+    const editor = editorRef.current.editor;
+    
+    editor.setOptions({
+      fontSize: editorSettings.fontSize,
+      wrap: editorSettings.wordWrap,
+      enableBasicAutocompletion: editorSettings.autoComplete,
+      enableLiveAutocompletion: editorSettings.autoComplete,
+      showGutter: editorSettings.showGutter
+    });
+  }, [editorSettings]);
+
   const handleCloseTab = (e: any, fileId: string) => {
     e.stopPropagation(); 
     const newOpenFiles = openFileIds.filter((id: string) => id !== fileId);
@@ -199,12 +216,15 @@ export default function AceEditorArea({
                 className={isMobile ? 'mobile-slim-gutter' : ''}
                 // IMPORTANT: value and onChange are removed so we can control the session natively
                 setOptions={{ 
-                  fontSize: 14, 
+                  fontSize: editorSettings?.fontSize || 14, 
                   showLineNumbers: true, 
-                  showGutter: true, 
+                  showGutter: editorSettings?.showGutter ?? true, 
                   showFoldWidgets: true, 
                   tabSize: 2, 
-                  useWorker: false 
+                  useWorker: false,
+                  wrap: editorSettings?.wordWrap || false,
+                  enableBasicAutocompletion: editorSettings?.autoComplete ?? true,
+                  enableLiveAutocompletion: editorSettings?.autoComplete ?? true
                 }}
                 style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
               />

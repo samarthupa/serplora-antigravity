@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } f
 import ActivityBar from './ActivityBar';
 import Sidebar from './Sidebar';
 import AceEditorArea from './AceEditorArea';
+import SettingsOverlay from './SettingsOverlay';
 
 const CompilerShell = forwardRef(({ 
   title, 
@@ -51,6 +52,27 @@ const CompilerShell = forwardRef(({
   const [shareUrl, setShareUrl] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [isLoadingShared, setIsLoadingShared] = useState(false);
+
+  // 🌟 NEW: Settings State
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [editorSettings, setEditorSettings] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('serplora_editor_settings');
+      if (saved) return JSON.parse(saved);
+    }
+    // Fallback defaults
+    return {
+      fontSize: 14,
+      wordWrap: false,
+      autoComplete: true,
+      showGutter: typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+    };
+  });
+
+  const saveSettings = (newSettings: any) => {
+    setEditorSettings(newSettings);
+    localStorage.setItem('serplora_editor_settings', JSON.stringify(newSettings));
+  };
 
   const [runHistory, setRunHistory] = useState<{ [fileId: string]: string }>({});
   const [lastSharedState, setLastSharedState] = useState<{ fingerprint: string, url: string } | null>(null);
@@ -347,10 +369,43 @@ const CompilerShell = forwardRef(({
         </div>
       </div>
       <div className="flex flex-1 overflow-hidden relative">
-        <div className="hidden md:flex"><ActivityBar activeView={activeView} setActiveView={setActiveView} isConsoleOpen={isConsoleOpen} setIsConsoleOpen={setIsConsoleOpen} handleReset={handleReset} handleShare={handleShare} isSharing={isSharing} showConsole={showConsole}/></div>
+        <div className="hidden md:flex">
+          <ActivityBar 
+            activeView={activeView} 
+            setActiveView={setActiveView} 
+            isConsoleOpen={isConsoleOpen} 
+            setIsConsoleOpen={setIsConsoleOpen} 
+            handleReset={handleReset} 
+            handleShare={handleShare} 
+            isSharing={isSharing} 
+            showConsole={showConsole}
+            isSettingsOpen={isSettingsOpen}
+            setIsSettingsOpen={setIsSettingsOpen}
+          />
+        </div>
         <div className={`${isMobile ? (mobileActiveTab === 'files' ? 'flex absolute inset-0 w-full z-20' : 'hidden') : (activeView ? 'flex relative' : 'hidden')} bg-gray-50 dark:bg-[#252526]`}><Sidebar projectName={projectName} setProjectName={setProjectName} activeView={isMobile ? 'explorer' : activeView} files={files} setFiles={setFiles} activeFileId={activeFileId} setActiveFileId={(id: string) => { setActiveFileId(id); if (isMobile) setMobileActiveTab('editor'); }} isMobile={isMobile} /></div>
         <div ref={splitViewRef} className="flex flex-1 overflow-hidden relative">
-            <div className={`${isMobile ? ((mobileActiveTab === 'editor' || mobileActiveTab === 'console') ? 'flex w-full absolute inset-0 z-10' : 'hidden') : 'flex flex-1 relative'} overflow-hidden`}><AceEditorArea isDarkMode={isDarkMode} isMobile={isMobile} mobileActiveTab={mobileActiveTab} activeFile={activeFile} files={files} setFiles={setFiles} activeFileId={activeFileId} setActiveFileId={setActiveFileId} openFileIds={openFileIds} setOpenFileIds={setOpenFileIds} isConsoleOpen={isConsoleOpen} setIsConsoleOpen={setIsConsoleOpen} isConsoleFullscreen={isConsoleFullscreen} setIsConsoleFullscreen={setIsConsoleFullscreen} logs={editorConsoleLogs} showConsole={showConsole}/></div>
+            <div className={`${isMobile ? ((mobileActiveTab === 'editor' || mobileActiveTab === 'console') ? 'flex w-full absolute inset-0 z-10' : 'hidden') : 'flex flex-1 relative'} overflow-hidden`}>
+              <AceEditorArea 
+                isDarkMode={isDarkMode} 
+                isMobile={isMobile} 
+                mobileActiveTab={mobileActiveTab} 
+                activeFile={activeFile} 
+                files={files} 
+                setFiles={setFiles} 
+                activeFileId={activeFileId} 
+                setActiveFileId={setActiveFileId} 
+                openFileIds={openFileIds} 
+                setOpenFileIds={setOpenFileIds} 
+                isConsoleOpen={isConsoleOpen} 
+                setIsConsoleOpen={setIsConsoleOpen} 
+                isConsoleFullscreen={isConsoleFullscreen} 
+                setIsConsoleFullscreen={setIsConsoleFullscreen} 
+                logs={editorConsoleLogs} 
+                showConsole={showConsole}
+                editorSettings={editorSettings}
+              />
+            </div>
             {OutputPane && OutputPane(layoutProps)}
         </div>
       </div>
@@ -361,6 +416,16 @@ const CompilerShell = forwardRef(({
       {showResetConfirm && (<div className="absolute inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm"><div className="bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#3c3c3c] p-6 rounded-lg shadow-xl max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200"><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Reset Compiler?</h3><p className="text-sm text-gray-600 dark:text-[#cccccc] mb-6">Are you sure you want to reset the compiler? All your unsaved changes will be lost.</p><div className="flex justify-end gap-3"><button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-[#cccccc] hover:bg-gray-100 dark:hover:bg-[#3c3c3c] rounded transition-colors">Cancel</button><button onClick={executeReset} className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition-colors shadow-sm">Yes, Reset</button></div></div></div>)}
       {showShareModal && (<div className="absolute inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm"><div className="bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#3c3c3c] p-6 rounded-lg shadow-xl max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200"><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Share Workspace</h3><div className="flex gap-2 mb-6"><input type="text" readOnly value={shareUrl} className="flex-1 bg-gray-50 dark:bg-[#3c3c3c] border border-gray-300 dark:border-[#555] text-gray-900 dark:text-white text-sm rounded px-3 py-2 outline-none focus:border-[#007acc]" onClick={(e) => (e.target as HTMLInputElement).select()} /><button onClick={copyToClipboard} className={`px-4 py-2 text-sm font-medium text-white rounded transition-colors ${isCopied ? 'bg-green-600' : 'bg-[#007acc] hover:bg-[#005f9e]'}`}>{isCopied ? 'Copied!' : 'Copy'}</button></div><div className="flex justify-end"><button onClick={() => setShowShareModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-[#cccccc] hover:bg-gray-100 dark:hover:bg-[#3c3c3c] rounded transition-colors">Close</button></div></div></div>)}
       {isLoadingShared && (<div className="absolute inset-0 z-[99999] flex flex-col items-center justify-center bg-white dark:bg-[#1e1e1e]"><svg className="w-10 h-10 text-[#007acc] animate-spin mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><div className="text-gray-600 dark:text-[#cccccc] font-medium tracking-wide">Loading Workspace...</div></div>)}
+      
+      {/* 🌟 NEW: Settings Overlay Rendered Here */}
+      {isSettingsOpen && (
+        <SettingsOverlay 
+          isMobile={isMobile}
+          currentSettings={editorSettings} 
+          onSave={saveSettings} 
+          onClose={() => setIsSettingsOpen(false)} 
+        />
+      )}
     </div>
   );
 });
