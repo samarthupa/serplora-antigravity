@@ -213,12 +213,13 @@ export default function AceEditorArea({
                 width="100%"
                 height="100%"
                 showPrintMargin={false}
-                className={isMobile ? 'mobile-slim-gutter' : ''}
+                // 🟢 FIX: Only apply the 34px forced margin if the gutter is actually enabled
+                className={(isMobile && (editorSettings?.showGutter ?? true)) ? 'mobile-slim-gutter' : ''}
                 // IMPORTANT: value and onChange are removed so we can control the session natively
                 setOptions={{ 
                   fontSize: editorSettings?.fontSize || 14, 
                   showLineNumbers: true, 
-                  showGutter: editorSettings?.showGutter ?? true, 
+                  showGutter: editorSettings?.showGutter ?? true,
                   showFoldWidgets: true, 
                   tabSize: 2, 
                   useWorker: false,
