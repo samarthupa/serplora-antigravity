@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import JSZip from 'jszip';
 
 export default function Sidebar({ activeView, files, setFiles, activeFileId, setActiveFileId, projectName, setProjectName, isMobile }: any) {
@@ -14,6 +14,43 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
 
   const [past, setPast] = useState<any[][]>([]);
   const [future, setFuture] = useState<any[][]>([]);
+
+  // ---> ADD SEARCH STATE & LOGIC HERE <---
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  // Debounce the search query to prevent UI freezing while typing
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Compute search results safely
+  const searchResults = useMemo(() => {
+    if (!debouncedQuery.trim()) return [];
+    const query = debouncedQuery.toLowerCase();
+    
+    return files
+      .filter((f: any) => {
+        // Ignore folders, empty files, and base64 image uploads
+        if (f.isFolder || !f.content || f.content.startsWith('data:image/')) return false;
+        return f.content.toLowerCase().includes(query);
+      })
+      .map((f: any) => {
+        // Extract a snippet of context around the match
+        const lowerContent = f.content.toLowerCase();
+        const index = lowerContent.indexOf(query);
+        const start = Math.max(0, index - 25);
+        const end = Math.min(f.content.length, index + query.length + 25);
+        
+        let snippet = f.content.substring(start, end).replace(/\n/g, ' ');
+        if (start > 0) snippet = '...' + snippet;
+        if (end < f.content.length) snippet = snippet + '...';
+        
+        return { file: f, snippet };
+      });
+  }, [debouncedQuery, files]);
+  // ---------------------------------------
 
   const updateFilesWithHistory = (newFilesOrUpdater: any) => {
     // Calculate the next files using the current closure's 'files' state
@@ -590,6 +627,46 @@ export default function Sidebar({ activeView, files, setFiles, activeFileId, set
             {expandedFolders.includes('root') && renderTree(null, 1)}
           </div>
         )}
+
+        {/* ---> ADD NEW SEARCH UI BLOCK HERE <--- */}
+        {activeView === 'search' && (
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {/* Search Input */}
+            <div className="px-3 py-2 shrink-0">
+              <input 
+                type="text" 
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white dark:bg-[#3c3c3c] text-gray-900 dark:text-white border border-gray-300 dark:border-[#555] rounded-[3px] px-2 py-1.5 text-[13px] outline-none focus:border-[#007acc] transition-colors"
+              />
+            </div>
+            
+            {/* Results */}
+            <div className="flex-1 overflow-y-auto px-2 pb-4">
+              {debouncedQuery.trim() !== '' && searchResults.length === 0 ? (
+                <p className="text-gray-500 dark:text-[#858585] text-[12px] px-2 mt-2">No results found.</p>
+              ) : (
+                searchResults.map((result: any, i: number) => (
+                  <div 
+                    key={`${result.file.id}-${i}`}
+                    className="mb-3 cursor-pointer group"
+                    onClick={() => setActiveFileId(result.file.id)}
+                  >
+                    <div className="flex items-center text-[13px] font-bold text-gray-700 dark:text-[#cccccc] px-1 py-1 group-hover:bg-gray-200/50 dark:group-hover:bg-[#2a2d2e] rounded transition-colors">
+                      <svg className="w-3.5 h-3.5 mr-1.5 text-blue-600 dark:text-[#519aba] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                      <span className="truncate">{result.file.name}</span>
+                    </div>
+                    <div className="text-[12px] text-gray-500 dark:text-[#858585] ml-6 px-1 line-clamp-2 leading-relaxed break-all">
+                      {result.snippet}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+        
       </div>
 
       {contextMenu && (
