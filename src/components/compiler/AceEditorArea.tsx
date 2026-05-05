@@ -115,7 +115,7 @@ export default function AceEditorArea({
     });
   }, [files]);
 
-  // 🌟 NEW: Safely apply settings via Ace's native API without unmounting the editor
+ // 🌟 NEW: Safely apply settings via Ace's native API without unmounting the editor
   useEffect(() => {
     if (!editorRef.current || !editorSettings) return;
     const editor = editorRef.current.editor;
@@ -127,6 +127,14 @@ export default function AceEditorArea({
       enableLiveAutocompletion: editorSettings.autoComplete,
       showGutter: editorSettings.showGutter
     });
+
+    // 🟢 FIX: Force Ace Editor to recalculate its internal pixel math 
+    // after React applies the 'mobile-slim-gutter' CSS class.
+    setTimeout(() => {
+      editor.resize(true);
+      editor.renderer.updateFull();
+    }, 50);
+
   }, [editorSettings]);
 
   const handleCloseTab = (e: any, fileId: string) => {
