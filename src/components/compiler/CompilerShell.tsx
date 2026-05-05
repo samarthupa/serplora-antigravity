@@ -358,8 +358,15 @@ const CompilerShell = forwardRef(({
             {isRunning ? <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg> : <svg className="w-5 h-5 pl-0.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21"/></svg>}
           </div>
           {showConsole && (<div onClick={() => setMobileActiveTab('console')} className={`relative cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'console' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}><svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>{editorConsoleLogs.length > 0 && <span className="absolute top-[2px] right-[2px] w-2 h-2 rounded-full bg-[#f48771] border border-gray-200 dark:border-[#3c3c3c]"></span>}</div>)}
-          <div onClick={handleReset} className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div>
-          <div onClick={!isSharing ? handleShare : undefined} className={`cursor-pointer p-1.5 transition-colors ${isSharing ? 'text-[#007acc] animate-pulse' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>{isSharing ? <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> : <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>}</div>
+          
+          {/* 🌟 NEW: Settings Icon REPLACES Reset & Share on Mobile */}
+          <div onClick={() => setIsSettingsOpen(!isSettingsOpen)} className={`cursor-pointer p-1.5 transition-colors ${isSettingsOpen ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          
           <div onClick={toggleFullscreen} className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors">{isAppFullscreen ? <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/></svg> : <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>}</div>
         </div>
         <div className="hidden md:flex items-center justify-center flex-1 text-sm font-normal text-gray-500 dark:text-[#858585]">{getActiveFilePath()}</div>
@@ -417,13 +424,16 @@ const CompilerShell = forwardRef(({
       {showShareModal && (<div className="absolute inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm"><div className="bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#3c3c3c] p-6 rounded-lg shadow-xl max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200"><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Share Workspace</h3><div className="flex gap-2 mb-6"><input type="text" readOnly value={shareUrl} className="flex-1 bg-gray-50 dark:bg-[#3c3c3c] border border-gray-300 dark:border-[#555] text-gray-900 dark:text-white text-sm rounded px-3 py-2 outline-none focus:border-[#007acc]" onClick={(e) => (e.target as HTMLInputElement).select()} /><button onClick={copyToClipboard} className={`px-4 py-2 text-sm font-medium text-white rounded transition-colors ${isCopied ? 'bg-green-600' : 'bg-[#007acc] hover:bg-[#005f9e]'}`}>{isCopied ? 'Copied!' : 'Copy'}</button></div><div className="flex justify-end"><button onClick={() => setShowShareModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-[#cccccc] hover:bg-gray-100 dark:hover:bg-[#3c3c3c] rounded transition-colors">Close</button></div></div></div>)}
       {isLoadingShared && (<div className="absolute inset-0 z-[99999] flex flex-col items-center justify-center bg-white dark:bg-[#1e1e1e]"><svg className="w-10 h-10 text-[#007acc] animate-spin mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><div className="text-gray-600 dark:text-[#cccccc] font-medium tracking-wide">Loading Workspace...</div></div>)}
       
-      {/* 🌟 NEW: Settings Overlay Rendered Here */}
+      {/* 🌟 Settings Overlay Rendered Here */}
       {isSettingsOpen && (
         <SettingsOverlay 
           isMobile={isMobile}
           currentSettings={editorSettings} 
           onSave={saveSettings} 
           onClose={() => setIsSettingsOpen(false)} 
+          onReset={handleReset} // NEW
+          onShare={handleShare} // NEW
+          isSharing={isSharing} // NEW
         />
       )}
     </div>
