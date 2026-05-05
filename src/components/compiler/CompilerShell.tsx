@@ -271,6 +271,7 @@ const CompilerShell = forwardRef(({
     if (lastSharedState && lastSharedState.fingerprint === currentFingerprint) {
       setShareUrl(lastSharedState.url);
       setShowShareModal(true);
+      setIsSettingsOpen(false); // 🌟 NEW: Close settings when share modal opens
       setIsCopied(false);
       return; 
     }
@@ -288,6 +289,7 @@ const CompilerShell = forwardRef(({
       window.history.pushState({}, '', newUrl);
       setShareUrl(newUrl);
       setShowShareModal(true);
+      setIsSettingsOpen(false); // 🌟 NEW: Close settings when share modal opens
       setIsCopied(false);
     } catch (error) {
       alert("Failed to generate share link.");
