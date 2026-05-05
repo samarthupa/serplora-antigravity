@@ -10,11 +10,8 @@ import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-tomorrow_night";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
-// 🌟 NEW IMPORT: Required to actually enable the Autocomplete engine in Ace
-import "ace-builds/src-noconflict/ext-language_tools";
 
 export default function AceEditorArea({ 
-  editorSettings, // 🌟 Pull settings prop
   isDarkMode, 
   isMobile,
   mobileActiveTab,
@@ -200,16 +197,14 @@ export default function AceEditorArea({
                 height="100%"
                 showPrintMargin={false}
                 className={isMobile ? 'mobile-slim-gutter' : ''}
-                wrapEnabled={editorSettings?.wordWrap}
+                // IMPORTANT: value and onChange are removed so we can control the session natively
                 setOptions={{ 
-                  fontSize: editorSettings?.fontSize || 14, 
+                  fontSize: 14, 
                   showLineNumbers: true, 
-                  showGutter: editorSettings?.showGutter, 
+                  showGutter: true, 
                   showFoldWidgets: true, 
                   tabSize: 2, 
-                  useWorker: false,
-                  enableBasicAutocompletion: editorSettings?.autoComplete,
-                  enableLiveAutocompletion: editorSettings?.autoComplete
+                  useWorker: false 
                 }}
                 style={{ backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff' }}
               />
