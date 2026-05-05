@@ -52,41 +52,6 @@ const CompilerShell = forwardRef(({
   const [isCopied, setIsCopied] = useState(false);
   const [isLoadingShared, setIsLoadingShared] = useState(false);
 
-  // ---> NEW SETTINGS STATE & LOGIC <---
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [editorSettings, setEditorSettings] = useState({
-    fontSize: 14,
-    wordWrap: false,
-    autoComplete: true,
-    showGutter: true // Fallback, will be updated in useEffect
-  });
-
-  // Load from localStorage, determining initial gutter state dynamically
-  useEffect(() => {
-    const saved = localStorage.getItem('serplora_editor_settings');
-    if (saved) {
-      try { setEditorSettings(JSON.parse(saved)); } catch (e) {}
-    } else {
-      setEditorSettings(prev => ({ ...prev, showGutter: window.innerWidth >= 768 }));
-    }
-  }, []);
-
-  const updateEditorSettings = (newSettings: any) => {
-    setEditorSettings(newSettings);
-    localStorage.setItem('serplora_editor_settings', JSON.stringify(newSettings));
-    // Force a resize event to ensure Ace Editor recalibrates Word Wrap line heights
-    setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
-  };
-
-  const handleResetSettings = () => {
-    updateEditorSettings({
-      fontSize: 14,
-      wordWrap: false,
-      autoComplete: true,
-      showGutter: window.innerWidth >= 768 // Dynamic default based on device
-    });
-  };
-
   const [runHistory, setRunHistory] = useState<{ [fileId: string]: string }>({});
   const [lastSharedState, setLastSharedState] = useState<{ fingerprint: string, url: string } | null>(null);
 
