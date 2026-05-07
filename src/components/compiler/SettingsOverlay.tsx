@@ -7,13 +7,17 @@ export default function SettingsOverlay({ currentSettings, onSave, onClose, isMo
   // Handle clicking outside to close without saving (only needed for desktop, mobile uses backdrop)
   useEffect(() => {
     if (isMobile) return; 
+    
     const handleClickOutside = (e: MouseEvent) => {
-      if (overlayRef.current && !overlayRef.current.contains(e.target as Node)) {
+      // 🟢 FIX: Use composedPath to safely track clicks even if React re-renders the clicked element
+      if (overlayRef.current && !e.composedPath().includes(overlayRef.current)) {
         onClose();
       }
     };
-    setTimeout(() => document.addEventListener('click', handleClickOutside), 10);
-    return () => document.removeEventListener('click', handleClickOutside);
+    
+    // 🟢 FIX: Use mousedown instead of click to catch it before React state updates destroy the DOM node
+    setTimeout(() => document.addEventListener('mousedown', handleClickOutside), 10);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose, isMobile]);
 
   const handleReset = () => {
@@ -49,12 +53,15 @@ export default function SettingsOverlay({ currentSettings, onSave, onClose, isMo
       {isMobile && (
         <div 
           className="fixed inset-0 bg-black/50 z-[99998] animate-in fade-in duration-200"
-          onClick={onClose} // Clicking backdrop closes without saving
+          onMouseDown={onClose} // 🟢 Consistently use mousedown
         />
       )}
 
       <div 
         ref={overlayRef}
+        // 🟢 FIX: Stop clicks inside the box from bubbling up to the document listener
+        onMouseDown={(e) => e.stopPropagation()} 
+        onClick={(e) => e.stopPropagation()}
         className={`${
           isMobile 
             ? 'fixed bottom-0 left-0 right-0 rounded-t-[20px] pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-3' 
@@ -75,7 +82,7 @@ export default function SettingsOverlay({ currentSettings, onSave, onClose, isMo
               Reset
             </button>
             <button 
-              onClick={() => { if(!isSharing) onShare(); }} // 🟢 FIX: Removed onClose() so user can see the loading spinner
+              onClick={() => { if(!isSharing) onShare(); }} 
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-lg transition-colors text-[13px] font-semibold ${isSharing ? 'bg-gray-100 dark:bg-[#3c3c3c] text-gray-400 dark:text-[#858585] cursor-not-allowed' : 'bg-[#007acc]/10 hover:bg-[#007acc]/20 text-[#007acc]'}`}
             >
               {isSharing ? (

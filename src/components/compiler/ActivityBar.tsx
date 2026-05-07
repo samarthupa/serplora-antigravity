@@ -26,10 +26,18 @@ export default function ActivityBar({ activeView, setActiveView, isConsoleOpen, 
           title="Search"
         >
           {activeView === 'search' && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#007acc]"></div>}
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="22" y1="22" x2="14" y2="14"></line>
-          </svg>
+          <svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class="w-5 h-5"
+>
+  <circle cx="11" cy="11" r="9"></circle>
+  <line x1="18" y1="18" x2="23" y2="23"></line>
+</svg>
         </div>
 
       </div>
@@ -40,6 +48,26 @@ export default function ActivityBar({ activeView, setActiveView, isConsoleOpen, 
         <div className="w-12 h-12 flex items-center justify-center cursor-pointer text-gray-500 dark:text-[#858585] hover:text-gray-800 dark:hover:text-[#cccccc]" title="Reset Compiler" onClick={handleReset}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         </div>
+
+        {/* COMMAND PALETTE BUTTON */}
+<div 
+  onClick={() => window.dispatchEvent(new Event('open-ace-palette'))}
+  className="flex items-center justify-center w-12 h-12 text-gray-500 dark:text-[#858585] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors relative group"
+  title="Command Palette (F1)"
+>
+  {/* A classic 'terminal prompt' icon to represent commands */}
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
+    <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+    <line x1="6" y1="8" x2="6.01" y2="8"></line>
+    <line x1="10" y1="8" x2="10.01" y2="8"></line>
+    <line x1="14" y1="8" x2="14.01" y2="8"></line>
+    <line x1="18" y1="8" x2="18.01" y2="8"></line>
+    <line x1="8" y1="12" x2="8.01" y2="12"></line>
+    <line x1="12" y1="12" x2="12.01" y2="12"></line>
+    <line x1="16" y1="12" x2="16.01" y2="12"></line>
+    <line x1="7" y1="16" x2="17" y2="16"></line>
+  </svg>
+</div>
         
         {/* Share Icon */}
         <div 
@@ -68,7 +96,10 @@ export default function ActivityBar({ activeView, setActiveView, isConsoleOpen, 
             onClick={() => setIsConsoleOpen(!isConsoleOpen)}
           >
             {isConsoleOpen && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#007acc]"></div>}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M9 18l6-6-6-6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <polyline points="4 17 10 11 4 5"></polyline>
+    <line x1="12" y1="19" x2="20" y2="19"></line>
+  </svg>
           </div>
         )}
         

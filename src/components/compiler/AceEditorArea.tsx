@@ -12,6 +12,7 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 // 🌟 NEW: Import required for autocomplete
 import "ace-builds/src-noconflict/ext-language_tools"; 
+import "ace-builds/src-noconflict/ext-prompt";
 
 export default function AceEditorArea({ 
   isDarkMode, 
@@ -103,6 +104,19 @@ export default function AceEditorArea({
     editor.focus();
   }, [activeFileId, files.find((f: any) => f.id === activeFileId)?.language]);
 
+  // 🌟 NEW: Listen for the custom event to open the palette programmatically
+  useEffect(() => {
+    const handleOpenPalette = () => {
+      if (editorRef.current && editorRef.current.editor) {
+        // Native Ace Editor command to trigger F1 palette
+        editorRef.current.editor.execCommand("openCommandPalette");
+      }
+    };
+
+    window.addEventListener('open-ace-palette', handleOpenPalette);
+    return () => window.removeEventListener('open-ace-palette', handleOpenPalette);
+  }, []);
+
   // 🌟 NEW: Effect 2 - Sync external changes (like Undo/Redo from the sidebar or loaded saves) into the session
   useEffect(() => {
     files.forEach((file: any) => {
@@ -185,6 +199,17 @@ export default function AceEditorArea({
         }
         .scrollbar-hide::-webkit-scrollbar {
           display: none; 
+        }
+
+        .ace_mobile-menu {
+            display: flex !important;
+            flex-direction: column !important;
+            z-index: 99999 !important;
+            pointer-events: auto !important;
+        }
+        .ace_mobile-menu span {
+            display: flex;
+            flex-direction: column;
         }
       `}</style>
       
