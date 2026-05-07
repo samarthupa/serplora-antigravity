@@ -29,6 +29,7 @@ interface Props {
     robotsIndex?: boolean;
     robotsFollow?: boolean;
     schemaType?: string; // <-- NEW: Accepts the schema type from CMS
+    disableStickyHeader?: boolean;
   };
   titleFallback?: string;
   excerptFallback?: string;
@@ -117,7 +118,7 @@ const robotsParams = [
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MVZN25KT"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-    <Header />
+    <Header disableStickyHeader={seo?.disableStickyHeader} />
     <main class="flex-1 w-full flex flex-col">
       <slot />
     </main>

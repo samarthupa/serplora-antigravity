@@ -1,6 +1,13 @@
 ---
 import { getEntry } from 'astro:content';
 import Search from "astro-pagefind/components/Search";
+// 🟢 NEW: Define Props
+interface Props {
+  disableStickyHeader?: boolean;
+}
+
+// 🟢 NEW: Extract the prop
+const { disableStickyHeader = false } = Astro.props;
 
 const headerEntry = await getEntry('header', 'data');
 const siteTitle = headerEntry?.data?.siteTitle || 'Serplora';
@@ -15,13 +22,18 @@ const primaryBtn = {
 };
 ---z
 
-<header id="site-header" class="sticky top-0 inset-x-0 w-full z-[200] h-[64px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300">
+{/* 🟢 CHANGED: We pass the prop to a data-attribute for JS, and toggle the 'sticky top-0' classes */}
+<header 
+  id="site-header" 
+  data-disable-sticky={disableStickyHeader ? "true" : "false"}
+  class={`inset-x-0 w-full z-[200] h-[64px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+>
   <div class="max-w-[1200px] mx-auto px-4 w-full flex items-center gap-2 md:gap-10">
     
     {/* --- MOBILE: Hamburger Toggle (Leftmost) --- */}
     <button 
       type="button" 
-      class="md:hidden flex flex-col justify-center items-center w-[40px] h-[40px] rounded-[10px] hover:bg-tx-muted/10 transition-colors focus:outline-none gap-[4px] cursor-pointer shrink-0 border-none p-0 -ml-5 text-tx-main" 
+      class="md:hidden flex flex-col justify-center items-center w-[40px] h-[40px] rounded-[10px] hover:bg-tx-muted/10 transition-colors focus:outline-none gap-[4px] cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main" 
       id="mobile-menu-btn" 
       aria-label="Toggle mobile menu"
     >
@@ -450,10 +462,12 @@ const primaryBtn = {
 
   // Smart header logic
   const header = document.getElementById('site-header');
+  const isStickyDisabled = header?.getAttribute('data-disable-sticky') === 'true'; // 🟢 NEW: Check if disabled
   let lastScrollY = window.scrollY;
 
   window.addEventListener('scroll', () => {
-    if (!header) return;
+    if (!header || isStickyDisabled) return; // 🟢 NEW: Abort entirely if disabled
+    
     const currentScrollY = window.scrollY;
     
     // Prevent jitter from minor trackpad movements

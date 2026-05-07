@@ -49,30 +49,29 @@ if (adsData?.data) {
 ---
 
 <Layout seo={compiler.data.seo} titleFallback={compiler.data.title} excerptFallback={compiler.data.excerpt}>
-<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8 compiler-wrapper">    
- 
- <Breadcrumb section="compilers" current={breadcrumbLabel} class="mb-12 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted flex flex-wrap items-center gap-2" />
-
+  <div class="w-full max-w-[1920px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8 compiler-wrapper">     
+    
     <div class="flex-1 min-w-0 flex flex-col gap-4">
         
         {/* DYNAMIC COMPILER ROUTING */}
-        <div class="relative w-full z-10">
+        {/* 🟢 Applied md:h-[calc(100vh-120px)] for desktop only. Mobile layout is untouched. */}
+        <div class="relative w-full z-10 md:h-[calc(100vh-120px)]">
           {compilerLang === 'python' ? (
             <PythonWorkspace 
               client:only="react" 
               title={compiler.data.title}
               initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'main.py', content: '# Write your Python code here', language: 'python' }]}
-              showConsole={compiler.data.showConsole} // 🟢 Pass prop
+              showConsole={compiler.data.showConsole}
             >
               <div 
-  slot="fallback" 
-  class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:min-h-[600px] md:max-h-[1080px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
->
+                slot="fallback" 
+                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-full md:min-h-[600px] md:max-h-[1080px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+              >
                 <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
-                <div class="flex flex-1 w-full">
+                <div class="flex flex-1 w-full h-full">
                   <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
                   <div class="hidden md:block w-[240px] bg-gray-50 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
-                  <div class="flex-1 bg-white dark:bg-[#1e1e1e]"></div>
+                  <div class="flex-1 bg-white dark:bg-[#1e1e1e] h-full"></div>
                 </div>
               </div>
             </PythonWorkspace>
@@ -83,22 +82,25 @@ if (adsData?.data) {
               initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'index.html', content: '', language: 'html' }]}
               showConsole={compiler.data.showConsole}
             >
-             <div 
-  slot="fallback" 
-  class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] max-h-[600px] my-0 rounded-none border-none md:h-[calc(100vh-160px)] md:min-h-[700px] md:max-h-[1440px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
->
+              <div 
+                slot="fallback" 
+                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] max-h-[700px] my-0 rounded-none border-none md:h-full md:min-h-[700px] md:max-h-[1440px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+              >
                 <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
-                <div class="flex flex-1 w-full">
+                <div class="flex flex-1 w-full h-full">
                   <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
                   <div class="hidden md:block w-[240px] bg-gray-50 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
-                  <div class="flex-1 bg-white dark:bg-[#1e1e1e]"></div>
+                  <div class="flex-1 bg-white dark:bg-[#1e1e1e] h-full"></div>
                 </div>
               </div>
             </HtmlWorkspace>
           )}
         </div>
 
-        {/* 🟢 AD MOVED HERE: Directly below the compiler */}
+        {/* 🟢 BREADCRUMBS MOVED HERE: Directly below the compiler */}
+        <Breadcrumb section="compilers" current={breadcrumbLabel} class="mt-6 md:mt-8 mb-6 md:ml-2 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted flex flex-wrap items-center gap-2" />
+
+        {/* Ads */}
         {sidebarAdHtml && (
           <div class="w-full flex justify-center mt-2 mb-4">
             <div 
@@ -109,7 +111,7 @@ if (adsData?.data) {
         )}
 
         {/* Title and Description */}
-        <div class="mt-4 lg:mt-6 pb-4 border-b border-gray-200 dark:border-[#3c3c3c]">
+        <div class="mt-2 lg:mt-4 pb-4 border-b border-gray-200 dark:border-[#3c3c3c]">
           <h1 class="text-2xl md:text-3xl font-bold mb-2 text-gray-900 dark:text-white">{compiler.data.title}</h1>
           <p class="opacity-80 text-sm md:text-base text-gray-700 dark:text-gray-300">
             {compiler.data.excerpt}

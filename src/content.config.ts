@@ -8,6 +8,7 @@ const seoSchema = z.object({
   metaDescription: z.string().optional(),
   canonicalUrl: z.string().optional(),
   robotsIndex: z.boolean().optional(),
+  disableStickyHeader: z.boolean().optional().default(false),
   robotsFollow: z.boolean().optional(),
   schemaType: z.string().optional().default('none'),
 }).optional();

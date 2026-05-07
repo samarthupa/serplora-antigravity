@@ -12,6 +12,12 @@ export const seoSchema = fields.object({
     robotsIndex: fields.checkbox({ label: 'Allow Search Engines to Index (index)', defaultValue: true }),
     robotsFollow: fields.checkbox({ label: 'Allow Search Engines to Follow Links (follow)', defaultValue: true }),
 
+    disableStickyHeader: fields.checkbox({ 
+        label: 'Disable Smart Sticky Header', 
+        description: 'Check this to make the header scroll naturally with the page instead of hiding/appearing on scroll.',
+        defaultValue: false 
+    }),
+
     schemaType: fields.select({
       label: 'Structured Data (Schema.org)',
       description: 'Select the primary schema type for this page.',
