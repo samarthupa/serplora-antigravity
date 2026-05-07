@@ -54,8 +54,8 @@ if (adsData?.data) {
     <div class="flex-1 min-w-0 flex flex-col gap-4">
         
         {/* DYNAMIC COMPILER ROUTING */}
-        {/* 🟢 Applied md:h-[calc(100vh-120px)] for desktop only. Mobile layout is untouched. */}
-        <div class="relative w-full z-10 md:h-[calc(100vh-120px)]">
+        {/* 🟢 Applied mobile height: calc(100dvh-250px) and desktop height: calc(100vh-100px) */}
+        <div class="relative w-full z-10 h-[calc(100dvh-100px)] md:h-[calc(100vh-100px)]">
           {compilerLang === 'python' ? (
             <PythonWorkspace 
               client:only="react" 
@@ -65,7 +65,7 @@ if (adsData?.data) {
             >
               <div 
                 slot="fallback" 
-                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] my-0 rounded-none border-none md:h-full md:min-h-[600px] md:max-h-[1080px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+                class="flex flex-col w-full h-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] my-0 rounded-none border-none md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
               >
                 <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
                 <div class="flex flex-1 w-full h-full">
@@ -84,7 +84,7 @@ if (adsData?.data) {
             >
               <div 
                 slot="fallback" 
-                class="flex flex-col w-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] h-[100dvh] max-h-[700px] my-0 rounded-none border-none md:h-full md:min-h-[700px] md:max-h-[1440px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+                class="flex flex-col w-full h-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] my-0 rounded-none border-none md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
               >
                 <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
                 <div class="flex flex-1 w-full h-full">

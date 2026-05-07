@@ -351,7 +351,7 @@ const CompilerShell = forwardRef(({
   };
 
   return (
-    <div ref={compilerRef} className={`flex flex-col w-full overflow-hidden font-sans transition-colors bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-[#cccccc] ${isAppFullscreen ? 'h-[100dvh] md:h-screen rounded-none border-none my-0 z-50 relative' : 'h-[100dvh] max-h-[600px] my-0 rounded-none border border-gray-300 dark:border-[#3c3c3c] md:h-[calc(100vh-100px)] md:min-h-[700px] md:max-h-[1440px] md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] relative'}`}>
+    <div ref={compilerRef} className={`flex flex-col w-full h-full overflow-hidden font-sans transition-colors bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-[#cccccc] ${isAppFullscreen ? 'h-[100dvh] md:h-screen rounded-none border-none my-0 z-50 relative' : 'my-0 rounded-none border-none md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] relative'}`}>
      <div className="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] flex items-center select-none shrink-0 transition-colors">
         <div className="flex md:hidden items-center justify-between flex-1 px-1">
           <div onClick={() => setMobileActiveTab(prev => prev === 'files' ? 'editor' : 'files')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}><svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
