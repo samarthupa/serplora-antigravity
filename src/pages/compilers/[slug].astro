@@ -54,7 +54,6 @@ if (adsData?.data) {
     <div class="flex-1 min-w-0 flex flex-col gap-4">
         
         {/* DYNAMIC COMPILER ROUTING */}
-        {/* 🟢 Applied mobile height: calc(100dvh-250px) and desktop height: calc(100vh-100px) */}
         <div class="relative w-full z-10 h-[calc(100dvh-100px)] md:h-[calc(100vh-100px)]">
           {compilerLang === 'python' ? (
             <PythonWorkspace 
@@ -97,30 +96,39 @@ if (adsData?.data) {
           )}
         </div>
 
-        {/* 🟢 BREADCRUMBS MOVED HERE: Directly below the compiler */}
+        {/* BREADCRUMBS */}
         <Breadcrumb section="compilers" current={breadcrumbLabel} class="mt-6 md:mt-8 mb-6 md:ml-2 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted flex flex-wrap items-center gap-2" />
 
-        {/* Ads */}
-        {sidebarAdHtml && (
-          <div class="w-full flex justify-center mt-2 mb-4">
-            <div 
-              class="sidebar-ad-container bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#3c3c3c] rounded-lg overflow-hidden shadow-sm block" 
-              set:html={sidebarAdHtml} 
-            />
+        {/* The Centered Reading Wrapper */}
+        <div class="w-full flex justify-center mt-8 mb-20">
+          
+          <div class="w-full max-w-4xl px-2 md:px-0">
+
+            {/* Ads */}
+            {sidebarAdHtml && (
+              <div class="w-full flex justify-center mb-10">
+                <div class="sidebar-ad-container bg-[var(--color-bg-main)] border border-[var(--color-border-subtle)] rounded-lg overflow-hidden shadow-sm block" set:html={sidebarAdHtml} />
+              </div>
+            )}
+
+            {/* Title and Description */}
+            <div class="pb-8 mb-8 border-b border-[var(--color-border-subtle)]">
+              <h1 class="text-2xl md:text-4xl font-extrabold mb-4 text-[var(--color-tx-main)] tracking-tight">
+                {compiler.data.title}
+              </h1>
+              {compiler.data.excerpt && (
+                <p class="text-[17px] md:text-lg text-[var(--color-tx-muted)] leading-relaxed">
+                  {compiler.data.excerpt}
+                </p>
+              )}
+            </div>
+
+            {/* The Rendered Markdown Content Container */}
+            <div class="markdown-content text-[16px] md:text-[17px] leading-[1.7] md:leading-[1.8] w-full text-[var(--color-tx-main)]">
+              <Content />
+            </div>
+
           </div>
-        )}
-
-        {/* Title and Description */}
-        <div class="mt-2 lg:mt-4 pb-4 border-b border-gray-200 dark:border-[#3c3c3c]">
-          <h1 class="text-2xl md:text-3xl font-bold mb-2 text-gray-900 dark:text-white">{compiler.data.title}</h1>
-          <p class="opacity-80 text-sm md:text-base text-gray-700 dark:text-gray-300">
-            {compiler.data.excerpt}
-          </p>
-        </div>
-
-        {/* The Rendered Markdown Content Container */}
-        <div class="markdown-content text-[15.5px] md:text-[17px] leading-[1.7] md:leading-[1.8] mt-2">
-          <Content />
         </div>
         
     </div>
@@ -134,15 +142,109 @@ if (adsData?.data) {
   .sidebar-ad-container a:hover img { opacity: 0.95; transition: opacity 0.2s ease-in-out; }
 
   .ace_mobile-menu span{
-        display: flex;
-        flex-direction: column;
-    }
+    display: flex;
+    flex-direction: column;
+  }
 
-  /* Custom 1400px Padding Override */
+  /* Custom 1400px Padding Override for the IDE Wrapper */
   @media (min-width: 1400px) {
     .compiler-wrapper {
       padding-left: 50px !important;
       padding-right: 50px !important;
     }
+  }
+
+  /* * ==============================================
+   * MARKDOWN TYPOGRAPHY STYLES 
+   * Powered by your global.css variables
+   * ==============================================
+   */
+  .markdown-content {
+    color: var(--color-tx-main);
+  }
+
+  .markdown-content h1, 
+  .markdown-content h2, 
+  .markdown-content h3, 
+  .markdown-content h4 {
+    font-weight: 700;
+    color: var(--color-tx-main);
+    margin-bottom: 0.8em;
+    line-height: 1.3;
+  }
+  
+  .markdown-content h1 { font-size: 2.25em; }
+  
+  .markdown-content h2 { 
+    font-size: 1.75em; 
+  }
+  
+  .markdown-content h3 { font-size: 1.35em; }
+  .markdown-content h4 { font-size: 1.15em; }
+
+  .markdown-content p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  /* 🚀 FIX: Bullet points and Numbered Lists */
+  .markdown-content ul {
+    list-style-type: disc;
+    /* padding-left is crucial. Without it, bullets render off-screen */
+    padding-left: 1.5em; 
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  .markdown-content ol {
+    list-style-type: decimal;
+    padding-left: 1.5em;
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  .markdown-content li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    padding-left: 0.375em;
+  }
+  
+  /* Support for nested lists (lists inside lists) */
+  .markdown-content li > ul,
+  .markdown-content li > ol {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  /* Links & Highlights */
+  .markdown-content a {
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: opacity 0.2s ease;
+  }
+
+  .markdown-content a:hover {
+    opacity: 0.8;
+  }
+
+  .markdown-content blockquote {
+    font-style: italic;
+    color: var(--color-tx-muted);
+    border-left: 4px solid var(--color-border-subtle);
+    padding-left: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Inline Code Styles */
+  .markdown-content code:not(pre code) {
+    background-color: var(--color-bg-surface);
+    color: var(--color-tx-main);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
   }
 </style>
