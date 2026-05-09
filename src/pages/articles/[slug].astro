@@ -48,15 +48,21 @@ const { Content } = await render(entry);
 
 // 🟢 BULLETPROOF AUTHOR FETCHING & ROUTING
 // 1. Grab the author ID (Astro's config will ensure it defaults to 'editorial-team' if missing)
-const authorId = entry.data.author || 'editorial-team';
-const authorEntry = await getEntry('authors', authorId);
+const rawAuthorId = entry.data.author || 'editorial-team';
 
-// 2. Safely grab the data
+// 2. Safely attempt to fetch the author, falling back to the folder-based ID if needed
+let authorEntry = await getEntry('authors', rawAuthorId);
+if (!authorEntry) {
+  authorEntry = await getEntry('authors', `${rawAuthorId}/index`);
+}
+
+// 3. Safely grab the data
 const authorName = authorEntry?.data?.name || "Editorial Team";
 const authorAvatar = authorEntry?.data?.avatar || null;
 
-// 3. CUSTOM ROUTING LOGIC: If the author is the team, send them to the hub!
-const authorLink = authorId === 'editorial-team' ? '/authors' : `/authors/${authorId}`;
+// 4. CUSTOM ROUTING LOGIC: Clean the ID for the link
+const cleanAuthorId = authorEntry ? authorEntry.id.replace(/\/index$/, '') : rawAuthorId;
+const authorLink = cleanAuthorId === 'editorial-team' ? '/authors' : `/authors/${cleanAuthorId}`;
 
 const displayDate = entry.data.updatedDate || entry.data.publishDate || new Date();
 const formattedDate = new Date(displayDate).toISOString().split('T')[0];

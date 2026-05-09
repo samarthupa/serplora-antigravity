@@ -15,11 +15,12 @@ const seoSchema = z.object({
 
 // 🟢 NEW: Define Authors Collection
 const authors = defineCollection({
-  loader: glob({ pattern: "**/*.json", base: "./src/content/authors" }),
+  // 👇 CHANGED: Look for markdown files
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/authors" }), 
   schema: z.object({
     name: z.string(),
     avatar: z.string().optional(),
-    bio: z.string().optional(),
+    // 👇 REMOVED: bio is no longer frontmatter, it's the body content
     twitter: z.string().optional(),
     linkedin: z.string().optional(),
     github: z.string().optional(),

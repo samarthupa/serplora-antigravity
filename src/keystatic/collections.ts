@@ -22,12 +22,12 @@ export const tags = collection({
 export const authors = collection({
     label: 'Authors',
     slugField: 'name',
-    path: 'src/content/authors/*',
-    format: { data: 'json' },
+    path: 'src/content/authors/*/', // <-- ADDED trailing slash
+    format: { contentField: 'bio' }, // <-- CHANGED from json
     schema: {
         name: fields.slug({ name: { label: 'Name' } }),
         avatar: fields.image({ label: 'Avatar', directory: 'public/images/avatars', publicPath: '/images/avatars/' }),
-        bio: fields.text({ label: 'Short Bio', multiline: true }),
+        bio: createGlobalEditor('Short Bio', 'authors'), // <-- CHANGED to rich text editor
         twitter: fields.text({ label: 'Twitter URL (Optional)' }),
         linkedin: fields.text({ label: 'LinkedIn URL (Optional)' }),
         github: fields.text({ label: 'GitHub URL (Optional)' }),

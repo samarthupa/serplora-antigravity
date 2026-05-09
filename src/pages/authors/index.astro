@@ -11,8 +11,9 @@ const subheadline = pageEntry?.data?.subheadline || 'Meet the developers and tec
 const breadcrumbLabel = pageEntry?.data?.breadcrumbTitle || headline || 'authors';
 
 // 2. Fetch and filter the Authors
+// 🟢 Safely filter out editorial-team, accounting for the /index suffix
 const allAuthors = await getCollection('authors');
-const displayAuthors = allAuthors.filter(author => author.id !== 'editorial-team');
+const displayAuthors = allAuthors.filter(author => !author.id.includes('editorial-team'));
 ---
 
 <Layout 
@@ -32,28 +33,34 @@ const displayAuthors = allAuthors.filter(author => author.id !== 'editorial-team
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {displayAuthors.map((author) => (
-        <a href={`/authors/${author.id}`} class="group flex flex-col items-center text-center p-8 bg-surface border border-subtle rounded-2xl hover:border-brand/50 hover:shadow-md transition-all duration-300">
-          
-          {author.data.avatar ? (
-            <img src={author.data.avatar} alt={author.data.name} class="w-24 h-24 rounded-full object-cover border border-subtle mb-4 group-hover:scale-105 transition-transform duration-300" />
-          ) : (
-            <div class="w-24 h-24 rounded-full bg-main border border-subtle flex items-center justify-center font-bold text-tx-main text-3xl mb-4 group-hover:scale-105 transition-transform duration-300">
-              {author.data.name.charAt(0)}
-            </div>
-          )}
-          
-          <h2 class="text-xl font-bold text-tx-main group-hover:text-brand transition-colors mb-2">
-            {author.data.name}
-          </h2>
-          
-          {author.data.bio && (
-            <p class="text-sm text-tx-muted line-clamp-2">
-              {author.data.bio}
-            </p>
-          )}
-        </a>
-      ))}
+      {displayAuthors.map((author) => {
+        // 🟢 Clean the ID for the link so it doesn't 404
+        const cleanAuthorId = author.id.replace(/\/index$/, '');
+        
+        return (
+          <a href={`/authors/${cleanAuthorId}`} class="group flex flex-col items-center text-center p-8 bg-surface border border-subtle rounded-2xl hover:border-brand/50 hover:shadow-md transition-all duration-300">
+            
+            {author.data.avatar ? (
+              <img src={author.data.avatar} alt={author.data.name} class="w-24 h-24 rounded-full object-cover border border-subtle mb-4 group-hover:scale-105 transition-transform duration-300" />
+            ) : (
+              <div class="w-24 h-24 rounded-full bg-main border border-subtle flex items-center justify-center font-bold text-tx-main text-3xl mb-4 group-hover:scale-105 transition-transform duration-300">
+                {author.data.name.charAt(0)}
+              </div>
+            )}
+            
+            <h2 class="text-xl font-bold text-tx-main group-hover:text-brand transition-colors mb-2">
+              {author.data.name}
+            </h2>
+            
+            {/* 🟢 Use author.body for the excerpt preview since it's now Markdown */}
+            {author.body && (
+              <p class="text-sm text-tx-muted line-clamp-2">
+                {author.body.replace(/<[^>]*>?/gm, '')}
+              </p>
+            )}
+          </a>
+        );
+      })}
     </div>
 
   </div>
