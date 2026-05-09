@@ -1,0 +1,33 @@
+---
+title: SerJS - JavaScript Compiler
+breadcrumbTitle: JavaScript Compiler
+draft: false
+language: javascript
+showConsole: false
+seo:
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+starterFiles:
+  - filename: main.js
+    language: javascript
+    content: |-
+      console.log("System initialized...");
+
+      async function main() {
+          // Native Prompt Support
+          let name = await prompt("What is your name?");
+          console.log(`Hello, ${name}!`);
+          
+          // Arrays
+          let colors = ['Red', 'Green', 'Blue'];
+          console.warn("Generating colors...");
+          
+          colors.forEach(c => {
+              console.log(`Color: ${c}`);
+          });
+      }
+
+      main();
+---

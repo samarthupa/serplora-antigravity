@@ -1,8 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-// Replace CompilerApp with the new Language Workspaces
 import HtmlWorkspace from '../../components/compiler/HtmlWorkspace.tsx';
 import PythonWorkspace from '../../components/compiler/PythonWorkspace.tsx';
+// ADDED: The new JavaScript Workspace
+import JsWorkspace from '../../components/compiler/JsWorkspace.tsx';
 
 import { getCollection, getEntry, render } from 'astro:content';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
@@ -49,13 +50,14 @@ if (adsData?.data) {
 ---
 
 <Layout seo={compiler.data.seo} titleFallback={compiler.data.title} excerptFallback={compiler.data.excerpt}>
-  <div class="w-full max-w-[1920px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8 compiler-wrapper">     
+  <div class="w-full max-w-[1920px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8 compiler-wrapper">    
     
     <div class="flex-1 min-w-0 flex flex-col gap-4">
         
         {/* DYNAMIC COMPILER ROUTING */}
         <div class="relative w-full z-10 h-[calc(100dvh-100px)] md:h-[calc(100vh-100px)]">
-          {compilerLang === 'python' ? (
+          
+          {compilerLang === 'python' && (
             <PythonWorkspace 
               client:only="react" 
               title={compiler.data.title}
@@ -74,7 +76,9 @@ if (adsData?.data) {
                 </div>
               </div>
             </PythonWorkspace>
-          ) : (
+          )}
+
+          {compilerLang === 'html' && (
             <HtmlWorkspace 
               client:only="react" 
               title={compiler.data.title}
@@ -94,6 +98,29 @@ if (adsData?.data) {
               </div>
             </HtmlWorkspace>
           )}
+
+          {/* ADDED: JavaScript Compiler Block */}
+          {compilerLang === 'javascript' && (
+            <JsWorkspace 
+              client:only="react" 
+              title={compiler.data.title}
+              initialFiles={starterFiles.length > 0 ? starterFiles : [{ id: '1', name: 'main.js', content: '// Write your JavaScript code here', language: 'javascript' }]}
+              showConsole={compiler.data.showConsole}
+            >
+              <div 
+                slot="fallback" 
+                class="flex flex-col w-full h-full overflow-hidden transition-colors bg-white dark:bg-[#1e1e1e] my-0 rounded-none border-none md:my-0 md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] animate-pulse"
+              >
+                <div class="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] w-full shrink-0"></div>
+                <div class="flex flex-1 w-full h-full">
+                  <div class="hidden md:block w-[50px] bg-gray-100 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
+                  <div class="hidden md:block w-[240px] bg-gray-50 dark:bg-[#252526] border-r border-gray-200 dark:border-[#3c3c3c]"></div>
+                  <div class="flex-1 bg-white dark:bg-[#1e1e1e] h-full"></div>
+                </div>
+              </div>
+            </JsWorkspace>
+          )}
+
         </div>
 
         {/* BREADCRUMBS */}

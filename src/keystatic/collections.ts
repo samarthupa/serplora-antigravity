@@ -142,7 +142,8 @@ export const compilers = collection({
                 { label: 'HTML / Web', value: 'html' },
                 { label: 'Python (Interactive)', value: 'python' },
                 { label: 'C++ (Interactive)', value: 'cpp' },
-                { label: 'Java (Interactive)', value: 'java' }
+                { label: 'Java (Interactive)', value: 'java' },
+                { label: 'JavaScript (Web)', value: 'javascript' },
             ],
             defaultValue: 'html',
         }),
