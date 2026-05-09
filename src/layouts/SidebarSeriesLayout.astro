@@ -95,18 +95,18 @@ if (adsData?.data) {
       )}
 
       <div class="bg-main/95 backdrop-blur-md py-2 flex items-center justify-between -mx-4 px-4 sm:-mx-6 sm:px-6">
-        <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95 shadow-sm" aria-label="Toggle Menu">
+        <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95" aria-label="Toggle Menu">
           <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
         </button>
 
         <div class="flex items-center gap-2">
           {prevLink && (
-            <a href={prevLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:text-brand transition-colors active:scale-95 shadow-sm" aria-label="Previous">
+            <a href={prevLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:text-brand transition-colors active:scale-95" aria-label="Previous">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
             </a>
           )}
           {nextLink && (
-            <a href={nextLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-white hover:brightness-90 transition-all active:scale-95 shadow-sm" aria-label="Next">
+            <a href={nextLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:brightness-90 transition-all active:scale-95" aria-label="Next">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </a>
           )}
