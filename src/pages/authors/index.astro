@@ -11,7 +11,6 @@ const subheadline = pageEntry?.data?.subheadline || 'Meet the developers and tec
 const breadcrumbLabel = pageEntry?.data?.breadcrumbTitle || headline || 'authors';
 
 // 2. Fetch and filter the Authors
-// 🟢 Safely filter out editorial-team, accounting for the /index suffix
 const allAuthors = await getCollection('authors');
 const displayAuthors = allAuthors.filter(author => !author.id.includes('editorial-team'));
 ---
@@ -34,7 +33,7 @@ const displayAuthors = allAuthors.filter(author => !author.id.includes('editoria
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {displayAuthors.map((author) => {
-        // 🟢 Clean the ID for the link so it doesn't 404
+        // Clean the ID for the link so it doesn't 404
         const cleanAuthorId = author.id.replace(/\/index$/, '');
         
         return (
@@ -52,10 +51,10 @@ const displayAuthors = allAuthors.filter(author => !author.id.includes('editoria
               {author.data.name}
             </h2>
             
-            {/* 🟢 Use author.body for the excerpt preview since it's now Markdown */}
-            {author.body && (
+            {/* 🟢 Use the SEO Meta Description for the excerpt */}
+            {author.data.seo?.metaDescription && (
               <p class="text-sm text-tx-muted line-clamp-2">
-                {author.body.replace(/<[^>]*>?/gm, '')}
+                {author.data.seo.metaDescription}
               </p>
             )}
           </a>
