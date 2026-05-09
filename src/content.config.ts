@@ -190,7 +190,7 @@ const compilers = defineCollection({
     excerpt: z.string().optional(),
     
     // 🟢 NEW: Add the language validation so Astro doesn't strip it out
-    language: z.enum(['html', 'python', 'cpp', 'java']).default('html'),
+    language: z.enum(['html', 'python', 'cpp', 'java', 'javascript']).default('html'),
     
     showConsole: z.boolean().default(true), // 🟢 NEW: Tell Astro to expect this boolean
     

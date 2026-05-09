@@ -3,25 +3,26 @@ import CompilerShell from './CompilerShell';
 import { useJsRunner } from './adapters/useJsRunner';
 import TerminalPreview from './output/TerminalPreview'; 
 
-export default function JsWorkspace({ title, initialFiles }: any) {
+export default function JsWorkspace({ title, initialFiles, showConsole = true }: any) {
   const { logs, isRunning, execute, abort, clearLogs } = useJsRunner();
   const shellRef = useRef<any>(null);
 
-  // Clear the run cache automatically when execution stops. 
-  // This ensures the "Run" button always works, even if the code hasn't changed.
   useEffect(() => {
-    if (!isRunning && shellRef.current?.clearCacheForFile) {
-       const targetFileId = initialFiles.find((f: any) => !f.isFolder && f.name.endsWith('.js'))?.id || initialFiles[0]?.id;
-       if (targetFileId) {
-         shellRef.current.clearCacheForFile(targetFileId);
-       }
+    if (logs && logs.length > 0) {
+      const lastLog = logs[logs.length - 1];
+      if (lastLog.type === 'err' || (lastLog.type === 'sys' && lastLog.content.includes('Terminated'))) {
+        const targetFileId = initialFiles.find((f: any) => !f.isFolder && f.name.endsWith('.js'))?.id;
+        if (targetFileId && shellRef.current?.clearCacheForFile) {
+          shellRef.current.clearCacheForFile(targetFileId);
+        }
+      }
     }
-  }, [isRunning, initialFiles]);
+  }, [logs, initialFiles]);
 
   return (
     <CompilerShell
       ref={shellRef} 
-      showConsole={false} // Force false: JS uses the Terminal output on the right, not the bottom console
+      showConsole={showConsole} 
       title={title}
       initialFiles={initialFiles}
       isRunning={isRunning}

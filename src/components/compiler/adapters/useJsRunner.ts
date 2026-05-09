@@ -1,9 +1,10 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export function useJsRunner() {
   const [logs, setLogs] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const workerRef = useRef<Worker | null>(null);
+  const workspaceIdRef = useRef(Math.random().toString(36).substring(2, 15));
+  const iframeContainerRef = useRef<HTMLDivElement | null>(null);
 
   const addLog = useCallback((type: 'sys' | 'err' | 'std' | 'image', content: string) => {
     setLogs(prev => [...prev, { id: Math.random().toString(36).substring(2, 9), type, content }]);
@@ -11,11 +12,30 @@ export function useJsRunner() {
 
   const clearLogs = () => setLogs([]);
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.workspaceId !== workspaceIdRef.current) return;
+
+      if (event.data.type === 'JS_CONSOLE') {
+        const { method, data } = event.data;
+        if (typeof data === 'string' && data.startsWith('data:image/')) {
+          addLog('image', data);
+        } else if (method === 'error') {
+          addLog('err', data);
+        } else if (method === 'system') {
+          addLog('sys', data);
+          setIsRunning(false); 
+        } else {
+          addLog('std', data);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [addLog]);
+
   const abort = useCallback(() => {
-    if (workerRef.current) {
-      workerRef.current.terminate();
-      workerRef.current = null;
-    }
+    if (iframeContainerRef.current) iframeContainerRef.current.innerHTML = ''; 
     setIsRunning(false);
     addLog('sys', '\n// Execution Terminated manually.');
   }, [addLog]);
@@ -24,7 +44,6 @@ export function useJsRunner() {
     setIsRunning(true);
     clearLogs();
     
-    // Find the JS file to run
     const jsFile = activeFile?.name.endsWith('.js') 
       ? activeFile 
       : files.find((f: any) => f.name === 'main.js' || f.name.endsWith('.js'));
@@ -37,85 +56,89 @@ export function useJsRunner() {
 
     addLog('sys', '// Compiling and executing...');
 
-    // Kill any existing worker before starting a new one
-    if (workerRef.current) {
-      workerRef.current.terminate();
+    if (!iframeContainerRef.current) {
+      const container = document.createElement('div');
+      container.style.display = 'none';
+      document.body.appendChild(container);
+      iframeContainerRef.current = container;
     }
 
-    // 🚀 The Web Worker Payload
-    const workerCode = `
-      function serialize(arg) {
-        if (arg === null) return 'null';
-        if (arg === undefined) return 'undefined';
-        if (arg instanceof Error) return arg.stack || arg.message;
-        if (typeof arg === 'object') {
-          try { return JSON.stringify(arg, null, 2); } 
-          catch (e) { return '[Circular Object]'; }
-        }
-        return String(arg);
-      }
+    iframeContainerRef.current.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.sandbox.add('allow-scripts'); 
+    iframeContainerRef.current.appendChild(iframe);
 
-      // Intercept console commands
-      ['log', 'error', 'warn', 'info'].forEach(method => {
-        const original = console[method];
-        console[method] = (...args) => {
-          const type = (method === 'error' || method === 'warn') ? 'err' : 'std';
-          const data = args.map(serialize).join(' ');
-          postMessage({ type, data });
-        };
-      });
-
-      // Listen for code from the main thread
-      self.onmessage = async (e) => {
-        try {
-          // AsyncFunction allows top-level await support dynamically
-          const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-          const exec = new AsyncFunction(e.data.code);
-          await exec();
-          
-          postMessage({ type: 'sys', data: '\\n// Execution Finished' });
-        } catch (err) {
-          postMessage({ type: 'err', data: err.toString() });
-          postMessage({ type: 'sys', data: '\\n// Execution Finished' });
-        }
-      };
+    const htmlPayload = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script>
+          const workspaceId = "${workspaceIdRef.current}";
+          function serialize(arg) {
+            if (arg === null) return 'null';
+            if (arg === undefined) return 'undefined';
+            if (arg instanceof Error) return arg.stack || arg.message;
+            if (typeof arg === 'object') {
+              try { return JSON.stringify(arg, null, 2); } 
+              catch (e) { return '[Circular Object]'; }
+            }
+            return String(arg);
+          }
+          ['log', 'error', 'warn', 'info'].forEach(method => {
+            const original = console[method];
+            console[method] = (...args) => {
+              original.apply(console, args);
+              window.parent.postMessage({ 
+                type: 'JS_CONSOLE', workspaceId, 
+                method: method === 'error' || method === 'warn' ? 'error' : 'log', 
+                data: args.map(serialize).join(' ') 
+              }, '*');
+            };
+          });
+          window.onerror = function(msg, url, line) {
+            console.error(msg + ' at line ' + (line - 1));
+            window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '' }, '*');
+            return true;
+          };
+          Babel.registerPlugin('loopProtection', ({ types: t }) => {
+            const buildGuard = () => t.ifStatement(
+                t.binaryExpression(">", t.updateExpression("++", t.memberExpression(t.identifier("window"), t.identifier("__loopCounter"))), t.numericLiteral(100000)),
+                t.throwStatement(t.newExpression(t.identifier("Error"), [t.stringLiteral("Infinite Loop Detected (100k steps)")]))
+            );
+            return { visitor: { "WhileStatement|ForStatement": (path) => { 
+                if (!t.isBlockStatement(path.node.body)) path.node.body = t.blockStatement([path.node.body]);
+                path.node.body.body.unshift(buildGuard());
+            }}};
+          });
+        </script>
+      </head>
+      <body>
+        <script>
+          window.__loopCounter = 0;
+          const userCode = ${JSON.stringify(jsFile.content)};
+          try {
+            const compiled = Babel.transform(
+              "(async () => { " + userCode + "\\n})();", 
+              { presets: ['env'], plugins: ['loopProtection'] }
+            ).code;
+            eval(compiled);
+            setTimeout(() => {
+              window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '\\n// Execution Finished' }, '*');
+            }, 50);
+          } catch (err) {
+            console.error(err.message);
+            window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '' }, '*');
+          }
+        </script>
+      </body>
+      </html>
     `;
-
-    // Spin up the worker securely via a Blob URL
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    const worker = new Worker(URL.createObjectURL(blob));
-    workerRef.current = worker;
-
-    // Listen for logs coming back from the worker
-    worker.onmessage = (e) => {
-      const { type, data } = e.data;
-      if (typeof data === 'string' && data.startsWith('data:image/')) {
-        addLog('image', data);
-      } else {
-        addLog(type, data);
-        if (type === 'sys' && data.includes('Finished')) {
-          setIsRunning(false);
-        }
-      }
-    };
-
-    // Catch fatal worker errors
-    worker.onerror = (err) => {
-      addLog('err', err.message);
-      setIsRunning(false);
-    };
-
-    // Send the user's code to the worker to execute
-    worker.postMessage({ code: jsFile.content });
+    iframe.srcdoc = htmlPayload;
     return true;
   };
 
-  // Cleanup to prevent memory leaks if the user leaves the page
-  useEffect(() => {
-    return () => {
-      if (workerRef.current) workerRef.current.terminate();
-    };
-  }, []);
+  useEffect(() => { return () => abort(); }, [abort]);
 
   return { logs, isRunning, execute, abort, clearLogs };
 }
