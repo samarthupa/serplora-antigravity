@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export function useJsRunner() {
   const [logs, setLogs] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isWaitingForInput, setIsWaitingForInput] = useState(false);
   const workspaceIdRef = useRef(Math.random().toString(36).substring(2, 15));
   const iframeContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -12,9 +13,25 @@ export function useJsRunner() {
 
   const clearLogs = () => setLogs([]);
 
+  const submitInput = useCallback((value: string) => {
+    addLog('std', value + '\n');
+    setIsWaitingForInput(false);
+    
+    const iframe = iframeContainerRef.current?.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'JS_PROMPT_ANSWER', data: value }, '*');
+    }
+  }, [addLog]);
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.workspaceId !== workspaceIdRef.current) return;
+
+      if (event.data.type === 'JS_PROMPT') {
+        addLog('std', event.data.data); 
+        setIsWaitingForInput(true);
+        return;
+      }
 
       if (event.data.type === 'JS_CONSOLE') {
         const { method, data } = event.data;
@@ -37,6 +54,7 @@ export function useJsRunner() {
   const abort = useCallback(() => {
     if (iframeContainerRef.current) iframeContainerRef.current.innerHTML = ''; 
     setIsRunning(false);
+    setIsWaitingForInput(false); 
     addLog('sys', '\n// Execution Terminated manually.');
   }, [addLog]);
 
@@ -53,8 +71,6 @@ export function useJsRunner() {
       setIsRunning(false);
       return false;
     }
-
-    addLog('sys', '// Compiling and executing...');
 
     if (!iframeContainerRef.current) {
       const container = document.createElement('div');
@@ -75,6 +91,30 @@ export function useJsRunner() {
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
         <script>
           const workspaceId = "${workspaceIdRef.current}";
+          
+          // 🟢 THE REAL FIX: Active Task Tracking
+          // This tracks asynchronous pauses (like waiting for input) regardless of how the user nested their promises.
+          window.__activeTasks = 1; // Start with 1 representing the main thread evaluation
+          
+          window.prompt = function(message) {
+            window.__activeTasks++; // Register a pending async task
+            return new Promise(resolve => {
+              const handler = function(event) {
+                if (event.data && event.data.type === 'JS_PROMPT_ANSWER') {
+                  window.removeEventListener('message', handler);
+                  resolve(event.data.data);
+                }
+              };
+              window.addEventListener('message', handler);
+              window.parent.postMessage({ type: 'JS_PROMPT', workspaceId, data: message ? message + ' ' : '' }, '*');
+            }).then(res => {
+              // Delay the task decrement slightly so the event loop can process subsequent lines 
+              // of user code (like the next console.log) before we accidentally declare execution finished.
+              setTimeout(() => { window.__activeTasks--; }, 15);
+              return res;
+            });
+          };
+
           function serialize(arg) {
             if (arg === null) return 'null';
             if (arg === undefined) return 'undefined';
@@ -85,6 +125,7 @@ export function useJsRunner() {
             }
             return String(arg);
           }
+          
           ['log', 'error', 'warn', 'info'].forEach(method => {
             const original = console[method];
             console[method] = (...args) => {
@@ -96,11 +137,18 @@ export function useJsRunner() {
               }, '*');
             };
           });
+
           window.onerror = function(msg, url, line) {
             console.error(msg + ' at line ' + (line - 1));
-            window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '' }, '*');
+            window.__activeTasks = 0; // Force terminate on error
             return true;
           };
+
+          window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled Promise Rejection: ' + event.reason);
+            window.__activeTasks = 0; // Force terminate on unhandled async error
+          });
+
           Babel.registerPlugin('loopProtection', ({ types: t }) => {
             const buildGuard = () => t.ifStatement(
                 t.binaryExpression(">", t.updateExpression("++", t.memberExpression(t.identifier("window"), t.identifier("__loopCounter"))), t.numericLiteral(100000)),
@@ -117,19 +165,34 @@ export function useJsRunner() {
         <script>
           window.__loopCounter = 0;
           const userCode = ${JSON.stringify(jsFile.content)};
+          
           try {
-            const compiled = Babel.transform(
-              "(async () => { " + userCode + "\\n})();", 
-              { presets: ['env'], plugins: ['loopProtection'] }
-            ).code;
+            // Wrap to support native top-level await if the user writes it
+            const wrappedCode = "(async () => {\\n" + userCode + "\\n})();";
+            
+            const compiled = Babel.transform(wrappedCode, {
+              plugins: ['loopProtection'] 
+            }).code;
+            
+            // Execute the code
             eval(compiled);
-            setTimeout(() => {
-              window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '\\n// Execution Finished' }, '*');
-            }, 50);
           } catch (err) {
             console.error(err.message);
-            window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '' }, '*');
+          } finally {
+            // The main synchronous evaluation is done. Decrease the base task count.
+            window.__activeTasks--;
           }
+
+          // Polling engine: Wait until all async tasks (prompts) are totally resolved
+          const checkInterval = setInterval(() => {
+            if (window.__activeTasks <= 0) {
+              clearInterval(checkInterval);
+              setTimeout(() => {
+                window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '\\n// Execution Finished.' }, '*');
+              }, 20); // Small buffer to ensure final console.logs reach the parent UI
+            }
+          }, 50);
+
         </script>
       </body>
       </html>
@@ -140,5 +203,5 @@ export function useJsRunner() {
 
   useEffect(() => { return () => abort(); }, [abort]);
 
-  return { logs, isRunning, execute, abort, clearLogs };
+  return { logs, isRunning, execute, abort, clearLogs, isWaitingForInput, submitInput };
 }
