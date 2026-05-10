@@ -19,5 +19,5 @@ const estimatedHeight = Math.min(Math.max(120, rawHeight), 400);
   class="editor-placeholder" 
   style={`min-height: ${estimatedHeight}px; width: 100%; display: block;`}
 >
-<CodeEditorReact client:visible code={code} language={language} />
+<CodeEditorReact client:only="react" code={code} language={language} />
 </div>
