@@ -1,25 +1,32 @@
-// compiler/JsWorkspace.tsx
 import React, { useEffect, useRef } from 'react';
 import CompilerShell from './CompilerShell';
 import { useJsRunner } from './adapters/useJsRunner';
 import TerminalPreview from './output/TerminalPreview'; 
 
 export default function JsWorkspace({ title, initialFiles, showConsole = true }: any) {
-  // 🟢 UPDATED: Destructure the new properties from the hook
-  const { logs, isRunning, execute, abort, clearLogs, isWaitingForInput, submitInput } = useJsRunner();
+  const { 
+    logs, 
+    runningFile, 
+    isRunning, 
+    execute, 
+    abort, 
+    clearLogs, 
+    isWaitingForInput, 
+    submitInput 
+  } = useJsRunner();
+  
   const shellRef = useRef<any>(null);
 
   useEffect(() => {
     if (logs && logs.length > 0) {
       const lastLog = logs[logs.length - 1];
       if (lastLog.type === 'err' || (lastLog.type === 'sys' && lastLog.content.includes('Terminated'))) {
-        const targetFileId = initialFiles.find((f: any) => !f.isFolder && f.name.endsWith('.js'))?.id;
-        if (targetFileId && shellRef.current?.clearCacheForFile) {
-          shellRef.current.clearCacheForFile(targetFileId);
+        if (shellRef.current?.clearCacheForFile && runningFile) {
+          shellRef.current.clearCacheForFile(runningFile.id);
         }
       }
     }
-  }, [logs, initialFiles]);
+  }, [logs, runningFile]);
 
   return (
     <CompilerShell
@@ -37,9 +44,11 @@ export default function JsWorkspace({ title, initialFiles, showConsole = true }:
           {...layoutProps} 
           logs={logs}
           onClear={clearLogs}
-          // 🟢 UPDATED: Pass the dynamic properties to the UI
           isWaitingForInput={isWaitingForInput}
           onInputSubmit={submitInput}
+          runningFile={runningFile} 
+          isRunning={isRunning} 
+          onAbort={abort} 
         />
       )}
     />

@@ -12,7 +12,8 @@ const CompilerShell = forwardRef(({
   OutputPane, 
   editorConsoleLogs = [], 
   showConsole = true,
-  onAbort 
+  onAbort,
+  cooldownDuration = 0 // 🟢 NEW: Defaults to 0 (No cooldown for JS/HTML)
 }: any, ref) => {
   const compilerRef = useRef<HTMLDivElement>(null);
   const splitViewRef = useRef<HTMLDivElement>(null); 
@@ -302,9 +303,12 @@ const CompilerShell = forwardRef(({
   };
 
   const handleRun = async () => {
-    if (isCooldown) return; // 🟢 Stop spam
-    setIsCooldown(true);
-    setTimeout(() => setIsCooldown(false), 3000); // 🟢 3s lock
+    // 🟢 ONLY apply cooldown logic if duration is greater than 0
+    if (cooldownDuration > 0) {
+      if (isCooldown) return; 
+      setIsCooldown(true);
+      setTimeout(() => setIsCooldown(false), cooldownDuration); 
+    }
 
     const currentFingerprint = generateCodeFingerprint(files, activeFile);
     setIsPreviewOpen(true);
@@ -320,9 +324,12 @@ const CompilerShell = forwardRef(({
 
   // 🌟 Wipes cache entry so user can re-run after stopping
   const handleAbortWrapper = () => {
-    if (isCooldown) return; // 🟢 Stop spam
-    setIsCooldown(true);
-    setTimeout(() => setIsCooldown(false), 3000); // 🟢3s lock
+    // 🟢 ONLY apply cooldown logic if duration is greater than 0
+    if (cooldownDuration > 0) {
+      if (isCooldown) return; 
+      setIsCooldown(true);
+      setTimeout(() => setIsCooldown(false), cooldownDuration); 
+    }
 
     if (onAbort) onAbort();
     setRunHistory(prev => {

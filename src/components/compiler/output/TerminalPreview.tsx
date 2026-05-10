@@ -18,7 +18,10 @@ export default function TerminalPreview({
   previewRef,
   // Interactive Input Props
   isWaitingForInput,
-  onInputSubmit
+  onInputSubmit,
+  // Process Tracking Props
+  runningFile,
+  isRunning
 }: any) {
   const consoleContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -67,6 +70,20 @@ export default function TerminalPreview({
       )}
       {isResizingPreview && <div className="fixed inset-0 z-[9999] cursor-col-resize" />}
 
+      {/* TERMINAL HEADER BAR */}
+      <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-center justify-between px-3 border-b border-gray-300 dark:border-[#252526] shrink-0 transition-colors">
+        <div className="flex items-center gap-2 text-[13px] text-gray-700 dark:text-[#cccccc] font-medium select-none">
+          <svg className="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span>{runningFile ? `Output: ${runningFile.name}` : 'Output'}</span>
+          {(isRunning || isWaitingForInput) && (
+            <span className="flex h-2 w-2 ml-1 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Console Area */}
       <div
         ref={consoleContainerRef} 
@@ -81,11 +98,9 @@ export default function TerminalPreview({
             return <img key={log.id} src={imgSrc} alt="Terminal Output" className="max-w-full rounded-[4px] mt-[10px] bg-white block" />;
           }
           
-          // 🟢 CHANGED: Render standard text as an inline span instead of a block div
           return <span key={log.id} className="text-gray-900 dark:text-[#e9ecef] transition-colors">{log.content}</span>;
         })}
 
-        {/* 🟢 CHANGED: Interactive inline input wrapper changed to a span to remain inline */}
         {isWaitingForInput && (
           <span className="inline-flex items-center max-w-full">
             <input 

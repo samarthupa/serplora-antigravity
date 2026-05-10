@@ -4,6 +4,7 @@ export function useJsRunner() {
   const [logs, setLogs] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
+  const [runningFile, setRunningFile] = useState<any>(null); // 🟢 NEW
   const workspaceIdRef = useRef(Math.random().toString(36).substring(2, 15));
   const iframeContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -65,6 +66,7 @@ export function useJsRunner() {
     const jsFile = activeFile?.name.endsWith('.js') 
       ? activeFile 
       : files.find((f: any) => f.name === 'main.js' || f.name.endsWith('.js'));
+      setRunningFile(jsFile); // 🟢 NEW
 
     if (!jsFile) {
       addLog('err', 'No JavaScript file found to execute.');
@@ -203,5 +205,5 @@ export function useJsRunner() {
 
   useEffect(() => { return () => abort(); }, [abort]);
 
-  return { logs, isRunning, execute, abort, clearLogs, isWaitingForInput, submitInput };
+  return { logs, runningFile, isRunning, execute, abort, clearLogs, isWaitingForInput, submitInput }; // 🟢 NEW
 }

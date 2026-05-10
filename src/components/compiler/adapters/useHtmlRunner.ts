@@ -9,6 +9,7 @@ export type HtmlLog = {
 export function useHtmlRunner() {
   const [previewContent, setPreviewContent] = useState('');
   const [logs, setLogs] = useState<HtmlLog[]>([]);
+  const [runningFile, setRunningFile] = useState<any>(null); // 🟢 NEW
 
   // 🌟 NEW: Generate a unique ID for this specific compiler instance
   const workspaceIdRef = useRef(Math.random().toString(36).substring(2, 15));
@@ -39,6 +40,7 @@ export function useHtmlRunner() {
     } else {
       htmlFile = files.find((f: any) => f.name === 'index.html') || files.find((f: any) => f.name.endsWith('.html'));
     }
+    setRunningFile(htmlFile); // 🟢 NEW
 
     if (!htmlFile) {
       setLogs([{ method: 'error', data: 'No HTML file found to run.', time: new Date().toLocaleTimeString([], {hour12: false}) }]);
@@ -180,11 +182,5 @@ export function useHtmlRunner() {
     return true; // Indicates success
   };
 
-  return {
-    previewContent,
-    setPreviewContent,
-    logs,
-    clearLogs,
-    execute
-  };
+  return { previewContent, setPreviewContent, logs, runningFile, clearLogs, execute }; // 🟢 NEW
 }
