@@ -4,7 +4,6 @@ export type ProcessPreview = { name: string; content: string; };
 export type HtmlProcessLog = { name: string; logs: any[]; };
 
 export function useHtmlRunner() {
-  // Multi-file preview tabs!
   const [processPreviews, setProcessPreviews] = useState<Record<string, ProcessPreview>>({});
   const [processLogs, setProcessLogs] = useState<Record<string, HtmlProcessLog>>({});
   const [runningFile, setRunningFile] = useState<any>(null);
@@ -25,7 +24,6 @@ export function useHtmlRunner() {
           ...current,
           logs: [
             ...current.logs,
-            // 🟢 THE FIX: Restored the proper { method, data, time } format for the Editor Console!
             { 
               method: method, 
               data: data, 
@@ -68,7 +66,6 @@ export function useHtmlRunner() {
     setRunningFile(htmlFile);
     targetFileIdRef.current = htmlFile.id;
     
-    // Initialize empty logs for this file
     setProcessLogs(prev => ({ ...prev, [htmlFile.id]: { name: htmlFile.name, logs: [] } }));
 
     const parser = new DOMParser();
@@ -145,11 +142,51 @@ export function useHtmlRunner() {
           return String(arg);
         }
 
-        window.console = {
-          log: function(...args) { originalConsole.log(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'log', data: args.map(serialize).join(' ') }, '*'); },
-          error: function(...args) { originalConsole.error(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'error', data: args.map(serialize).join(' ') }, '*'); },
-          warn: function(...args) { originalConsole.warn(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'warn', data: args.map(serialize).join(' ') }, '*'); },
-          info: function(...args) { originalConsole.info(...args); window.parent.postMessage({ type: 'CONSOLE_LOG', workspaceId: currentWorkspaceId, method: 'info', data: args.map(serialize).join(' ') }, '*'); }
+        // 🟢 1. CSS Stripper & Standard Logs
+        ['log', 'error', 'warn', 'info'].forEach(method => {
+          const original = originalConsole[method];
+          window.console[method] = function(...args) {
+            original.apply(originalConsole, args);
+            
+            // Handle %c CSS styling by stripping it and its corresponding style strings
+            if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('%c')) {
+              const count = (args[0].match(/%c/g) || []).length;
+              args[0] = args[0].replace(/%c/g, '');
+              args.splice(1, count); // Remove the CSS string arguments
+            }
+
+            window.parent.postMessage({ 
+              type: 'CONSOLE_LOG', 
+              workspaceId: currentWorkspaceId, 
+              method: method === 'error' || method === 'warn' ? 'error' : 'log', 
+              data: args.map(serialize).join(' ') 
+            }, '*');
+          };
+        });
+
+        // 🟢 2. Time & TimeEnd Handlers
+        window.__consoleTimers = {};
+        window.console.time = function(label = 'default') {
+          window.__consoleTimers[label] = performance.now();
+        };
+        window.console.timeEnd = function(label = 'default') {
+          const start = window.__consoleTimers[label];
+          if (start) {
+            const duration = performance.now() - start;
+            window.console.log(label + ': ' + duration.toFixed(3) + ' ms');
+            delete window.__consoleTimers[label];
+          } else {
+            window.console.warn("Timer '" + label + "' does not exist");
+          }
+        };
+
+        // 🟢 3. Table Handler
+        window.console.table = function(data) {
+          if (typeof data === 'object' && data !== null) {
+            window.console.log(JSON.stringify(data, null, 2));
+          } else {
+            window.console.log(data);
+          }
         };
 
         window.onerror = function(message, source, lineno, colno, error) {
@@ -161,7 +198,6 @@ export function useHtmlRunner() {
     if (doc.head) doc.head.insertBefore(consoleInterceptor, doc.head.firstChild);
     else doc.insertBefore(consoleInterceptor, doc.firstChild);
 
-    // Register the new rendered HTML tab!
     setProcessPreviews(prev => ({
       ...prev,
       [htmlFile.id]: { name: htmlFile.name, content: "<!DOCTYPE html>\n" + doc.documentElement.outerHTML }

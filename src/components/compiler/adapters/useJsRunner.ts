@@ -104,7 +104,6 @@ export function useJsRunner() {
     setRunningFile(jsFile);
     targetFileIdRef.current = jsFile.id;
     
-    // 🟢 Initialize the tab/process for this JS file
     setProcessLogs(prev => ({
       ...prev,
       [jsFile.id]: {
@@ -162,10 +161,18 @@ export function useJsRunner() {
             return String(arg);
           }
           
+          // 🟢 1. CSS Stripper & Standard Logs
           ['log', 'error', 'warn', 'info'].forEach(method => {
             const original = console[method];
             console[method] = (...args) => {
               original.apply(console, args);
+              
+              if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('%c')) {
+                const count = (args[0].match(/%c/g) || []).length;
+                args[0] = args[0].replace(/%c/g, '');
+                args.splice(1, count); 
+              }
+
               window.parent.postMessage({ 
                 type: 'JS_CONSOLE', workspaceId, 
                 method: method === 'error' || method === 'warn' ? 'error' : 'log', 
@@ -173,6 +180,64 @@ export function useJsRunner() {
               }, '*');
             };
           });
+
+          // 🟢 2. Time & TimeEnd Handlers
+          window.__consoleTimers = {};
+          console.time = function(label = 'default') {
+            window.__consoleTimers[label] = performance.now();
+          };
+          console.timeEnd = function(label = 'default') {
+            const start = window.__consoleTimers[label];
+            if (start) {
+              const duration = performance.now() - start;
+              console.log(label + ': ' + duration.toFixed(3) + ' ms');
+              delete window.__consoleTimers[label];
+            } else {
+              console.warn("Timer '" + label + "' does not exist");
+            }
+          };
+
+          // 🟢 3. Advanced ASCII Table Handler
+          console.table = function(data) {
+            if (!Array.isArray(data) || data.length === 0 || typeof data[0] !== 'object' || data[0] === null) {
+              console.log(typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
+              return;
+            }
+            
+            try {
+              const keys = ['(index)', ...new Set(data.flatMap(Object.keys))];
+              const widths = {};
+              keys.forEach(k => widths[k] = k.length);
+              
+              const rows = data.map((row, i) => {
+                const r = { '(index)': String(i) };
+                keys.slice(1).forEach(k => {
+                  let val = row[k] !== undefined ? String(row[k]) : '';
+                  if (typeof row[k] === 'object' && row[k] !== null) val = '[Object]'; 
+                  r[k] = val;
+                  widths[k] = Math.max(widths[k], val.length);
+                });
+                return r;
+              });
+
+              const pad = (s, w) => s + ' '.repeat(Math.max(0, w - s.length));
+              const sep = (L, M, R) => L + '─' + keys.map(k => '─'.repeat(widths[k] + 2)).join('─' + M + '─') + '─' + R;
+              
+              let out = sep('┌', '┬', '┐') + '\\n';
+              out += '│ ' + keys.map(k => pad(k, widths[k])).join(' │ ') + ' │\\n';
+              out += sep('├', '┼', '┤') + '\\n';
+              
+              rows.forEach(row => {
+                out += '│ ' + keys.map(k => pad(row[k], widths[k])).join(' │ ') + ' │\\n';
+              });
+              
+              out += sep('└', '┴', '┘');
+              
+              console.log(out);
+            } catch(e) {
+              console.log(JSON.stringify(data, null, 2));
+            }
+          };
 
           window.onerror = function(msg, url, line) {
             console.error(msg + ' at line ' + (line - 1));
