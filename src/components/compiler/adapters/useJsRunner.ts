@@ -1,18 +1,48 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+export type JsProcessLog = {
+  name: string;
+  logs: any[];
+};
+
 export function useJsRunner() {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [processLogs, setProcessLogs] = useState<Record<string, JsProcessLog>>({});
+  const [runningFile, setRunningFile] = useState<any>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
-  const [runningFile, setRunningFile] = useState<any>(null); // 🟢 NEW
+  
   const workspaceIdRef = useRef(Math.random().toString(36).substring(2, 15));
   const iframeContainerRef = useRef<HTMLDivElement | null>(null);
+  const targetFileIdRef = useRef<string | null>(null);
 
   const addLog = useCallback((type: 'sys' | 'err' | 'std' | 'image', content: string) => {
-    setLogs(prev => [...prev, { id: Math.random().toString(36).substring(2, 9), type, content }]);
+    const fileId = targetFileIdRef.current;
+    if (!fileId) return;
+    
+    setProcessLogs(prev => {
+      const current = prev[fileId];
+      if (!current) return prev;
+      return {
+        ...prev,
+        [fileId]: {
+          ...current,
+          logs: [...current.logs, { id: Math.random().toString(36).substring(2, 9), type, content }]
+        }
+      };
+    });
   }, []);
 
-  const clearLogs = () => setLogs([]);
+  const clearLogs = useCallback((fileId?: string) => {
+    if (fileId) {
+      setProcessLogs(prev => {
+        const next = { ...prev };
+        delete next[fileId];
+        return next;
+      });
+    } else {
+      setProcessLogs({});
+    }
+  }, []);
 
   const submitInput = useCallback((value: string) => {
     addLog('std', value + '\n');
@@ -61,18 +91,27 @@ export function useJsRunner() {
 
   const execute = async (files: any[], activeFile: any) => {
     setIsRunning(true);
-    clearLogs();
     
     const jsFile = activeFile?.name.endsWith('.js') 
       ? activeFile 
       : files.find((f: any) => f.name === 'main.js' || f.name.endsWith('.js'));
-      setRunningFile(jsFile); // 🟢 NEW
 
     if (!jsFile) {
-      addLog('err', 'No JavaScript file found to execute.');
       setIsRunning(false);
       return false;
     }
+
+    setRunningFile(jsFile);
+    targetFileIdRef.current = jsFile.id;
+    
+    // 🟢 Initialize the tab/process for this JS file
+    setProcessLogs(prev => ({
+      ...prev,
+      [jsFile.id]: {
+        name: jsFile.name,
+        logs: [{ id: Math.random().toString(36).substring(2, 9), type: 'sys', content: '// Executing locally...\n' }]
+      }
+    }));
 
     if (!iframeContainerRef.current) {
       const container = document.createElement('div');
@@ -93,13 +132,10 @@ export function useJsRunner() {
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
         <script>
           const workspaceId = "${workspaceIdRef.current}";
-          
-          // 🟢 THE REAL FIX: Active Task Tracking
-          // This tracks asynchronous pauses (like waiting for input) regardless of how the user nested their promises.
-          window.__activeTasks = 1; // Start with 1 representing the main thread evaluation
+          window.__activeTasks = 1; 
           
           window.prompt = function(message) {
-            window.__activeTasks++; // Register a pending async task
+            window.__activeTasks++; 
             return new Promise(resolve => {
               const handler = function(event) {
                 if (event.data && event.data.type === 'JS_PROMPT_ANSWER') {
@@ -110,8 +146,6 @@ export function useJsRunner() {
               window.addEventListener('message', handler);
               window.parent.postMessage({ type: 'JS_PROMPT', workspaceId, data: message ? message + ' ' : '' }, '*');
             }).then(res => {
-              // Delay the task decrement slightly so the event loop can process subsequent lines 
-              // of user code (like the next console.log) before we accidentally declare execution finished.
               setTimeout(() => { window.__activeTasks--; }, 15);
               return res;
             });
@@ -142,13 +176,13 @@ export function useJsRunner() {
 
           window.onerror = function(msg, url, line) {
             console.error(msg + ' at line ' + (line - 1));
-            window.__activeTasks = 0; // Force terminate on error
+            window.__activeTasks = 0; 
             return true;
           };
 
           window.addEventListener('unhandledrejection', function(event) {
             console.error('Unhandled Promise Rejection: ' + event.reason);
-            window.__activeTasks = 0; // Force terminate on unhandled async error
+            window.__activeTasks = 0; 
           });
 
           Babel.registerPlugin('loopProtection', ({ types: t }) => {
@@ -169,32 +203,23 @@ export function useJsRunner() {
           const userCode = ${JSON.stringify(jsFile.content)};
           
           try {
-            // Wrap to support native top-level await if the user writes it
             const wrappedCode = "(async () => {\\n" + userCode + "\\n})();";
-            
-            const compiled = Babel.transform(wrappedCode, {
-              plugins: ['loopProtection'] 
-            }).code;
-            
-            // Execute the code
+            const compiled = Babel.transform(wrappedCode, { plugins: ['loopProtection'] }).code;
             eval(compiled);
           } catch (err) {
             console.error(err.message);
           } finally {
-            // The main synchronous evaluation is done. Decrease the base task count.
             window.__activeTasks--;
           }
 
-          // Polling engine: Wait until all async tasks (prompts) are totally resolved
           const checkInterval = setInterval(() => {
             if (window.__activeTasks <= 0) {
               clearInterval(checkInterval);
               setTimeout(() => {
                 window.parent.postMessage({ type: 'JS_CONSOLE', workspaceId, method: 'system', data: '\\n// Execution Finished.' }, '*');
-              }, 20); // Small buffer to ensure final console.logs reach the parent UI
+              }, 20); 
             }
           }, 50);
-
         </script>
       </body>
       </html>
@@ -205,5 +230,5 @@ export function useJsRunner() {
 
   useEffect(() => { return () => abort(); }, [abort]);
 
-  return { logs, runningFile, isRunning, execute, abort, clearLogs, isWaitingForInput, submitInput }; // 🟢 NEW
+  return { processLogs, runningFile, isRunning, execute, abort, clearLogs, isWaitingForInput, submitInput };
 }

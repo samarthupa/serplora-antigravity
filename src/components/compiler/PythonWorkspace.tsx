@@ -5,7 +5,7 @@ import TerminalPreview from './output/TerminalPreview';
 
 export default function PythonWorkspace({ title, initialFiles, showConsole = true }: any) {
   const { 
-    logs, 
+    processLogs, // 🟢 Updated destructure
     runningFile, 
     isRunning, 
     isWaitingForInput, 
@@ -17,18 +17,20 @@ export default function PythonWorkspace({ title, initialFiles, showConsole = tru
 
   const shellRef = useRef<any>(null);
 
-  // Error Recovery Logic
+  // Error Recovery Logic checks all tracked processes
   useEffect(() => {
-    if (logs && logs.length > 0) {
-      const lastLog = logs[logs.length - 1];
-      // If last message was an error or a system termination/timeout
-      if (lastLog.type === 'err' || (lastLog.type === 'sys' && lastLog.content.includes('Terminated'))) {
-        if (shellRef.current?.clearCacheForFile && runningFile) {
-          shellRef.current.clearCacheForFile(runningFile.id);
+    Object.keys(processLogs).forEach(fileId => {
+      const logs = processLogs[fileId].logs;
+      if (logs && logs.length > 0) {
+        const lastLog = logs[logs.length - 1];
+        if (lastLog.type === 'err' || (lastLog.type === 'sys' && lastLog.content.includes('Terminated'))) {
+          if (shellRef.current?.clearCacheForFile) {
+            shellRef.current.clearCacheForFile(fileId);
+          }
         }
       }
-    }
-  }, [logs, runningFile]);
+    });
+  }, [processLogs]);
 
   return (
     <CompilerShell
@@ -38,20 +40,19 @@ export default function PythonWorkspace({ title, initialFiles, showConsole = tru
       initialFiles={initialFiles}
       isRunning={isRunning}
       onAbort={abort} 
-      cooldownDuration={1500} // 🟢 NEW: 1.5 second UI lock passed to shell
+      cooldownDuration={1500}
       onRun={async (files: any[], activeFile: any) => {
         await execute(files, activeFile);
       }}
       OutputPane={(layoutProps: any) => (
         <TerminalPreview 
           {...layoutProps} 
-          logs={logs}
+          processLogs={processLogs} // 🟢 Pass the new object format
           onClear={clearLogs}
           isWaitingForInput={isWaitingForInput}
           onInputSubmit={handleInputSubmit}
           runningFile={runningFile} 
           isRunning={isRunning} 
-          onAbort={abort} 
         />
       )}
     />

@@ -13,7 +13,8 @@ const CompilerShell = forwardRef(({
   editorConsoleLogs = [], 
   showConsole = true,
   onAbort,
-  cooldownDuration = 0 // 🟢 NEW: Defaults to 0 (No cooldown for JS/HTML)
+  cooldownDuration = 0, // 🟢 NEW: Defaults to 0 (No cooldown for JS/HTML)
+  allowReRunWithoutEdit = false
 }: any, ref) => {
   const compilerRef = useRef<HTMLDivElement>(null);
   const splitViewRef = useRef<HTMLDivElement>(null); 
@@ -313,7 +314,7 @@ const CompilerShell = forwardRef(({
     const currentFingerprint = generateCodeFingerprint(files, activeFile);
     setIsPreviewOpen(true);
     if (isMobile) setMobileActiveTab('preview');
-    if (runHistory[activeFileId] === currentFingerprint) {
+    if (!allowReRunWithoutEdit && runHistory[activeFileId] === currentFingerprint) {
       return; 
     }
     setRunHistory(prev => ({ ...prev, [activeFileId]: currentFingerprint }));

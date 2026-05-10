@@ -1,21 +1,50 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { TerminalLog } from '../output/TerminalPreview';
 
+export type ProcessLog = {
+  name: string;
+  logs: TerminalLog[];
+};
+
 export function useRemoteRunner(wsUrl: string) {
-  // 🟢 NEW: Unified global log state instead of per-file
-  const [logs, setLogs] = useState<TerminalLog[]>([]);
-  const [runningFile, setRunningFile] = useState<any>(null); // 🟢 NEW: Track the active process
+  // 🟢 NEW: Stores a history of logs for every file run
+  const [processLogs, setProcessLogs] = useState<Record<string, ProcessLog>>({});
+  const [runningFile, setRunningFile] = useState<any>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
   
   const wsRef = useRef<WebSocket | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const targetFileIdRef = useRef<string | null>(null); // Track which file WS belongs to
 
   const addLog = (type: TerminalLog['type'], content: string) => {
-    setLogs((prev) => [...prev, { id: Math.random().toString(36).substring(2, 9), type, content }]);
+    const fileId = targetFileIdRef.current;
+    if (!fileId) return;
+    
+    setProcessLogs((prev) => {
+      const currentProcess = prev[fileId];
+      if (!currentProcess) return prev;
+      return {
+        ...prev,
+        [fileId]: {
+          ...currentProcess,
+          logs: [...currentProcess.logs, { id: Math.random().toString(36).substring(2, 9), type, content }]
+        }
+      };
+    });
   };
 
-  const clearLogs = () => setLogs([]);
+  const clearLogs = (fileId?: string) => {
+    if (fileId) {
+      setProcessLogs(prev => {
+        const next = { ...prev };
+        delete next[fileId];
+        return next;
+      });
+    } else {
+      setProcessLogs({});
+    }
+  };
 
   const cleanup = useCallback(() => {
     if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
@@ -51,16 +80,22 @@ export function useRemoteRunner(wsUrl: string) {
     if (isRunning) return false;
 
     let targetFile = activeFile || files.find((f: any) => !f.name.endsWith('.txt'));
-    if (!targetFile) {
-      addLog('err', 'No executable file found.');
-      return false;
-    }
+    if (!targetFile) return false;
 
     cleanup(); 
     setIsRunning(true);
     setIsWaitingForInput(false); 
-    setRunningFile(targetFile); // 🟢 NEW: Lock the terminal to this file
-    setLogs([{ id: Math.random().toString(36).substring(2, 9), type: 'sys', content: '// Connecting to server... Executing...\n' }]);
+    setRunningFile(targetFile); 
+    targetFileIdRef.current = targetFile.id; // 🟢 Lock WS logs to this file ID
+
+    // 🟢 Initialize the tab/process for this file
+    setProcessLogs(prev => ({
+      ...prev,
+      [targetFile.id]: {
+        name: targetFile.name,
+        logs: [{ id: Math.random().toString(36).substring(2, 9), type: 'sys', content: '// Connecting to server... Executing...\n' }]
+      }
+    }));
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -113,8 +148,6 @@ export function useRemoteRunner(wsUrl: string) {
     addLog('std', value + '\n'); 
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: "input", data: value }));
-    } else {
-      addLog('err', '\n// Cannot send input. Connection is closed.');
     }
   };
 
@@ -124,5 +157,5 @@ export function useRemoteRunner(wsUrl: string) {
     cleanup();
   };
 
-  return { logs, runningFile, isRunning, isWaitingForInput, execute, abort, clearLogs, handleInputSubmit };
+  return { processLogs, runningFile, isRunning, isWaitingForInput, execute, abort, clearLogs, handleInputSubmit };
 }

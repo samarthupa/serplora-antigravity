@@ -191,3 +191,13 @@ article img,
 .markdown-content tbody tr:last-child td {
   border-bottom: none;
 }
+
+
+/* --- HIDE SCROLLBARS BUT KEEP SCROLLING --- */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

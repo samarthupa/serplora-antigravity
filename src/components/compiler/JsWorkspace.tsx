@@ -5,7 +5,7 @@ import TerminalPreview from './output/TerminalPreview';
 
 export default function JsWorkspace({ title, initialFiles, showConsole = true }: any) {
   const { 
-    logs, 
+    processLogs, // 🟢 NOW TABS!
     runningFile, 
     isRunning, 
     execute, 
@@ -18,15 +18,18 @@ export default function JsWorkspace({ title, initialFiles, showConsole = true }:
   const shellRef = useRef<any>(null);
 
   useEffect(() => {
-    if (logs && logs.length > 0) {
-      const lastLog = logs[logs.length - 1];
-      if (lastLog.type === 'err' || (lastLog.type === 'sys' && lastLog.content.includes('Terminated'))) {
-        if (shellRef.current?.clearCacheForFile && runningFile) {
-          shellRef.current.clearCacheForFile(runningFile.id);
+    Object.keys(processLogs).forEach(fileId => {
+      const logs = processLogs[fileId].logs;
+      if (logs && logs.length > 0) {
+        const lastLog = logs[logs.length - 1];
+        if (lastLog.type === 'err' || (lastLog.type === 'sys' && lastLog.content.includes('Terminated'))) {
+          if (shellRef.current?.clearCacheForFile) {
+            shellRef.current.clearCacheForFile(fileId);
+          }
         }
       }
-    }
-  }, [logs, runningFile]);
+    });
+  }, [processLogs]);
 
   return (
     <CompilerShell
@@ -36,13 +39,14 @@ export default function JsWorkspace({ title, initialFiles, showConsole = true }:
       initialFiles={initialFiles}
       isRunning={isRunning}
       onAbort={abort} 
+      allowReRunWithoutEdit={true}
       onRun={async (files: any[], activeFile: any) => {
         await execute(files, activeFile);
       }}
       OutputPane={(layoutProps: any) => (
         <TerminalPreview 
           {...layoutProps} 
-          logs={logs}
+          processLogs={processLogs} // 🟢 Pass the new object format
           onClear={clearLogs}
           isWaitingForInput={isWaitingForInput}
           onInputSubmit={submitInput}
