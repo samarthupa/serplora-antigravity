@@ -33,7 +33,8 @@ export function useRemoteRunner(wsUrl: string) {
   const cleanup = useCallback(() => {
     if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
     if (wsRef.current) {
-       if (wsRef.current.readyState === WebSocket.OPEN) {
+       // 🟢 THE FIX: Check for both OPEN (1) and CONNECTING (0) states
+       if (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING) {
          wsRef.current.close();
        }
        wsRef.current = null;

@@ -43,7 +43,7 @@ export function useJsRunner() {
           addLog('sys', data);
           setIsRunning(false); 
         } else {
-          addLog('std', data);
+          addLog('std', data + '\n');
         }
       }
     };

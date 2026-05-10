@@ -53,6 +53,9 @@ const CompilerShell = forwardRef(({
   const [isCopied, setIsCopied] = useState(false);
   const [isLoadingShared, setIsLoadingShared] = useState(false);
 
+  // 🌟 NEW: Cooldown State
+  const [isCooldown, setIsCooldown] = useState(false);
+
   // 🌟 NEW: Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editorSettings, setEditorSettings] = useState(() => {
@@ -299,6 +302,10 @@ const CompilerShell = forwardRef(({
   };
 
   const handleRun = async () => {
+    if (isCooldown) return; // 🟢 Stop spam
+    setIsCooldown(true);
+    setTimeout(() => setIsCooldown(false), 3000); // 🟢 3s lock
+
     const currentFingerprint = generateCodeFingerprint(files, activeFile);
     setIsPreviewOpen(true);
     if (isMobile) setMobileActiveTab('preview');
@@ -313,6 +320,10 @@ const CompilerShell = forwardRef(({
 
   // 🌟 Wipes cache entry so user can re-run after stopping
   const handleAbortWrapper = () => {
+    if (isCooldown) return; // 🟢 Stop spam
+    setIsCooldown(true);
+    setTimeout(() => setIsCooldown(false), 3000); // 🟢3s lock
+
     if (onAbort) onAbort();
     setRunHistory(prev => {
       const newHistory = { ...prev };
@@ -360,6 +371,7 @@ const CompilerShell = forwardRef(({
           {/* 🌟 FIXED: Context-Aware Run/Stop/Preview Button */}
           <div 
             onClick={() => {
+              if (isCooldown) return;
               if (isRunning) {
                 if (mobileActiveTab !== 'preview') {
                   setMobileActiveTab('preview'); // Bring them back to the preview tab
@@ -370,7 +382,7 @@ const CompilerShell = forwardRef(({
                 handleRun(); // Run code (which auto-switches to preview)
               }
             }} 
-            className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'preview' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}
+            className={`p-1.5 transition-colors ${isCooldown ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${mobileActiveTab === 'preview' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}
           >
             {isRunning ? (
               <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg>
@@ -393,7 +405,7 @@ const CompilerShell = forwardRef(({
         </div>
         <div className="hidden md:flex items-center justify-center flex-1 text-sm font-normal text-gray-500 dark:text-[#858585]">{getActiveFilePath()}</div>
         <div className="hidden md:flex h-full items-center pr-2 gap-2 md:gap-1">
-          {isRunning ? <button id="abort-code-btn" onClick={handleAbortWrapper} className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 md:py-0.5 md:bg-transparent md:text-red-500 md:hover:bg-red-500/10 rounded transition-colors" title="Stop"><svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg><span className="text-xs font-bold md:hidden tracking-wider">STOP</span></button> : <button id="run-code-btn" onClick={handleRun} className="flex items-center gap-1.5 bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 md:py-0.5 md:bg-transparent md:text-green-700 md:dark:text-[#89d185] md:hover:bg-black/5 md:dark:hover:bg-white/10 rounded transition-colors" title="Run"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg><span className="text-xs font-bold md:hidden tracking-wider">RUN</span></button>}
+          {isRunning ? <button id="abort-code-btn" onClick={handleAbortWrapper} disabled={isCooldown} className={`flex items-center gap-1.5 px-3 py-1.5 md:py-0.5 rounded transition-colors ${isCooldown ? 'opacity-50 cursor-not-allowed bg-red-600 text-white md:bg-transparent md:text-red-500' : 'bg-red-600 hover:bg-red-700 text-white md:bg-transparent md:text-red-500 md:hover:bg-red-500/10'}`} title="Stop"><svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg><span className="text-xs font-bold md:hidden tracking-wider">STOP</span></button> : <button id="run-code-btn" onClick={handleRun} disabled={isCooldown} className={`flex items-center gap-1.5 px-3 py-1.5 md:py-0.5 rounded transition-colors ${isCooldown ? 'opacity-50 cursor-not-allowed bg-green-700 text-white md:bg-transparent md:text-green-700 md:dark:text-[#89d185]' : 'bg-green-700 hover:bg-green-800 text-white md:bg-transparent md:text-green-700 md:dark:text-[#89d185] md:hover:bg-black/5 md:dark:hover:bg-white/10'}`} title="Run"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg><span className="text-xs font-bold md:hidden tracking-wider">RUN</span></button>}
           <div id="fullscreen-btn" onClick={toggleFullscreen} className="hidden md:flex w-7 h-6 items-center justify-center rounded cursor-pointer text-gray-500 dark:text-[#858585] hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-800 dark:hover:text-[#cccccc]" title={isAppFullscreen ? "Exit Fullscreen" : "Fullscreen"}>{isAppFullscreen ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/></svg> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>}</div>
         </div>
       </div>
