@@ -27,7 +27,7 @@ export default function CodeEditorReact({ code, language }: any) {
 
   // CONNECT TO THE WEBSOCKET BACKEND
   const {
-    logsByFile,
+    processLogs,
     isRunning,
     isWaitingForInput,
     execute,
@@ -36,7 +36,7 @@ export default function CodeEditorReact({ code, language }: any) {
   } = useRemoteRunner('wss://api.serplora.com/python');
 
   // Safely extract logs for this standalone editor
-  const logs = logsByFile['standalone-editor'] || [];
+  const logs = processLogs['standalone-editor']?.logs || [];
 
   // Memoize extensions
   const extensions = useMemo(() => {
