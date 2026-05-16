@@ -6,3 +6,25 @@
 
 # Example of a single specific page redirect
 # /about-us /company 301
+
+# Redirect SQL quiz index
+/quizzes/sql-quiz /quizzes/sql 301
+
+# Redirect all SQL quiz pages
+/quizzes/sql-quiz/* /quizzes/sql/:splat 301
+
+# Redirect Python quiz index
+/quizzes/python-quiz /quizzes/python 301
+
+# Redirect all Python quiz pages
+/quizzes/python-quiz/* /quizzes/python/:splat 301
+
+# Permanent redirects to new compiler URLs
+
+/compilers/html-compiler/*         /compilers/html 301
+/compilers/javascript-compiler/*   /compilers/javascript 301
+/compilers/python-compiler/*       /compilers/python 301
+
+
+# Normalize /compilers/
+/compilers/ /compilers 301
