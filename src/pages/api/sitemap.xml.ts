@@ -9,7 +9,6 @@ export const GET: APIRoute = async (context) => {
       <sitemap><loc>${new URL('/api/sitemap-articles.xml', siteUrl).toString()}</loc></sitemap>
       <sitemap><loc>${new URL('/api/sitemap-tutorials.xml', siteUrl).toString()}</loc></sitemap>
       <sitemap><loc>${new URL('/api/sitemap-quizzes.xml', siteUrl).toString()}</loc></sitemap>
-      <sitemap><loc>${new URL('/api/sitemap-quizzes.xml', siteUrl).toString()}</loc></sitemap>
       <sitemap><loc>${new URL('/api/sitemap-compilers.xml', siteUrl).toString()}</loc></sitemap>
     </sitemapindex>`;
 
