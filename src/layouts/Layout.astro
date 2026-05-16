@@ -53,7 +53,9 @@ const rawExcerpt = excerptFallback?.replace(/<[^>]*>?/gm, '');
 const finalDescription = seo?.metaDescription || null;
 
 // Handle Canonical URL (defaults to the current request URL if blank)
-const canonicalURL = seo?.canonicalUrl || new URL(Astro.url.pathname, Astro.site || Astro.url.origin).toString();
+// We strip out .html from the pathname to ensure clean canonicals even when built with format: 'file'
+const rawPathname = Astro.url.pathname.replace(/\.html$/, '');
+const canonicalURL = seo?.canonicalUrl || new URL(rawPathname, Astro.site || Astro.url.origin).toString();
 
 // Handle Robots format
 const robotsParams = [
