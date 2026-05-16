@@ -1,0 +1,25 @@
+
+> serplora@0.0.1 dev
+> astro dev
+
+[vite] connected.
+20:51:05 [types] Generated 1ms
+[vite] connected.
+
+ update  ▶ New version of Astro available: 6.3.3
+  Run npx @astrojs/upgrade to update
+
+20:51:06 [content] Syncing content
+20:51:06 [content] Synced content
+20:51:06 [WARN] [vite] [plugin:astro:scripts] context method emitFile() is not supported in serve mode. This plugin is likely not vite-compatible.
+20:51:06 [vite] Re-optimizing dependencies because vite config has changed
+ astro  v6.0.5 ready in 2637 ms
+┃ Local    http://127.0.0.1:4321/
+20:51:06 watching for file changes...
+20:52:32 [200] /410 156ms
+20:52:36 [vite] ✨ new dependencies optimized: astro/runtime/client/dev-toolbar/entrypoint.js, photoswipe/lightbox, photoswipe
+20:52:36 [vite] ✨ optimized dependencies changed. reloading
+20:52:36 [200] /410 8ms
+20:52:36 [404] /cdn-cgi/trace 185ms
+20:52:36 [404] /cdn-cgi/trace 7ms
+20:52:37 [200] /503 105ms

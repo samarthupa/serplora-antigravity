@@ -1,0 +1,24 @@
+
+ ⛅️ wrangler 4.76.0 (update available 4.92.0)
+─────────────────────────────────────────────
+✨ Compiled Worker successfully
+✨ Parsed 10 valid redirect rules.
+The redirect rule /quizzes/sql-quiz → 301 /quizzes/sql could be made more performant by bringing it above any lines with splats or placeholders.
+The redirect rule /quizzes/python-quiz → 301 /quizzes/python could be made more performant by bringing it above any lines with splats or placeholders.
+The redirect rule /compilers/ → 301 /compilers could be made more performant by bringing it above any lines with splats or placeholders.
+Your Worker has access to the following bindings:
+Binding                                                                   Resource                  Mode
+env.CF_PAGES ("1")                                                        Environment Variable      local
+env.CF_PAGES_BRANCH ("jules-9563084117067084486-a8b5937f")                Environment Variable      local
+env.CF_PAGES_COMMIT_SHA ("92d06812bdfc8cdb22a040b524deef15f886c...")      Environment Variable      local
+env.CF_PAGES_URL ("https://92d0681.serplora.pages.dev")                   Environment Variable      local
+
+⎔ Starting local server...
+[wrangler:info] ✨ Parsed 10 valid redirect rules.
+[wrangler:info] The redirect rule /quizzes/sql-quiz → 301 /quizzes/sql could be made more performant by bringing it above any lines with splats or placeholders.
+[wrangler:info] The redirect rule /quizzes/python-quiz → 301 /quizzes/python could be made more performant by bringing it above any lines with splats or placeholders.
+[wrangler:info] The redirect rule /compilers/ → 301 /compilers could be made more performant by bringing it above any lines with splats or placeholders.
+[wrangler:info] Ready on http://localhost:8788
+[wrangler:info] HEAD /old-gone-page 410 Gone (52ms)
+[wrangler:info] HEAD /maintenance 503 Service Unavailable (42ms)
+[wrangler:info] HEAD / 200 OK (6ms)
