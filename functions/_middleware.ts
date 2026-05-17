@@ -5,8 +5,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const url = new URL(request.url);
 
   // Lists of paths to handle
-  const gonePaths = ['/old-gone-page', '/deleted-article']; // Example paths for 410
-  const unavailablePaths = ['/maintenance', '/service-down']; // Example paths for 503
+  const gonePaths = ['/tools/wysiwyg-editor/', '/deleted-article']; // Example paths for 410
+  const unavailablePaths = ['/compilers/c-compiler/', '/compilers/cpp-compiler/', '/compilers/csharp-compiler/', '/tools/' ]; // Example paths for 503
 
   // Handle 410 Gone
   if (gonePaths.includes(url.pathname)) {
@@ -28,7 +28,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // Create a new response with the 503 status code and Retry-After header
     const headers = new Headers(response.headers);
-    headers.set('Retry-After', '3600'); // Tell clients to retry after 1 hour (3600 seconds)
+    headers.set('Retry-After', '1296000'); // Tell clients to retry after 1 hour (1296000 seconds)
 
     return new Response(response.body, {
       status: 503,
