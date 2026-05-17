@@ -39,5 +39,9 @@
     "relatinator": "^2.1.0",
     "tailwindcss": "^4.2.1",
     "wrangler": "^4.76.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260516.1",
+    "typescript": "^6.0.3"
   }
 }

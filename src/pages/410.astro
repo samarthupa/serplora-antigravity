@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="410 - Page Gone">
+  <div class="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
+    <h1 class="text-7xl font-bold tracking-tighter text-gray-900 dark:text-white mb-2">410</h1>
+    <h2 class="text-2xl font-medium text-gray-600 dark:text-gray-400 mb-8">Page Gone</h2>
+
+    <p class="text-gray-500 dark:text-gray-500 mb-10 max-w-md">
+      The page you are looking for has been permanently removed and is no longer available.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center w-full max-w-md">
+      <a
+        href="/"
+        class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+      >
+        Return Home
+      </a>
+
+      <a
+        id="dynamic-dir-link"
+        href="#"
+        class="hidden w-full sm:w-auto px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+      >
+        View all <span id="dynamic-dir-name">Items</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Get the path segments (e.g., /articles/broken-link -> ['articles', 'broken-link'])
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+
+      // 2. Define the main sections of your site
+      const validSections: Record<string, string> = {
+        'articles': 'Articles',
+        'tutorials': 'Tutorials',
+        'compilers': 'Compilers',
+        'quizzes': 'Quizzes',
+        'authors': 'Authors'
+      };
+
+      // 3. If the user is inside a known directory, show the link back to its index
+      if (pathParts.length > 0) {
+        const rootDir = pathParts[0].toLowerCase();
+
+        if (validSections[rootDir]) {
+          const linkElement = document.getElementById('dynamic-dir-link');
+          const nameElement = document.getElementById('dynamic-dir-name');
+
+          if (linkElement && nameElement && linkElement instanceof HTMLAnchorElement) {
+            linkElement.href = `/${rootDir}`;
+            nameElement.textContent = validSections[rootDir];
+            linkElement.classList.remove('hidden');
+          }
+        }
+      }
+    });
+  </script>
+</Layout>
