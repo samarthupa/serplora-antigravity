@@ -1,0 +1,70 @@
+---
+title: Variables & Mutability
+urlSlug: variables-and-mutability
+quizParent: python
+order: 2
+seo:
+  metaTitle: Python Variables & Mutability Quiz Questions
+  metaDescription: >-
+    Practice Python quiz questions on variables, mutability, object identity,
+    lists, tuples, strings, and memory references with detailed explanations.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+questions: []
+bulkQuestionsJson: |-
+  [
+    {
+      "questionText": "You are reviewing a colleague's code where two lists were initialized on the same line. What will be the final output? <code>a = b = []\na.append(1)\nb.append(2)\nprint(a)</code>",
+      "options": [
+        { "text": "[1]", "isCorrect": false },
+        { "text": "[2]", "isCorrect": false },
+        { "text": "[1, 2]", "isCorrect": true },
+        { "text": "[]", "isCorrect": false }
+      ],
+      "explanation": "This syntax does not create two separate lists. Python creates one empty list in memory, and both <code>a</code> and <code>b</code> point to that same list. So, changing the list using either variable affects the same shared list."
+    },
+    {
+      "questionText": "Analyze this tuple representing a user's database configuration. Does this code run successfully?<code>db_config = (\"localhost\", 5432, [\"read_only\"])\ndb_config[2].append(\"write\")</code>",
+      "options": [
+        { "text": "Yes, because the list inside the tuple is mutable.", "isCorrect": true },
+        { "text": "No, because tuples are completely immutable (TypeError).", "isCorrect": false },
+        { "text": "No, because <code>append()</code> cannot be used on a nested collection.", "isCorrect": false },
+        { "text": "Yes, but only a temporary copy of the list is modified.", "isCorrect": false }
+      ],
+      "explanation": "Tuples themselves are immutable, which means their elements cannot be replaced or reassigned. However, the tuple contains a list, and lists are mutable. Since the list object itself is still the same, Python allows changes to its contents using methods like <code>append()</code>."
+    },
+    {
+      "questionText": "A developer attempts to safely convert a variable's data type. What is the output of this equality check?<code>original = [10, 20]\nconverted = list(original)\nprint(original is converted)</code>",
+      "options": [
+        { "text": "True", "isCorrect": false },
+        { "text": "False", "isCorrect": true },
+        { "text": "None", "isCorrect": false },
+        { "text": "Raises a TypeError", "isCorrect": false }
+      ],
+      "explanation": "The <code>is</code> operator checks whether two variables point to the exact same object in memory, not whether their values are equal. Calling <code>list(original)</code> creates a new list object with the same elements. So, <code>original</code> and <code>converted</code> contain the same values, but they are stored as different objects in memory."
+    },
+    {
+      "questionText": "Analyze this simultaneous assignment pattern often used in algorithms like Fibonacci sequence generators. What are the final values?<code>x, y = 10, 20\nx, y = y, x + y\nprint(x, y)</code>",
+      "options": [
+        { "text": "20, 30", "isCorrect": true },
+        { "text": "20, 40", "isCorrect": false },
+        { "text": "10, 30", "isCorrect": false },
+        { "text": "10, 20", "isCorrect": false }
+      ],
+      "explanation": "Python first evaluates everything on the right side using the original values of <code>x</code> and <code>y</code>. So, <code>y</code> becomes <code>20</code>, and <code>x + y</code> becomes <code>10 + 20</code>, which is <code>30</code>. After that, Python assigns the new values to <code>x</code> and <code>y</code>. Therefore, <code>x</code> becomes <code>20</code> and <code>y</code> becomes <code>30</code>."
+    },
+    {
+      "questionText": "What happens to the memory address (<code>id</code>) of this string when the augmented assignment runs?<code>word = \"Code\"\noriginal_address = id(word)\nword += \"Base\"\nprint(original_address == id(word))</code>",
+      "options": [
+        { "text": "True", "isCorrect": false },
+        { "text": "False", "isCorrect": true },
+        { "text": "Raises TypeError because strings do not support <code>+=</code>", "isCorrect": false },
+        { "text": "None", "isCorrect": false }
+      ],
+      "explanation": "Strings in Python are immutable, which means they cannot be changed after creation. When <code>+=</code> is used with a string, Python creates a new string object instead of modifying the existing one. So, <code>\"CodeBase\"</code> is stored at a different memory address, and the <code>id</code> changes."
+    }
+  ]
+---
+Test your understanding of Python variables, memory references, mutable objects, immutable types, and object identity with tricky conceptual quiz questions.

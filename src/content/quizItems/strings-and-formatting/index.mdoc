@@ -1,0 +1,70 @@
+---
+title: Strings & Formatting
+urlSlug: strings-and-formatting
+quizParent: python
+order: 4
+seo:
+  metaTitle: Python Strings & Formatting MCQs
+  metaDescription: >-
+    Solve Python Strings & Formatting MCQs covering slicing, f-strings, strip,
+    replace, and common string methods with detailed explanations.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+questions: []
+bulkQuestionsJson: |-
+  [
+    {
+      "questionText": "Analyze the data-cleaning script below. What is the output?<code>raw_data = \"xyxoxyz\"\ncleaned = raw_data.strip(\"xyz\")\nprint(cleaned)</code>",
+      "options": [
+        { "text": "\"xyxo\"", "isCorrect": false },
+        { "text": "\"o\"", "isCorrect": true },
+        { "text": "\"xyxoxyz\"", "isCorrect": false },
+        { "text": "\"xyxo\"", "isCorrect": false }
+      ],
+      "explanation": "The <code>.strip()</code> method does not remove the exact string <code>\"xyz\"</code>.\nInstead, Python treats <code>\"xyz\"</code> as a group of characters to remove from both the beginning and the end of the string.\nSo Python keeps removing:\n<code>x</code>\n<code>y</code>\n<code>z</code>\nfrom both sides until it finds a different character.\nStarting string:\n<code>\"xyxoxyz\"</code>\nRemoving characters from the left:\n<code>x</code> → remove\n<code>y</code> → remove\n<code>x</code> → remove\nNow the string becomes:\n<code>\"oxyz\"</code>\nRemoving characters from the right:\n<code>z</code> → remove\n<code>y</code> → remove\n<code>x</code> → remove\nFinal result:\n<code>\"o\"</code>"
+    },
+    {
+      "questionText": "What is the resulting string after calling this replacement logic?<code>word = \"mississippi\"\nprint(word.replace(\"s\", \"z\", 2))</code>",
+      "options": [
+        { "text": "\"mizzizzippi\"", "isCorrect": false },
+        { "text": "\"mizzissippi\"", "isCorrect": true },
+        { "text": "\"misziszzippi\"", "isCorrect": false },
+        { "text": "Raises a TypeError", "isCorrect": false }
+      ],
+      "explanation": "The <code>.replace()</code> method replaces text from left to right.\nThe third argument (<code>2</code>) tells Python to replace only the first 2 occurrences of <code>\"s\"</code>.\nStarting string:\n<code>\"mississippi\"</code>\nPython replaces the first two <code>\"s\"</code> characters with <code>\"z\"</code>:\n<code>\"mizzissippi\"</code>\nAfter replacing two <code>\"s\"</code> characters, Python stops. The remaining <code>\"s\"</code> characters stay unchanged."
+    },
+    {
+      "questionText": "How many times does the empty string appear inside the word \"ab\"?<code>text = \"ab\"\nprint(text.count(\"\"))</code>",
+      "options": [
+        { "text": "0", "isCorrect": false },
+        { "text": "1", "isCorrect": false },
+        { "text": "2", "isCorrect": false },
+        { "text": "3", "isCorrect": true }
+      ],
+      "explanation": "In Python, the empty string <code>\"\"</code> is counted in every possible position inside the string:\nbefore the first character\nbetween characters\nafter the last character\nFor the string <code>\"ab\"</code>:\n<code>\"\"a\"\"b\"\"</code>\nSo there are:\nbefore <code>a</code>\nbetween <code>a</code> and <code>b</code>\nafter <code>b</code>\nThat makes a total of:\n<code>3</code>"
+    },
+    {
+      "questionText": "A developer is trying to escape curly braces inside an f-string to generate JSON formatting. What is the output?<code>value = 5\nprint(f\"{{value}}\")</code>",
+      "options": [
+        { "text": "5", "isCorrect": false },
+        { "text": "\"{value}\"", "isCorrect": true },
+        { "text": "\"{{5}}\"", "isCorrect": false },
+        { "text": "SyntaxError", "isCorrect": false }
+      ],
+      "explanation": "In an f-string, curly braces <code>{}</code> are normally used to evaluate variables or expressions.\nExample:\n<code>f\"{value}\"</code>\nwould output:\n<code>5</code>\nBut when you use double curly braces:\n<code>{{ }}</code>\nPython treats them as normal text instead of evaluating them.\nSo:\n<code>f\"{{value}}\"</code>\nbecomes:\n<code>\"{value}\"</code>\nThe word <code>value</code> is printed literally, not evaluated as a variable."
+    },
+    {
+      "questionText": "What happens when you attempt to slice a string with a step size of zero?<code>text = \"python\"\nprint(text[::0])</code>",
+      "options": [
+        { "text": "\"\" (Empty string)", "isCorrect": false },
+        { "text": "\"python\"", "isCorrect": false },
+        { "text": "\"p\"", "isCorrect": false },
+        { "text": "Raises a ValueError", "isCorrect": true }
+      ],
+      "explanation": "In string slicing, the step value tells Python how many positions to move each time.\nFor example:\n<code>::1</code> moves 1 step at a time\n<code>::2</code> moves 2 steps at a time\nBut a step value of <code>0</code> is invalid because Python cannot move forward by zero positions.\nSo this code:\n<code>text[::0]</code>\ncauses Python to raise an error:\n<code>ValueError: slice step cannot be zero</code>\nPython blocks this operation to prevent an impossible traversal."
+    }
+  ]
+---
+Practice tricky Python MCQs on string slicing, f-strings, string methods, replace, strip, and formatting with beginner-friendly explanations.

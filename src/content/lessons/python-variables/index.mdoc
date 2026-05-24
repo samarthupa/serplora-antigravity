@@ -8,12 +8,10 @@ seo:
   metaDescription: learn python variables
   robotsIndex: true
   robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
 ---
-A variable is a name used to store a data value in Python.
-
-{% codeEditor language="python" code="x = 10\nprint(x + x)\nprint(x - 5)" /%}
-
-For example:
+A variable is a name used to store a data value in Python. For example:
 
 ```python
 x = 10
@@ -35,34 +33,15 @@ Variables are not a necessity, but without variables, it becomes hard to read, w
 
 **Without variables:**
 
-```python
-print(10 + 10)
-print(10 - 5)
-```
+{% codeEditor language="python" code="print(10 + 10)\nprint(10 - 5)" /%}
 
 **With variables:**
 
-{% codeEditor
-   language="python"
-   code="x = 10\nprint(x + x)\nprint(x - 5)\n\nx = 10\nprint(x + x)\nprint(x - 5)\n\nx = 10\nprint(x + x)\nprint(x - 5)\n\nx = 10\nprint(x + x)\nprint(x - 5)\n\nx = 10\nprint(x + x)\nprint(x - 5)\n\nx = 10\nprint(x + x)\nprint(x - 5)" /%}
-
-```python
-x = 10
-print(x + x)
-print(x - 5)
-```
-
-{% codeEditor
-   language="javascript"
-   code="let name = \"Samarth\";\nconsole.log(\"Hello \" + name);\n\nlet a = 5;\nlet b = 3;\nconsole.log(\"Sum is:\", a + b);" /%}
+{% codeEditor language="python" code="x = 10\nprint(x + x)\nprint(x - 5)" /%}
 
 Now, if we want to use the value `10` anywhere, we can use `x`. And if we need to change the value from `10` to `15` everywhere, we just need to update the value of `x`:
 
-```python
-x = 15
-print(x + x)
-print(x - 5)
-```
+{% codeEditor language="python" code="x = 15\nprint(x + x)\nprint(x - 5)" /%}
 
 Here, we are using the value stored in `x` in different places and also changing it when needed.
 
@@ -74,13 +53,8 @@ A variable is a name used to store a data value, such as numbers, text, or objec
 
 When writing a text (string) variable, you can use single quotes (`'text'`), double quotes (`"text"`), or triple quotes (`'''text'''` or `"""text"""`).
 
-```python
-x = 'sam'
-y = "sam"
-z = '''sam'''
-z2 = """sam"""
-
-print(x, y, z, z2)
-```
+{% codeEditor
+   language="python"
+   code="x = 'sam'\ny = \"sam\"\nz = '''sam'''\nz2 = \"\"\"sam\"\"\"\n\nprint(x, y, z, z2)" /%}
 
 However, generally everyone uses double quotes (`"text"`).

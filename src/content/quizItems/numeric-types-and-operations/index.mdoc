@@ -1,0 +1,70 @@
+---
+title: Numeric Types & Operations
+urlSlug: numeric-types-and-operations
+quizParent: python
+order: 3
+seo:
+  metaTitle: Python Numeric Types & Operations MCQs
+  metaDescription: >-
+    Solve Python Numeric Types & Operations MCQs covering integers, floats,
+    modulo, floor division, rounding, and type conversion.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+questions: []
+bulkQuestionsJson: |-
+  [
+    {
+      "questionText": "You are building a financial dashboard that rounds currency values. What does Python output?<code>print(round(2.5), round(3.5))</code>",
+      "options": [
+        { "text": "3 4", "isCorrect": false },
+        { "text": "2 3", "isCorrect": false },
+        { "text": "2 4", "isCorrect": true },
+        { "text": "3 3", "isCorrect": false }
+      ],
+      "explanation": "In Python, numbers ending with <code>.5</code> do not always round upward.\nPython checks the two nearest whole numbers and chooses the even one:\n<code>2.5</code> is between <code>2</code> and <code>3</code>\n→ <code>2</code> is even, so Python returns <code>2</code>\n<code>3.5</code> is between <code>3</code> and <code>4</code>\n→ <code>4</code> is even, so Python returns <code>4</code>\nThis rounding method is called <code>Banker's Rounding</code>. It helps reduce rounding bias when many calculations are performed."
+    },
+    {
+      "questionText": "What is the result of evaluating this mathematical expression involving boolean values?<code>score = True + True + False\nprint(score)</code>",
+      "options": [
+        { "text": "True", "isCorrect": false },
+        { "text": "False", "isCorrect": false },
+        { "text": "TypeError: unsupported operand types", "isCorrect": false },
+        { "text": "2", "isCorrect": true }
+      ],
+      "explanation": "In Python, boolean values can also behave like numbers:\n<code>True</code> acts like <code>1</code>\n<code>False</code> acts like <code>0</code>\nSo Python calculates the expression like this:\n<code>1 + 1 + 0</code>\nThe final result is:\n<code>2</code>\nThis works because the <code>bool</code> type in Python is based on the <code>int</code> type."
+    },
+    {
+      "questionText": "A junior developer attempts to divide a float using floor division. What value is returned?<code>result = 5.0 // 2\nprint(result)</code>",
+      "options": [
+        { "text": "2", "isCorrect": false },
+        { "text": "2.5", "isCorrect": false },
+        { "text": "2.0", "isCorrect": true },
+        { "text": "TypeError", "isCorrect": false }
+      ],
+      "explanation": "The <code>//</code> operator performs floor division, which removes the decimal part after division.\nFirst, Python calculates:\n<code>5.0 / 2 = 2.5</code>\nThen floor division rounds the result down to:\n<code>2.0</code>\nBecause one of the numbers (<code>5.0</code>) is a float, Python returns the final answer as a float too. That is why the result is <code>2.0</code>instead of <code>2</code>."
+    },
+    {
+      "questionText": "Evaluate this conversion attempt while parsing an API payload:<code>user_input = \"10.5\"\nparsed = int(user_input)</code>",
+      "options": [
+        { "text": "10.5", "isCorrect": false },
+        { "text": "10", "isCorrect": false },
+        { "text": "11", "isCorrect": false },
+        { "text": "Raises a ValueError", "isCorrect": true }
+      ],
+      "explanation": "The <code>int()</code> function can only convert strings that contain a whole number, such as <code>\"10\"</code> or <code>\"25\"</code>.\nHere, the string contains a decimal point:\n<code>\"10.5\"</code>\nBecause of this, Python cannot directly convert it to an integer and raises a <code>ValueError</code>.\nTo convert it safely, Python must first change the string into a float:\n<code>int(float(user_input))</code>\nThis would produce:\n<code>10</code>"
+    },
+    {
+      "questionText": "Calculate the result of this negative modulo operation used in a circular array algorithm:<code>print(-7 % 4)</code>",
+      "options": [
+        { "text": "-3", "isCorrect": false },
+        { "text": "3", "isCorrect": false },
+        { "text": "1", "isCorrect": true },
+        { "text": "-1", "isCorrect": false }
+      ],
+      "explanation": "The modulo operator <code>%</code> returns the remainder after division.\nIn Python, the result of modulo always keeps the sign of the divisor. Since the divisor is positive (<code>4</code>), the answer will also be positive.\nPython finds a number that satisfies this equation:\n<code>(4 * quotient) + remainder = -7</code>\nPython uses floor division:\n<code>-7 // 4 = -2</code>\nThen:\n<code>4 * -2 = -8</code>\nNow Python checks what must be added to <code>-8</code> to get <code>-7</code>:\n<code>-8 + 1 = -7</code>\nSo, the remainder is:\n<code>1</code>"
+    }
+  ]
+---
+Practice tricky Python MCQs on integers, floats, modulo, floor division, rounding, and type conversion with simple explanations.
