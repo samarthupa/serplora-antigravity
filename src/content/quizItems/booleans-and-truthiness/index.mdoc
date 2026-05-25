@@ -1,0 +1,70 @@
+---
+title: Booleans and Truthiness
+urlSlug: booleans-and-truthiness
+quizParent: python
+order: 5
+seo:
+  metaTitle: Python Booleans & Truthiness Quiz with Answers and Explanations
+  metaDescription: >-
+    Python booleans and truthiness quiz covering short-circuiting, falsy values,
+    tuples, and isinstance().
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+questions: []
+bulkQuestionsJson: |-
+  [
+    {
+      "questionText": "You are reviewing an API validation check. Does the <code>log_error()</code> function ever execute?<code>def log_error():\n   print(\"Error Logged\")\n   return True\n\nis_valid = False and log_error()</code>",
+      "options": [
+        { "text": "Yes, because the function is explicitly called with ().", "isCorrect": false },
+        { "text": "No, because Python short-circuits the and operator.", "isCorrect": true },
+        { "text": "Yes, but it doesn't print anything.", "isCorrect": false },
+        { "text": "Raises a SyntaxError.", "isCorrect": false }
+      ],
+      "explanation": "Python uses a feature called short-circuit evaluation with logical operators like <code>and</code>.\nFor the <code>and</code> operator:\nif the left side is already <code>False</code>\nPython knows the full expression can never become <code>True</code>.\nSo in this code:\n<code>False and log_error()</code>\nPython stops immediately after seeing <code>False</code>.\nBecause of that:\n<code>log_error()</code> is never executed\n<code>\"Error Logged\"</code> is never printed\nThe final value of <code>is_valid</code> becomes:\n<code>False</code>"
+    },
+    {
+      "questionText": "Evaluate the truthiness of this string input containing only whitespace.<code>user_input = \" \"\nprint(bool(user_input))</code>",
+      "options": [
+        { "text": "False", "isCorrect": false },
+        { "text": "True", "isCorrect": true },
+        { "text": "None", "isCorrect": false },
+        { "text": "TypeError", "isCorrect": false }
+      ],
+      "explanation": "In Python, an empty string evaluates to <code>False</code>:\n<code>\"\"</code>\nBut this string is not empty:\n<code>\" \"</code>\nIt contains one space character, so its length is 1.\nBecause the string contains a character, Python treats it as a truthy value. Therefore:\n<code>bool(\" \")</code>\nreturns:\n<code>True</code>"
+    },
+    {
+      "questionText": "Analyze the truthiness of this data structure validation:<code>data = (False,)\nif data:\n   print(\"Truthy\")\nelse:\n   print(\"Falsy\")</code>",
+      "options": [
+        { "text": "\"Truthy\"", "isCorrect": true },
+        { "text": "\"Falsy\"", "isCorrect": false },
+        { "text": "Raises a TypeError", "isCorrect": false },
+        { "text": "Prints nothing", "isCorrect": false }
+      ],
+      "explanation": "For collections like tuples, lists, and sets, Python checks whether they are empty or not.\nEmpty collections are <code>False</code>\nNon-empty collections are <code>True</code>\nThis tuple:\n<code>(False,)</code>\ncontains one element, so it is not empty.\nEven though the value inside the tuple is <code>False</code>, the tuple itself still has a length greater than 0. Therefore, Python treats the tuple as truthy and prints:\n<code>\"Truthy\"</code>"
+    },
+    {
+      "questionText": "What is the boolean evaluation of the built-in <code>sum()</code> function when passed an empty list?<code>print(bool(sum([])))</code>",
+      "options": [
+        { "text": "True", "isCorrect": false },
+        { "text": "False", "isCorrect": true },
+        { "text": "Raises a ValueError", "isCorrect": false },
+        { "text": "None", "isCorrect": false }
+      ],
+      "explanation": "When <code>sum()</code> is given an empty list, there are no numbers to add.\nSo Python returns the default starting value:\n<code>0</code>\nThen <code>bool()</code> checks the truthiness of <code>0</code>.\nIn Python:\n<code>0</code> evaluates to <code>False</code>\nnon-zero numbers evaluate to <code>True</code>\nSo this code:\n<code>bool(sum([]))</code>\nbecomes:\n<code>bool(0)</code>\nwhich returns:\n<code>False</code>"
+    },
+    {
+      "questionText": "A developer runs an <code>isinstance</code> check to ensure strict typing. What does Python return?<code>is_admin = True\nprint(isinstance(is_admin, int))</code>",
+      "options": [
+        { "text": "False", "isCorrect": false },
+        { "text": "True", "isCorrect": true },
+        { "text": "Raises TypeError", "isCorrect": false },
+        { "text": "None", "isCorrect": false }
+      ],
+      "explanation": "In Python, the <code>bool</code> type is built on top of the <code>int</code> type.\nThis means:\n<code>True</code> behaves like <code>1</code>\n<code>False</code> behaves like <code>0</code>\nBecause of this relationship, Python considers a boolean value to also be an integer type.\nSo:\n<code>isinstance(True, int)</code>\nreturns:\n<code>True</code>\nEven though <code>True</code> is a boolean value, Python internally treats <code>bool</code> as a subclass of <code>int</code>."
+    }
+  ]
+---
+Test your understanding of Python booleans, truthy and falsy values, short-circuit evaluation, empty sequences, tuples, and type checking with  multiple-choice questions and detailed explanations.
