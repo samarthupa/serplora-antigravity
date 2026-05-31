@@ -186,17 +186,18 @@ const primaryBtn = {
   <div id="search-modal-content" class="absolute top-0 left-0 w-full h-full flex flex-col transform -translate-y-8 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
     
     <div class="flex-1 overflow-y-auto custom-scrollbar w-full">
-      <div class="w-full max-w-[1000px] mx-auto px-4 md:px-8 pb-20 pt-10 md:pt-20">
+      {/* REDUCED TOP PADDING HERE: pt-2 md:pt-6 AND REDUCED MAX WIDTH FOR SLEEKER LOOK */}
+      <div class="w-full max-w-[800px] mx-auto px-4 md:px-8 pb-20 pt-2 md:pt-6">
         
         <div class="relative w-full">
           {/* Search Component */}
           <Search id="site-search" className="pagefind-ui-custom" uiOptions={{ showImages: false }} />
           
-          {/* Inline ESC / Close Button */}
-          <button id="close-search" class="absolute right-0 top-[12px] md:top-[22px] h-[36px] md:h-[40px] text-[12px] font-['JetBrains_Mono',monospace] px-3 rounded-full text-tx-muted hover:text-tx-main hover:bg-tx-muted/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none z-10 mr-1 md:mr-2">
-            <span class="hidden md:block pt-0.5">ESC</span>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
+          {/* Inline ESC / Close Button - LOCKED TO TOP */}
+<button id="close-search" class="absolute right-0 top-[7px] md:top-[12px] h-[32px] text-[12px] font-['JetBrains_Mono',monospace] px-3 rounded-full text-tx-muted hover:text-tx-main hover:bg-tx-muted/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none z-10 mr-1 md:mr-2">
+  <span class="hidden md:block pt-0.5">ESC</span>
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+</button>
         </div>
 
       </div>
@@ -225,53 +226,48 @@ const primaryBtn = {
 
   .pagefind-ui-custom .pagefind-ui__form {
     position: relative;
+    width: 100%;
   }
 
-  /* FIX: Locks the magnifying glass securely inside the input field */
+  /* SAFELY REMOVE: Pagefind magnifying glass */
   .pagefind-ui-custom .pagefind-ui__form::before {
-    width: 28px;
-    height: 28px;
-    top: 26px !important; 
-    transform: none !important;
-    left: 8px;
-    opacity: 0.4;
+    display: none !important;
+    content: none !important;
+    background: none !important;
   }
 
-  /* NEW: Hide Pagefind's default clear button to replace it with the unified ESC button */
+  /* REMOVE: Native clear button */
   .pagefind-ui-custom .pagefind-ui__search-clear {
     display: none !important;
   }
 
+  /* MINIMALIST INPUT (Flush left, no icon) */
   .pagefind-ui-custom .pagefind-ui__search-input {
+    width: 100% !important;
     font-family: 'Outfit', sans-serif;
-    font-weight: 600;
-    font-size: 32px; 
+    font-weight: 500; 
+    font-size: 24px;  
     color: var(--color-tx-main);
     background-color: transparent;
-    border: none;
-    border-bottom: 2px solid var(--color-border-subtle);
-    /* UPDATED: Increased right padding (100px) to make room for the ESC button */
-    padding: 24px 100px 24px 50px; 
+    border: none !important;
+    border-bottom: 1px solid var(--color-border-subtle) !important;
+    /* 0px Left Padding makes text perfectly flush with the left edge */
+    padding: 16px 100px 16px 0px !important; 
     border-radius: 0;
     transition: all 0.3s ease;
+    box-shadow: none !important;
   }
 
   @media (max-width: 768px) {
     .pagefind-ui-custom .pagefind-ui__search-input {
-      font-size: 20px;
-      /* UPDATED: Increased right padding (60px) to make room for mobile ESC button */
-      padding: 16px 60px 16px 40px;
-    }
-    .pagefind-ui-custom .pagefind-ui__form::before {
-      width: 20px;
-      height: 20px;
-      top: 20px !important;
+      font-size: 18px; 
+      padding: 12px 60px 12px 0px !important;
     }
   }
 
   .pagefind-ui-custom .pagefind-ui__search-input:focus {
-    outline: none;
-    border-bottom-color: var(--pagefind-ui-primary);
+    outline: none !important;
+    border-bottom-color: var(--pagefind-ui-primary) !important;
   }
 
   .pagefind-ui-custom .pagefind-ui__drawer {
@@ -320,7 +316,7 @@ const primaryBtn = {
   }
 
   .pagefind-ui-custom .pagefind-ui__message {
-    padding: 0 24px 24px 24px;
+    padding: 0 24px 24px 0px; /* Aligned flush left with input */
     font-size: 15px;
     color: var(--color-tx-muted);
     font-weight: 500;
