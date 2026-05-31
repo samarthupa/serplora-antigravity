@@ -104,11 +104,11 @@ const primaryBtn = {
         <span class="hidden md:block text-[13px] truncate text-left w-full ml-1.5">Search...</span>
       </button>
 
-      {/* Theme Toggle Button (Hidden on Mobile, kept in drawer) */}
-      <button class="theme-toggle-btn hidden md:flex p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer" aria-label="Toggle theme">
-        <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-      </button>
+      {/* Theme Toggle Button */}
+<button class="theme-toggle-btn flex p-1.5 md:p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer" aria-label="Toggle theme">
+  <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+  <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+</button>
 
       {/* --- UNIFIED AUTH SECTION --- */}
       <div class="flex items-center">
@@ -174,21 +174,6 @@ const primaryBtn = {
           })}
         </nav>
         
-        {/* Bottom Dock (Theme Switcher ONLY) */}
-        <div class="mt-auto flex flex-col gap-4 pb-8">
-          <button class="theme-toggle-btn flex items-center justify-between w-full py-2 px-1 bg-transparent active:scale-[0.98] transition-all focus:outline-none group mt-2" aria-label="Toggle theme">
-            <div class="flex items-center gap-3 text-tx-muted opacity-80 group-hover:opacity-100 transition-opacity">
-              <svg class="theme-toggle-light-icon w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-              <svg class="theme-toggle-dark-icon hidden w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-              <span class="text-[15px] font-[500]">Appearance</span>
-            </div>
-            
-            {/* iOS style purely CSS driven pill toggle */}
-            <div class="relative w-[44px] h-[24px] rounded-full bg-main border border-subtle shrink-0 shadow-inner">
-              <div class="absolute left-1 top-1 w-[14px] h-[14px] rounded-full bg-tx-muted shadow-sm transition-all duration-300 ease-spring dark:translate-x-[20px] dark:bg-blue-500"></div>
-            </div>
-          </button>
-        </div>
 
       </div>
     </div>
