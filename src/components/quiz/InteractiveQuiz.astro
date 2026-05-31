@@ -14,23 +14,15 @@ const { questions } = Astro.props;
       <a href="#" id="quiz-take-yourself" class="underline hover:text-blue-800 dark:hover:text-blue-200 font-bold">Take it yourself</a>
     </div>
 
-    {/* Header Section */}
-    <div id="quiz-header-section">
-      <div class="mb-4 flex items-center justify-between">
+    {/* Header Section (Score and Progress Bar Removed) */}
+    <div id="quiz-header-section" class="mb-10">
+      <div class="flex items-center justify-between">
         <span id="quiz-progress-text" class="text-xs font-bold tracking-widest uppercase text-tx-muted">
           Loading...
         </span>
-        <div class="flex items-center gap-4">
-          <button type="button" id="quiz-restart-btn" class="hidden text-xs font-bold tracking-widest uppercase text-tx-muted hover:text-rose-500 transition-colors">
-            Restart
-          </button>
-          <span id="quiz-score-text" class="text-xs font-bold tracking-widest uppercase text-tx-muted transition-opacity duration-300">
-            Score: 0
-          </span>
-        </div>
-      </div>
-      <div class="w-full h-1.5 bg-surface border border-subtle rounded-full overflow-hidden mb-10">
-        <div id="quiz-progress-bar" class="h-full bg-blue-600 transition-all duration-500 ease-out" style="width: 0%;"></div>
+        <button type="button" id="quiz-restart-btn" class="hidden text-xs font-bold tracking-widest uppercase text-tx-muted hover:text-rose-500 transition-colors">
+          Restart
+        </button>
       </div>
     </div>
 
@@ -39,7 +31,7 @@ const { questions } = Astro.props;
       
       {/* Dynamic Content Container */}
       <div id="quiz-dynamic-content" class="quiz-styled-content flex-1 w-full transition-opacity duration-200 ease-in-out flex flex-col">
-        </div>
+      </div>
 
       {/* Action Buttons */}
       <div id="quiz-footer-actions" class="mt-auto pt-8 flex justify-between items-center border-t border-subtle border-opacity-50">
@@ -93,9 +85,7 @@ Anyone with this link can view your score and answers.
       const nextBtn = document.getElementById('quiz-next-btn');
       const prevBtn = document.getElementById('quiz-prev-btn');
       const restartBtn = document.getElementById('quiz-restart-btn');
-      const progressBar = document.getElementById('quiz-progress-bar');
       const progressText = document.getElementById('quiz-progress-text');
-      const scoreText = document.getElementById('quiz-score-text');
       
       // Modal Elements
       const modal = document.getElementById('quiz-share-modal');
@@ -149,16 +139,31 @@ Anyone with this link can view your score and answers.
 
       /* --- CORE LOGIC --- */
 
+      /* --- TEXT FORMATTER --- */
+      function formatQuizText(text) {
+        if (!text) return '';
+        
+        let formattedText = text.replace(/<code>([\s\S]*?)<\/code>/g, (match, codeContent) => {
+          if (codeContent.includes('\n')) {
+             return `<pre class="quiz-multi-line-code"><code>${codeContent.replace(/^\n+|\n+$/g, '')}</code></pre>`;
+          }
+          return `<code>${codeContent}</code>`;
+        });
+
+        formattedText = formattedText.split(/(<pre[\s\S]*?<\/pre>)/g).map(part => {
+           if (part.startsWith('<pre')) return part; 
+           return part.replace(/\n/g, '<br>');        
+        }).join('');
+
+        return formattedText;
+      }
+
       function calculateScore() {
         let currentScore = 0;
         userAnswers.forEach((ans, idx) => {
           if (ans !== null && quizData[idx].options[ans].isCorrect) currentScore++;
         });
         return currentScore;
-      }
-
-      function updateLiveScore() {
-        scoreText.textContent = `Score: ${calculateScore()}`;
       }
 
       function saveState() {
@@ -176,10 +181,6 @@ Anyone with this link can view your score and answers.
         headerSection.style.display = 'block';
         footerActions.style.display = 'flex';
         const q = quizData[currentIndex];
-        
-        // --- Navigation Setup ---
-        const progressPercent = ((currentIndex) / quizData.length) * 100;
-        progressBar.style.width = `${progressPercent}%`;
 
         // Restart logic
         if (!isSharedMode && !isFinished && (currentIndex > 0 || userAnswers[0] !== null)) {
@@ -195,13 +196,10 @@ Anyone with this link can view your score and answers.
         
         if (isReviewMode) {
           progressText.innerHTML = `<span class="text-blue-500">Reviewing</span> &bull; Question ${currentIndex + 1} of ${quizData.length}`;
-          scoreText.classList.add('opacity-0');
           nextBtn.textContent = (currentIndex === quizData.length - 1) ? "Finish Review" : "Next \u2192";
           restartBtn.classList.add('hidden');
         } else {
           progressText.textContent = `Question ${currentIndex + 1} of ${quizData.length}`;
-          scoreText.classList.remove('opacity-0');
-          updateLiveScore();
           
           if (userAnswers[currentIndex] === null) {
             nextBtn.textContent = (currentIndex === quizData.length - 1) ? "Skip & Finish" : "Skip \u2192";
@@ -225,7 +223,7 @@ Anyone with this link can view your score and answers.
             <button 
               type="button"
               data-index="${idx}" 
-              class="quiz-option w-full text-left p-4 md:p-5 rounded-xl border-2 border-subtle bg-surface text-[16px] text-tx-main hover:border-blue-500/50 transition-all flex items-center justify-between group cursor-pointer shadow-sm"
+              class="quiz-option w-full text-left p-4 md:p-5 rounded-xl bg-surface text-[16px] text-tx-main hover:border-blue-500/50 transition-all flex items-center justify-between group cursor-pointer shadow-sm"
             >
               <div class="flex items-center gap-4 flex-1">
                 <div class="w-5 h-5 rounded-full border-2 border-subtle flex items-center justify-center transition-colors indicator-circle shrink-0">
@@ -240,13 +238,17 @@ Anyone with this link can view your score and answers.
 
         // --- Inject HTML ---
         contentDiv.innerHTML = `
-          <h3 class="text-2xl md:text-[1.65rem] font-semibold text-tx-main mb-8 leading-[1.35] tracking-tight">${q.questionText}</h3>
+          <h3 class="text-2xl md:text-[1.65rem] font-semibold text-tx-main mb-8 leading-[1.35] tracking-tight">
+            ${formatQuizText(q.questionText)}
+          </h3>
           <div class="flex flex-col gap-3.5 mb-6">
             ${optionsHtml}
           </div>
           <div id="quiz-explanation" class="hidden mt-auto p-5 rounded-xl border text-[15px] leading-relaxed">
             <strong id="quiz-explanation-title" class="block mb-2 text-lg"></strong>
-            <span class="text-tx-main opacity-90">${q.explanation || 'No further explanation provided.'}</span>
+            <span class="text-tx-main opacity-90">
+              ${formatQuizText(q.explanation || 'No further explanation provided.')}
+            </span>
           </div>
         `;
 
@@ -275,7 +277,6 @@ Anyone with this link can view your score and answers.
         userAnswers[currentIndex] = selectedIndex; 
         
         applyVisualFeedback(selectedIndex);
-        updateLiveScore();
         saveState();
 
         nextBtn.textContent = (currentIndex === quizData.length - 1) ? "See Results" : "Next \u2192";
@@ -406,7 +407,6 @@ Anyone with this link can view your score and answers.
             currentIndex = 0;
             isReviewMode = false;
             userAnswers.fill(null);
-            updateLiveScore();
             saveState();
             transitionToQuestion();
           });
@@ -482,7 +482,6 @@ Anyone with this link can view your score and answers.
           currentIndex = 0;
           isReviewMode = false;
           userAnswers.fill(null);
-          updateLiveScore();
           saveState();
           transitionToQuestion();
         }
@@ -535,24 +534,11 @@ Anyone with this link can view your score and answers.
         setTimeout(() => modalCopyBtn.textContent = "Copy", 2000);
       });
 
-      // Keyboard & Swipe Controls
+      // Keyboard Controls
       document.addEventListener('keydown', (e) => {
         if (contentDiv.style.display !== 'none' && !contentDiv.classList.contains('opacity-0')) {
           if (e.key === "ArrowRight") nextBtn.click();
           if (e.key === "ArrowLeft") prevBtn.click();
-        }
-      });
-
-      let touchStartX = 0;
-      let touchEndX = 0;
-      wrapper.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
-      wrapper.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        if (contentDiv.style.display === 'none' || contentDiv.classList.contains('opacity-0')) return;
-        const xDiff = touchStartX - touchEndX;
-        if (Math.abs(xDiff) > 50) {
-          if (xDiff > 0) nextBtn.click();
-          else prevBtn.click();
         }
       });
 
@@ -566,11 +552,38 @@ Anyone with this link can view your score and answers.
     /* HTML Styling Rules */
     .quiz-styled-content b, .quiz-styled-content strong { font-weight: 700; color: var(--color-tx-main); }
     .quiz-styled-content i, .quiz-styled-content em { font-style: italic; }
+    
+    /* This applies to INLINE code */
     .quiz-styled-content code {
       font-family: 'JetBrains Mono', monospace; font-size: 0.85em; color: #ef4444; 
       background-color: var(--color-bg-surface); border: 1px solid var(--color-border-subtle);
       padding: 0.15em 0.35em; border-radius: 0.25rem;
     }
+    
+    /* NEW: This applies to MULTI-LINE code blocks */
+    .quiz-styled-content pre.quiz-multi-line-code {
+      display: block;
+      margin: 1rem 0;
+      padding: 1.25rem;
+      background-color: var(--color-bg-surface); /* Dynamically switches in Light/Dark mode */
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Reset the inline code styles when inside a <pre> block */
+    .quiz-styled-content pre.quiz-multi-line-code code {
+      color: var(--color-text-main); /* Dynamically switches in Light/Dark mode */
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      font-size: 0.9em;
+      white-space: pre; /* This forces HTML to respect the \n spaces */
+      display: block;
+      line-height: 1.6;
+    }
+
     .quiz-styled-content mark { background-color: rgba(250, 204, 21, 0.3); color: inherit; padding: 0 0.2em; border-radius: 0.2em; }
   </style>
 ) : null}
