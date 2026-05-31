@@ -79,7 +79,7 @@ const CompilerShell = forwardRef(({
     return {
       fontSize: 14,
       wordWrap: false,
-      showGutter: typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+      showGutter: false
     };
   });
 
@@ -475,7 +475,7 @@ const CompilerShell = forwardRef(({
             {OutputPane && OutputPane(layoutProps)}
         </div>
       </div>
-      <div className="h-[22px] w-full bg-gray-200 dark:bg-[#3c3c3c] transition-colors flex items-center justify-between px-2 text-xs text-gray-700 dark:text-[#cccccc] select-none shrink-0 z-50">
+      <div className="h-[22px] w-full bg-gray-100 dark:bg-[#2d2d2d] transition-colors flex items-center justify-between px-2 text-xs text-gray-700 dark:text-[#cccccc] select-none shrink-0 z-50">
         <div className="flex items-center h-full"><div className="px-2 h-full flex items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">Ln {activeFile?.content ? activeFile.content.split('\n').length : 0}, Ch {activeFile?.content ? activeFile.content.length : 0}</div><div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">UTF-8</div><div className="hidden md:flex px-2 h-full items-center cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">{activeFile?.language?.toUpperCase() || 'TEXT'}</div></div>
         {(isPreviewOpen || (isMobile && mobileActiveTab === 'preview')) && (<div className="flex items-center h-full"><div className="px-2 h-full flex items-center font-mono text-[11px] tracking-wider cursor-pointer hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">Preview: {previewDims.w}px × {previewDims.h}px</div></div>)}
       </div>

@@ -14,7 +14,7 @@ export default function SettingsOverlay({ currentSettings, onSave, onClose, isMo
   }, [onClose, isMobile]);
 
   const handleReset = () => {
-    const defaultSettings = { fontSize: 14, wordWrap: false, showGutter: !isMobile };
+    const defaultSettings = { fontSize: 14, wordWrap: false, showGutter: false };
     setDraft(defaultSettings);
     onSave(defaultSettings);
     onClose();

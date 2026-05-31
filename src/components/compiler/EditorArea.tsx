@@ -152,13 +152,17 @@ export default function EditorArea({
           padding-left: 10px !important; 
           padding-right: 10px !important; 
           border-right: 1px solid ${isDarkMode ? '#3c3c3c' : '#e5e7eb'} !important;
-          color: ${isDarkMode ? '#858585' : '#888888'} !important;
           background-color: ${isDarkMode ? '#1e1e1e' : '#ffffff'} !important;
           flex-shrink: 0 !important; 
           text-align: right !important;
           position: sticky !important; 
           left: 0 !important; 
           z-index: 10 !important;
+        }
+
+        /* OVERRIDE: Force the inner numbers to ignore the plugin's inline light gray style */
+        .codejar-linenumber {
+          color: ${isDarkMode ? '#858585' : '#6b7280'} !important;
         }
 
         /* PrismJS Themes */
@@ -185,16 +189,18 @@ export default function EditorArea({
       
       <div className={`${(isMobile && mobileActiveTab === 'console') || isConsoleFullscreen ? 'hidden' : 'flex flex-col flex-1'} overflow-hidden`}>
         <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-end overflow-x-auto shrink-0 border-b border-gray-300 dark:border-[#252526] scrollbar-hide transition-colors">
-          {openTabs.map((file: any) => (
-            <div key={file.id} title={file.name} onClick={() => setActiveFileId(file.id)} 
-              className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-[#252526] transition-colors group max-w-[200px] shrink-0 ${
-                activeFileId === file.id ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t border-t-[#007acc]' : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t border-t-transparent'
-              }`}
-            >
-                <span className="truncate block">{file.name}</span>
-            </div>
-          ))}
-        </div>
+  {openTabs.map((file: any) => (
+    <div key={file.id} title={file.name} onClick={() => setActiveFileId(file.id)} 
+      className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-r-[#252526] transition-colors group max-w-[200px] shrink-0 ${
+        activeFileId === file.id 
+        ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t-2 border-t-[#007acc] dark:border-t-[#007acc]' 
+        : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t-2 border-t-transparent dark:border-t-transparent'
+      }`}
+    >
+        <span className="truncate block">{file.name}</span>
+    </div>
+  ))}
+</div>
 
         <div className="flex-1 relative bg-white dark:bg-[#1e1e1e]">
           {openTabs.length > 0 ? (

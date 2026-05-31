@@ -48,7 +48,7 @@ export default function ActivityBar({
       </div>
 
       {/* BOTTOM SECTION */}
-      <div className="pb-2 flex flex-col items-center w-full">
+      <div className="gap-2 pb-2 flex flex-col items-center w-full">
 
         {/* Download Icon */}
         <div
@@ -90,7 +90,7 @@ export default function ActivityBar({
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
-            className="w-6 h-6"
+            className="w-5 h-5"
           >
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path d="M3 3v5h5" />
@@ -166,7 +166,7 @@ export default function ActivityBar({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-6 h-6"
+              className="w-5 h-5"
             >
               <polyline points="4 17 10 11 4 5"></polyline>
               <line x1="12" y1="19" x2="20" y2="19"></line>
