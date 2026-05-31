@@ -124,7 +124,8 @@ const robotsParams = [
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <Header disableStickyHeader={seo?.disableStickyHeader} />
-    <main class="flex-1 w-full flex flex-col">
+    {/* 5px gap on mobile, perfectly aligned 32px gap on desktop */}
+    <main class="flex-1 w-full md:px-8 flex flex-col">
       <slot />
     </main>
     <Footer />

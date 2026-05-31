@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import ActivityBar from './ActivityBar';
 import Sidebar from './Sidebar';
-import AceEditorArea from './AceEditorArea';
+import EditorArea from './EditorArea';
 import SettingsOverlay from './SettingsOverlay';
+import DownloadModal from './DownloadModal';
 
 const CompilerShell = forwardRef(({ 
   title, 
@@ -13,7 +14,7 @@ const CompilerShell = forwardRef(({
   editorConsoleLogs = [], 
   showConsole = true,
   onAbort,
-  cooldownDuration = 0, // 🟢 NEW: Defaults to 0 (No cooldown for JS/HTML)
+  cooldownDuration = 0, 
   allowReRunWithoutEdit = false
 }: any, ref) => {
   const compilerRef = useRef<HTMLDivElement>(null);
@@ -23,7 +24,9 @@ const CompilerShell = forwardRef(({
   const [isMobile, setIsMobile] = useState(() => 
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
-  const [mobileActiveTab, setMobileActiveTab] = useState<'files' | 'editor' | 'preview' | 'console'>('editor');
+  
+  // 🟢 Removed 'files' from mobile tabs
+  const [mobileActiveTab, setMobileActiveTab] = useState<'editor' | 'preview' | 'console'>('editor');
 
   const [isAppFullscreen, setIsAppFullscreen] = useState(false);
   const [activeView, setActiveView] = useState<string | null>(null); 
@@ -55,21 +58,27 @@ const CompilerShell = forwardRef(({
   const [isCopied, setIsCopied] = useState(false);
   const [isLoadingShared, setIsLoadingShared] = useState(false);
 
-  // 🌟 NEW: Cooldown State
   const [isCooldown, setIsCooldown] = useState(false);
 
-  // 🌟 NEW: Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [editorSettings, setEditorSettings] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('serplora_editor_settings');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        let parsed = JSON.parse(saved);
+        
+        // 🟢 SANITIZE BROKEN CACHE: Force mutual exclusivity 
+        if (parsed.wordWrap && parsed.showGutter) {
+          parsed.showGutter = false; // Prioritize word wrap over line numbers if corrupted
+        }
+        return parsed;
+      }
     }
     // Fallback defaults
     return {
       fontSize: 14,
       wordWrap: false,
-      autoComplete: true,
       showGutter: typeof window !== 'undefined' ? window.innerWidth >= 768 : true
     };
   });
@@ -82,7 +91,6 @@ const CompilerShell = forwardRef(({
   const [runHistory, setRunHistory] = useState<{ [fileId: string]: string }>({});
   const [lastSharedState, setLastSharedState] = useState<{ fingerprint: string, url: string } | null>(null);
 
-  // 🌟 Expose cache clearing function to parent Workspaces via Ref
   useImperativeHandle(ref, () => ({
     clearCacheForFile: (fileId: string) => {
       setRunHistory(prev => {
@@ -94,7 +102,6 @@ const CompilerShell = forwardRef(({
   }));
 
   const generateCodeFingerprint = (targetFiles: any[], active: any) => {
-    // 🌟 Smart Fingerprinting: Python only tracks active file
     if (active && (active.name.endsWith('.py') || active.language === 'python')) {
       return `${active.id}:${active.content?.trim() || ''}`;
     }
@@ -256,7 +263,6 @@ const CompilerShell = forwardRef(({
     }
   }, []);
 
-  // 🌟 Trigger Confirmation Modal
   const handleReset = () => setShowResetConfirm(true);
 
   const executeReset = () => {
@@ -276,7 +282,7 @@ const CompilerShell = forwardRef(({
     if (lastSharedState && lastSharedState.fingerprint === currentFingerprint) {
       setShareUrl(lastSharedState.url);
       setShowShareModal(true);
-      setIsSettingsOpen(false); // 🌟 NEW: Close settings when share modal opens
+      setIsSettingsOpen(false); 
       setIsCopied(false);
       return; 
     }
@@ -294,7 +300,7 @@ const CompilerShell = forwardRef(({
       window.history.pushState({}, '', newUrl);
       setShareUrl(newUrl);
       setShowShareModal(true);
-      setIsSettingsOpen(false); // 🌟 NEW: Close settings when share modal opens
+      setIsSettingsOpen(false); 
       setIsCopied(false);
     } catch (error) {
       alert("Failed to generate share link.");
@@ -304,7 +310,6 @@ const CompilerShell = forwardRef(({
   };
 
   const handleRun = async () => {
-    // 🟢 ONLY apply cooldown logic if duration is greater than 0
     if (cooldownDuration > 0) {
       if (isCooldown) return; 
       setIsCooldown(true);
@@ -323,9 +328,7 @@ const CompilerShell = forwardRef(({
     }
   };
 
-  // 🌟 Wipes cache entry so user can re-run after stopping
   const handleAbortWrapper = () => {
-    // 🟢 ONLY apply cooldown logic if duration is greater than 0
     if (cooldownDuration > 0) {
       if (isCooldown) return; 
       setIsCooldown(true);
@@ -360,7 +363,9 @@ const CompilerShell = forwardRef(({
   };
 
   const layoutProps = {
-    isMobile, mobileActiveTab, previewWidth, isResizingPreview, setIsResizingPreview, previewRef, activeFileId 
+    isMobile, mobileActiveTab, previewWidth, isResizingPreview, setIsResizingPreview, previewRef, activeFileId,
+    // 🟢 PASS EXECUTION PROPS DOWN
+    handleRun, handleAbortWrapper, isRunning, isCooldown, toggleFullscreen, isAppFullscreen
   };
 
   const copyToClipboard = () => {
@@ -370,24 +375,24 @@ const CompilerShell = forwardRef(({
   };
 
   return (
-    <div ref={compilerRef} className={`flex flex-col w-full h-full overflow-hidden font-sans transition-colors bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-[#cccccc] ${isAppFullscreen ? 'h-[100dvh] md:h-screen rounded-none border-none my-0 z-50 relative' : 'my-0 rounded-none border-none md:rounded-xl md:border md:border-gray-300 md:dark:border-[#3c3c3c] relative'}`}>
-     <div className="h-[44px] md:h-[30px] bg-gray-200 dark:bg-[#3c3c3c] flex items-center select-none shrink-0 transition-colors">
+    <div ref={compilerRef} className={`flex flex-col w-full h-full overflow-hidden font-sans transition-colors bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-[#cccccc] ${isAppFullscreen ? 'h-[100dvh] md:h-screen z-50 relative' : 'relative border-b border-gray-300 dark:border-[#3c3c3c]'}`}>
+     {/* 🟢 CHANGED: Added md:hidden to completely remove the top strip on desktop */}
+     <div className="h-[44px] md:hidden bg-gray-100 dark:bg-[#2d2d2d] flex items-center select-none shrink-0 transition-colors">
         <div className="flex md:hidden items-center justify-between flex-1 px-1">
-          <div onClick={() => setMobileActiveTab(prev => prev === 'files' ? 'editor' : 'files')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'files' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}><svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+          {/* 🟢 Removed Mobile Files Toggle Button entirely */}
           <div onClick={() => setMobileActiveTab('editor')} className={`cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'editor' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}><svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
           
-          {/* 🌟 FIXED: Context-Aware Run/Stop/Preview Button */}
           <div 
             onClick={() => {
               if (isCooldown) return;
               if (isRunning) {
                 if (mobileActiveTab !== 'preview') {
-                  setMobileActiveTab('preview'); // Bring them back to the preview tab
+                  setMobileActiveTab('preview'); 
                 } else {
-                  handleAbortWrapper(); // Actually stop the code
+                  handleAbortWrapper(); 
                 }
               } else {
-                handleRun(); // Run code (which auto-switches to preview)
+                handleRun(); 
               }
             }} 
             className={`p-1.5 transition-colors ${isCooldown ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${mobileActiveTab === 'preview' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}
@@ -401,15 +406,20 @@ const CompilerShell = forwardRef(({
 
           {showConsole && (<div onClick={() => setMobileActiveTab('console')} className={`relative cursor-pointer p-1.5 transition-colors ${mobileActiveTab === 'console' ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}><svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>{editorConsoleLogs.length > 0 && <span className="absolute top-[2px] right-[2px] w-2 h-2 rounded-full bg-[#f48771] border border-gray-200 dark:border-[#3c3c3c]"></span>}</div>)}
           
-          {/* 🌟 NEW: Settings Icon REPLACES Reset & Share on Mobile */}
+          <div onClick={() => setIsDownloadOpen(!isDownloadOpen)} className={`cursor-pointer p-1.5 transition-colors ${isDownloadOpen ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          
           <div onClick={() => setIsSettingsOpen(!isSettingsOpen)} className={`cursor-pointer p-1.5 transition-colors ${isSettingsOpen ? 'text-[#007acc]' : 'text-gray-600 dark:text-[#9d9d9d]'}`}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
               <circle cx="12" cy="12" r="3"></circle>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
           </div>
-          
-          <div onClick={toggleFullscreen} className="cursor-pointer p-1.5 text-gray-600 dark:text-[#9d9d9d] transition-colors">{isAppFullscreen ? <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/></svg> : <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>}</div>
         </div>
         <div className="hidden md:flex items-center justify-center flex-1 text-sm font-normal text-gray-500 dark:text-[#858585]">{getActiveFilePath()}</div>
         <div className="hidden md:flex h-full items-center pr-2 gap-2 md:gap-1">
@@ -420,22 +430,29 @@ const CompilerShell = forwardRef(({
       <div className="flex flex-1 overflow-hidden relative">
         <div className="hidden md:flex">
           <ActivityBar 
-            activeView={activeView} 
-            setActiveView={setActiveView} 
-            isConsoleOpen={isConsoleOpen} 
-            setIsConsoleOpen={setIsConsoleOpen} 
-            handleReset={handleReset} 
-            handleShare={handleShare} 
-            isSharing={isSharing} 
-            showConsole={showConsole}
+             activeView={activeView} 
+             setActiveView={setActiveView} 
+             isConsoleOpen={isConsoleOpen} 
+             setIsConsoleOpen={setIsConsoleOpen} 
+             handleReset={handleReset} 
+             handleShare={handleShare} 
+             isSharing={isSharing} 
+             showConsole={showConsole}
             isSettingsOpen={isSettingsOpen}
             setIsSettingsOpen={setIsSettingsOpen}
+            isDownloadOpen={isDownloadOpen}
+            setIsDownloadOpen={setIsDownloadOpen}
           />
         </div>
-        <div className={`${isMobile ? (mobileActiveTab === 'files' ? 'flex absolute inset-0 w-full z-20' : 'hidden') : (activeView ? 'flex relative' : 'hidden')} bg-gray-50 dark:bg-[#252526]`}><Sidebar projectName={projectName} setProjectName={setProjectName} activeView={isMobile ? 'explorer' : activeView} files={files} setFiles={setFiles} activeFileId={activeFileId} setActiveFileId={(id: string) => { setActiveFileId(id); if (isMobile) setMobileActiveTab('editor'); }} isMobile={isMobile} /></div>
+        
+        {/* 🟢 Removed Mobile file explorer injection logic entirely */}
+        <div className={`${isMobile ? 'hidden' : (activeView ? 'flex relative' : 'hidden')} bg-gray-50 dark:bg-[#252526]`}>
+          <Sidebar projectName={projectName} setProjectName={setProjectName} activeView={activeView} files={files} setFiles={setFiles} activeFileId={activeFileId} setActiveFileId={(id: string) => setActiveFileId(id)} isMobile={isMobile} />
+        </div>
+        
         <div ref={splitViewRef} className="flex flex-1 overflow-hidden relative">
             <div className={`${isMobile ? ((mobileActiveTab === 'editor' || mobileActiveTab === 'console') ? 'flex w-full absolute inset-0 z-10' : 'hidden') : 'flex flex-1 relative'} overflow-hidden`}>
-              <AceEditorArea 
+              <EditorArea 
                 isDarkMode={isDarkMode} 
                 isMobile={isMobile} 
                 mobileActiveTab={mobileActiveTab} 
@@ -466,16 +483,23 @@ const CompilerShell = forwardRef(({
       {showShareModal && (<div className="absolute inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm"><div className="bg-white dark:bg-[#252526] border border-gray-300 dark:border-[#3c3c3c] p-6 rounded-lg shadow-xl max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200"><h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Share Workspace</h3><div className="flex gap-2 mb-6"><input type="text" readOnly value={shareUrl} className="flex-1 bg-gray-50 dark:bg-[#3c3c3c] border border-gray-300 dark:border-[#555] text-gray-900 dark:text-white text-sm rounded px-3 py-2 outline-none focus:border-[#007acc]" onClick={(e) => (e.target as HTMLInputElement).select()} /><button onClick={copyToClipboard} className={`px-4 py-2 text-sm font-medium text-white rounded transition-colors ${isCopied ? 'bg-green-600' : 'bg-[#007acc] hover:bg-[#005f9e]'}`}>{isCopied ? 'Copied!' : 'Copy'}</button></div><div className="flex justify-end"><button onClick={() => setShowShareModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-[#cccccc] hover:bg-gray-100 dark:hover:bg-[#3c3c3c] rounded transition-colors">Close</button></div></div></div>)}
       {isLoadingShared && (<div className="absolute inset-0 z-[99999] flex flex-col items-center justify-center bg-white dark:bg-[#1e1e1e]"><svg className="w-10 h-10 text-[#007acc] animate-spin mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><div className="text-gray-600 dark:text-[#cccccc] font-medium tracking-wide">Loading Workspace...</div></div>)}
       
-      {/* 🌟 Settings Overlay Rendered Here */}
       {isSettingsOpen && (
         <SettingsOverlay 
-          isMobile={isMobile}
+           isMobile={isMobile}
           currentSettings={editorSettings} 
-          onSave={saveSettings} 
-          onClose={() => setIsSettingsOpen(false)} 
-          onReset={handleReset} // NEW
-          onShare={handleShare} // NEW
-          isSharing={isSharing} // NEW
+           onSave={saveSettings} 
+           onClose={() => setIsSettingsOpen(false)} 
+           onReset={handleReset} 
+           onShare={handleShare} 
+           isSharing={isSharing} 
+         />
+      )}
+      
+      {isDownloadOpen && (
+        <DownloadModal 
+          files={files} 
+          projectName={projectName} 
+          onClose={() => setIsDownloadOpen(false)} 
         />
       )}
     </div>

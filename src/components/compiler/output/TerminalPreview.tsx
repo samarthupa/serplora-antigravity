@@ -19,13 +19,19 @@ export default function TerminalPreview({
   isWaitingForInput,
   onInputSubmit,
   runningFile,
-  isRunning
+  isRunning,
+  // 🟢 NEW PROPS DESTRUCTURED FROM SHELL
+  handleRun, 
+  handleAbortWrapper, 
+  isCooldown, 
+  toggleFullscreen, 
+  isAppFullscreen
 }: any) {
   const consoleContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState('');
 
-  // 🟢 NEW: Tab Management State
+  // 🟢 Tab Management State
   const isTabbed = !!processLogs;
   const processIds = isTabbed ? Object.keys(processLogs) : [];
   const [viewedProcessId, setViewedProcessId] = useState<string | null>(null);
@@ -61,6 +67,24 @@ export default function TerminalPreview({
   const isHidden = isMobile ? mobileActiveTab !== 'preview' : false;
   if (isHidden) return null;
 
+  // 🟢 ACTION BUTTONS UI
+  const actionButtons = (
+    <div className="hidden md:flex h-full items-center gap-1 shrink-0 ml-auto pr-2">
+      {isRunning ? (
+        <button onClick={handleAbortWrapper} disabled={isCooldown} className={`flex items-center justify-center w-7 h-6 rounded transition-colors ${isCooldown ? 'opacity-50 cursor-not-allowed bg-transparent text-red-500' : 'bg-transparent text-red-500 hover:bg-red-500/10'}`} title="Stop">
+          <svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg>
+        </button>
+      ) : (
+        <button onClick={handleRun} disabled={isCooldown} className={`flex items-center justify-center w-7 h-6 rounded transition-colors ${isCooldown ? 'opacity-50 cursor-not-allowed bg-transparent text-green-700 dark:text-[#89d185]' : 'bg-transparent text-green-700 dark:text-[#89d185] hover:bg-black/5 dark:hover:bg-white/10'}`} title="Run">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+        </button>
+      )}
+      <div onClick={toggleFullscreen} className="flex w-7 h-6 items-center justify-center rounded cursor-pointer text-gray-500 dark:text-[#858585] hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-800 dark:hover:text-[#cccccc]" title={isAppFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+        {isAppFullscreen ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/></svg> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>}
+      </div>
+    </div>
+  );
+
   return (
     <div 
       ref={previewRef}
@@ -70,34 +94,38 @@ export default function TerminalPreview({
       {!isMobile && <div className="absolute left-[-2px] top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingPreview(true)} />}
       {isResizingPreview && <div className="fixed inset-0 z-[9999] cursor-col-resize" />}
 
-      {/* 🟢 NEW: DYNAMIC HEADER (Tabs vs Single) */}
       {isTabbed ? (
-        <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-center px-1 border-b border-gray-300 dark:border-[#252526] shrink-0 transition-colors overflow-x-auto no-scrollbar">
-          {processIds.length === 0 && <span className="text-[12px] text-gray-500 px-3 select-none">No output history</span>}
-          
-          {processIds.map(id => {
-            const isActive = viewedProcessId === id;
-            const isThisRunning = isRunning && runningFile?.id === id;
-            return (
-              <div
-                key={id}
-                onClick={() => setViewedProcessId(id)}
-                className={`flex items-center gap-2 px-4 h-[35px] cursor-pointer border-b-2 text-[13px] font-medium transition-colors select-none ${isActive ? 'border-[#007acc] text-[#007acc] bg-white dark:bg-[#1e1e1e]' : 'border-transparent text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#3c3c3c]'}`}
-              >
-                 <svg className="w-3.5 h-3.5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-                 {processLogs[id].name}
-                 {isThisRunning && (
-                    <span className="flex h-2 w-2 ml-1 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                 )}
-              </div>
-            )
-          })}
+        // 🟢 UPDATED TABBED HEADER (Matches IframePreview layout)
+        <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-center justify-between px-1 border-b border-gray-300 dark:border-[#252526] shrink-0 transition-colors">
+          <div className="flex items-center overflow-x-auto no-scrollbar flex-1">
+            {processIds.length === 0 && <span className="text-[12px] text-gray-500 px-3 select-none">No output history</span>}
+            
+            {processIds.map(id => {
+              const isActive = viewedProcessId === id;
+              const isThisRunning = isRunning && runningFile?.id === id;
+              return (
+                <div
+                  key={id}
+                  onClick={() => setViewedProcessId(id)}
+                  className={`flex items-center gap-2 px-4 h-[35px] cursor-pointer border-b-2 text-[13px] font-medium transition-colors select-none ${isActive ? 'border-[#007acc] text-[#007acc] bg-white dark:bg-[#1e1e1e]' : 'border-transparent text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#3c3c3c]'}`}
+                >
+                   <svg className="w-3.5 h-3.5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                   {processLogs[id].name}
+                   {isThisRunning && (
+                      <span className="flex h-2 w-2 ml-1 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                   )}
+                </div>
+              )
+            })}
+          </div>
+          {/* 🟢 MOUNT ACTION BUTTONS */}
+          {actionButtons}
         </div>
       ) : (
-        /* Legacy Single Terminal Header */
+        /* 🟢 UPDATED LEGACY SINGLE TERMINAL HEADER */
         <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-center justify-between px-3 border-b border-gray-300 dark:border-[#252526] shrink-0 transition-colors">
           <div className="flex items-center gap-2 text-[13px] text-gray-700 dark:text-[#cccccc] font-medium select-none">
             <svg className="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
@@ -109,6 +137,8 @@ export default function TerminalPreview({
               </span>
             )}
           </div>
+          {/* 🟢 MOUNT ACTION BUTTONS */}
+          {actionButtons}
         </div>
       )}
 

@@ -93,7 +93,7 @@ export function useRemoteRunner(wsUrl: string) {
       ...prev,
       [targetFile.id]: {
         name: targetFile.name,
-        logs: [{ id: Math.random().toString(36).substring(2, 9), type: 'sys', content: '// Connecting to server... Executing...\n' }]
+        logs: [{ id: Math.random().toString(36).substring(2, 9), type: 'sys', content: 'Executing...\n' }]
       }
     }));
 

@@ -50,12 +50,14 @@ if (adsData?.data) {
 ---
 
 <Layout seo={compiler.data.seo} titleFallback={compiler.data.title} excerptFallback={compiler.data.excerpt}>
-  <div class="w-full max-w-[1920px] mx-auto px-2 sm:px-4 pb-12 mt-6 lg:mt-8 compiler-wrapper">    
+  {/* Removed max-width, horizontal padding, and top margin */}
+  <div class="w-full pb-12">    
     
     <div class="flex-1 min-w-0 flex flex-col gap-4">
         
         {/* DYNAMIC COMPILER ROUTING */}
-        <div class="relative w-full z-10 h-[calc(100dvh-100px)] md:h-[calc(100vh-100px)]">
+        {/* Changed calculation to exactly 100vh minus the 48px header */}
+        <div class="relative w-full z-10 h-[calc(100dvh-48px)] md:mt-[20px] md:h-[calc(100vh-68px)]">
           
           {compilerLang === 'python' && (
             <PythonWorkspace 
@@ -173,13 +175,6 @@ if (adsData?.data) {
     flex-direction: column;
   }
 
-  /* Custom 1400px Padding Override for the IDE Wrapper */
-  @media (min-width: 1400px) {
-    .compiler-wrapper {
-      padding-left: 50px !important;
-      padding-right: 50px !important;
-    }
-  }
 
   /* * ==============================================
    * MARKDOWN TYPOGRAPHY STYLES 
