@@ -33,37 +33,25 @@ starterFiles:
       main();
   - filename: main2.js
     language: javascript
-    content: |2-
-        console.log("Normal log");
+    content: |-
+      console.log("Normal log");
+      console.info("Info log");
+      console.warn("Warning log");
+      console.error("Error log");
 
-        console.info("Info log");
+      console.table([{ name: "Alice", age: 20 }, { name: "Bob", age: 25 }]);
 
-        console.warn("Warning log");
+      for (let i = 1; i <= 10; i++) console.log("Counter:", i);
 
-        console.error("Error log");
+      try {
+        undefinedFunction();
+      } catch (error) {
+        console.error("Caught Error:", error.message);
+      }
 
-        console.table([
-          { name: "Alice", age: 20 },
-          { name: "Bob", age: 25 }
-        ]);
+      console.time("smallLoop");
+      for (let i = 0; i < 1000; i++) Math.sqrt(i);
+      console.timeEnd("smallLoop");
 
-        for (let i = 1; i <= 10; i++) {
-          console.log("Counter:", i);
-        }
-
-        try {
-          undefinedFunction();
-        } catch (error) {
-          console.error("Caught Error:", error.message);
-        }
-
-        console.time("smallLoop");
-
-        for (let i = 0; i < 1000; i++) {
-          Math.sqrt(i);
-        }
-
-        console.timeEnd("smallLoop");
-
-        console.log("%cStyled message", "color: green; font-size: 18px;");
+      console.log("%cStyled message", "color: green; font-size: 18px;");
 ---
