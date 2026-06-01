@@ -44,7 +44,7 @@ const { Content } = await render(quiz);
       
       <div class="flex flex-col gap-3">
         {childQuizzes.length > 0 ? childQuizzes.map((item, index) => (
-          <a href={`/quizzes/${quiz.id}/${item.data.urlSlug}`} class="p-4 rounded-xl border border-subtle bg-surface hover:border-brand/50 hover:shadow-sm transition-all flex items-center justify-between group">
+          <a href={`/quizzes/${quiz.id}/${item.data.urlSlug}`} class="p-4 rounded-xl bg-surface hover:shadow-sm transition-all flex items-center justify-between group">
             <div class="flex items-center gap-4">
               <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center text-tx-muted font-bold group-hover:bg-brand/10 group-hover:text-brand transition-colors">
                 {index + 1}
