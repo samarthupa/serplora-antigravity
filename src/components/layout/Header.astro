@@ -27,7 +27,7 @@ const primaryBtn = {
   id="site-header" 
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
   {/* Added: border-b border-subtle */}
-  class={`inset-x-0 w-full z-[200] h-[52px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class={`inset-x-0 w-full z-[200] h-[60px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
   <div class="w-full px-4 md:px-8 flex items-center gap-2 md:gap-10">
     
@@ -52,7 +52,7 @@ const primaryBtn = {
             {/* Light theme logo */}
             <img src={logo} alt={siteTitle} width="160" height="40" class="h-8 md:h-8 w-auto object-contain dark:hidden" />
             {/* Dark theme logo */}
-            <img src={logoDark} alt={siteTitle} width="160" height="40" class="h-8 md:h-8 w-auto object-contain hidden dark:block" />
+            <img src={logoDark} alt={siteTitle} width="160" height="40" class="h-8 md:h-10 w-auto object-contain hidden dark:block" />
           </>
         )}
         {!logo && <span class="text-[17px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
