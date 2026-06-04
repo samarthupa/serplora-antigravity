@@ -148,7 +148,7 @@ export default function EditorArea({
 
         /* 2. Custom Scrollbars */
         .cm-scroller {
-          scrollbar-width: thin;
+          scrollbar-width: auto;
           scrollbar-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.2) transparent' : 'rgba(0, 0, 0, 0.2) transparent'};
         }
         .cm-scroller::-webkit-scrollbar { width: 14px; height: 14px; }

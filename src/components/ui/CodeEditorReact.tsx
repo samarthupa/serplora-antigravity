@@ -44,6 +44,13 @@ export default function CodeEditorReact({ code, language }: any) {
     if (language === 'javascript' || language === 'js') exts.push(javascript());
     if (language === 'python' || language === 'py') exts.push(python());
     
+    // 🟢 FIX: Remove the horizontal sticky behavior from the gutter
+    exts.push(EditorView.theme({
+      ".cm-gutters": {
+        position: "static !important",
+      }
+    }));
+
     exts.push(EditorView.contentAttributes.of({ 'aria-label': 'Interactive code editor' }));
     return exts;
   }, [language]);
