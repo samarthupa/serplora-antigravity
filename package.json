@@ -32,22 +32,17 @@
     "@uiw/react-codemirror": "^4.25.10",
     "astro": "^6.0.5",
     "astro-pagefind": "^1.8.6",
-    "codejar": "^4.3.0",
-    "codejar-linenumbers": "^1.0.1",
     "js-yaml": "^4.1.1",
     "jszip": "^3.10.1",
     "photoswipe": "^5.4.4",
-    "prismjs": "^1.30.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-simple-code-editor": "^0.14.1",
     "relatinator": "^2.1.0",
     "tailwindcss": "^4.2.1",
     "wrangler": "^4.76.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260516.1",
-    "@types/prismjs": "^1.26.6",
     "typescript": "^6.0.3"
   }
 }

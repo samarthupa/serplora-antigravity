@@ -32,7 +32,7 @@ function VirtualizedEditor({ file, isDarkMode, settings, onChange, isActive }: a
     },
     ".cm-content": {
       fontFamily: "monospace",
-      padding: "12px 12px 12px 16px",
+      padding: "8px 12px 12px 6px",
     },
     ".cm-scroller": {
       overflow: "auto !important",
@@ -49,7 +49,7 @@ function VirtualizedEditor({ file, isDarkMode, settings, onChange, isActive }: a
       position: "static !important", 
     },
     ".cm-lineNumbers .cm-gutterElement": {
-      padding: "0 16px 0 12px !important", 
+      padding: "0 8px 0 8px !important", 
     }
   });
 
@@ -64,7 +64,6 @@ function VirtualizedEditor({ file, isDarkMode, settings, onChange, isActive }: a
     <div 
       style={{ display: isActive ? 'block' : 'none' }} 
       className="absolute inset-0 overflow-hidden bg-white dark:bg-[#1e1e1e] mobile-editor-wrapper"
-      // 🟢 FIX: Removed onContextMenu preventDefault so native OS copy/paste menus can fire
     >
       <CodeMirror
         className="h-full w-full"
@@ -140,7 +139,6 @@ export default function EditorArea({
       <style>{`
         /* 1. Mobile Constraints */
         .mobile-editor-wrapper {
-          /* 🟢 FIX: Removed -webkit-touch-callout: none to allow OS Copy/Paste bubbles */
           -webkit-tap-highlight-color: transparent !important;
         }
         .cm-content {
@@ -148,129 +146,140 @@ export default function EditorArea({
           user-select: text !important;
         }
 
-        /* 2. Custom Scrollbars for CodeMirror */
+        /* 2. Custom Scrollbars */
         .cm-scroller {
           scrollbar-width: thin;
           scrollbar-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.2) transparent' : 'rgba(0, 0, 0, 0.2) transparent'};
         }
-        .cm-scroller::-webkit-scrollbar {
-          width: 14px;
-          height: 14px;
-        }
-        .cm-scroller::-webkit-scrollbar-track {
-          background: transparent;
-        }
+        .cm-scroller::-webkit-scrollbar { width: 14px; height: 14px; }
+        .cm-scroller::-webkit-scrollbar-track { background: transparent; }
         .cm-scroller::-webkit-scrollbar-thumb {
           background-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'};
-          border: 4px solid transparent;
-          background-clip: padding-box;
-          border-radius: 8px;
+          border: 4px solid transparent; background-clip: padding-box; border-radius: 8px;
         }
-        .cm-scroller::-webkit-scrollbar-thumb:hover {
-          background-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)'};
-        }
-        .cm-scroller::-webkit-scrollbar-corner {
-          background: transparent;
-        }
+        .cm-scroller::-webkit-scrollbar-thumb:hover { background-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)'}; }
+        .cm-scroller::-webkit-scrollbar-corner { background: transparent; }
 
-        /* 3. Hide legacy scrollbars on generic containers */
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-        /* 4. COMPACT VS CODE SEARCH WIDGET */
-        .cm-panels {
-          background-color: transparent !important;
-        }
-        .cm-panels-top {
-          border-bottom: none !important;
-        }
+        /* 🟢 4. SQUARE-STYLE VS CODE SEARCH WIDGET */
+        .cm-panels { background-color: transparent !important; }
+        .cm-panels-top { border-bottom: none !important; }
         
         .cm-search {
+          display: block !important; 
           position: absolute !important;
-          top: 0;
-          right: 28px; 
+          top: 12px !important;
+          right: 28px !important; 
           z-index: 100;
           background-color: ${isDarkMode ? '#252526' : '#ffffff'} !important;
           border: 1px solid ${isDarkMode ? '#454545' : '#cccccc'} !important;
-          border-top: none !important;
-          border-radius: 0 0 6px 6px !important;
-          padding: 8px 32px 8px 12px !important;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          border-radius: 6px !important;
+          padding: 12px 36px 12px 16px !important; 
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
           font-family: system-ui, -apple-system, sans-serif;
-          font-size: 13px;
           color: ${isDarkMode ? '#cccccc' : '#333333'};
-          max-width: 500px;
-          line-height: 2.2; 
+          width: 320px !important; 
+          max-width: calc(100vw - 40px) !important;
         }
 
-        /* STRIP ALL OS-DEFAULT STYLING FROM BUTTONS */
+        .cm-search br { display: none !important; }
+
+        /* ROW 1: Inputs */
+        .cm-search input[type="text"], .cm-search input.cm-textfield {
+          display: block !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          background-color: ${isDarkMode ? '#3c3c3c' : '#f3f4f6'} !important;
+          border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
+          color: ${isDarkMode ? '#fff' : '#000'} !important;
+          border-radius: 4px;
+          padding: 6px 10px;
+          margin: 0 0 8px 0 !important;
+          outline: none;
+          font-size: 13px;
+          transition: border-color 0.2s;
+        }
+        .cm-search input.cm-textfield:focus {
+          border-color: #007acc !important;
+        }
+
+        /* Buttons Global */
         .cm-search button {
           appearance: none !important;
-          -webkit-appearance: none !important;
-          background-color: transparent !important;
-          background-image: none !important;
+          background-color: ${isDarkMode ? '#333333' : '#f8f9fa'} !important;
           border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
           color: ${isDarkMode ? '#ccc' : '#333'} !important;
-          border-radius: 3px;
-          padding: 2px 8px;
-          margin-right: 4px;
+          border-radius: 4px;
+          padding: 5px 12px;
           cursor: pointer;
           text-transform: capitalize;
           font-size: 12px;
-          vertical-align: middle;
+          font-weight: 500;
+          transition: all 0.2s;
         }
         .cm-search button:hover {
           background-color: ${isDarkMode ? '#444' : '#e5e7eb'} !important;
           color: ${isDarkMode ? '#fff' : '#000'} !important;
         }
 
-        /* Inputs */
-        .cm-search input[type="text"], .cm-search input.cm-textfield {
-          background-color: ${isDarkMode ? '#3c3c3c' : '#f3f4f6'} !important;
-          border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
-          color: ${isDarkMode ? '#fff' : '#000'} !important;
-          border-radius: 3px;
-          padding: 3px 6px;
-          margin-right: 6px;
-          outline: none;
-          min-width: 160px;
-          vertical-align: middle;
-        }
-        .cm-search input[type="text"]:focus, .cm-search input.cm-textfield:focus {
-          border-color: #007acc !important;
+        /* ROW 1.5: Find Buttons */
+        .cm-search button[name="next"],
+        .cm-search button[name="prev"],
+        .cm-search button[name="select"] {
+          display: inline-block !important;
+          margin: 0 6px 12px 0 !important;
         }
 
-        /* Checkboxes */
+        /* ROW 2: Checkboxes */
         .cm-search label {
-          display: inline-flex;
+          display: inline-flex !important;
           align-items: center;
           gap: 4px;
-          margin-right: 8px;
+          margin: 0 10px 12px 0 !important;
           cursor: pointer;
           font-size: 12px;
-          vertical-align: middle;
+          color: ${isDarkMode ? '#bbb' : '#555'};
         }
+        .cm-search label:hover { color: ${isDarkMode ? '#ddd' : '#333'}; }
         .cm-search label input[type="checkbox"] {
           margin: 0;
+          width: 14px;
+          height: 14px;
           accent-color: #007acc;
+          cursor: pointer;
         }
 
-        /* Close Button styling */
+        /* ROW 3.5: Replace Buttons */
+        .cm-search button[name="replace"],
+        .cm-search button[name="replaceAll"] {
+          display: inline-block !important;
+          margin: 0 6px 0 0 !important;
+        }
+
+        /* The Close (X) Button */
         .cm-search button[name="close"] {
-          position: absolute;
-          top: 6px;
-          right: 6px;
+          position: absolute !important;
+          top: 6px !important;
+          right: 6px !important;
+          width: 26px !important;
+          height: 26px !important;
+          padding: 0 !important;
+          margin: 0 !important;
           border: none !important;
           background: transparent !important;
-          font-size: 18px;
-          padding: 0 4px;
-          color: ${isDarkMode ? '#858585' : '#666'} !important;
-          margin: 0;
-          line-height: 1;
+          font-size: 20px !important;
+          line-height: 1 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          color: ${isDarkMode ? '#858585' : '#888'} !important;
         }
         .cm-search button[name="close"]:hover {
-          background-color: transparent !important;
+          background-color: ${isDarkMode ? '#444' : '#e5e7eb'} !important;
           color: ${isDarkMode ? '#fff' : '#000'} !important;
+          border-radius: 4px !important;
         }
       `}</style>
       
