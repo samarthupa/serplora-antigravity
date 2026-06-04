@@ -1,75 +1,89 @@
 // src/components/compiler/EditorArea.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { CodeJar } from 'codejar';
-import { withLineNumbers } from 'codejar-linenumbers';
-import Prism from 'prismjs';
-
-// Bundle syntax languages
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-python';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-markup'; // HTML
+import React, { useState, useEffect } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+import { python } from '@codemirror/lang-python';
+import { EditorView } from '@codemirror/view';
+import { search } from '@codemirror/search'; // 🟢 NEW: Import the search module
 
 // --------------------------------------------------------
-// 1. INDIVIDUAL TAB EDITOR (Preserves Native Undo/Redo)
+// 1. INDIVIDUAL TAB EDITOR (Virtualization for 10k+ lines)
 // --------------------------------------------------------
-function CodeJarEditor({ file, isDarkMode, settings, onChange, isActive }: any) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const jarRef = useRef<any>(null);
+function VirtualizedEditor({ file, isDarkMode, settings, onChange, isActive }: any) {
   
-  // Lock to prevent React from wiping the history stack on every keystroke
-  const isTyping = useRef(false);
-
-  useEffect(() => {
-    if (!editorRef.current) return;
-
-    const highlight = (editor: HTMLElement) => {
-      let lang = file.language || 'javascript';
-      if (lang === 'html') lang = 'markup'; 
-      const syntax = Prism.languages[lang] || Prism.languages.javascript;
-      editor.innerHTML = Prism.highlight(editor.textContent || '', syntax, lang);
-    };
-
-    // Smart Toggle: Hide gutter completely if wordWrap is enabled
-    const shouldShowGutter = settings?.showGutter && !settings?.wordWrap;
-
-    const jar = CodeJar(
-      editorRef.current,
-      shouldShowGutter ? withLineNumbers(highlight) : highlight,
-      { tab: '  ', history: true } 
-    );
-    jarRef.current = jar;
-
-    jar.onUpdate((code: string) => {
-      isTyping.current = true;
-      onChange(code, file.id);
-      setTimeout(() => { isTyping.current = false; }, 0);
-    });
-    
-    jar.updateCode(file.content || '');
-
-    return () => jar.destroy();
-  }, [settings?.showGutter, settings?.wordWrap, file.language]);
-
-  // Sync state if changed externally
-  useEffect(() => {
-    if (jarRef.current && !isTyping.current && file.content !== jarRef.current.toString()) {
-      const pos = jarRef.current.save();
-      jarRef.current.updateCode(file.content || '');
-      jarRef.current.restore(pos);
+  // Map file extensions to CM6 language parsers
+  const getLanguageExtension = (lang: string) => {
+    switch(lang) {
+      case 'html': return html();
+      case 'css': return css();
+      case 'python': return python();
+      default: return javascript();
     }
-  }, [file.content]);
+  };
+
+  // Strip down CM6 to feel like a raw textarea
+  const minimalTheme = EditorView.theme({
+    "&": {
+      height: "100%",
+      fontSize: `${settings?.fontSize || 14}px`,
+      backgroundColor: "transparent !important", 
+    },
+    ".cm-content": {
+      fontFamily: "monospace",
+      padding: "12px 12px 12px 16px",
+    },
+    ".cm-scroller": {
+      overflow: "auto !important",
+      height: "100% !important",
+      fontFamily: "monospace",
+    },
+    // Hide all the noisy IDE visual elements
+    ".cm-activeLine": { backgroundColor: "transparent !important" },
+    ".cm-activeLineGutter": { backgroundColor: "transparent !important" },
+    ".cm-gutters": {
+      backgroundColor: "transparent !important",
+      borderRight: `1px solid ${isDarkMode ? "#3c3c3c" : "#e5e7eb"} !important`, 
+      color: isDarkMode ? "#858585" : "#6b7280",
+      position: "static !important", 
+    },
+    ".cm-lineNumbers .cm-gutterElement": {
+      padding: "0 16px 0 12px !important", 
+    }
+  });
+
+  const extensions = [
+    getLanguageExtension(file.language),
+    minimalTheme,
+    search({ top: true }), // 🟢 NEW: Forces the search panel to render at the top
+    ...(settings?.wordWrap ? [EditorView.lineWrapping] : [])
+  ];
 
   return (
-    <div style={{ display: isActive ? 'block' : 'none' }} className="absolute inset-0 overflow-auto bg-white dark:bg-[#1e1e1e] custom-scrollbar">
-      <div
-        ref={editorRef}
-        style={{
-          fontSize: `${settings?.fontSize || 14}px`,
-          minHeight: '100%',
+    <div 
+      style={{ display: isActive ? 'block' : 'none' }} 
+      className="absolute inset-0 overflow-hidden bg-white dark:bg-[#1e1e1e] mobile-editor-wrapper"
+      onContextMenu={(e) => e.preventDefault()} // Disables right-click menu natively
+    >
+      <CodeMirror
+        className="h-full w-full"
+        value={file.content || ''}
+        height="100%"
+        theme={isDarkMode ? 'dark' : 'light'}
+        extensions={extensions}
+        onChange={(val) => onChange(val, file.id)}
+        // Turn off heavy IDE features to keep it lightweight
+        basicSetup={{
+          lineNumbers: settings?.showGutter,
+          foldGutter: false,
+          dropCursor: false,
+          allowMultipleSelections: false,
+          indentOnInput: false,
+          highlightActiveLine: false,
+          highlightSelectionMatches: false,
+          autocompletion: false, 
         }}
-        // 🟢 NEW: Added the 'codejar-editor-core' class to force !important wrap rules
-        className={`codejar-editor-core font-mono p-3 outline-none ${isDarkMode ? 'dark-theme text-[#cccccc]' : 'light-theme text-[#333333]'}`}
       />
     </div>
   );
@@ -121,91 +135,143 @@ export default function EditorArea({
   const openTabs = openFileIds.map((id: string) => files.find((f: any) => f.id === id)).filter(Boolean);
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors">
+    <div className="flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors min-w-0 min-h-0">
       
       <style>{`
-        /* 1. CodeJar Line Number Layout */
-        .codejar-wrap { 
-          display: flex !important; 
-          flex-direction: row !important; 
-          min-height: 100%; 
-          /* 🟢 NEW: Forces the wrapper to expand, activating the parent's horizontal scrollbar */
-          ${!editorSettings?.wordWrap ? 'min-width: max-content !important;' : ''}
+        /* 1. Mobile Constraints */
+        .mobile-editor-wrapper {
+          -webkit-touch-callout: none !important;
+          -webkit-tap-highlight-color: transparent !important;
         }
-        
-        /* 2. The Code Editor Wrapper */
-        .codejar-wrap > div:last-child { 
-          flex: 1 1 auto !important; 
-          min-width: 0 !important; 
-          padding-left: 12px !important; 
+        .cm-content {
+          -webkit-user-select: text !important;
+          user-select: text !important;
         }
 
-        /* 🟢 3. FORCE WORD WRAP RULES (Overrides CodeJar's hardcoded JS) */
-        .codejar-editor-core {
-          white-space: ${editorSettings?.wordWrap ? 'pre-wrap' : 'pre'} !important;
-          overflow-wrap: ${editorSettings?.wordWrap ? 'anywhere' : 'normal'} !important;
+        /* 2. Custom Scrollbars for CodeMirror */
+        .cm-scroller {
+          scrollbar-width: thin;
+          scrollbar-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.2) transparent' : 'rgba(0, 0, 0, 0.2) transparent'};
+        }
+        .cm-scroller::-webkit-scrollbar {
+          width: 14px;
+          height: 14px;
+        }
+        .cm-scroller::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .cm-scroller::-webkit-scrollbar-thumb {
+          background-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'};
+          border: 4px solid transparent;
+          background-clip: padding-box;
+          border-radius: 8px;
+        }
+        .cm-scroller::-webkit-scrollbar-thumb:hover {
+          background-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)'};
+        }
+        .cm-scroller::-webkit-scrollbar-corner {
+          background: transparent;
         }
 
-        /* 4. The Line Numbers Gutter */
-        .codejar-linenumbers {
-          font-family: monospace;
-          padding-left: 10px !important; 
-          padding-right: 10px !important; 
-          border-right: 1px solid ${isDarkMode ? '#3c3c3c' : '#e5e7eb'} !important;
-          background-color: ${isDarkMode ? '#1e1e1e' : '#ffffff'} !important;
-          flex-shrink: 0 !important; 
-          text-align: right !important;
-          position: sticky !important; 
-          left: 0 !important; 
-          z-index: 10 !important;
-        }
-
-        /* OVERRIDE: Force the inner numbers to ignore the plugin's inline light gray style */
-        .codejar-linenumber {
-          color: ${isDarkMode ? '#858585' : '#6b7280'} !important;
-        }
-
-        /* PrismJS Themes */
-        .light-theme .token.comment, .light-theme .token.doctype, .light-theme .token.cdata { color: #6a737d; font-style: italic; }
-        .light-theme .token.punctuation { color: #24292e; }
-        .light-theme .token.property, .light-theme .token.tag, .light-theme .token.boolean, .light-theme .token.number, .light-theme .token.constant { color: #005cc5; }
-        .light-theme .token.selector, .light-theme .token.attr-name, .light-theme .token.string, .light-theme .token.builtin { color: #032f62; }
-        .light-theme .token.operator, .light-theme .token.entity, .light-theme .token.url, .light-theme .token.keyword { color: #d73a49; }
-        .light-theme .token.function, .light-theme .token.class-name { color: #6f42c1; }
-        
-        .dark-theme .token.comment, .dark-theme .token.doctype, .dark-theme .token.cdata { color: #999999; font-style: italic; }
-        .dark-theme .token.punctuation { color: #cccccc; }
-        .dark-theme .token.tag, .dark-theme .token.attr-name { color: #e2777a; }
-        .dark-theme .token.function-name { color: #6196cc; }
-        .dark-theme .token.boolean, .dark-theme .token.number, .dark-theme .token.function { color: #f08d49; }
-        .dark-theme .token.property, .dark-theme .token.class-name, .dark-theme .token.constant { color: #f8c555; }
-        .dark-theme .token.selector, .dark-theme .token.keyword, .dark-theme .token.builtin { color: #cc99cd; }
-        .dark-theme .token.string, .dark-theme .token.attr-value, .dark-theme .token.variable { color: #7ec699; }
-        .dark-theme .token.operator, .dark-theme .token.entity, .dark-theme .token.url { color: #67cdcc; }
-
+        /* 3. Hide legacy scrollbars on generic containers */
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+        /* 🟢 4. VS CODE STYLE FLOATING SEARCH WIDGET */
+        .cm-panels {
+          background-color: transparent !important;
+        }
+        .cm-panels-top {
+          border-bottom: none !important;
+        }
+        .cm-search {
+          position: absolute !important;
+          top: 0;
+          right: 24px;
+          z-index: 100;
+          background-color: ${isDarkMode ? '#252526' : '#ffffff'} !important;
+          border: 1px solid ${isDarkMode ? '#3c3c3c' : '#e5e7eb'} !important;
+          border-top: none !important;
+          border-radius: 0 0 6px 6px !important;
+          padding: 10px 30px 10px 12px !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          font-family: sans-serif;
+          font-size: 12px;
+          color: ${isDarkMode ? '#cccccc' : '#333333'};
+        }
+        /* Search Layout Fixes */
+        .cm-search > div { display: flex; align-items: center; gap: 4px; }
+        .cm-search input[type="text"], .cm-search input.cm-textfield {
+          background-color: ${isDarkMode ? '#3c3c3c' : '#f3f4f6'} !important;
+          border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
+          color: ${isDarkMode ? '#fff' : '#000'} !important;
+          border-radius: 3px;
+          padding: 4px 6px;
+          outline: none;
+          min-width: 150px;
+        }
+        .cm-search input[type="text"]:focus, .cm-search input.cm-textfield:focus {
+          border-color: #007acc !important;
+        }
+        .cm-search button {
+          background-color: transparent !important;
+          border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
+          color: ${isDarkMode ? '#ccc' : '#333'} !important;
+          border-radius: 3px;
+          padding: 3px 8px;
+          cursor: pointer;
+          text-transform: capitalize;
+        }
+        .cm-search button:hover {
+          background-color: ${isDarkMode ? '#444' : '#e5e7eb'} !important;
+        }
+        .cm-search label {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin-right: 6px;
+          cursor: pointer;
+        }
+        .cm-search label input[type="checkbox"] {
+          margin: 0;
+        }
+        .cm-search button[name="close"] {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          border: none !important;
+          font-size: 16px;
+          padding: 0 6px;
+          opacity: 0.6;
+        }
+        .cm-search button[name="close"]:hover {
+          background-color: transparent !important;
+          opacity: 1;
+        }
       `}</style>
       
-      <div className={`${(isMobile && mobileActiveTab === 'console') || isConsoleFullscreen ? 'hidden' : 'flex flex-col flex-1'} overflow-hidden`}>
+      <div className={`${(isMobile && mobileActiveTab === 'console') || isConsoleFullscreen ? 'hidden' : 'flex flex-col flex-1'} overflow-hidden min-w-0 min-h-0`}>
         <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-end overflow-x-auto shrink-0 border-b border-gray-300 dark:border-[#252526] scrollbar-hide transition-colors">
-  {openTabs.map((file: any) => (
-    <div key={file.id} title={file.name} onClick={() => setActiveFileId(file.id)} 
-      className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-r-[#252526] transition-colors group max-w-[200px] shrink-0 ${
-        activeFileId === file.id 
-        ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t-2 border-t-[#007acc] dark:border-t-[#007acc]' 
-        : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t-2 border-t-transparent dark:border-t-transparent'
-      }`}
-    >
-        <span className="truncate block">{file.name}</span>
-    </div>
-  ))}
-</div>
+          {openTabs.map((file: any) => (
+            <div key={file.id} title={file.name} onClick={() => setActiveFileId(file.id)} 
+              className={`h-[35px] px-3.5 flex items-center gap-2 text-[13px] cursor-pointer select-none border-r border-gray-300 dark:border-r-[#252526] transition-colors group max-w-[200px] shrink-0 ${
+                activeFileId === file.id 
+                ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d4d4d4] border-t-2 border-t-[#007acc] dark:border-t-[#007acc]' 
+                : 'bg-gray-100 dark:bg-[#2d2d2d] text-gray-600 dark:text-[#9d9d9d] hover:bg-gray-200 dark:hover:bg-[#2a2d2e] border-t-2 border-t-transparent dark:border-t-transparent'
+              }`}
+            >
+                <span className="truncate block">{file.name}</span>
+            </div>
+          ))}
+        </div>
 
-        <div className="flex-1 relative bg-white dark:bg-[#1e1e1e]">
+        <div className="flex-1 relative bg-white dark:bg-[#1e1e1e] min-w-0 min-h-0">
           {openTabs.length > 0 ? (
             openTabs.map((file: any) => (
-              <CodeJarEditor 
+              <VirtualizedEditor 
                 key={`${file.id}-wrap:${editorSettings.wordWrap}-gutter:${editorSettings.showGutter}`}
                 file={file} 
                 isActive={activeFileId === file.id} 
@@ -234,8 +300,16 @@ export default function EditorArea({
             
             {!isMobile && (
               <div className="ml-auto flex gap-1 text-gray-500 dark:text-[#858585]">
-                <svg onClick={() => setIsConsoleFullscreen(!isConsoleFullscreen)} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{isConsoleFullscreen ? <polyline points="4 14 10 14 10 20M20 10 14 10 14 4M14 10 21 3M3 21 10 14"/> : <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>}</svg>
-                <svg onClick={() => { setIsConsoleOpen(false); setIsConsoleFullscreen(false); }} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                <svg onClick={() => setIsConsoleFullscreen(!isConsoleFullscreen)} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  {isConsoleFullscreen ? (
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                  ) : (
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  )}
+                </svg>
+                <svg onClick={() => { setIsConsoleOpen(false); setIsConsoleFullscreen(false); }} className="w-6 h-6 p-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a2d2e] rounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
               </div>
             )}
           </div>
