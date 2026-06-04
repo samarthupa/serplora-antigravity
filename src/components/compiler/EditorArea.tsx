@@ -6,7 +6,7 @@ import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
 import { python } from '@codemirror/lang-python';
 import { EditorView } from '@codemirror/view';
-import { search } from '@codemirror/search'; // 🟢 NEW: Import the search module
+import { search } from '@codemirror/search'; 
 
 // --------------------------------------------------------
 // 1. INDIVIDUAL TAB EDITOR (Virtualization for 10k+ lines)
@@ -56,7 +56,7 @@ function VirtualizedEditor({ file, isDarkMode, settings, onChange, isActive }: a
   const extensions = [
     getLanguageExtension(file.language),
     minimalTheme,
-    search({ top: true }), // 🟢 NEW: Forces the search panel to render at the top
+    search({ top: true }), 
     ...(settings?.wordWrap ? [EditorView.lineWrapping] : [])
   ];
 
@@ -64,7 +64,7 @@ function VirtualizedEditor({ file, isDarkMode, settings, onChange, isActive }: a
     <div 
       style={{ display: isActive ? 'block' : 'none' }} 
       className="absolute inset-0 overflow-hidden bg-white dark:bg-[#1e1e1e] mobile-editor-wrapper"
-      onContextMenu={(e) => e.preventDefault()} // Disables right-click menu natively
+      // 🟢 FIX: Removed onContextMenu preventDefault so native OS copy/paste menus can fire
     >
       <CodeMirror
         className="h-full w-full"
@@ -140,7 +140,7 @@ export default function EditorArea({
       <style>{`
         /* 1. Mobile Constraints */
         .mobile-editor-wrapper {
-          -webkit-touch-callout: none !important;
+          /* 🟢 FIX: Removed -webkit-touch-callout: none to allow OS Copy/Paste bubbles */
           -webkit-tap-highlight-color: transparent !important;
         }
         .cm-content {
@@ -177,79 +177,100 @@ export default function EditorArea({
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-        /* 🟢 4. VS CODE STYLE FLOATING SEARCH WIDGET */
+        /* 4. COMPACT VS CODE SEARCH WIDGET */
         .cm-panels {
           background-color: transparent !important;
         }
         .cm-panels-top {
           border-bottom: none !important;
         }
+        
         .cm-search {
           position: absolute !important;
           top: 0;
-          right: 24px;
+          right: 28px; 
           z-index: 100;
           background-color: ${isDarkMode ? '#252526' : '#ffffff'} !important;
-          border: 1px solid ${isDarkMode ? '#3c3c3c' : '#e5e7eb'} !important;
+          border: 1px solid ${isDarkMode ? '#454545' : '#cccccc'} !important;
           border-top: none !important;
           border-radius: 0 0 6px 6px !important;
-          padding: 10px 30px 10px 12px !important;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          font-family: sans-serif;
-          font-size: 12px;
+          padding: 8px 32px 8px 12px !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          font-family: system-ui, -apple-system, sans-serif;
+          font-size: 13px;
           color: ${isDarkMode ? '#cccccc' : '#333333'};
+          max-width: 500px;
+          line-height: 2.2; 
         }
-        /* Search Layout Fixes */
-        .cm-search > div { display: flex; align-items: center; gap: 4px; }
+
+        /* STRIP ALL OS-DEFAULT STYLING FROM BUTTONS */
+        .cm-search button {
+          appearance: none !important;
+          -webkit-appearance: none !important;
+          background-color: transparent !important;
+          background-image: none !important;
+          border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
+          color: ${isDarkMode ? '#ccc' : '#333'} !important;
+          border-radius: 3px;
+          padding: 2px 8px;
+          margin-right: 4px;
+          cursor: pointer;
+          text-transform: capitalize;
+          font-size: 12px;
+          vertical-align: middle;
+        }
+        .cm-search button:hover {
+          background-color: ${isDarkMode ? '#444' : '#e5e7eb'} !important;
+          color: ${isDarkMode ? '#fff' : '#000'} !important;
+        }
+
+        /* Inputs */
         .cm-search input[type="text"], .cm-search input.cm-textfield {
           background-color: ${isDarkMode ? '#3c3c3c' : '#f3f4f6'} !important;
           border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
           color: ${isDarkMode ? '#fff' : '#000'} !important;
           border-radius: 3px;
-          padding: 4px 6px;
+          padding: 3px 6px;
+          margin-right: 6px;
           outline: none;
-          min-width: 150px;
+          min-width: 160px;
+          vertical-align: middle;
         }
         .cm-search input[type="text"]:focus, .cm-search input.cm-textfield:focus {
           border-color: #007acc !important;
         }
-        .cm-search button {
-          background-color: transparent !important;
-          border: 1px solid ${isDarkMode ? '#555' : '#ccc'} !important;
-          color: ${isDarkMode ? '#ccc' : '#333'} !important;
-          border-radius: 3px;
-          padding: 3px 8px;
-          cursor: pointer;
-          text-transform: capitalize;
-        }
-        .cm-search button:hover {
-          background-color: ${isDarkMode ? '#444' : '#e5e7eb'} !important;
-        }
+
+        /* Checkboxes */
         .cm-search label {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          margin-right: 6px;
+          margin-right: 8px;
           cursor: pointer;
+          font-size: 12px;
+          vertical-align: middle;
         }
         .cm-search label input[type="checkbox"] {
           margin: 0;
+          accent-color: #007acc;
         }
+
+        /* Close Button styling */
         .cm-search button[name="close"] {
           position: absolute;
-          top: 4px;
-          right: 4px;
+          top: 6px;
+          right: 6px;
           border: none !important;
-          font-size: 16px;
-          padding: 0 6px;
-          opacity: 0.6;
+          background: transparent !important;
+          font-size: 18px;
+          padding: 0 4px;
+          color: ${isDarkMode ? '#858585' : '#666'} !important;
+          margin: 0;
+          line-height: 1;
         }
         .cm-search button[name="close"]:hover {
           background-color: transparent !important;
-          opacity: 1;
+          color: ${isDarkMode ? '#fff' : '#000'} !important;
         }
       `}</style>
       
