@@ -3,21 +3,16 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Movie Night">
-  <div id="auth-layer" class="fixed inset-0 z-50 bg-gray-900 flex flex-col items-center justify-center text-white">
-    <h1 class="text-2xl mb-4 font-mono">Restricted Access</h1>
-    <input type="password" id="pass-input" class="text-black p-2 rounded mb-2 w-64" placeholder="Enter password" />
-    <button id="login-btn" class="bg-blue-600 px-6 py-2 rounded font-semibold hover:bg-blue-700 transition">Enter</button>
-  </div>
-
-  <main class="flex h-screen w-screen bg-black overflow-hidden transition-all duration-300">
+  <main class="flex h-screen w-screen bg-black overflow-hidden transition-all duration-300 font-sans">
     
+    {/* --- MOVIE CONTAINER --- */}
     <div id="video-container" class="flex-grow flex flex-col items-center justify-center transition-all duration-300 w-full relative">
       
       <div class="absolute top-4 left-4 z-40 flex gap-2">
         {Array.from({length: 8}, (_, i) => i + 1).map((part) => (
           <button 
             data-part={part}
-            class="part-btn bg-gray-800 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+            class="part-btn bg-gray-900/80 text-white px-4 py-1.5 rounded-md font-semibold text-sm hover:bg-blue-600 transition-colors border border-gray-800"
           >
             Part {part}
           </button>
@@ -25,73 +20,172 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <video id="shared-video" class="w-full max-h-screen outline-none" controls>
-        {/* UPDATED: Using the new active R2 URL for the initial load */}
         <source id="video-source" src="https://pub-180d70048e494856af2392d19a5760f8.r2.dev/oc-1.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
 
-    <div id="chat-sidebar" class="w-96 h-screen border-l border-gray-800 transition-all duration-300 block bg-gray-950">
-      <iframe 
-        src="https://p2p.mirotalk.com/join/SamarthSecretMovieRoom77Xy" 
-        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay"
-        class="w-full h-full border-none">
-      </iframe>
+    {/* --- SIDEBAR (50% VIDEO / 50% CHAT) --- */}
+    <div id="sidebar" class="w-96 h-screen border-l border-gray-800 bg-gray-950 flex flex-col transition-all duration-300 flex-shrink-0">
+      
+      {/* Top Half: Native WebRTC Video Grid */}
+      <div class="h-1/2 border-b border-gray-800 p-3 overflow-y-auto bg-gray-950">
+        <div id="peer-videos" class="grid grid-cols-2 gap-3 auto-rows-max">
+          {/* Your local camera will be injected here automatically */}
+          <video id="local-video" class="w-full aspect-video object-cover bg-gray-900 rounded-lg border border-gray-800 shadow-sm" autoplay muted playsinline></video>
+        </div>
+      </div>
+
+      {/* Bottom Half: Native Text Chat */}
+      <div class="h-1/2 flex flex-col bg-gray-950">
+        <div id="chat-messages" class="flex-grow overflow-y-auto p-4 flex flex-col gap-2 text-sm">
+           <p class="text-gray-500 italic text-center text-xs mt-2">Chat connected. Press '1' to hide sidebar.</p>
+        </div>
+        <div class="p-3 border-t border-gray-800 bg-gray-900">
+          <input 
+            id="chat-input" 
+            type="text" 
+            class="w-full bg-black text-white p-2.5 rounded-md outline-none border border-gray-700 focus:border-blue-500 transition-colors text-sm" 
+            placeholder="Type a message..." 
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
     </div>
   </main>
 </Layout>
 
+{/* Scripts for Networking */}
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.4/mqtt.min.js"></script>
+<script is:inline src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
-    const correctPassword = "2123";
     const video = document.getElementById('shared-video');
     const source = document.getElementById('video-source');
+    const sidebar = document.getElementById('sidebar');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
     
-    // --- AUTH ---
-    const authLayer = document.getElementById('auth-layer');
-    const passInput = document.getElementById('pass-input');
-    document.getElementById('login-btn').addEventListener('click', () => {
-      if(passInput.value === correctPassword) authLayer.style.display = 'none';
-      else window.location.href = '/';
-    });
+    // Assign a random username for the chat session
+    const username = `Guest-${Math.floor(Math.random() * 1000)}`;
 
     // --- PART SELECTOR ---
     document.querySelectorAll('.part-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const part = e.target.dataset.part;
-        // UPDATED: Using the new active R2 URL for dynamically switching parts
         source.src = `https://pub-180d70048e494856af2392d19a5760f8.r2.dev/oc-${part}.mp4`;
         video.load();
         video.play();
       });
     });
 
-    // --- PANIC BUTTON ---
+    // --- TOGGLE SIDEBAR HOTKEY ('1') ---
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        const sidebar = document.getElementById('chat-sidebar');
-        sidebar.style.display = (sidebar.style.display === 'none') ? 'block' : 'none';
+      // Only toggle if the user isn't actively typing in the chat box
+      if (e.key === '1' && document.activeElement !== chatInput) {
+        sidebar.style.display = (sidebar.style.display === 'none') ? 'flex' : 'none';
       }
     });
 
-    // --- SYNC ---
-    const syncTopic = 'movie-sync-a8b2f9c4-7d1e-45fa-b982-c3f1e8a9d0b2';
+    // --- MQTT SETUP (Sync & Signaling) ---
+    const roomId = 'movie-room-a8b2f9c4'; // Simplified Room ID
+    const syncTopic = `${roomId}-sync`;
+    const chatTopic = `${roomId}-chat`;
+    const presenceTopic = `${roomId}-presence`;
+
     const client = mqtt.connect('wss://test.mosquitto.org:8081');
     let isRemoteAction = false;
 
-    client.on('connect', () => client.subscribe(syncTopic));
-    client.on('message', (topic, message) => {
-      const data = JSON.parse(message.toString());
-      isRemoteAction = true;
-      if (Math.abs(video.currentTime - data.time) > 1) video.currentTime = data.time;
-      if (data.action === 'play') video.play();
-      else if (data.action === 'pause') video.pause();
-      setTimeout(() => { isRemoteAction = false; }, 500);
+    client.on('connect', () => {
+      client.subscribe(syncTopic);
+      client.subscribe(chatTopic);
+      client.subscribe(presenceTopic);
     });
 
+    // --- MOVIE SYNCING ---
     video.addEventListener('play', () => { if (!isRemoteAction) client.publish(syncTopic, JSON.stringify({ action: 'play', time: video.currentTime })); });
     video.addEventListener('pause', () => { if (!isRemoteAction) client.publish(syncTopic, JSON.stringify({ action: 'pause', time: video.currentTime })); });
+
+    // --- TEXT CHAT EVENT ---
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+        client.publish(chatTopic, JSON.stringify({ sender: username, text: chatInput.value.trim() }));
+        chatInput.value = '';
+      }
+    });
+
+    // --- GLOBAL MESSAGE HANDLER ---
+    client.on('message', (topic, message) => {
+      const data = JSON.parse(message.toString());
+
+      // Handle Video Sync
+      if (topic === syncTopic) {
+        isRemoteAction = true;
+        if (Math.abs(video.currentTime - data.time) > 1) video.currentTime = data.time;
+        if (data.action === 'play') video.play();
+        else if (data.action === 'pause') video.pause();
+        setTimeout(() => { isRemoteAction = false; }, 500);
+      }
+
+      // Handle Chat Messages
+      if (topic === chatTopic) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'bg-gray-900 rounded-lg p-2.5 shadow-sm border border-gray-800';
+        msgDiv.innerHTML = `<span class="font-bold text-blue-400 text-xs uppercase tracking-wider block mb-0.5">${data.sender}</span><span class="text-gray-200">${data.text}</span>`;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+      }
+
+      // Handle WebRTC Peer Discovery
+      if (topic === presenceTopic && myPeer) {
+        if (data.action === 'join' && data.peerId !== myPeer.id && myStream) {
+          // A new user joined! Call them.
+          const call = myPeer.call(data.peerId, myStream);
+          const videoEl = document.createElement('video');
+          call.on('stream', userVideoStream => { addVideoStream(videoEl, userVideoStream, data.peerId); });
+        }
+      }
+    });
+
+    // --- WEBRTC CAMERA/AUDIO MESH (PeerJS) ---
+    let myPeer;
+    let myStream;
+    myPeer = new Peer(); // Auto-generates a unique ID for this browser tab
+
+    // 1. Get local camera and microphone
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+      myStream = stream;
+      document.getElementById('local-video').srcObject = stream;
+
+      // 2. Once connected to Peer server, announce presence to the room via MQTT
+      myPeer.on('open', id => {
+        client.publish(presenceTopic, JSON.stringify({ action: 'join', peerId: id }));
+      });
+
+      // 3. Answer incoming calls from other users
+      myPeer.on('call', call => {
+        call.answer(stream);
+        const videoEl = document.createElement('video');
+        call.on('stream', userVideoStream => {
+          addVideoStream(videoEl, userVideoStream, call.peer);
+        });
+      });
+    }).catch(err => {
+      console.warn("Camera/Mic access denied or unavailable", err);
+      // Even without a camera, they can still watch the movie and text chat
+    });
+
+    // Helper to add a friend's video to the grid
+    function addVideoStream(videoEl, stream, id) {
+      if(document.getElementById(`video-${id}`)) return; // Prevent duplicates
+      videoEl.id = `video-${id}`;
+      videoEl.srcObject = stream;
+      videoEl.autoplay = true;
+      videoEl.playsinline = true;
+      videoEl.className = "w-full aspect-video object-cover bg-gray-900 rounded-lg border border-gray-800 shadow-sm";
+      document.getElementById('peer-videos').appendChild(videoEl);
+    }
   });
 </script>
