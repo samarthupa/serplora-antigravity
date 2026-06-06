@@ -3,13 +3,15 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Movie Night">
-  {/* 🟢 CHANGED: Added 'fixed inset-0 z-[9999]' to cover headers/footers and lock to 100vh */}
+  {/* 🟢 COVER HEADERS/FOOTERS: fixed inset-0 z-[9999] */}
   <main class="fixed inset-0 z-[9999] flex bg-black overflow-hidden transition-all duration-300 font-sans">
     
     {/* --- MOVIE CONTAINER --- */}
-    <div id="video-container" class="flex-grow flex flex-col items-center justify-center transition-all duration-300 h-full relative">
+    {/* 🟢 ADDED 'group' class here to detect the mouse hover over the video area */}
+    <div id="video-container" class="group flex-grow flex flex-col items-center justify-center transition-all duration-300 h-full relative">
       
-      <div class="absolute top-4 left-4 z-40 flex gap-2">
+      {/* 🟢 ADDED opacity-0 group-hover:opacity-100 to hide/show buttons smoothly */}
+      <div class="absolute top-4 left-4 z-40 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         {Array.from({length: 8}, (_, i) => i + 1).map((part) => (
           <button 
             data-part={part}
