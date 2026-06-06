@@ -25,7 +25,8 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <video id="shared-video" class="w-full max-h-screen outline-none" controls>
-        <source id="video-source" src="https://pub-d3f708374417aa28062fc699618c8e83.r2.dev/oc-1.mp4" type="video/mp4" />
+        {/* UPDATED: Using the new active R2 URL for the initial load */}
+        <source id="video-source" src="https://pub-180d70048e494856af2392d19a5760f8.r2.dev/oc-1.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
@@ -60,7 +61,8 @@ import Layout from '../layouts/Layout.astro';
     document.querySelectorAll('.part-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const part = e.target.dataset.part;
-        source.src = `https://pub-d3f708374417aa28062fc699618c8e83.r2.dev/oc-${part}.mp4`;
+        // UPDATED: Using the new active R2 URL for dynamically switching parts
+        source.src = `https://pub-180d70048e494856af2392d19a5760f8.r2.dev/oc-${part}.mp4`;
         video.load();
         video.play();
       });
