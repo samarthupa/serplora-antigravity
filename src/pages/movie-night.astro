@@ -3,14 +3,14 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Movie Night">
-  {/* 🟢 COVER HEADERS/FOOTERS: fixed inset-0 z-[9999] */}
   <main class="fixed inset-0 z-[9999] flex bg-black overflow-hidden transition-all duration-300 font-sans">
     
+    {/* --- FLOATING CHAT TOAST CONTAINER --- */}
+    <div id="toast-container" class="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
     {/* --- MOVIE CONTAINER --- */}
-    {/* 🟢 ADDED 'group' class here to detect the mouse hover over the video area */}
     <div id="video-container" class="group flex-grow flex flex-col items-center justify-center transition-all duration-300 h-full relative">
       
-      {/* 🟢 ADDED opacity-0 group-hover:opacity-100 to hide/show buttons smoothly */}
       <div class="absolute top-4 left-4 z-40 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         {Array.from({length: 8}, (_, i) => i + 1).map((part) => (
           <button 
@@ -29,12 +29,11 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     {/* --- SIDEBAR (50% VIDEO / 50% CHAT) --- */}
-    <div id="sidebar" class="w-96 h-full border-l border-gray-800 bg-gray-950 flex flex-col transition-all duration-300 flex-shrink-0">
+    <div id="sidebar" style="display: none;" class="w-96 h-full border-l border-gray-800 bg-gray-950 flex-col transition-all duration-300 flex-shrink-0">
       
       {/* Top Half: Native WebRTC Video Grid */}
       <div class="h-1/2 border-b border-gray-800 p-3 overflow-y-auto bg-gray-950">
         <div id="peer-videos" class="grid grid-cols-2 gap-3 auto-rows-max">
-          {/* Your local camera will be injected here automatically */}
           <video id="local-video" class="w-full aspect-video object-cover bg-gray-900 rounded-lg border border-gray-800 shadow-sm" autoplay muted playsinline></video>
         </div>
       </div>
@@ -42,7 +41,7 @@ import Layout from '../layouts/Layout.astro';
       {/* Bottom Half: Native Text Chat */}
       <div class="h-1/2 flex flex-col bg-gray-950">
         <div id="chat-messages" class="flex-grow overflow-y-auto p-4 flex flex-col gap-2 text-sm">
-           <p class="text-gray-500 italic text-center text-xs mt-2">Chat connected. Press '1' to hide sidebar.</p>
+           <p class="text-gray-500 italic text-center text-xs mt-2">Chat connected. Press '1' to show/hide sidebar.</p>
         </div>
         <div class="p-3 border-t border-gray-800 bg-gray-900">
           <input 
@@ -59,7 +58,6 @@ import Layout from '../layouts/Layout.astro';
   </main>
 </Layout>
 
-{/* Scripts for Networking */}
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.4/mqtt.min.js"></script>
 <script is:inline src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
@@ -70,8 +68,8 @@ import Layout from '../layouts/Layout.astro';
     const sidebar = document.getElementById('sidebar');
     const chatInput = document.getElementById('chat-input');
     const chatMessages = document.getElementById('chat-messages');
+    const toastContainer = document.getElementById('toast-container');
     
-    // Assign a random username for the chat session
     const username = `Guest-${Math.floor(Math.random() * 1000)}`;
 
     // --- PART SELECTOR ---
@@ -86,14 +84,20 @@ import Layout from '../layouts/Layout.astro';
 
     // --- TOGGLE SIDEBAR HOTKEY ('1') ---
     document.addEventListener('keydown', (e) => {
-      // Only toggle if the user isn't actively typing in the chat box
-      if (e.key === '1' && document.activeElement !== chatInput) {
-        sidebar.style.display = (sidebar.style.display === 'none') ? 'flex' : 'none';
+      if (e.key === '1') {
+        e.preventDefault(); // Prevents typing '1' in the text box
+        if (sidebar.style.display === 'none') {
+          sidebar.style.display = 'flex';
+          chatInput.focus(); // Auto-focus the chat when opened
+        } else {
+          sidebar.style.display = 'none';
+          chatInput.blur(); // Remove focus when hidden so you don't keep typing
+        }
       }
     });
 
     // --- MQTT SETUP (Sync & Signaling) ---
-    const roomId = 'movie-room-a8b2f9c4'; // Simplified Room ID
+    const roomId = 'movie-room-a8b2f9c4'; 
     const syncTopic = `${roomId}-sync`;
     const chatTopic = `${roomId}-chat`;
     const presenceTopic = `${roomId}-presence`;
@@ -134,17 +138,31 @@ import Layout from '../layouts/Layout.astro';
 
       // Handle Chat Messages
       if (topic === chatTopic) {
+        // 1. Add to sidebar chat list
         const msgDiv = document.createElement('div');
         msgDiv.className = 'bg-gray-900 rounded-lg p-2.5 shadow-sm border border-gray-800';
         msgDiv.innerHTML = `<span class="font-bold text-blue-400 text-xs uppercase tracking-wider block mb-0.5">${data.sender}</span><span class="text-gray-200">${data.text}</span>`;
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+
+        // 2. Show Toast if sidebar is hidden
+        if (sidebar.style.display === 'none') {
+          const toast = document.createElement('div');
+          toast.className = 'bg-gray-900/90 text-white px-4 py-2 rounded-md border border-gray-700 shadow-lg backdrop-blur-sm transition-opacity duration-500 text-sm flex gap-2 items-center';
+          toast.innerHTML = `<span class="font-bold text-blue-400">${data.sender}:</span> <span>${data.text}</span>`;
+          toastContainer.appendChild(toast);
+
+          // Fade out and remove after 3 seconds
+          setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+          }, 3000);
+        }
       }
 
       // Handle WebRTC Peer Discovery
       if (topic === presenceTopic && myPeer) {
         if (data.action === 'join' && data.peerId !== myPeer.id && myStream) {
-          // A new user joined! Call them.
           const call = myPeer.call(data.peerId, myStream);
           const videoEl = document.createElement('video');
           call.on('stream', userVideoStream => { addVideoStream(videoEl, userVideoStream, data.peerId); });
@@ -152,22 +170,20 @@ import Layout from '../layouts/Layout.astro';
       }
     });
 
-    // --- WEBRTC CAMERA/AUDIO MESH (PeerJS) ---
+    // --- WEBRTC CAMERA MESH (PeerJS) ---
     let myPeer;
     let myStream;
-    myPeer = new Peer(); // Auto-generates a unique ID for this browser tab
+    myPeer = new Peer(); 
 
-    // 1. Get local camera and microphone
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+    // Disabled audio (audio: false) to prevent microphone sharing
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
       myStream = stream;
       document.getElementById('local-video').srcObject = stream;
 
-      // 2. Once connected to Peer server, announce presence to the room via MQTT
       myPeer.on('open', id => {
         client.publish(presenceTopic, JSON.stringify({ action: 'join', peerId: id }));
       });
 
-      // 3. Answer incoming calls from other users
       myPeer.on('call', call => {
         call.answer(stream);
         const videoEl = document.createElement('video');
@@ -176,17 +192,16 @@ import Layout from '../layouts/Layout.astro';
         });
       });
     }).catch(err => {
-      console.warn("Camera/Mic access denied or unavailable", err);
-      // Even without a camera, they can still watch the movie and text chat
+      console.warn("Camera access denied or unavailable", err);
     });
 
-    // Helper to add a friend's video to the grid
     function addVideoStream(videoEl, stream, id) {
-      if(document.getElementById(`video-${id}`)) return; // Prevent duplicates
+      if(document.getElementById(`video-${id}`)) return; 
       videoEl.id = `video-${id}`;
       videoEl.srcObject = stream;
       videoEl.autoplay = true;
       videoEl.playsinline = true;
+      videoEl.muted = true; // Extra safety precaution
       videoEl.className = "w-full aspect-video object-cover bg-gray-900 rounded-lg border border-gray-800 shadow-sm";
       document.getElementById('peer-videos').appendChild(videoEl);
     }
