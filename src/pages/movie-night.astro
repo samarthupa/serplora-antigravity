@@ -157,17 +157,31 @@ import Layout from '../layouts/Layout.astro';
 
     let myPeer = new Peer();
     let myStream;
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(s => {
+    
+    // 🟢 FIX 1: Set audio to false so the microphone is never asked for or used
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(s => {
       myStream = s;
       document.getElementById('local-video').srcObject = s;
       myPeer.on('open', id => announcePresence());
-      myPeer.on('call', call => { call.answer(s); call.on('stream', st => addVideoStream(document.createElement('video'), st, call.peer)); });
+      myPeer.on('call', call => { 
+        call.answer(s); 
+        call.on('stream', st => addVideoStream(document.createElement('video'), st, call.peer)); 
+      });
+    }).catch(err => {
+      console.warn("Camera access denied or unavailable", err);
     });
 
     function announcePresence() { if(client.connected && myPeer.id) client.publish(`${roomId}-presence`, JSON.stringify({ action: 'join', peerId: myPeer.id })); }
+    
     function addVideoStream(videoEl, stream, id) {
       if(document.getElementById(`video-${id}`)) return;
-      videoEl.id = `video-${id}`; videoEl.srcObject = stream; videoEl.autoplay = true; videoEl.muted = false;
+      videoEl.id = `video-${id}`; 
+      videoEl.srcObject = stream; 
+      videoEl.autoplay = true; 
+      
+      // 🟢 FIX 2: Explicitly force incoming video tags to remain completely muted
+      videoEl.muted = true; 
+      
       videoEl.className = "w-full aspect-video object-cover bg-gray-900 rounded-lg border border-gray-800 shadow-sm";
       document.getElementById('peer-videos').appendChild(videoEl);
     }
