@@ -53,7 +53,6 @@ import Layout from '../layouts/Layout.astro';
           />
         </div>
       </div>
-
     </div>
   </main>
 </Layout>
@@ -72,7 +71,6 @@ import Layout from '../layouts/Layout.astro';
     
     const username = `Guest-${Math.floor(Math.random() * 1000)}`;
 
-    // --- REUSABLE TOAST NOTIFICATION ---
     function showToast(htmlContent) {
       const toast = document.createElement('div');
       toast.className = 'bg-gray-900/90 text-white px-4 py-2 rounded-md border border-gray-700 shadow-lg backdrop-blur-sm transition-opacity duration-500 text-sm flex gap-2 items-center';
@@ -84,17 +82,14 @@ import Layout from '../layouts/Layout.astro';
       }, 3000);
     }
 
-    // --- PART SELECTOR ---
     document.querySelectorAll('.part-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const part = e.target.dataset.part;
-        source.src = `https://pub-180d70048e494856af2392d19a5760f8.r2.dev/oc-${part}.mp4`;
+        source.src = `https://pub-180d70048e494856af2392d19a5760f8.r2.dev/oc-${e.target.dataset.part}.mp4`;
         video.load();
         video.play();
       });
     });
 
-    // --- TOGGLE SIDEBAR HOTKEY ('1') ---
     document.addEventListener('keydown', (e) => {
       if (e.key === '1') {
         e.preventDefault(); 
@@ -108,124 +103,71 @@ import Layout from '../layouts/Layout.astro';
       }
     });
 
-    // --- MQTT SETUP (Sync & Signaling) ---
-    const roomId = 'movie-room-a8b2f9c4'; 
-    const syncTopic = `${roomId}-sync`;
-    const chatTopic = `${roomId}-chat`;
-    const presenceTopic = `${roomId}-presence`;
-
     const client = mqtt.connect('wss://test.mosquitto.org:8081');
+    const roomId = 'movie-room-a8b2f9c4'; 
     let isRemoteAction = false;
 
     client.on('connect', () => {
-      client.subscribe(syncTopic);
-      client.subscribe(chatTopic);
-      client.subscribe(presenceTopic);
+      client.subscribe(`${roomId}-sync`);
+      client.subscribe(`${roomId}-chat`);
+      client.subscribe(`${roomId}-presence`);
+      announcePresence();
     });
 
-    // --- BULLETPROOF MOVIE SYNCING ---
     const sendSync = (action, isBuffering = false) => {
       if (isRemoteAction) return;
-      client.publish(syncTopic, JSON.stringify({ 
-        sender: username, 
-        action: action, 
-        time: video.currentTime,
-        buffering: isBuffering 
-      }));
+      client.publish(`${roomId}-sync`, JSON.stringify({ sender: username, action, time: video.currentTime, buffering: isBuffering }));
     };
 
-    // Listeners for standard controls and seeking
     video.addEventListener('play', () => sendSync('play'));
     video.addEventListener('pause', () => sendSync('pause'));
     video.addEventListener('seeked', () => sendSync(video.paused ? 'pause' : 'play'));
-    
-    // The Magic Sauce: Listen for internet lag (Buffering)
     video.addEventListener('waiting', () => sendSync('pause', true));
 
-    // --- TEXT CHAT EVENT ---
     chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && chatInput.value.trim() !== '') {
-        client.publish(chatTopic, JSON.stringify({ sender: username, text: chatInput.value.trim() }));
+        client.publish(`${roomId}-chat`, JSON.stringify({ sender: username, text: chatInput.value.trim() }));
         chatInput.value = '';
       }
     });
 
-    // --- GLOBAL MESSAGE HANDLER ---
     client.on('message', (topic, message) => {
       const data = JSON.parse(message.toString());
-
-      // Handle Video Sync
-      if (topic === syncTopic) {
+      if (topic === `${roomId}-sync`) {
         isRemoteAction = true;
-        
-        // Force timestamp alignment if drift is more than 1 second
-        if (Math.abs(video.currentTime - data.time) > 1) video.currentTime = data.time;
-        
-        if (data.action === 'play') video.play();
-        else if (data.action === 'pause') video.pause();
-
-        // Alert the room if someone is pausing because of bad internet
-        if (data.buffering && data.sender !== username) {
-          showToast(`⚠️ <span class="font-bold text-yellow-400">${data.sender}</span> is buffering... Pausing.`);
-        }
-
-        setTimeout(() => { isRemoteAction = false; }, 500);
+        if (Math.abs(video.currentTime - data.time) > 1.5) video.currentTime = data.time;
+        data.action === 'play' ? video.play() : video.pause();
+        if (data.buffering && data.sender !== username) showToast(`⚠️ ${data.sender} is buffering...`);
+        setTimeout(() => isRemoteAction = false, 500);
       }
-
-      // Handle Chat Messages
-      if (topic === chatTopic) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'bg-gray-900 rounded-lg p-2.5 shadow-sm border border-gray-800';
-        msgDiv.innerHTML = `<span class="font-bold text-blue-400 text-xs uppercase tracking-wider block mb-0.5">${data.sender}</span><span class="text-gray-200">${data.text}</span>`;
-        chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight; 
-
-        if (sidebar.style.display === 'none') {
-          showToast(`<span class="font-bold text-blue-400">${data.sender}:</span> <span>${data.text}</span>`);
-        }
+      if (topic === `${roomId}-chat`) {
+        const msg = document.createElement('div');
+        msg.className = 'bg-gray-900 rounded-lg p-2.5 shadow-sm border border-gray-800';
+        msg.innerHTML = `<span class="font-bold text-blue-400 text-xs">${data.sender}:</span> ${data.text}`;
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (sidebar.style.display === 'none') showToast(`<b>${data.sender}:</b> ${data.text}`);
       }
-
-      // Handle WebRTC Peer Discovery
-      if (topic === presenceTopic && myPeer) {
-        if (data.action === 'join' && data.peerId !== myPeer.id && myStream) {
-          const call = myPeer.call(data.peerId, myStream);
-          const videoEl = document.createElement('video');
-          call.on('stream', userVideoStream => { addVideoStream(videoEl, userVideoStream, data.peerId); });
-        }
+      if (topic === `${roomId}-presence` && data.action === 'join' && data.peerId !== myPeer.id && myStream) {
+        const call = myPeer.call(data.peerId, myStream);
+        call.on('stream', s => addVideoStream(document.createElement('video'), s, data.peerId));
       }
+      if (topic === `${roomId}-presence` && data.action === 'rollcall') announcePresence();
     });
 
-    // --- WEBRTC CAMERA MESH (PeerJS) ---
-    let myPeer;
+    let myPeer = new Peer();
     let myStream;
-    myPeer = new Peer(); 
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
-      myStream = stream;
-      document.getElementById('local-video').srcObject = stream;
-
-      myPeer.on('open', id => {
-        client.publish(presenceTopic, JSON.stringify({ action: 'join', peerId: id }));
-      });
-
-      myPeer.on('call', call => {
-        call.answer(stream);
-        const videoEl = document.createElement('video');
-        call.on('stream', userVideoStream => {
-          addVideoStream(videoEl, userVideoStream, call.peer);
-        });
-      });
-    }).catch(err => {
-      console.warn("Camera access denied or unavailable", err);
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(s => {
+      myStream = s;
+      document.getElementById('local-video').srcObject = s;
+      myPeer.on('open', id => announcePresence());
+      myPeer.on('call', call => { call.answer(s); call.on('stream', st => addVideoStream(document.createElement('video'), st, call.peer)); });
     });
 
+    function announcePresence() { if(client.connected && myPeer.id) client.publish(`${roomId}-presence`, JSON.stringify({ action: 'join', peerId: myPeer.id })); }
     function addVideoStream(videoEl, stream, id) {
-      if(document.getElementById(`video-${id}`)) return; 
-      videoEl.id = `video-${id}`;
-      videoEl.srcObject = stream;
-      videoEl.autoplay = true;
-      videoEl.playsinline = true;
-      videoEl.muted = true;
+      if(document.getElementById(`video-${id}`)) return;
+      videoEl.id = `video-${id}`; videoEl.srcObject = stream; videoEl.autoplay = true; videoEl.muted = false;
       videoEl.className = "w-full aspect-video object-cover bg-gray-900 rounded-lg border border-gray-800 shadow-sm";
       document.getElementById('peer-videos').appendChild(videoEl);
     }
