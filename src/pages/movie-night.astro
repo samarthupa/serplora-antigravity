@@ -5,7 +5,7 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Movie Night">
   <main class="fixed inset-0 z-[9999] flex bg-black overflow-hidden transition-all duration-300 font-sans">
     
-    {/* --- FLOATING CHAT TOAST CONTAINER --- */}
+    {/* --- FLOATING TOAST CONTAINER --- */}
     <div id="toast-container" class="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     {/* --- MOVIE CONTAINER --- */}
@@ -72,6 +72,18 @@ import Layout from '../layouts/Layout.astro';
     
     const username = `Guest-${Math.floor(Math.random() * 1000)}`;
 
+    // --- REUSABLE TOAST NOTIFICATION ---
+    function showToast(htmlContent) {
+      const toast = document.createElement('div');
+      toast.className = 'bg-gray-900/90 text-white px-4 py-2 rounded-md border border-gray-700 shadow-lg backdrop-blur-sm transition-opacity duration-500 text-sm flex gap-2 items-center';
+      toast.innerHTML = htmlContent;
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+      }, 3000);
+    }
+
     // --- PART SELECTOR ---
     document.querySelectorAll('.part-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -85,13 +97,13 @@ import Layout from '../layouts/Layout.astro';
     // --- TOGGLE SIDEBAR HOTKEY ('1') ---
     document.addEventListener('keydown', (e) => {
       if (e.key === '1') {
-        e.preventDefault(); // Prevents typing '1' in the text box
+        e.preventDefault(); 
         if (sidebar.style.display === 'none') {
           sidebar.style.display = 'flex';
-          chatInput.focus(); // Auto-focus the chat when opened
+          chatInput.focus(); 
         } else {
           sidebar.style.display = 'none';
-          chatInput.blur(); // Remove focus when hidden so you don't keep typing
+          chatInput.blur(); 
         }
       }
     });
@@ -111,9 +123,24 @@ import Layout from '../layouts/Layout.astro';
       client.subscribe(presenceTopic);
     });
 
-    // --- MOVIE SYNCING ---
-    video.addEventListener('play', () => { if (!isRemoteAction) client.publish(syncTopic, JSON.stringify({ action: 'play', time: video.currentTime })); });
-    video.addEventListener('pause', () => { if (!isRemoteAction) client.publish(syncTopic, JSON.stringify({ action: 'pause', time: video.currentTime })); });
+    // --- BULLETPROOF MOVIE SYNCING ---
+    const sendSync = (action, isBuffering = false) => {
+      if (isRemoteAction) return;
+      client.publish(syncTopic, JSON.stringify({ 
+        sender: username, 
+        action: action, 
+        time: video.currentTime,
+        buffering: isBuffering 
+      }));
+    };
+
+    // Listeners for standard controls and seeking
+    video.addEventListener('play', () => sendSync('play'));
+    video.addEventListener('pause', () => sendSync('pause'));
+    video.addEventListener('seeked', () => sendSync(video.paused ? 'pause' : 'play'));
+    
+    // The Magic Sauce: Listen for internet lag (Buffering)
+    video.addEventListener('waiting', () => sendSync('pause', true));
 
     // --- TEXT CHAT EVENT ---
     chatInput.addEventListener('keypress', (e) => {
@@ -130,33 +157,31 @@ import Layout from '../layouts/Layout.astro';
       // Handle Video Sync
       if (topic === syncTopic) {
         isRemoteAction = true;
+        
+        // Force timestamp alignment if drift is more than 1 second
         if (Math.abs(video.currentTime - data.time) > 1) video.currentTime = data.time;
+        
         if (data.action === 'play') video.play();
         else if (data.action === 'pause') video.pause();
+
+        // Alert the room if someone is pausing because of bad internet
+        if (data.buffering && data.sender !== username) {
+          showToast(`⚠️ <span class="font-bold text-yellow-400">${data.sender}</span> is buffering... Pausing.`);
+        }
+
         setTimeout(() => { isRemoteAction = false; }, 500);
       }
 
       // Handle Chat Messages
       if (topic === chatTopic) {
-        // 1. Add to sidebar chat list
         const msgDiv = document.createElement('div');
         msgDiv.className = 'bg-gray-900 rounded-lg p-2.5 shadow-sm border border-gray-800';
         msgDiv.innerHTML = `<span class="font-bold text-blue-400 text-xs uppercase tracking-wider block mb-0.5">${data.sender}</span><span class="text-gray-200">${data.text}</span>`;
         chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+        chatMessages.scrollTop = chatMessages.scrollHeight; 
 
-        // 2. Show Toast if sidebar is hidden
         if (sidebar.style.display === 'none') {
-          const toast = document.createElement('div');
-          toast.className = 'bg-gray-900/90 text-white px-4 py-2 rounded-md border border-gray-700 shadow-lg backdrop-blur-sm transition-opacity duration-500 text-sm flex gap-2 items-center';
-          toast.innerHTML = `<span class="font-bold text-blue-400">${data.sender}:</span> <span>${data.text}</span>`;
-          toastContainer.appendChild(toast);
-
-          // Fade out and remove after 3 seconds
-          setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 500);
-          }, 3000);
+          showToast(`<span class="font-bold text-blue-400">${data.sender}:</span> <span>${data.text}</span>`);
         }
       }
 
@@ -175,7 +200,6 @@ import Layout from '../layouts/Layout.astro';
     let myStream;
     myPeer = new Peer(); 
 
-    // Disabled audio (audio: false) to prevent microphone sharing
     navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
       myStream = stream;
       document.getElementById('local-video').srcObject = stream;
@@ -201,7 +225,7 @@ import Layout from '../layouts/Layout.astro';
       videoEl.srcObject = stream;
       videoEl.autoplay = true;
       videoEl.playsinline = true;
-      videoEl.muted = true; // Extra safety precaution
+      videoEl.muted = true;
       videoEl.className = "w-full aspect-video object-cover bg-gray-900 rounded-lg border border-gray-800 shadow-sm";
       document.getElementById('peer-videos').appendChild(videoEl);
     }
