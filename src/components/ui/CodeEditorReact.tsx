@@ -38,16 +38,22 @@ export default function CodeEditorReact({ code, language }: any) {
   // Safely extract logs for this standalone editor
   const logs = processLogs['standalone-editor']?.logs || [];
 
+  // Line count check for line numbers (less than 5 lines hides them)
+  const showLineNumbers = value.split('\n').length >= 5;
+
   // Memoize extensions
   const extensions = useMemo(() => {
     const exts = [];
     if (language === 'javascript' || language === 'js') exts.push(javascript());
     if (language === 'python' || language === 'py') exts.push(python());
     
-    // 🟢 FIX: Remove the horizontal sticky behavior from the gutter
+    // Theme updates: static gutters & padding top for content
     exts.push(EditorView.theme({
       ".cm-gutters": {
         position: "static !important",
+      },
+      ".cm-content": {
+        padding: "16px 0 0 12px !important",
       }
     }));
 
@@ -128,15 +134,11 @@ export default function CodeEditorReact({ code, language }: any) {
   };
 
   const handleOpenInCompiler = () => {
-    // 1. Determine the destination based on the language
     const targetPath = (language === 'python' || language === 'py') 
       ? '/compilers/python' 
       : '/compilers/html';
 
-    // 2. Save the code to local storage temporarily
     localStorage.setItem('serplora_transfer_code', value);
-
-    // 3. Open the compiler page in a new tab, passing a ?transfer=true flag
     window.open(`${targetPath}?transfer=true`, '_blank');
   };
 
@@ -162,7 +164,9 @@ export default function CodeEditorReact({ code, language }: any) {
   return (
     <div
       ref={containerRef}
-      className={isFullscreen ? "bg-surface w-full h-full flex flex-col m-0 relative z-[9999]" : "relative my-8 rounded-[0.75rem] overflow-hidden border border-subtle shadow-sm bg-surface"}
+      className={isFullscreen 
+        ? "bg-surface w-full h-full flex flex-col m-0 relative z-[9999]" 
+        : "relative my-8 rounded-[0.75rem] overflow-hidden border border-subtle shadow-sm bg-surface"}
     >
       {/* HEADER & CONTROLS */}
       <div className="bg-surface px-4 py-2 border-b border-subtle flex justify-between items-center shrink-0">
@@ -233,14 +237,18 @@ export default function CodeEditorReact({ code, language }: any) {
           <CodeMirror
             ref={editorRef}
             value={value}
-            readOnly={true} // Locks only while running
-            editable={false}      // Always editable now
+            readOnly={true}
+            editable={false}
             height={isFullscreen ? "100%" : "auto"}
             maxHeight={isFullscreen ? "none" : "360px"}
             extensions={extensions}
             onChange={(val) => setValue(val)}
             theme={isDarkMode ? "dark" : "light"}
-            basicSetup={{ lineNumbers: true, foldGutter: true, indentOnInput: true }}
+            basicSetup={{ 
+              lineNumbers: showLineNumbers, 
+              foldGutter: false, 
+              indentOnInput: true 
+            }}
             className="text-[14px] md:text-[15px]"
           />
           

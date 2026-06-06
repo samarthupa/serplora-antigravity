@@ -52,8 +52,15 @@ import Layout from '../layouts/Layout.astro';
   import { saveLocalUser } from '../lib/auth';
 
   let googleToken = "";
+  
+  // 1. Grab and sanitize the returnUrl to prevent Open Redirect attacks
   const urlParams = new URLSearchParams(window.location.search);
-  const returnUrl = urlParams.get('returnUrl') || '/';
+  let rawReturnUrl = urlParams.get('returnUrl') || '/';
+  
+  // Ensure it's a relative path and NOT a protocol-relative absolute URL (like //evilsite.com)
+  const safeReturnUrl = (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) 
+    ? rawReturnUrl 
+    : '/';
 
   // Attach to window so Google's external script can find it
   window.handleGoogleLogin = async (response) => {
@@ -62,46 +69,56 @@ import Layout from '../layouts/Layout.astro';
     const loginSection = document.getElementById('login-section');
     loginSection.innerHTML = '<div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div><p class="mt-4 text-tx-main font-semibold">Verifying securely...</p>';
     
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      body: JSON.stringify({ token: googleToken })
-    });
-    
-    const data = await res.json();
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ token: googleToken })
+      });
+      
+      const data = await res.json();
 
-    if (data.success) {
-      // Use imported library
-      saveLocalUser(data.user);
-      window.location.href = returnUrl;
-    } else if (data.isNew) {
-      loginSection.classList.add('hidden');
-      const countrySection = document.getElementById('country-section');
-      countrySection.classList.remove('hidden');
-      countrySection.style.display = 'flex';
+      if (data.success) {
+        saveLocalUser(data.user);
+        window.location.href = safeReturnUrl; // ✅ Secure redirect
+      } else if (data.isNew) {
+        loginSection.classList.add('hidden');
+        const countrySection = document.getElementById('country-section');
+        countrySection.classList.remove('hidden');
+        countrySection.style.display = 'flex';
+      } else {
+        throw new Error(data.message || 'Login failed');
+      }
+    } catch (error) {
+      alert("Verification failed. Please refresh and try again.");
+      console.error(error);
     }
   };
 
-  document.getElementById('finish-btn').addEventListener('click', async () => {
+  document.getElementById('finish-btn')?.addEventListener('click', async () => {
     const country = document.getElementById('country').value;
     const btn = document.getElementById('finish-btn');
+    const originalText = btn.innerHTML;
     
     btn.innerHTML = 'Saving...';
     btn.disabled = true;
     
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: googleToken, country })
-    });
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: googleToken, country })
+      });
 
-    if (res.ok) {
-      const data = await res.json();
-      // Use imported library
-      saveLocalUser(data.user);
-      window.location.href = returnUrl;
-    } else {
+      if (res.ok) {
+        const data = await res.json();
+        saveLocalUser(data.user);
+        window.location.href = safeReturnUrl; // ✅ Secure redirect
+      } else {
+        throw new Error("Registration failed");
+      }
+    } catch (error) {
       alert("Error saving data. Please try again.");
-      btn.innerHTML = 'Complete Profile';
+      btn.innerHTML = originalText;
       btn.disabled = false;
     }
   });

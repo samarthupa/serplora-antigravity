@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 
+User-agent: *
+Disallow: /*login*
+
 # Point to your master sitemap index
 Sitemap: https://serplora.com/api/sitemap.xml

@@ -17,7 +17,6 @@ const navItems = headerEntry?.data?.navItems || [];
 
 const primaryBtn = {
   label: headerEntry?.data?.primaryButton?.label || 'Sign up for free',
-  url: `/signin?returnUrl=${Astro.url.pathname}`,
   show: headerEntry?.data?.primaryButton?.show !== false
 };
 ---z
@@ -67,7 +66,7 @@ const primaryBtn = {
         
         return (
           <li class="relative group">
-          <a href={item.url || '#'} class="flex items-center px-[12px] py-1.5 rounded-[6px] text-[13.5px] font-[600] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main">
+          <a href={item.url || '#'} class="flex items-center px-[12px] py-1.5 rounded-[6px] text-[14px] font-[600] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main">
               {item.label}
               {hasSubItems && (
                 <svg class="w-4 h-4 ml-1 opacity-60 group-hover:opacity-100 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,12 +114,12 @@ const primaryBtn = {
         
         {/* Unauthenticated View: Sign In */}
         <div id="auth-signin-header" style="display: none;">
-          {primaryBtn.show && (
-            <a href={primaryBtn.url} class="ml-1 md:ml-2 flex items-center justify-center h-[28px] px-2 md:px-3 rounded-[7px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[12px] md:text-[12.5px] font-[600] tracking-[0.01em] transition-all hover:opacity-85 hover:-translate-y-[1px] active:translate-y-0 cursor-pointer outline-none whitespace-nowrap">
-              <span>{primaryBtn.label}</span>
-            </a>
-          )}
-        </div>
+  {primaryBtn.show && (
+    <button id="dynamic-signin-btn" type="button" class="ml-1 md:ml-2 flex items-center justify-center h-[28px] px-2 md:px-3 rounded-[7px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[12px] md:text-[12.5px] font-[600] tracking-[0.01em] transition-all hover:opacity-85 hover:-translate-y-[1px] active:translate-y-0 cursor-pointer outline-none whitespace-nowrap">
+      <span>{primaryBtn.label}</span>
+    </button>
+  )}
+</div>
 
         {/* Authenticated View: Avatar */}
         <div id="auth-profile-header" style="display: none;">
@@ -492,7 +491,7 @@ const primaryBtn = {
 
   // --- Client-side Authentication & Page Tracking Logic ---
   const currentPath = window.location.pathname;
-  const isExcluded = currentPath.includes('/signin') || currentPath.includes('/account');
+  const isExcluded = currentPath.includes('/login') || currentPath.includes('/account');
   const userJson = localStorage.getItem('serplora_user');
 
   if (!isExcluded) {
@@ -534,5 +533,15 @@ const primaryBtn = {
   } else {
     if (signinHeader) signinHeader.style.display = 'block';
     if (profileHeader) profileHeader.style.display = 'none';
+  }
+
+  // --- DYNAMIC SIGN-IN ROUTING ---
+  const dynamicSigninBtn = document.getElementById('dynamic-signin-btn');
+  if (dynamicSigninBtn) {
+    dynamicSigninBtn.addEventListener('click', () => {
+      // Grabs current path + query params safely
+      const currentPath = window.location.pathname + window.location.search;
+      window.location.href = `/login?returnUrl=${encodeURIComponent(currentPath)}`;
+    });
   }
 </script>

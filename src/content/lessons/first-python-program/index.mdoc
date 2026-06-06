@@ -1,0 +1,47 @@
+---
+title: First Python Program
+breadcrumbTitle: first program
+urlSlug: first-program
+tutorial: python
+order: 2
+seo:
+  metaTitle: Print "Hello World" - First Python Program
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+The first program most people write while learning any programming language is called the **"Hello, World!"** program. It simply displays the text **Hello, World!** on the screen.
+
+Here's how we write it in Python:
+
+{% codeEditor language="python" code="print(\"Hello, World!\")" /%}
+
+Now let's decode this program.
+
+- **`print()`**: This is a Python function that tells the computer to output something.
+- **Parentheses `()`**: The computer will output whatever value or text is present inside the parentheses.
+
+In this example, `print("Hello, World!")` tells the computer to output the text **Hello, World!** exactly as written. The quotes (`" "`) indicate that **Hello, World!** is text.
+
+According to Python's rules, any text we want to output must be enclosed in quotes. This can be either a single quote (`' '`) or a double quote (`" "`). If we don't use quotes, Python will show an error.
+
+**Example:**
+
+{% codeEditor language="python" code="print(Hello, World!)" /%}
+
+For numbers, we don't need to use quotes:
+
+{% codeEditor language="python" code="print(5)" /%}
+
+Now, what if we use quotes for numbers? Let's try it:
+
+{% codeEditor language="python" code="print(\"5\")" /%}
+
+Notice that Python still outputs `5` successfully. However, Python treats `"5"` as text, not as the number `5`, because it is enclosed in quotes.
+
+> **Note:** Python is case-sensitive. If you write `Print("Hello, World!")` with an uppercase **P**, It will show an error.
+
+Try it:
+
+{% codeEditor language="python" code="Print(\"Hello, World!\")" /%}

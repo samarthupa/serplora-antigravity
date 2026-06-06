@@ -173,7 +173,7 @@ const robotsParams = [
         const pageUrl = window.location.pathname;
 
         // Don't track system pages in the history
-        if (pageUrl !== '/account' && pageUrl !== '/signin' && pageUrl !== '/') {
+        if (pageUrl !== '/account' && pageUrl !== '/login' && pageUrl !== '/') {
           syncUserHistory(pageUrl, pageTitle);
         }
       }
