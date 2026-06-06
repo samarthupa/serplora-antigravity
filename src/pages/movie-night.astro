@@ -3,10 +3,11 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Movie Night">
-  <main class="flex h-screen w-screen bg-black overflow-hidden transition-all duration-300 font-sans">
+  {/* 🟢 CHANGED: Added 'fixed inset-0 z-[9999]' to cover headers/footers and lock to 100vh */}
+  <main class="fixed inset-0 z-[9999] flex bg-black overflow-hidden transition-all duration-300 font-sans">
     
     {/* --- MOVIE CONTAINER --- */}
-    <div id="video-container" class="flex-grow flex flex-col items-center justify-center transition-all duration-300 w-full relative">
+    <div id="video-container" class="flex-grow flex flex-col items-center justify-center transition-all duration-300 h-full relative">
       
       <div class="absolute top-4 left-4 z-40 flex gap-2">
         {Array.from({length: 8}, (_, i) => i + 1).map((part) => (
@@ -19,14 +20,14 @@ import Layout from '../layouts/Layout.astro';
         ))}
       </div>
 
-      <video id="shared-video" class="w-full max-h-screen outline-none" controls>
+      <video id="shared-video" class="w-full h-full object-contain outline-none" controls>
         <source id="video-source" src="https://pub-180d70048e494856af2392d19a5760f8.r2.dev/oc-1.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
 
     {/* --- SIDEBAR (50% VIDEO / 50% CHAT) --- */}
-    <div id="sidebar" class="w-96 h-screen border-l border-gray-800 bg-gray-950 flex flex-col transition-all duration-300 flex-shrink-0">
+    <div id="sidebar" class="w-96 h-full border-l border-gray-800 bg-gray-950 flex flex-col transition-all duration-300 flex-shrink-0">
       
       {/* Top Half: Native WebRTC Video Grid */}
       <div class="h-1/2 border-b border-gray-800 p-3 overflow-y-auto bg-gray-950">
