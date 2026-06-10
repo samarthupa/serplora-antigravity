@@ -1,0 +1,164 @@
+---
+title: Python Variable Rules
+breadcrumbTitle: variable rules
+urlSlug: variable-rules
+tutorial: python
+order: 4
+seo:
+  metaTitle: Python Variable Rules and Best Practices
+  metaDescription: >-
+    Learn Python variable naming rules and best practices with simple examples.
+    Understand allowed characters, naming conventions, and common mistakes
+    beginners make.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+There are certain rules and best practices for Python variables.
+
+Rules are mandatory. If you break them, the code will show an error. Best practices are not rules, but everyone follows them to keep the code clean and readable.
+
+Let's discuss the Python variable naming rules first.
+
+## Allowed Characters
+
+A Python variable name can only contain these characters:
+
+- Letters (`a-z`, `A-Z`)
+- Numbers (`0-9`)
+- Underscore (`_`)
+
+Examples:
+
+```python
+name = "Sam"
+age1 = 20
+total_marks = 95
+```
+
+## Rules
+
+### 1. A Variable Name Cannot Start with a Number
+
+Wrong:
+
+```python
+1name = "Sam"
+```
+
+Correct:
+
+```python
+name1 = "Sam"
+```
+
+### 2. A Variable Name Cannot Contain Spaces
+
+Wrong:
+
+```python
+user name = "Sam"
+```
+
+Correct:
+
+```python
+user_name = "Sam"
+```
+
+### 3. Variable Names Are Case-Sensitive
+
+```python
+age = 20
+Age = 25
+```
+
+Both are different variables. Python treats `age` and `Age` as separate names.
+
+### 4. Do Not Use Python Keywords as Variable Names
+
+Wrong:
+
+```python
+if = 10
+for = 5
+```
+
+Python keywords are special words that Python uses internally. They cannot be used as variable names. If we try to use a keyword as a variable name, Python raises a SyntaxError.
+
+If you have not studied Python keywords yet, that is fine. We will cover them in next tutorials.
+
+## Best Practices for Naming Variables
+
+These are not rules, but you should follow them.
+
+### 1. Use Descriptive Names
+
+Bad:
+
+```python
+x = 10
+```
+
+Good:
+
+```python
+price = 10
+```
+
+If you write `x = 10`, it is technically correct, but `price = 10` is more readable. Just by looking at the variable name, we can immediately understand what value it stores.
+
+### 2. Use Snake Case
+
+In Python, variable names are usually written using snake_case. Snake case means writing all words in lowercase and separating them with underscores (`_`).
+
+Good:
+
+```python
+user_name = "Sam"
+total_marks = 95
+```
+
+Bad:
+
+```python
+userName = "Sam"
+TotalMarks = 95
+```
+
+Python will run both versions, but snake_case is the standard naming style followed by Python programmers.
+
+### 3. Avoid Very Long Variable Names
+
+Your variable names should be descriptive, but they should not be unnecessarily long.
+
+Good:
+
+```python
+total_marks = 450
+```
+
+Bad:
+
+```python
+total_marks_obtained_by_the_student_in_the_final_examination = 450
+```
+
+Long variable names can make your code harder to read. Try to keep variable names meaningful and reasonably short.
+
+### 4. Use Singular and Plural Names Properly
+
+If a variable stores a single value, use a singular name.
+
+```python
+student = "Sam"
+```
+
+If a variable stores multiple values, use a plural name.
+
+```python
+students = ["Sam", "John", "Amit"]
+```
+
+This makes the purpose of the variable clearer and helps other programmers understand your code more easily.

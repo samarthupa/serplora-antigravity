@@ -53,8 +53,17 @@ const rawExcerpt = excerptFallback?.replace(/<[^>]*>?/gm, '');
 const finalDescription = seo?.metaDescription || null;
 
 // Handle Canonical URL (defaults to the current request URL if blank)
-// We strip out .html from the pathname to ensure clean canonicals even when built with format: 'file'
-const rawPathname = Astro.url.pathname.replace(/\.html$/, '');
+// Strip out .html from the pathname to ensure clean canonicals even when built with format: 'file'
+let rawPathname = Astro.url.pathname.replace(/\.html$/, '');
+
+// Strip trailing '/index' for all directory index pages globally (including homepage)
+rawPathname = rawPathname.replace(/\/index$/, '');
+
+// Ensure the root homepage resolves correctly to '/' rather than an empty string
+if (rawPathname === '') {
+  rawPathname = '/';
+}
+
 const canonicalURL = seo?.canonicalUrl || new URL(rawPathname, Astro.site || Astro.url.origin).toString();
 
 // Handle Robots format

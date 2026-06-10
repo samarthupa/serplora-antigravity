@@ -31,6 +31,9 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      dedupe: ['@keystatic/core', 'react', 'react-dom'],
+    },
     ssr: {
         external: ['relatinator']
     },
