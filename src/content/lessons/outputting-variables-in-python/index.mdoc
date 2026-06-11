@@ -1,0 +1,65 @@
+---
+title: Outputting Variables in Python
+breadcrumbTitle: outputting variables
+urlSlug: outputting-variables
+tutorial: python
+order: 7
+seo:
+  metaTitle: Outputting Variables in Python
+  metaDescription: >-
+    Learn how to output variables in Python using print(), display multiple
+    variables, combine text and values, and avoid common errors.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+In Python, we use the `print()` function to display variables and their values.
+
+## 1. Printing a Single Variable
+
+{% codeEditor language="python" code="x = 10\nprint(x)" /%}
+
+## 2. Printing Multiple Variables
+
+{% codeEditor language="python" code="a = 10\nb = 20\n\nprint(a, b)" /%}
+
+## 3. Printing Text with Variables
+
+{% codeEditor
+   language="python"
+   code="name = \"Sam\"\n\nprint(\"My name is\", name)" /%}
+
+## 4. Using the + Operator with Strings
+
+{% codeEditor
+   language="python"
+   code="x = \"Python \"\ny = \"is \"\nz = \"awesome\"\n\nprint(x + y + z)" /%}
+
+**Note:** We added spaces after `"Python "` and `"is "`. If we do not add spaces, the output will be:
+
+```
+Pythonisawesome
+```
+
+## 5. Using the + Operator with Numbers
+
+{% codeEditor language="python" code="x = 5\ny = 10\n\nprint(x + y)" /%}
+
+Here, `+` works as a mathematical operator and adds the two numbers.
+
+## 6. Mixing Strings and Numbers (Important)
+
+If you try to use `+` with a string variable and a number variable, Python raises an error.
+
+Example:
+
+{% codeEditor language="python" code="x = 5\ny = \"John\"\n\nprint(x + y)" /%}
+
+This happens because Python cannot add a number and a string using `+`.
+
+To correctly output different data types together, use a comma (`,`) instead.
+
+Example:
+
+{% codeEditor language="python" code="x = 5\ny = \"John\"\n\nprint(x, y)" /%}

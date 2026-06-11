@@ -1,0 +1,85 @@
+---
+title: Multiple Variable Assignment in Python
+breadcrumbTitle: multiple variable assignment
+urlSlug: multiple-variable-assignment
+tutorial: python
+order: 5
+seo:
+  metaTitle: Multiple Variable Assignment in Python
+  metaDescription: >-
+    Learn multiple variable assignment in Python, including assigning one value
+    to many variables, multiple values at once, and swapping values.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+Python allows you to:
+
+- Assign one value to multiple variables
+- Assign multiple values to multiple variables
+- Swap values of variables
+
+Let's understand them.
+
+### 1. One Value to Multiple Variables
+
+We can assign the same value to multiple variables in one line.
+
+{% codeEditor
+   language="python"
+   code="x = y = z = 10\n\nprint(x)\nprint(y)\nprint(z)" /%}
+
+So, instead of writing:
+
+```
+x = 10
+y = 10
+z = 10
+```
+
+we wrote:
+
+```
+x = y = z = 10
+```
+
+### 2. Multiple Values to Multiple Variables
+
+We can assign different values to different variables in one line.
+
+{% codeEditor
+   language="python"
+   code="a, b, c = 10, 20, 30\n\nprint(a)\nprint(b)\nprint(c)" /%}
+
+Here:
+
+- `a` gets `10`
+- `b` gets `20`
+- `c` gets `30`
+
+While assigning multiple values to multiple variables, make sure the number of variables and values are equal.
+
+For example, if you write two variable names and assign three values, Python raises an error:
+
+{% codeEditor language="python" code="a, b = 10, 20, 30" /%}
+
+It should be:
+
+```
+a, b = 10, 20
+```
+
+### 3. Swapping Values of Variables
+
+Python allows you to swap the values of variables.
+
+For example, if you have assigned `a = 5` and `b = 10`, you can swap their values by writing:
+
+`a, b = b, a`
+
+**Try:**
+
+{% codeEditor
+   language="python"
+   code="a = 5\nb = 10\n\na, b = b, a\n\nprint(a)\nprint(b)" /%}
