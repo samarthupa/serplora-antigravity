@@ -1,0 +1,99 @@
+---
+title: Python Comments
+breadcrumbTitle: comments
+urlSlug: comments
+tutorial: python
+order: 23
+seo:
+  metaTitle: Python Comments (Single, Multi-line) with Examples
+  metaDescription: >-
+    Learn Python comments with simple examples. Understand single-line, inline,
+    multi-line comments, triple-quoted strings, common mistakes, and best
+    practices.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+As your Python programs become larger, they also become harder to understand. Imagine you write a program today. A week later, you open it again and wonder:
+
+> "Why did I write this code?"
+
+Or maybe another programmer needs to read your program. Without any explanation, understanding your code can take time.
+
+This is where **comments** become useful.
+
+## What are Python Comments?
+
+Python comments are non-executable lines of text within a program that are ignored by the interpreter. Comments are written to help people understand the code. They do not affect how the program works.
+
+The purpose of Python comments is:
+
+- Explain what a piece of code does.
+- Make the code easier for themselves and others to understand.
+- Leave reminders or notes for future changes.
+- Make debugging easier by explaining the purpose of the code.
+
+## Types of Python Comments
+
+There are four common ways to write comments in Python:
+
+1. Single-line comments
+1. Inline comments
+1. Multi-line comments
+1. Triple-quoted strings
+
+### 1. Single-line Comments
+
+A **single-line comment** starts with the hash symbol (`#`). Everything after the `#` on that line is ignored by Python.
+
+{% codeEditor
+   language="python"
+   code="# This is a single-line comment\n\nprint(\"Hello, World!\")" /%}
+
+## 2. Inline Comments
+
+An **inline comment** is simply a single-line comment written after a line of code.
+
+{% codeEditor
+   language="python"
+   code="print(\"Hello, World!\")  # Print a greeting message" /%}
+
+Inline comments are useful when you want to briefly explain a specific line of code.
+
+## 3. Multi-line Comments
+
+Python does **not** have a special syntax for multi-line comments. Instead, programmers usually write multiple single-line comments.
+
+```python
+# This is the first line of a comment.
+# This is the second line.
+# This is the third line.
+```
+
+## 4. Triple-quoted Strings
+
+Sometimes you may see programmers use triple quotes (`""" """` or `''' '''`) to write longer notes or comments.
+
+{% codeEditor
+   language="python"
+   code="\"\"\"\nThis is a longer note.\nIt spans multiple lines.\n\"\"\"\n\nprint(\"Hello\")" /%}
+
+Although this looks like a multi-line comment, it is actually a **string**.
+
+Since the string is not assigned to a variable or used anywhere, Python simply ignores it while running the program.
+
+If you assign a triple-quoted string to a variable, it becomes a normal string. It is no longer ignored by Python and can be used or printed like any other string.
+
+{% codeEditor
+   language="python"
+   code="text = \"\"\"\nThis is a message\nstored inside the variable 'text'.\n\"\"\"\n\nprint(text)" /%}
+
+**Output**
+
+```
+This is a message
+stored inside the variable 'text'.
+```
+
+Notice that the text is printed because it is stored in the variable `text`.
