@@ -1,0 +1,127 @@
+---
+title: Python Print Function
+breadcrumbTitle: print function
+urlSlug: print-function
+tutorial: python
+order: 7
+seo:
+  metaTitle: Python print() Function with Examples
+  metaDescription: >-
+    Learn how to use Python's print() function to display text, numbers,
+    variables, and multiple values. Understand the end parameter, newline (\n),
+    and print output with simple examples.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+`print()` is used to display text or output values in Python. In this lesson, we'll learn how to use the `print()` function effectively and format the output.
+
+## Printing Strings
+
+You can use single, double, or triple quotes to print strings (text).
+
+{% codeEditor
+   language="python"
+   code="print('this is single quote')\nprint(\"this is double quote\")\nprint(\"\"\"this is triple quote\"\"\")\nprint('''this is also triple quote''')" /%}
+
+But if your quotes don't match correctly, or you leave them out entirely, Python will throw an error:
+
+{% codeEditor
+   language="python"
+   code="print(''''this is four quote'''')  # Error: mismatched quotes\nprint(this is no quote)            # Error: no quotes" /%}
+
+## Printing Numbers
+
+To print numeric values, you don't need any quotes:
+
+{% codeEditor language="python" code="print(2)" /%}
+
+## Printing on the Same Line
+
+So far, every time we've used the `print()` function, the next `print()` started on a new line.
+
+For example:
+
+{% codeEditor
+   language="python"
+   code="print(\"Hello World!\")\nprint(\"How are you?\")" /%}
+
+**Output**
+
+```
+Hello World!
+How are you?
+```
+
+Notice that `"How are you?"` is printed on the next line. But what if you want both outputs to appear on the same line instead?
+
+{% codeEditor
+   language="python"
+   code="print(\"Hello World!\", end=\" \")\nprint(\"How are you?\")" /%}
+
+**Output**
+
+```
+Hello World! How are you?
+```
+
+The extra part inside `print()`, `end=" "`, is called a parameter. It tells Python what should be printed after the output.
+
+Normally, Python automatically moves to the next line after every `print()`. It does this by using a special character called the **newline character**, written as `\n`.
+
+So when you write:
+
+{% codeEditor
+   language="python"
+   code="print(\"Hello World!\")\nprint(\"How are you?\")" /%}
+
+Python behaves as if you had written:
+
+{% codeEditor
+   language="python"
+   code="print(\"Hello World!\", end=\"\\n\")\nprint(\"How are you?\")" /%}
+
+The `\n` tells Python to move the cursor to the beginning of the next line. When you change `end="\n"` to `end=" "`, you're telling Python:
+
+> "Don't move to the next line. Print a space instead."
+
+That's why the next `print()` continues on the same line.
+
+### Using No Space
+
+If you don't even want a space between the outputs, use an empty string.
+
+{% codeEditor
+   language="python"
+   code="print(\"Hello\", end=\"\")\nprint(\"World\")" /%}
+
+### Using Custom Text
+
+The `end` parameter can contain any text you want.
+
+{% codeEditor
+   language="python"
+   code="print(\"Apple\", end=\", \")\nprint(\"Banana\")" /%}
+
+{% codeEditor
+   language="python"
+   code="print(\"Python\", end=\" = \")\nprint(\"Easy\")" /%}
+
+You can use the `end` parameter whenever you want to control what appears after the output instead of moving to a new line.
+
+## Printing Multiple Lines with One `print()`
+
+The newline character (`\n`) can also be written inside a string. Whenever Python sees `\n` inside a string, it starts printing from the next line.
+
+{% codeEditor language="python" code="print(\"Hello\\nWorld\\nSam\")" /%}
+
+## Printing Text with Numbers
+
+{% codeEditor language="python" code="print(\"My age is\", 8)" /%}
+
+## Printing Variables with Text
+
+{% codeEditor
+   language="python"
+   code="x = 10\nprint(\"The value of x is\", x)" /%}

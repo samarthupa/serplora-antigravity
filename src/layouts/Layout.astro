@@ -188,5 +188,24 @@ const robotsParams = [
       }
     </script>
 
+    {/* 🟢 NEW: Global External Link Interceptor */}
+    <script>
+      function setExternalLinks() {
+        const currentHost = window.location.host;
+        const links = document.querySelectorAll('a');
+
+        links.forEach(link => {
+          if (link.host && link.host !== currentHost) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', setExternalLinks);
+      // Optional: If you use View Transitions later
+      document.addEventListener('astro:page-load', setExternalLinks);
+    </script>
+
   </body>
 </html>
