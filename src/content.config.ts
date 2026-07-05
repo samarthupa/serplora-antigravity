@@ -301,6 +301,55 @@ const homePage = defineCollection({
   })
 });
 
+// Update the existing Projects collection
+const projects = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/projects" }),
+  schema: z.object({
+    title: z.string().optional(),
+    breadcrumbTitle: z.string().optional(),
+    draft: z.boolean().optional(),
+    excerpt: z.string().optional(),
+    
+    // NEW: Array of relational category IDs
+    // Preprocess the incoming value: if it's a single string, wrap it in an array so .includes() works later
+categories: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
+    
+    difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
+    duration: z.string().default('2 Hrs'),
+    githubUrl: z.string().optional(),
+    heroCode: z.string().optional(),
+    seo: seoSchema,
+  }),
+});
+
+// Define Project Categories
+const projectCategories = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/projectCategories" }),
+  schema: z.object({
+    title: z.string(),
+    breadcrumbTitle: z.string().optional(),
+    description: z.string().optional(),
+    iconSvg: z.string().optional(), // Store the raw SVG for the grid
+    // NEW: Pagination Settings for individual categories
+    postsPerPage: z.number().default(9),
+    paginationTitleTemplate: z.string().default(' - Page {page}'),
+    noindexPaginated: z.boolean().default(true),
+    seo: seoSchema,
+  })
+});
+
+//single project pages
+// single project pages
+const projectsPage = defineCollection({
+  loader: glob({ pattern: 'data.json', base: './src/content/projectsPage' }),
+  schema: z.object({
+    headline: z.string().optional(),
+    breadcrumbTitle: z.string().optional(),
+    subheadline: z.string().optional(),
+    seo: seoSchema,
+  })
+});
+
 // 🟢 NEW: Quizzes Page
 const quizzesPage = defineCollection({
   loader: glob({ pattern: 'data.json', base: './src/content/quizzesPage' }),
@@ -372,4 +421,7 @@ export const collections = {
   pages,
   quizzesPage,   
   compilersPage, 
+  projects,
+  projectsPage,
+  projectCategories,
 };

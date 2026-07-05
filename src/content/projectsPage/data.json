@@ -1,0 +1,12 @@
+{
+  "headline": "Our Projects",
+  "subheadline": "Explore our latest builds.",
+  "postsPerPage": 2,
+  "noindexPaginated": true,
+  "seo": {
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "disableStickyHeader": false,
+    "schemaType": "none"
+  }
+}

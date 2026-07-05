@@ -144,6 +144,19 @@ export const authorsPage = singleton({
     },
 });
 
+// Add this to your exports in src/keystatic/singletons.ts
+export const projectsPage = singleton({
+    label: 'Projects Index Page',
+    path: 'src/content/projectsPage/data',
+    format: { data: 'json' },
+    schema: {
+        headline: fields.text({ label: 'Headline', defaultValue: 'Our Projects' }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)' }),
+        subheadline: fields.text({ label: 'Subheadline', multiline: true, defaultValue: 'Explore our latest builds.' }),
+        seo: seoSchema,
+    },
+});
+
 export const sidebarAds = singleton({
     label: 'Sidebar Ads Manager',
     path: 'src/content/sidebarAds/data',

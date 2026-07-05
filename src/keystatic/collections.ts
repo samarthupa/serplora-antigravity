@@ -189,6 +189,82 @@ export const quizzes = collection({
     },
 });
 
+// Add this to your exports in src/keystatic/collections.ts
+export const projects = collection({
+    label: 'Projects',
+    slugField: 'title',
+    path: 'src/content/projects/*/',
+    format: { contentField: 'content' },
+    previewUrl: '/projects/{slug}',
+    schema: {
+        title: fields.slug({ name: { label: 'Project Name' }, slug: { label: 'SEO Slug' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)' }),
+        draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
+        excerpt: fields.text({ label: 'Short Description', multiline: true }),
+        
+        // NEW FIELDS FOR PROJECT DESIGN
+        difficulty: fields.select({
+            label: 'Difficulty',
+            options: [
+                { label: 'Beginner', value: 'beginner' },
+                { label: 'Intermediate', value: 'intermediate' },
+                { label: 'Advanced', value: 'advanced' }
+            ],
+            defaultValue: 'beginner'
+        }),
+        duration: fields.text({ label: 'Estimated Duration (e.g., 2 Hrs)', defaultValue: '2 Hrs' }),
+        githubUrl: fields.text({ label: 'GitHub Repository URL' }),
+        heroCode: fields.text({ 
+            label: 'Hero Terminal Code (Python/JS)', 
+            multiline: true, 
+            description: 'The code snippet to display in the Mac terminal mockup.' 
+        }),
+        
+        categories: fields.relationship({
+            label: 'Categories (Select multiple)',
+            collection: 'projectCategories',
+            many: true,
+             validation: { length: { min: 1 } }
+        }),
+        
+        seo: seoSchema,
+        content: createGlobalEditor('Project Details', 'projects'),
+    },
+});
+
+export const projectCategories = collection({
+    label: 'Project Categories',
+    slugField: 'title',
+    path: 'src/content/projectCategories/*/',
+    format: { contentField: 'content' },
+    schema: {
+        title: fields.slug({ name: { label: 'Category Name' }, slug: { label: 'SEO Slug' } }),
+        breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)' }),
+        description: fields.text({ label: 'Description', multiline: true }),
+        iconSvg: fields.text({ label: 'Raw SVG Icon', multiline: true, description: 'Paste the raw <svg> tag here.' }),
+        
+        // NEW: Pagination Settings
+        postsPerPage: fields.integer({ 
+            label: 'Projects Per Page', 
+            defaultValue: 9, 
+            validation: { min: 1 } 
+        }),
+        paginationTitleTemplate: fields.text({ 
+            label: 'Pagination Title Template', 
+            defaultValue: ' - Page {page}', 
+            description: 'Appended to the meta title on page 2+ (Use {page} as a variable).' 
+        }),
+        noindexPaginated: fields.checkbox({ 
+            label: 'Noindex Paginated Pages', 
+            defaultValue: true, 
+            description: 'Tell Google not to index Page 2, Page 3, etc. (Recommended to save crawl budget).' 
+        }),
+        
+        seo: seoSchema,
+        content: createGlobalEditor('Category Details', 'projectCategories'),
+    }
+});
+
 export const quizItems = collection({
     label: 'Quiz Items (Children)',
     slugField: 'title',

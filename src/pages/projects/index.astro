@@ -1,0 +1,63 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+
+// Fetch the Projects Page Singleton safely
+const pageData = await getEntry('projectsPage', 'data');
+const headline = pageData?.data?.headline || 'Our Projects';
+const subheadline = pageData?.data?.subheadline || 'Explore our latest builds and tools.';
+const seo = pageData?.data?.seo || {};
+
+// Fetch dynamic categories from the CMS
+const categories = await getCollection('projectCategories');
+---
+
+<Layout title={seo?.metaTitle || headline} description={seo?.metaDescription || subheadline}>
+  <section class="w-full max-w-[1000px] mx-auto px-5 pt-12 pb-12 md:pt-24 md:pb-16 flex flex-col items-center text-center font-['Outfit',sans-serif]">
+    <Breadcrumb 
+      section="projects" 
+      current={pageData?.data?.breadcrumbTitle || 'projects'} 
+      class="mb-6 font-['JetBrains_Mono',monospace] text-[12px] md:text-[13px] text-tx-muted flex flex-wrap items-center justify-center gap-2"
+    />
+    <h1 class="text-4xl md:text-6xl font-[800] text-tx-main tracking-tight leading-[1.15] mb-5">
+      {headline}
+    </h1>
+    <p class="text-base md:text-xl text-tx-muted max-w-[600px] leading-relaxed">
+      {subheadline}
+    </p>
+  </section>
+
+  <section class="w-full max-w-[1200px] mx-auto px-5 md:px-6 pb-20 md:pb-32 font-['Outfit',sans-serif]">
+    {categories.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+        {categories.map((cat) => (
+          <a href={`/projects/${cat.id}`} class="group bg-surface border border-subtle rounded-[20px] md:rounded-[24px] p-6 md:p-8 flex flex-col hover:border-brand/40 transition-all duration-300 shadow-sm hover:shadow-md outline-none">
+            
+            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-5 md:mb-6 text-brand bg-brand/10">
+              <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" set:html={cat.data.iconSvg || '<circle cx="12" cy="12" r="10" />'} />
+            </div>
+            
+            <h2 class="text-2xl font-[800] text-tx-main mb-3 tracking-tight group-hover:text-brand transition-colors">
+              {cat.data.title}
+            </h2>
+            
+            <p class="text-tx-muted text-[15px] leading-relaxed mb-8 md:mb-auto">
+              {cat.data.description}
+            </p>
+            
+            <div class="inline-flex items-center gap-1.5 text-sm font-bold text-tx-main group-hover:text-brand transition-colors w-max mt-auto">
+              View Projects
+              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="w-full bg-surface border border-subtle rounded-[24px] p-12 text-center">
+        <h2 class="text-2xl font-[800] text-tx-main mb-2">No Categories Found</h2>
+        <p class="text-tx-muted">Create a Project Category in the CMS to get started.</p>
+      </div>
+    )}
+  </section>
+</Layout>

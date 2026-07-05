@@ -1,0 +1,76 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
+
+export async function getStaticPaths() {
+  const allProjects = await getCollection('projects', ({ data }) => {
+    return import.meta.env.PROD ? !data.draft : true;
+  });
+
+  // FlatMap is required here because one project can generate multiple URLs
+  return allProjects.flatMap((project) => {
+    return project.data.categories.map((catId) => ({
+      params: { category: catId, slug: project.id },
+      props: { project, currentCategory: catId },
+    }));
+  });
+}
+
+const { project, currentCategory } = Astro.props;
+const { Content } = await render(project);
+
+const difficultyEmoji = {
+  beginner: '🌱',
+  intermediate: '⚡',
+  advanced: '🔥'
+};
+
+// Note: Because this page can exist at multiple URLs (e.g. /projects/python/to-do and /projects/ai/to-do)
+// Setting the canonical URL to the primary category ensures Google only indexes one version.
+const primaryCategory = project.data.categories[0];
+const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
+---
+
+<!-- Ensure your Layout component accepts and uses an explicit canonical URL if passed -->
+<Layout 
+  title={project.data.seo?.metaTitle || project.data.title} 
+  description={project.data.seo?.metaDescription || project.data.excerpt}
+>
+  <main class="w-full max-w-[720px] mx-auto px-6 font-['Outfit',sans-serif] pt-16 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    
+    <Breadcrumb 
+      section="projects"
+      parents={[
+        { label: 'Projects', url: '/projects' },
+        { label: currentCategory, url: `/projects/${currentCategory}` }
+      ]}
+      current={project.data.breadcrumbTitle || project.data.title} 
+    />
+
+    <!-- The rest of your single project template (ai_studio_code-5.html) goes here -->
+    <header class="mb-12">
+      <h1 class="text-4xl md:text-[40px] font-[800] text-tx-main tracking-tight leading-[1.2] mb-6">
+        {project.data.title}
+      </h1>
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-subtle">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="px-3 py-1.5 bg-surface border border-subtle rounded-md text-[13px] font-medium text-tx-muted flex items-center gap-1.5">
+            <span class="opacity-60">{difficultyEmoji[project.data.difficulty]}</span> 
+            <span class="capitalize">{project.data.difficulty}</span>
+          </span>
+          <span class="px-3 py-1.5 bg-surface border border-subtle rounded-md text-[13px] font-medium text-tx-muted flex items-center gap-1.5">
+            <span class="opacity-60">⏱️</span> 
+            {project.data.duration}
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <article class="markdown-content prose dark:prose-invert max-w-none text-tx-muted">
+      <Content />
+    </article>
+
+  </main>
+</Layout>

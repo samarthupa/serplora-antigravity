@@ -10,6 +10,7 @@
     "metaTitle": "Articles and Guides - Serplora Academy",
     "robotsIndex": true,
     "robotsFollow": true,
+    "disableStickyHeader": false,
     "schemaType": "none"
   }
 }
