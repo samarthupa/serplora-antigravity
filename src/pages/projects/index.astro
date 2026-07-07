@@ -34,9 +34,9 @@ const categories = await getCollection('projectCategories');
         {categories.map((cat) => (
           <a href={`/projects/${cat.id}`} class="group bg-surface border border-subtle rounded-[20px] md:rounded-[24px] p-6 md:p-8 flex flex-col hover:border-brand/40 transition-all duration-300 shadow-sm hover:shadow-md outline-none">
             
-            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-5 md:mb-6 text-brand bg-brand/10">
-              <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" set:html={cat.data.iconSvg || '<circle cx="12" cy="12" r="10" />'} />
-            </div>
+           <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-5 md:mb-6 text-brand bg-brand/10 [&>svg]:w-6 [&>svg]:h-6 md:[&>svg]:w-7 md:[&>svg]:h-7 [&>svg]:object-contain">
+                <Fragment set:html={cat.data.iconSvg || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /></svg>'} />
+              </div>
             
             <h2 class="text-2xl font-[800] text-tx-main mb-3 tracking-tight group-hover:text-brand transition-colors">
               {cat.data.title}

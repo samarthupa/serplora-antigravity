@@ -89,14 +89,14 @@ export default function TerminalPreview({
     <div 
       ref={previewRef}
       style={{ width: isMobile ? '100%' : (typeof previewWidth === 'number' ? `${previewWidth}px` : previewWidth), maxWidth: isMobile ? '100%' : 'calc(100% - 10px)' }} 
-      className={`${isMobile ? 'flex w-full absolute inset-0 z-30' : 'flex relative'} bg-white dark:bg-[#1e1e1e] flex-col shrink-0 transition-colors ${isMobile ? '' : 'border-l border-gray-300 dark:border-[#3c3c3c]'}`}
+      className={`${isMobile ? 'flex w-full absolute inset-0 z-30' : 'flex relative'} bg-white dark:bg-[#1e1e1e] flex-col shrink-0 transition-colors ${isMobile ? '' : 'border-l border-r border-gray-300 dark:border-[#3c3c3c]'}`}
     >
       {!isMobile && <div className="absolute left-[-2px] top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-[#007acc] z-20 transition-colors" onMouseDown={() => setIsResizingPreview(true)} />}
       {isResizingPreview && <div className="fixed inset-0 z-[9999] cursor-col-resize" />}
 
       {isTabbed ? (
         // 🟢 UPDATED TABBED HEADER (Matches IframePreview layout)
-        <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-center justify-between px-1 border-b border-gray-300 dark:border-[#252526] shrink-0 transition-colors">
+        <div className="h-[35px] bg-gray-100 dark:bg-[#2d2d2d] flex items-center justify-between border-b border-gray-300 dark:border-[#252526] shrink-0 transition-colors">
           <div className="flex items-center overflow-x-auto no-scrollbar flex-1">
             {processIds.length === 0 && <span className="text-[12px] text-gray-500 px-3 select-none">No output history</span>}
             

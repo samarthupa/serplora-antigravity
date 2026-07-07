@@ -201,6 +201,18 @@ export const projects = collection({
         breadcrumbTitle: fields.text({ label: 'Breadcrumb Title (Optional)' }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         excerpt: fields.text({ label: 'Short Description', multiline: true }),
+
+        // NEW FIELDS FOR FEATURED IMAGE
+        image: fields.image({ 
+            label: 'Featured Image', 
+            directory: 'public/images/projects', 
+            publicPath: '/images/projects/' 
+        }),
+        hideImage: fields.checkbox({ 
+            label: 'Hide image on page', 
+            description: 'Check this to visually hide the image on the page, while keeping it in the HTML for SEO and social sharing.',
+            defaultValue: false 
+        }),
         
         // NEW FIELDS FOR PROJECT DESIGN
         difficulty: fields.select({

@@ -309,6 +309,9 @@ const projects = defineCollection({
     breadcrumbTitle: z.string().optional(),
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
+    // NEW: Featured Image and Hide Toggle
+    image: z.string().optional(),
+    hideImage: z.boolean().optional().default(false),
     
     // NEW: Array of relational category IDs
     // Preprocess the incoming value: if it's a single string, wrap it in an array so .includes() works later

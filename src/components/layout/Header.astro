@@ -1,12 +1,13 @@
 ---
 import { getEntry } from 'astro:content';
 import Search from "astro-pagefind/components/Search";
-// 🟢 NEW: Define Props
+
+// 🟢 Define Props
 interface Props {
   disableStickyHeader?: boolean;
 }
 
-// 🟢 NEW: Extract the prop
+// 🟢 Extract the prop
 const { disableStickyHeader = false } = Astro.props;
 
 const headerEntry = await getEntry('header', 'data');
@@ -19,46 +20,38 @@ const primaryBtn = {
   label: headerEntry?.data?.primaryButton?.label || 'Sign up for free',
   show: headerEntry?.data?.primaryButton?.show !== false
 };
----z
+---
 
-{/* 🟢 CHANGED: We pass the prop to a data-attribute for JS, and toggle the 'sticky top-0' classes */}
 <header 
   id="site-header" 
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
-  {/* Added: border-b border-subtle */}
-  class={`inset-x-0 w-full z-[200] h-[60px] bg-main/95 backdrop-blur-[8px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class={`inset-x-0 w-full z-[200] h-[60px] md:h-[66px] bg-main/95 backdrop-blur-[12px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
   <div class="w-full px-4 md:px-8 flex items-center gap-2 md:gap-10">
     
-    {/* --- MOBILE: Hamburger Toggle (Leftmost) --- */}
     <button 
       type="button" 
-      class="md:hidden flex flex-col justify-center items-center w-[28px] h-[30px] rounded-[10px] hover:bg-tx-muted/10 transition-colors focus:outline-none gap-[5px] cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main" 
+      class="md:hidden flex flex-col justify-center items-center w-[28px] h-[32px] rounded-[10px] hover:bg-tx-muted/10 transition-colors focus:outline-none gap-[5.5px] cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main" 
       id="mobile-menu-btn" 
       aria-label="Toggle mobile menu"
     >
-      {/* Changed w-[16px] to w-[22px] and increased gap slightly to gap-[5px] */}
       <span class="block w-[22px] h-[1.8px] bg-current rounded-sm transition-transform duration-300 origin-center" id="ham-top"></span>
       <span class="block w-[22px] h-[1.8px] bg-current rounded-sm transition-opacity duration-300" id="ham-mid"></span>
       <span class="block w-[22px] h-[1.8px] bg-current rounded-sm transition-transform duration-300 origin-center" id="ham-bot"></span>
     </button>
 
-    {/* Brand / Logo */}
-    <a href="/" class="flex flex-col items-start justify-center gap-1 shrink-0 outline-none mr-auto md:mr-0">
+    <a href="/" class="flex flex-col items-start justify-center gap-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted rounded mr-auto md:mr-0">
       <div class="flex items-center">
         {logo && (
           <>
-            {/* Light theme logo */}
-<img src={logo} alt={siteTitle} width="160" height="40" class="h-8 md:h-8 w-auto object-contain dark:hidden" />
-{/* Dark theme logo */}
-<img src={logoDark} alt={siteTitle} width="160" height="40" class="h-8 md:h-8 w-auto object-contain hidden dark:block" />
+            <img src={logo} alt={siteTitle} width="160" height="40" class="h-8 md:h-9 w-auto object-contain dark:hidden" />
+<img src={logoDark} alt={siteTitle} width="160" height="40" class="h-8 md:h-9 w-auto object-contain hidden dark:block" />
           </>
         )}
-        {!logo && <span class="text-[17px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
+        {!logo && <span class="text-[18px] md:text-[20px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
       </div>
     </a>
     
-    {/* Desktop Navigation Links */}
     <ul class="hidden md:flex gap-2 list-none m-0 p-0">
       {navItems.map((item, index) => {
         const hasSubItems = item.subItems && item.subItems.length > 0;
@@ -66,7 +59,7 @@ const primaryBtn = {
         
         return (
           <li class="relative group">
-          <a href={item.url || '#'} class="flex items-center px-[12px] py-1.5 rounded-[6px] text-[14px] font-[600] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main">
+            <a href={item.url || '#'} class="flex items-center px-[14px] py-2 rounded-[8px] text-[15px] font-[550] text-tx-muted transition-all duration-200 hover:bg-main hover:text-tx-main focus-visible:ring-2 focus-visible:ring-tx-muted outline-none">
               {item.label}
               {hasSubItems && (
                 <svg class="w-4 h-4 ml-1 opacity-60 group-hover:opacity-100 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,63 +84,51 @@ const primaryBtn = {
       })}
     </ul>
 
-    {/* Right Area: Actions */}
     <div class="flex items-center justify-end gap-1.5 md:gap-4 md:ml-auto md:flex-1">
       
-      {/* Search Button */}
-      <button id="search-trigger" class="flex items-center justify-center w-[36px] h-[36px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none cursor-pointer shrink-0 md:w-auto md:h-auto md:px-2 md:py-1.5 md:rounded-[8px] md:text-tx-muted md:hover:bg-transparent" aria-label="Search">
-        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+      <button id="search-trigger" class="flex items-center justify-center w-[40px] h-[40px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[38px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/50 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 md:opacity-70">
           <circle cx="7.5" cy="7.5" r="4.75"></circle>
           <line x1="11" y1="11" x2="16" y2="16"></line>
         </svg>
-        <span class="hidden md:block text-[13px] truncate text-left w-full ml-1.5">Search...</span>
+        <span class="hidden md:block text-[14px] truncate text-left w-full ml-2 opacity-80">Search...</span>
+        <span class="hidden md:flex items-center justify-center border border-subtle/60 rounded-[4px] px-1.5 py-0.5 text-[10px] font-mono opacity-60">⌘K</span>
       </button>
 
-      {/* Theme Toggle Button */}
-<button class="theme-toggle-btn flex p-1.5 md:p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none cursor-pointer" aria-label="Toggle theme">
-  <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-  <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-</button>
+      <button class="theme-toggle-btn flex p-2 rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
+        <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+      </button>
 
-      {/* --- UNIFIED AUTH SECTION --- */}
       <div class="flex items-center">
         
-        {/* Unauthenticated View: Sign In */}
         <div id="auth-signin-header" style="display: none;">
-  {primaryBtn.show && (
-    <button id="dynamic-signin-btn" type="button" class="ml-1 md:ml-2 flex items-center justify-center h-[28px] px-2 md:px-3 rounded-[7px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[12px] md:text-[12.5px] font-[600] tracking-[0.01em] transition-all hover:opacity-85 hover:-translate-y-[1px] active:translate-y-0 cursor-pointer outline-none whitespace-nowrap">
-      <span>{primaryBtn.label}</span>
-    </button>
-  )}
-</div>
+          {primaryBtn.show && (
+            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[34px] md:h-[36px] px-3 md:px-4 rounded-[8px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-[#4eb95a] hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5ecb6b] outline-none whitespace-nowrap">
+              <span>{primaryBtn.label}</span>
+            </button>
+          )}
+        </div>
 
-        {/* Authenticated View: Avatar */}
         <div id="auth-profile-header" style="display: none;">
-          <a href="/account" class="ml-1 md:ml-2 flex items-center justify-center h-[30px] px-2 md:px-2.5 rounded-[7px] bg-transparent text-tx-main font-['DM_Sans',sans-serif] text-[12.5px] font-[600] hover:bg-tx-muted/10 transition-colors outline-none whitespace-nowrap">
-            
-            {/* The Avatar Icon */}
-            <div id="profile-avatar-header" class="w-5 h-5 rounded-full bg-[#5ecb6b] text-[#0d0e0c] flex items-center justify-center font-extrabold text-[10px] shrink-0"></div>
-            
-            {/* The Account Text */}
-            <span class="hidden md:inline ml-2">Profile</span>
+          <a href="/account" class="ml-2 md:ml-4 flex items-center justify-center h-[34px] md:h-[36px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
+            <div id="profile-avatar-header" class="w-6 h-6 rounded-full bg-[#5ecb6b] text-[#0d0e0c] flex items-center justify-center font-extrabold text-[12px] shrink-0"></div>
+            <span class="hidden md:inline ml-2.5">Profile</span>
           </a>
         </div>
         
       </div>
     </div>
 
-    {/* Mobile Navigation Drawer (Hamburger Menu) */}
-    <div id="mobile-menu" class="hidden absolute top-[48px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-48px)] overflow-y-auto z-[190]">
+    <div id="mobile-menu" class="hidden absolute top-[60px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-60px)] overflow-y-auto z-[190]">
       <div class="flex flex-col h-full px-6 py-6 w-full max-w-[500px] mx-auto">
-        
-        {/* Navigation Links */}
         <nav class="flex flex-col gap-2 mb-8 mt-4">
           {navItems.map((item: any) => {
              const hasSubItems = item.subItems && item.subItems.length > 0;
              return (
                <div class="border-b border-subtle group">
                  <div class="flex items-center justify-between">
-                   <a href={item.url || '#'} class="text-lg font-[800] tracking-tight text-tx-main hover:opacity-80 transition-opacity flex-1 leading-none">{item.label}</a>
+                   <a href={item.url || '#'} class="text-lg font-[800] tracking-tight text-tx-main hover:opacity-80 transition-opacity flex-1 leading-none py-2">{item.label}</a>
                    {hasSubItems ? (
                      <button class="mobile-submenu-toggle p-2 text-tx-muted focus:outline-none" aria-expanded="false" aria-label="Toggle submenu">
                        <svg class="w-6 h-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
@@ -172,31 +153,25 @@ const primaryBtn = {
              );
           })}
         </nav>
-        
-
       </div>
     </div>
   </div>
 </header>
 
-{/* Full-Screen Search Overlay Modal */}
 <div id="search-modal" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-xl opacity-0 invisible transition-all duration-300">
   <div class="absolute inset-0" id="search-modal-backdrop"></div>
   <div id="search-modal-content" class="absolute top-0 left-0 w-full h-full flex flex-col transform -translate-y-8 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
     
     <div class="flex-1 overflow-y-auto custom-scrollbar w-full">
-      {/* REDUCED TOP PADDING HERE: pt-2 md:pt-6 AND REDUCED MAX WIDTH FOR SLEEKER LOOK */}
       <div class="w-full max-w-[800px] mx-auto px-4 md:px-8 pb-20 pt-2 md:pt-6">
         
         <div class="relative w-full">
-          {/* Search Component */}
           <Search id="site-search" className="pagefind-ui-custom" uiOptions={{ showImages: false }} />
           
-          {/* Inline ESC / Close Button - LOCKED TO TOP */}
-<button id="close-search" class="absolute right-0 top-[7px] md:top-[12px] h-[32px] text-[12px] font-['JetBrains_Mono',monospace] px-3 rounded-full text-tx-muted hover:text-tx-main hover:bg-tx-muted/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none z-10 mr-1 md:mr-2">
-  <span class="hidden md:block pt-0.5">ESC</span>
-  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-</button>
+          <button id="close-search" class="absolute right-0 top-[7px] md:top-[12px] h-[32px] text-[12px] font-['JetBrains_Mono',monospace] px-3 rounded-full text-tx-muted hover:text-tx-main hover:bg-tx-muted/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none z-10 mr-1 md:mr-2">
+            <span class="hidden md:block pt-0.5">ESC</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
         </div>
 
       </div>
@@ -205,12 +180,10 @@ const primaryBtn = {
 </div>
 
 <style is:global>
-  /* Custom Spring Easing for Toggle */
   .ease-spring {
     transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
-  /* OVERRIDE: World-Class Minimalist Search Design */
   .pagefind-ui-custom {
     --pagefind-ui-scale: 1;
     --pagefind-ui-primary: #3b82f6;
@@ -228,19 +201,16 @@ const primaryBtn = {
     width: 100%;
   }
 
-  /* SAFELY REMOVE: Pagefind magnifying glass */
   .pagefind-ui-custom .pagefind-ui__form::before {
     display: none !important;
     content: none !important;
     background: none !important;
   }
 
-  /* REMOVE: Native clear button */
   .pagefind-ui-custom .pagefind-ui__search-clear {
     display: none !important;
   }
 
-  /* MINIMALIST INPUT (Flush left, no icon) */
   .pagefind-ui-custom .pagefind-ui__search-input {
     width: 100% !important;
     font-family: 'Outfit', sans-serif;
@@ -250,7 +220,6 @@ const primaryBtn = {
     background-color: transparent;
     border: none !important;
     border-bottom: 1px solid var(--color-border-subtle) !important;
-    /* 0px Left Padding makes text perfectly flush with the left edge */
     padding: 16px 100px 16px 0px !important; 
     border-radius: 0;
     transition: all 0.3s ease;
@@ -273,7 +242,6 @@ const primaryBtn = {
     margin-top: 32px;
   }
 
-  /* Forces layout to cleanly span 100% of the hover area */
   .pagefind-ui-custom .pagefind-ui__result {
     display: block !important; 
     padding: 24px !important;
@@ -315,7 +283,7 @@ const primaryBtn = {
   }
 
   .pagefind-ui-custom .pagefind-ui__message {
-    padding: 0 24px 24px 0px; /* Aligned flush left with input */
+    padding: 0 24px 24px 0px;
     font-size: 15px;
     color: var(--color-tx-muted);
     font-weight: 500;
@@ -331,7 +299,6 @@ const primaryBtn = {
   }
 </style>
 
-
 <script>
   // Theme Toggle Logic
   const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
@@ -339,14 +306,12 @@ const primaryBtn = {
   const lightIcons = document.querySelectorAll('.theme-toggle-light-icon');
 
   if (themeToggleBtns.length > 0) {
-    // Initial load setup
     if (document.documentElement.classList.contains('dark')) {
       lightIcons.forEach(icon => icon.classList.remove('hidden'));
     } else {
       darkIcons.forEach(icon => icon.classList.remove('hidden'));
     }
 
-    // Click event for all theme buttons
     themeToggleBtns.forEach(btn => {
       btn.addEventListener('click', function() {
         const isCurrentlyDark = document.documentElement.classList.contains('dark');
@@ -365,7 +330,7 @@ const primaryBtn = {
     });
   }
 
-  // Search Modal Logic (With Body Scroll Locking)
+  // Search Modal Logic
   const searchTrigger = document.getElementById('search-trigger');
   const searchModal = document.getElementById('search-modal');
   const searchBackdrop = document.getElementById('search-modal-backdrop');
@@ -416,7 +381,6 @@ const primaryBtn = {
       menu.classList.toggle('hidden');
       menu.classList.toggle('flex');
       
-      // Prevent body scroll when menu is open
       if (menu.classList.contains('hidden')) {
         document.body.style.overflow = '';
         topBar.style.transform = '';
@@ -424,7 +388,6 @@ const primaryBtn = {
         botBar.style.transform = '';
       } else {
         document.body.style.overflow = 'hidden';
-        // PERFECT MATH: 7px translation for a 5px gap + 2px line height
         topBar.style.transform = 'translateY(7px) rotate(45deg)';
         midBar.style.opacity = '0';
         botBar.style.transform = 'translateY(-7px) rotate(-45deg)';
@@ -455,33 +418,28 @@ const primaryBtn = {
 
   // Smart header logic
   const header = document.getElementById('site-header');
-  const isStickyDisabled = header?.getAttribute('data-disable-sticky') === 'true'; // 🟢 NEW: Check if disabled
+  const isStickyDisabled = header?.getAttribute('data-disable-sticky') === 'true';
   let lastScrollY = window.scrollY;
 
   window.addEventListener('scroll', () => {
-    if (!header || isStickyDisabled) return; // 🟢 NEW: Abort entirely if disabled
+    if (!header || isStickyDisabled) return;
     
     const currentScrollY = window.scrollY;
     
-    // Prevent jitter from minor trackpad movements
     if (Math.abs(currentScrollY - lastScrollY) < 5) return;
 
-    // Safely check if modals are closed
     const isMenuClosed = !document.getElementById('mobile-menu')?.classList.contains('flex');
     const isSearchClosed = document.getElementById('search-modal')?.classList.contains('invisible');
     
     if (currentScrollY > 48 && isMenuClosed && isSearchClosed) {
       if (currentScrollY > lastScrollY) {
-        // Scrolling down: Hide
         header.classList.add('-translate-y-full');
         document.documentElement.classList.add('header-hidden'); 
       } else {
-        // Scrolling up: Show
         header.classList.remove('-translate-y-full');
         document.documentElement.classList.remove('header-hidden'); 
       }
     } else if (currentScrollY <= 48) {
-      // At the absolute top: Show
       header.classList.remove('-translate-y-full');
       document.documentElement.classList.remove('header-hidden');
     }
@@ -500,13 +458,11 @@ const primaryBtn = {
     
     let history = JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
     
-    // Update local immediately for snappy UI
     history = history.filter((p: any) => p.url !== currentPath);
     history.unshift({ url: currentPath, title: cleanTitle });
     if (history.length > 10) history = history.slice(0, 10);
     localStorage.setItem('serplora_recent_pages', JSON.stringify(history));
 
-    // If logged in, sync this visit to the database!
     if (userJson) {
       fetch('/api/sync-history', {
         method: 'POST',
@@ -539,7 +495,6 @@ const primaryBtn = {
   const dynamicSigninBtn = document.getElementById('dynamic-signin-btn');
   if (dynamicSigninBtn) {
     dynamicSigninBtn.addEventListener('click', () => {
-      // Grabs current path + query params safely
       const currentPath = window.location.pathname + window.location.search;
       window.location.href = `/login?returnUrl=${encodeURIComponent(currentPath)}`;
     });

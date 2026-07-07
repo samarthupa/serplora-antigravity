@@ -15,7 +15,7 @@ export default function ActivityBar({
   setIsDownloadOpen
 }: any) {
   return (
-    <div className="w-11 bg-gray-100 dark:bg-[#2d2d2d] flex flex-col items-center pt-1 shrink-0 transition-colors">
+    <div className="w-11 bg-gray-100 dark:bg-[#2d2d2d] flex flex-col items-center pt-1 shrink-0 transition-colors border-l border-r border-gray-300 dark:border-[#3c3c3c]">
 
       {/* TOP SECTION (Search Only) */}
       <div className="flex flex-col items-center w-full">

@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 #unbuilt projects
 /projects
+
+#movie night
+/movie-night
