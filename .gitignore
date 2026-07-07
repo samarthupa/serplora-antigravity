@@ -27,7 +27,4 @@ pnpm-debug.log*
 .wrangler/
 
 #unbuilt projects
-/projects
-
-#movie night
-/movie-night
+src/pages/projects
