@@ -25,7 +25,7 @@ const primaryBtn = {
 <header 
   id="site-header" 
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
-  class={`inset-x-0 w-full z-[200] h-[56px] md:h-[60px] bg-main/95 backdrop-blur-[12px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class={`inset-x-0 w-full z-[200] h-[50px] md:h-[56px] bg-main/95 backdrop-blur-[12px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
   <div class="w-full px-4 md:px-8 flex items-center gap-3 md:gap-6">
     
@@ -44,8 +44,8 @@ const primaryBtn = {
       <div class="flex items-center">
         {logo && (
           <>
-            <img src={logo} alt={siteTitle} width="160" height="40" class="h-9 md:h-10 w-auto object-contain dark:hidden" />
-<img src={logoDark} alt={siteTitle} width="160" height="40" class="h-9 md:h-10 w-auto object-contain hidden dark:block" />
+            <img src={logo} alt={siteTitle} width="160" height="40" class="h-9 md:h-9.5 w-auto object-contain dark:hidden" />
+<img src={logoDark} alt={siteTitle} width="160" height="40" class="h-9 md:h-9.5 w-auto object-contain hidden dark:block" />
           </>
         )}
         {!logo && <span class="text-[18px] md:text-[20px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
@@ -104,7 +104,7 @@ const primaryBtn = {
         
         <div id="auth-signin-header" style="display: none;">
           {primaryBtn.show && (
-            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[34px] md:h-[36px] px-3 md:px-4 rounded-[8px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-[#4eb95a] hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5ecb6b] outline-none whitespace-nowrap">
+            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[34px] md:h-[34px] px-3 md:px-4 rounded-[8px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-[#4eb95a] hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5ecb6b] outline-none whitespace-nowrap">
               <span>{primaryBtn.label}</span>
             </button>
           )}
