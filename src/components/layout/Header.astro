@@ -25,7 +25,7 @@ const primaryBtn = {
 <header 
   id="site-header" 
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
-  class={`inset-x-0 w-full z-[200] h-[50px] md:h-[56px] bg-main/95 backdrop-blur-[12px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class={`inset-x-0 w-full z-[200] h-[50px] md:h-[58px] bg-main/95 backdrop-blur-[12px] flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
   <div class="w-full px-4 md:px-8 flex items-center gap-3 md:gap-6">
     
@@ -86,7 +86,7 @@ const primaryBtn = {
 
     <div class="flex items-center justify-end gap-1.5 md:gap-4 md:ml-auto md:flex-1">
       
-      <button id="search-trigger" class="flex items-center justify-center w-[40px] h-[40px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[38px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/50 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Search">
+      <button id="search-trigger" class="flex items-center justify-center w-[40px] h-[40px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[36px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/50 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Search">
         <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 md:opacity-70">
           <circle cx="7.5" cy="7.5" r="4.75"></circle>
           <line x1="11" y1="11" x2="16" y2="16"></line>
@@ -120,7 +120,7 @@ const primaryBtn = {
       </div>
     </div>
 
-    <div id="mobile-menu" class="hidden absolute top-[56px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-56px)] overflow-y-auto z-[190]">
+    <div id="mobile-menu" class="hidden absolute top-[50px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-50px)] overflow-y-auto z-[190]">
       <div class="flex flex-col h-full px-6 py-6 w-full max-w-[500px] mx-auto">
         <nav class="flex flex-col gap-2 mb-8 mt-4">
           {navItems.map((item: any) => {
