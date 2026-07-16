@@ -22,39 +22,67 @@ export async function getStaticPaths() {
     };
 
     const pageSize = category.data.postsPerPage || 9;
-    const totalPages = Math.ceil(categoryProjects.length / pageSize) || 1;
+    const difficulties = ['all', 'beginner', 'intermediate', 'advanced'];
     const paths = [];
 
-    // Generate static routes only for the base category pagination (No difficulty routes)
-    for (let i = 0; i < totalPages; i++) {
-      const currentPage = i + 1;
-      const isFirst = currentPage === 1;
-      const isLast = currentPage === totalPages;
-      const start = i * pageSize;
-      const end = start + pageSize;
-      const data = categoryProjects.slice(start, end);
+    // Generate static routes for the base category AND each difficulty filter
+    difficulties.forEach(diff => {
+      const filteredProjects = diff === 'all' 
+        ? categoryProjects 
+        : categoryProjects.filter(p => p.data.difficulty === diff);
 
-      const baseUrl = `/projects/${category.id}`;
-      const prevUrl = isFirst ? undefined : (currentPage === 2 ? baseUrl : `${baseUrl}/page/${currentPage - 1}`);
-      const nextUrl = isLast ? undefined : `${baseUrl}/page/${currentPage + 1}`;
+      // Skip generating pages for filters that have 0 projects
+      if (filteredProjects.length === 0 && diff !== 'all') return;
 
-      paths.push({
-        params: { 
-          category: category.id,
-          page: isFirst ? undefined : `page/${currentPage}`
-        },
-        props: { 
-          category,
-          counts,
-          page: {
-            data,
-            currentPage,
-            lastPage: totalPages,
-            url: { prev: prevUrl, next: nextUrl }
-          }
+      const totalPages = Math.ceil(filteredProjects.length / pageSize) || 1;
+
+      for (let i = 0; i < totalPages; i++) {
+        const currentPage = i + 1;
+        const isFirst = currentPage === 1;
+        const isLast = currentPage === totalPages;
+        const start = i * pageSize;
+        const end = start + pageSize;
+        const data = filteredProjects.slice(start, end);
+
+        // Map out the [...page] rest parameters based on the filter
+        let pageParam;
+        if (diff === 'all') {
+          pageParam = isFirst ? undefined : `page/${currentPage}`;
+        } else {
+          pageParam = isFirst ? diff : `${diff}/page/${currentPage}`;
         }
-      });
-    }
+
+        // Determine correct pagination URLs depending on current filter state
+        const baseUrl = `/projects/${category.id}`;
+        let prevUrl, nextUrl;
+
+        if (diff === 'all') {
+          prevUrl = isFirst ? undefined : (currentPage === 2 ? baseUrl : `${baseUrl}/page/${currentPage - 1}`);
+          nextUrl = isLast ? undefined : `${baseUrl}/page/${currentPage + 1}`;
+        } else {
+          prevUrl = isFirst ? undefined : (currentPage === 2 ? `${baseUrl}/${diff}` : `${baseUrl}/${diff}/page/${currentPage - 1}`);
+          nextUrl = isLast ? undefined : `${baseUrl}/${diff}/page/${currentPage + 1}`;
+        }
+
+        paths.push({
+          params: { 
+            category: category.id,
+            page: pageParam
+          },
+          props: { 
+            category,
+            currentFilter: diff,
+            counts,
+            page: {
+              data,
+              currentPage,
+              lastPage: totalPages,
+              url: { prev: prevUrl, next: nextUrl }
+            }
+          }
+        });
+      }
+    });
 
     return paths;
   });
@@ -63,19 +91,45 @@ export async function getStaticPaths() {
 const { 
   category, 
   page, 
+  currentFilter = 'all', 
   counts = { all: 0, beginner: 0, intermediate: 0, advanced: 0 } 
 } = Astro.props;
 
 const projects = page?.data || [];
 
-// Dynamic SEO
+const filterLabels = {
+  all: 'All levels',
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced'
+};
+const activeLabel = (filterLabels as any)[currentFilter] || 'All levels';
+
+// ==========================================
+// DYNAMIC SEO & CANONICAL LOGIC
+// ==========================================
 let pageTitle = category?.data?.seo?.metaTitle || category?.data?.title || 'Projects';
 let robotsIndex = category?.data?.seo?.robotsIndex !== false;
+let canonicalUrl = category?.data?.seo?.canonicalUrl; // Default from CMS if it exists
 
+// Construct base category canonical URL
+const siteOrigin = Astro.site ? Astro.site.origin : Astro.url.origin;
+const baseCategoryCanonical = `${siteOrigin}/projects/${category.id}/`;
+
+// 1. If it's a filtered page (beginner/intermediate/advanced)
+if (currentFilter !== 'all') {
+  pageTitle += ` (${activeLabel} Projects)`;
+  robotsIndex = false; // Do not index the filtered variants
+  canonicalUrl = baseCategoryCanonical; // Canonicalize back to the main category
+}
+
+// 2. Handle Pagination (page 2, page 3, etc.)
 if (page?.currentPage > 1) {
   const template = category?.data?.paginationTitleTemplate || ' - Page {page}';
   pageTitle += template.replace('{page}', String(page.currentPage));
   
+  // Only override to noindex if the CMS explicitly says to hide paginated pages.
+  // Otherwise, (for currentFilter === 'all') Page 2 will remain indexed.
   if (category?.data?.noindexPaginated) {
     robotsIndex = false;
   }
@@ -84,8 +138,10 @@ if (page?.currentPage > 1) {
 const dynamicSeo = {
   ...category?.data?.seo,
   metaTitle: pageTitle,
-  robotsIndex: robotsIndex
+  robotsIndex: robotsIndex,
+  canonicalUrl: canonicalUrl 
 };
+// ==========================================
 ---
 
 <Layout 
@@ -118,42 +174,41 @@ const dynamicSeo = {
       </div>
     </div>
 
-    <!-- Filter Section (Inline Selectable Pills - Justified Start) -->
-    <div class="flex flex-wrap items-center justify-start gap-2 sm:gap-2.5 mb-8 relative z-20" id="filter-container">
+    <!-- Filter Section (Inline Selectable Pills - Server Driven) -->
+    <div class="flex flex-wrap items-center justify-start gap-2 sm:gap-2.5 mb-8 relative z-20">
       
-      <!-- Using buttons and data-attributes for client side JS filtering -->
-      <button 
-        data-filter="all"
-        class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-tx-main border-tx-main text-main font-[600] shadow-sm"
+      <a 
+        href={`/projects/${category?.id}`}
+        class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'all' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
       >
-        All <span class="ml-1.5 text-[11px] text-main/80">({counts.all})</span>
-      </button>
+        All <span class={`ml-1.5 text-[11px] ${currentFilter === 'all' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.all})</span>
+      </a>
 
       {counts.beginner > 0 && (
-        <button 
-          data-filter="beginner"
-          class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5"
+        <a 
+          href={`/projects/${category?.id}/beginner`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'beginner' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
         >
-          Beginner <span class="ml-1.5 text-[11px] text-tx-muted">({counts.beginner})</span>
-        </button>
+          Beginner <span class={`ml-1.5 text-[11px] ${currentFilter === 'beginner' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.beginner})</span>
+        </a>
       )}
 
       {counts.intermediate > 0 && (
-        <button 
-          data-filter="intermediate"
-          class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5"
+        <a 
+          href={`/projects/${category?.id}/intermediate`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'intermediate' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
         >
-          Intermediate <span class="ml-1.5 text-[11px] text-tx-muted">({counts.intermediate})</span>
-        </button>
+          Intermediate <span class={`ml-1.5 text-[11px] ${currentFilter === 'intermediate' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.intermediate})</span>
+        </a>
       )}
 
       {counts.advanced > 0 && (
-        <button 
-          data-filter="advanced"
-          class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5"
+        <a 
+          href={`/projects/${category?.id}/advanced`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'advanced' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
         >
-          Advanced <span class="ml-1.5 text-[11px] text-tx-muted">({counts.advanced})</span>
-        </button>
+          Advanced <span class={`ml-1.5 text-[11px] ${currentFilter === 'advanced' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.advanced})</span>
+        </a>
       )}
     </div>
 
@@ -162,7 +217,6 @@ const dynamicSeo = {
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
-          data-difficulty={project.data.difficulty}
           class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
           <!-- Graphic Area with Top-Left Badge -->
@@ -228,7 +282,11 @@ const dynamicSeo = {
         {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((num) => {
           const isFirst = num === 1;
           const baseUrl = `/projects/${category?.id}`;
-          const targetUrl = isFirst ? baseUrl : `${baseUrl}/page/${num}`;
+          
+          // Generate correct URL based on the current filter
+          const targetUrl = isFirst 
+            ? (currentFilter === 'all' ? baseUrl : `${baseUrl}/${currentFilter}`) 
+            : (currentFilter === 'all' ? `${baseUrl}/page/${num}` : `${baseUrl}/${currentFilter}/page/${num}`);
 
           return (
             <a 
@@ -285,50 +343,3 @@ const dynamicSeo = {
 <style>
   .faq summary::-webkit-details-marker { display:none; }
 </style>
-
-<script>
-  function initClientSideFilter() {
-    const btns = document.querySelectorAll('.filter-btn');
-    const cards = document.querySelectorAll('.project-card');
-
-    if (btns.length === 0 || cards.length === 0) return;
-
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetFilter = btn.getAttribute('data-filter');
-
-        // 1. Update active states on buttons
-        btns.forEach(b => {
-          const isSelected = b === btn;
-          
-          if (isSelected) {
-            b.className = 'filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-tx-main border-tx-main text-main font-[600] shadow-sm';
-            b.querySelector('span').className = 'ml-1.5 text-[11px] text-main/80';
-          } else {
-            b.className = 'filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5';
-            b.querySelector('span').className = 'ml-1.5 text-[11px] text-tx-muted';
-          }
-        });
-
-        // 2. Hide/Show Cards locally
-        cards.forEach(card => {
-          if (targetFilter === 'all' || card.getAttribute('data-difficulty') === targetFilter) {
-            card.style.display = 'flex';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      });
-    });
-  }
-
-  // Runs on the very first page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initClientSideFilter);
-  } else {
-    initClientSideFilter();
-  }
-
-  // Re-runs after Astro View Transitions swap the DOM (if enabled on this site)
-  document.addEventListener('astro:page-load', initClientSideFilter);
-</script>
