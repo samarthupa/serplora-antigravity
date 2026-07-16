@@ -1,0 +1,364 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
+import UtilityActions from '../../../components/ui/UtilityActions.astro';
+
+// Single source of truth for difficulty levels to avoid hardcoding everywhere
+const DIFFICULTY_LEVELS = [
+  { id: 'beginner', label: 'Beginner', dotColor: 'bg-emerald-500' },
+  { id: 'intermediate', label: 'Intermediate', dotColor: 'bg-amber-500' },
+  { id: 'advanced', label: 'Advanced', dotColor: 'bg-rose-500' }
+];
+
+export async function getStaticPaths() {
+  const categories = await getCollection('projectCategories');
+  const allProjects = await getCollection('projects', ({ data }) => {
+    return import.meta.env.PROD ? !data.draft : true;
+  });
+
+  return categories.flatMap((category) => {
+    const categoryProjects = allProjects.filter(p => p.data.categories.includes(category.id));
+    
+    // Calculate counts dynamically based on our levels
+    const counts = { all: categoryProjects.length };
+    DIFFICULTY_LEVELS.forEach(level => {
+      counts[level.id] = categoryProjects.filter(p => p.data.difficulty === level.id).length;
+    });
+
+    const pageSize = category.data.postsPerPage || 9;
+    const difficulties = ['all', ...DIFFICULTY_LEVELS.map(l => l.id)];
+    const paths = [];
+
+    // Generate static routes for the base category AND each difficulty filter
+    difficulties.forEach(diff => {
+      const filteredProjects = diff === 'all' 
+        ? categoryProjects 
+        : categoryProjects.filter(p => p.data.difficulty === diff);
+      
+      const totalPages = Math.ceil(filteredProjects.length / pageSize) || 1;
+
+      for (let i = 0; i < totalPages; i++) {
+        const currentPage = i + 1;
+        const isFirst = currentPage === 1;
+        const isLast = currentPage === totalPages;
+        const start = i * pageSize;
+        const end = start + pageSize;
+        const data = filteredProjects.slice(start, end);
+
+        // Map out the [...page] rest parameters based on the filter
+        let pageParam;
+        if (diff === 'all') {
+          pageParam = isFirst ? undefined : `page/${currentPage}`;
+        } else {
+          pageParam = isFirst ? diff : `${diff}/page/${currentPage}`;
+        }
+
+        // Determine correct pagination URLs depending on current filter state
+        const baseUrl = `/projects/${category.id}`;
+        let prevUrl, nextUrl;
+
+        if (diff === 'all') {
+          prevUrl = isFirst ? undefined : (currentPage === 2 ? baseUrl : `${baseUrl}/page/${currentPage - 1}`);
+          nextUrl = isLast ? undefined : `${baseUrl}/page/${currentPage + 1}`;
+        } else {
+          prevUrl = isFirst ? undefined : (currentPage === 2 ? `${baseUrl}/${diff}` : `${baseUrl}/${diff}/page/${currentPage - 1}`);
+          nextUrl = isLast ? undefined : `${baseUrl}/${diff}/page/${currentPage + 1}`;
+        }
+
+        paths.push({
+          params: { 
+            category: category.id,
+            page: pageParam
+          },
+          props: { 
+            category,
+            currentFilter: diff,
+            counts,
+            page: {
+              data,
+              currentPage,
+              lastPage: totalPages,
+              url: { prev: prevUrl, next: nextUrl }
+            }
+          }
+        });
+      }
+    });
+
+    return paths;
+  });
+}
+
+const { 
+  category, 
+  page, 
+  currentFilter = 'all', 
+  counts = { all: 0, beginner: 0, intermediate: 0, advanced: 0 } 
+} = Astro.props;
+
+const projects = page?.data || [];
+
+// Formatting the active label dynamically safely
+const activeLevelConfig = DIFFICULTY_LEVELS.find(lvl => lvl.id === currentFilter);
+const activeLabel = activeLevelConfig ? activeLevelConfig.label : 'All levels';
+const activeCount = counts[currentFilter] || 0;
+
+// Dynamic SEO
+let pageTitle = category?.data?.seo?.metaTitle || category?.data?.title || 'Projects';
+let robotsIndex = category?.data?.seo?.robotsIndex !== false;
+
+if (currentFilter !== 'all') {
+  pageTitle += ` (${activeLabel} Projects)`;
+}
+
+if (page?.currentPage > 1) {
+  const template = category?.data?.paginationTitleTemplate || ' - Page {page}';
+  pageTitle += template.replace('{page}', String(page.currentPage));
+  
+  if (category?.data?.noindexPaginated) {
+    robotsIndex = false;
+  }
+}
+
+const dynamicSeo = {
+  ...category?.data?.seo,
+  metaTitle: pageTitle,
+  robotsIndex: robotsIndex
+};
+---
+
+<Layout 
+  title={dynamicSeo.metaTitle} 
+  description={category?.data?.seo?.metaDescription || category?.data?.description} 
+  seo={dynamicSeo}
+  hasNewsletterModal={true} 
+>
+  <!-- Expanded max-w-[1280px] to max-w-[1600px] so it can hold more cards on wider screens -->
+  <main class="w-full bg-main text-tx-main font-['Outfit',sans-serif] px-4 py-8 sm:px-8 md:px-12 lg:px-14 lg:py-10 max-w-[1600px] mx-auto min-h-screen">
+    
+    <Breadcrumb 
+      section="projects"
+      parents={[{ label: 'Projects', url: '/projects' }]} 
+      current={category?.data?.breadcrumbTitle || category?.data?.title} 
+      class="flex items-center gap-1.5 text-[12px] md:text-[13px] text-tx-muted mt-6 md:mt-8 mb-6 font-['JetBrains_Mono',monospace]"
+    />
+
+    <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
+      <div class="flex-1 min-w-0 md:pr-10">
+        <h1 id="countHeading" class="text-3xl sm:text-4xl md:text-[42px] font-[800] tracking-tight mb-3 text-tx-main">
+           {category?.data?.title} <span class="text-tx-muted font-normal text-2xl ml-1">({activeCount})</span>
+        </h1>
+        <p class="text-[16px] sm:text-[18px] text-tx-muted leading-relaxed max-w-2xl">
+          {category?.data?.description || 'Hands-on projects to build real skills, from your first script to production-ready apps.'}
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0 flex-wrap md:flex-nowrap mt-2 md:mt-0">
+        
+        <details class="relative shrink-0 w-full sm:w-auto dropdown-details group">
+          <summary class="list-none flex items-center justify-between w-full sm:w-auto gap-2 font-[500] text-sm px-4 py-2.5 rounded-xl border border-subtle bg-surface text-tx-main hover:bg-tx-muted/5 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main marker:hidden [&::-webkit-details-marker]:hidden">
+            <span>{activeLabel}</span>
+            <span class="text-[10px] text-tx-muted ml-2 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+
+          <div class="absolute right-0 left-auto top-[calc(100%+8px)] z-50 bg-surface border border-subtle rounded-2xl p-1.5 flex flex-col gap-0.5 w-[220px] max-w-[calc(100vw-2rem)] max-h-[60vh] overflow-y-auto shadow-xl">
+            <a href={`/projects/${category?.id}`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'all' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+              <span>All levels</span>
+              <span class="flex items-center gap-2">
+                <span class={`text-xs font-[500] ${currentFilter === 'all' ? 'text-brand' : 'text-tx-muted'}`}>{counts.all}</span>
+                {currentFilter === 'all' && <span class="text-brand">✓</span>}
+              </span>
+            </a>
+
+            {DIFFICULTY_LEVELS.map((level) => counts[level.id] > 0 && (
+              <a href={`/projects/${category?.id}/${level.id}`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === level.id ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+                <span>{level.label}</span>
+                <span class="flex items-center gap-2">
+                  <span class={`text-xs font-[500] ${currentFilter === level.id ? 'text-brand' : 'text-tx-muted'}`}>{counts[level.id]}</span>
+                  {currentFilter === level.id && <span class="text-brand">✓</span>}
+                </span>
+              </a>
+            ))}
+          </div>
+        </details>
+
+        <div class="w-px h-6 bg-subtle hidden sm:block"></div>
+        <UtilityActions showShare={true} showNewsletter={true} showGoogle={true} />
+      </div>
+    </div>
+
+    <!-- Dynamic Flex Container (Switched from Grid to Flex) -->
+    <div id="project-grid" class="flex flex-wrap gap-5 sm:gap-6 items-stretch justify-start relative z-10">
+      {projects.length > 0 ? projects.map((project, index) => {
+        const diffConfig = DIFFICULTY_LEVELS.find(l => l.id === project.data.difficulty) || DIFFICULTY_LEVELS[0];
+        
+        return (
+          <a 
+            href={`/projects/${category?.id}/${project.id}`} 
+            /* Flex layout rules: allows growing, bounds at min 350px (on sm+) and max 400px */
+            class="project-card flex-auto w-full sm:min-w-[350px] max-w-[400px] group bg-surface rounded-2xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          >
+            <!-- Graphic Area - Reduced height and capped at 300px max -->
+            <div class="w-full h-[180px] sm:h-[200px] max-h-[300px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center text-4xl relative overflow-hidden shrink-0">
+               {(project.data.image && !project.data.hideImage) ? (
+                 <img 
+                   src={project.data.image} 
+                   alt={project.data.title} 
+                   width="640"
+                   height="360"
+                   loading={index < 4 ? "eager" : "lazy"} 
+                   decoding="async"
+                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                 />
+               ) : (
+                 <div class="w-12 h-12 flex items-center justify-center opacity-90 drop-shadow-md text-main [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain">
+                   <Fragment set:html={category?.data?.iconSvg || '💻'} />
+                 </div>
+               )}
+            </div>
+            
+            <!-- Body Area -->
+            <div class="p-4 flex flex-col flex-1">
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-[600] px-2 py-1 rounded-md border border-subtle text-tx-muted mb-3 w-max">
+                <span class={`w-1.5 h-1.5 rounded-full ${diffConfig.dotColor}`}></span>
+                <span class="capitalize">{project.data.difficulty}</span>
+              </span>
+              <div class="flex items-start justify-between gap-3 flex-1 w-full">
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-[16px] font-[800] mb-1 text-tx-main tracking-tight line-clamp-2 leading-snug group-hover:text-brand transition-colors">
+                    {project.data.title}
+                  </h3>
+                  {project.data.excerpt && (
+                    <p class="text-[13px] text-tx-muted leading-snug line-clamp-2">{project.data.excerpt}</p>
+                  )}
+                </div>
+                <div class="shrink-0 flex flex-col justify-end h-full">
+                  <span class="w-8 h-8 flex items-center justify-center rounded-full border border-subtle text-tx-muted transition-all duration-150 group-hover:bg-brand group-hover:border-brand group-hover:text-main">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+        );
+      }) : (
+        <div class="w-full py-16 px-4 text-center bg-surface rounded-2xl border border-subtle flex flex-col items-center justify-center">
+          <span class="text-4xl mb-4 block">🔍</span>
+          <h3 class="text-lg font-bold text-tx-main mb-2">No projects found</h3>
+          <p class="text-tx-muted max-w-md mx-auto">There are currently no {currentFilter !== 'all' ? currentFilter : ''} projects in this category.</p>
+          {currentFilter !== 'all' && (
+            <a href={`/projects/${category?.id}`} class="mt-6 px-5 py-2.5 bg-surface border border-subtle hover:bg-tx-muted/5 transition-colors text-tx-main text-sm font-semibold rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand">
+              View all levels
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+
+    <!-- Pagination -->
+    {page?.lastPage > 1 && (
+      <div id="pagination" class="flex flex-wrap items-center justify-center gap-1.5 mt-10 sm:mt-12">
+        {page?.url?.prev ? (
+          <a href={page.url.prev} aria-label="Previous page" class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface hover:bg-tx-muted/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+          </a>
+        ) : (
+          <span class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface opacity-40 cursor-not-allowed">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+          </span>
+        )}
+
+        {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((num) => {
+          const isFirst = num === 1;
+          const baseUrl = `/projects/${category?.id}`;
+          const targetUrl = isFirst 
+            ? (currentFilter === 'all' ? baseUrl : `${baseUrl}/${currentFilter}`) 
+            : (currentFilter === 'all' ? `${baseUrl}/page/${num}` : `${baseUrl}/${currentFilter}/page/${num}`);
+
+          return (
+            <a 
+              href={targetUrl}
+              aria-current={page.currentPage === num ? 'page' : undefined}
+              class={`w-9 h-9 flex items-center justify-center rounded-lg text-sm transition-colors outline-none border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-main ${
+                page.currentPage === num 
+                  ? 'font-[600] bg-brand text-main focus-visible:ring-brand' 
+                  : 'font-[500] text-tx-muted hover:bg-tx-muted/10 focus-visible:ring-tx-muted'
+              }`}
+            >
+              {num}
+            </a>
+          );
+        })}
+
+        {page?.url?.next ? (
+          <a href={page.url.next} aria-label="Next page" class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface hover:bg-tx-muted/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </a>
+        ) : (
+          <span class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface opacity-40 cursor-not-allowed">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </span>
+        )}
+      </div>
+    )}
+
+    <!-- Dynamic FAQs -->
+    {category?.data?.faqs && category.data.faqs.length > 0 && (
+      <div class="mt-20 sm:mt-24 max-w-[800px] mx-auto">
+        <div class="text-center mb-10">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-[800] tracking-tight mb-3 text-tx-main">Frequently asked questions</h2>
+          <p class="text-base text-tx-muted">Everything you need to know before you start building.</p>
+        </div>
+
+        <div class="flex flex-col border-t border-subtle">
+          {category.data.faqs.map((faq) => (
+            <details class="faq group py-5 md:py-6 border-b border-subtle">
+              <summary class="flex items-center justify-between gap-6 cursor-pointer list-none font-[600] text-[16px] md:text-[18px] text-tx-main outline-none focus-visible:ring-2 focus-visible:ring-brand hover:text-brand transition-colors rounded-lg marker:hidden [&::-webkit-details-marker]:hidden">
+                {faq.question}
+                <div class="w-8 h-8 rounded-full border border-subtle flex items-center justify-center shrink-0 text-tx-muted group-hover:border-brand group-hover:text-brand group-hover:bg-brand/5 transition-all group-open:rotate-45">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+              </summary>
+              <p class="text-[15px] md:text-[16px] text-tx-muted leading-relaxed mt-4 md:mt-5 pr-12">{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    )}
+  </main>
+</Layout>
+
+<script>
+  function initFilterDropdown() {
+    const detailsElements = document.querySelectorAll('details.dropdown-details');
+    
+    document.addEventListener('click', (e) => {
+      detailsElements.forEach(details => {
+        if (details.hasAttribute('open') && !details.contains(e.target as Node)) {
+          details.removeAttribute('open');
+        }
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        detailsElements.forEach(details => {
+          if (details.hasAttribute('open')) {
+            details.removeAttribute('open');
+            const summary = details.querySelector('summary');
+            if (summary) summary.focus();
+          }
+        });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFilterDropdown);
+  } else {
+    initFilterDropdown();
+  }
+
+  document.addEventListener('astro:page-load', initFilterDropdown);
+</script>
