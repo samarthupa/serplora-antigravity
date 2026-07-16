@@ -22,67 +22,39 @@ export async function getStaticPaths() {
     };
 
     const pageSize = category.data.postsPerPage || 9;
-    const difficulties = ['all', 'beginner', 'intermediate', 'advanced'];
+    const totalPages = Math.ceil(categoryProjects.length / pageSize) || 1;
     const paths = [];
 
-    // Generate static routes for the base category AND each difficulty filter
-    difficulties.forEach(diff => {
-      const filteredProjects = diff === 'all' 
-        ? categoryProjects 
-        : categoryProjects.filter(p => p.data.difficulty === diff);
+    // Generate static routes only for the base category pagination (No difficulty routes)
+    for (let i = 0; i < totalPages; i++) {
+      const currentPage = i + 1;
+      const isFirst = currentPage === 1;
+      const isLast = currentPage === totalPages;
+      const start = i * pageSize;
+      const end = start + pageSize;
+      const data = categoryProjects.slice(start, end);
 
-      // Skip generating pages for filters that have 0 projects
-      if (filteredProjects.length === 0 && diff !== 'all') return;
+      const baseUrl = `/projects/${category.id}`;
+      const prevUrl = isFirst ? undefined : (currentPage === 2 ? baseUrl : `${baseUrl}/page/${currentPage - 1}`);
+      const nextUrl = isLast ? undefined : `${baseUrl}/page/${currentPage + 1}`;
 
-      const totalPages = Math.ceil(filteredProjects.length / pageSize) || 1;
-
-      for (let i = 0; i < totalPages; i++) {
-        const currentPage = i + 1;
-        const isFirst = currentPage === 1;
-        const isLast = currentPage === totalPages;
-        const start = i * pageSize;
-        const end = start + pageSize;
-        const data = filteredProjects.slice(start, end);
-
-        // Map out the [...page] rest parameters based on the filter
-        let pageParam;
-        if (diff === 'all') {
-          pageParam = isFirst ? undefined : `page/${currentPage}`;
-        } else {
-          pageParam = isFirst ? diff : `${diff}/page/${currentPage}`;
-        }
-
-        // Determine correct pagination URLs depending on current filter state
-        const baseUrl = `/projects/${category.id}`;
-        let prevUrl, nextUrl;
-
-        if (diff === 'all') {
-          prevUrl = isFirst ? undefined : (currentPage === 2 ? baseUrl : `${baseUrl}/page/${currentPage - 1}`);
-          nextUrl = isLast ? undefined : `${baseUrl}/page/${currentPage + 1}`;
-        } else {
-          prevUrl = isFirst ? undefined : (currentPage === 2 ? `${baseUrl}/${diff}` : `${baseUrl}/${diff}/page/${currentPage - 1}`);
-          nextUrl = isLast ? undefined : `${baseUrl}/${diff}/page/${currentPage + 1}`;
-        }
-
-        paths.push({
-          params: { 
-            category: category.id,
-            page: pageParam
-          },
-          props: { 
-            category,
-            currentFilter: diff,
-            counts,
-            page: {
-              data,
-              currentPage,
-              lastPage: totalPages,
-              url: { prev: prevUrl, next: nextUrl }
-            }
+      paths.push({
+        params: { 
+          category: category.id,
+          page: isFirst ? undefined : `page/${currentPage}`
+        },
+        props: { 
+          category,
+          counts,
+          page: {
+            data,
+            currentPage,
+            lastPage: totalPages,
+            url: { prev: prevUrl, next: nextUrl }
           }
-        });
-      }
-    });
+        }
+      });
+    }
 
     return paths;
   });
@@ -91,28 +63,14 @@ export async function getStaticPaths() {
 const { 
   category, 
   page, 
-  currentFilter = 'all', 
   counts = { all: 0, beginner: 0, intermediate: 0, advanced: 0 } 
 } = Astro.props;
 
 const projects = page?.data || [];
 
-const filterLabels = {
-  all: 'All levels',
-  beginner: 'Beginner',
-  intermediate: 'Intermediate',
-  advanced: 'Advanced'
-};
-const activeLabel = (filterLabels as any)[currentFilter] || 'All levels';
-const activeCount = (counts as any)[currentFilter] || 0;
-
 // Dynamic SEO
 let pageTitle = category?.data?.seo?.metaTitle || category?.data?.title || 'Projects';
 let robotsIndex = category?.data?.seo?.robotsIndex !== false;
-
-if (currentFilter !== 'all') {
-  pageTitle += ` (${activeLabel} Projects)`;
-}
 
 if (page?.currentPage > 1) {
   const template = category?.data?.paginationTitleTemplate || ' - Page {page}';
@@ -143,11 +101,11 @@ const dynamicSeo = {
       section="projects"
       parents={[{ label: 'Projects', url: '/projects' }]} 
       current={category?.data?.breadcrumbTitle || category?.data?.title} 
-      class="flex items-center gap-1.5 text-[12px] md:text-[13px] text-tx-muted mt-2 md:mt-4 mb-4 font-['JetBrains_Mono',monospace]"
+      class="flex items-center gap-1.5 text-[12px] md:text-[13px] text-tx-muted md:mt-2 mb-6 font-['JetBrains_Mono',monospace]"
     />
 
     <!-- Header Section with Utilities Below -->
-    <div class="flex flex-col items-center text-center pb-10 mb-10">
+    <div class="flex flex-col items-center text-center pb-8 mb-8">
       <h1 id="countHeading" class="text-3xl sm:text-4xl md:text-5xl font-[800] tracking-tight mb-4 text-tx-main">
           {category?.data?.title} 
       </h1>
@@ -160,66 +118,43 @@ const dynamicSeo = {
       </div>
     </div>
 
-    <!-- Section Header (All Projects + Filter) -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-      <h2 class="text-2xl font-[800] text-tx-main tracking-tight">
-        {currentFilter === 'all' ? 'All Projects' : `${activeLabel} Projects`} <span class="text-tx-muted font-normal text-lg ml-1">({activeCount})</span>
-      </h2>
+    <!-- Filter Section (Inline Selectable Pills - Justified Start) -->
+    <div class="flex flex-wrap items-center justify-start gap-2 sm:gap-2.5 mb-8 relative z-20" id="filter-container">
+      
+      <!-- Using buttons and data-attributes for client side JS filtering -->
+      <button 
+        data-filter="all"
+        class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-tx-main border-tx-main text-main font-[600] shadow-sm"
+      >
+        All <span class="ml-1.5 text-[11px] text-main/80">({counts.all})</span>
+      </button>
 
-      <!-- Filter Dropdown (Right Aligned above grid) -->
-      <div class="relative shrink-0 w-full sm:w-auto">
+      {counts.beginner > 0 && (
         <button 
-          id="filterBtn" 
-          aria-expanded="false"
-          aria-controls="filterPopover"
-          aria-haspopup="true"
-          class="flex items-center justify-between w-full sm:w-[180px] gap-2 font-[600] text-sm px-4 py-2 rounded-lg border border-subtle bg-surface text-tx-main hover:bg-tx-muted/5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          data-filter="beginner"
+          class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5"
         >
-          <span class="text-tx-muted font-normal mr-1">Filter:</span>
-          <span id="filterLabel" class="truncate">{activeLabel}</span>
-          <span class="text-[10px] text-tx-muted ml-auto pl-2">▾</span>
+          Beginner <span class="ml-1.5 text-[11px] text-tx-muted">({counts.beginner})</span>
         </button>
+      )}
 
-        <div id="filterPopover" class="hidden absolute left-0 sm:left-auto right-0 top-[calc(100%+6px)] z-50 bg-surface border border-subtle rounded-xl p-1.5 flex flex-col gap-0.5 w-full sm:w-[220px] max-h-[60vh] overflow-y-auto shadow-xl">
-          <a href={`/projects/${category?.id}`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'all' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-            <span>All levels</span>
-            <span class="flex items-center gap-2">
-              <span class={`text-xs font-[500] ${currentFilter === 'all' ? 'text-brand' : 'text-tx-muted'}`}>{counts.all}</span>
-              {currentFilter === 'all' && <span class="text-brand">✓</span>}
-            </span>
-          </a>
+      {counts.intermediate > 0 && (
+        <button 
+          data-filter="intermediate"
+          class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5"
+        >
+          Intermediate <span class="ml-1.5 text-[11px] text-tx-muted">({counts.intermediate})</span>
+        </button>
+      )}
 
-          {counts.beginner > 0 && (
-            <a href={`/projects/${category?.id}/beginner`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'beginner' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-              <span>Beginner</span>
-              <span class="flex items-center gap-2">
-                <span class={`text-xs font-[500] ${currentFilter === 'beginner' ? 'text-brand' : 'text-tx-muted'}`}>{counts.beginner}</span>
-                {currentFilter === 'beginner' && <span class="text-brand">✓</span>}
-              </span>
-            </a>
-          )}
-
-          {counts.intermediate > 0 && (
-            <a href={`/projects/${category?.id}/intermediate`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'intermediate' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-              <span>Intermediate</span>
-              <span class="flex items-center gap-2">
-                <span class={`text-xs font-[500] ${currentFilter === 'intermediate' ? 'text-brand' : 'text-tx-muted'}`}>{counts.intermediate}</span>
-                {currentFilter === 'intermediate' && <span class="text-brand">✓</span>}
-              </span>
-            </a>
-          )}
-
-          {counts.advanced > 0 && (
-            <a href={`/projects/${category?.id}/advanced`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'advanced' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-              <span>Advanced</span>
-              <span class="flex items-center gap-2">
-                <span class={`text-xs font-[500] ${currentFilter === 'advanced' ? 'text-brand' : 'text-tx-muted'}`}>{counts.advanced}</span>
-                {currentFilter === 'advanced' && <span class="text-brand">✓</span>}
-              </span>
-            </a>
-          )}
-        </div>
-      </div>
+      {counts.advanced > 0 && (
+        <button 
+          data-filter="advanced"
+          class="filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5"
+        >
+          Advanced <span class="ml-1.5 text-[11px] text-tx-muted">({counts.advanced})</span>
+        </button>
+      )}
     </div>
 
     <!-- Main Grid -->
@@ -227,6 +162,7 @@ const dynamicSeo = {
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
+          data-difficulty={project.data.difficulty}
           class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
           <!-- Graphic Area with Top-Left Badge -->
@@ -271,12 +207,7 @@ const dynamicSeo = {
         <div class="col-span-full py-16 px-4 text-center bg-surface rounded-2xl border border-subtle flex flex-col items-center justify-center">
           <span class="text-4xl mb-4 block">🔍</span>
           <h3 class="text-lg font-bold text-tx-main mb-2">No projects found</h3>
-          <p class="text-tx-muted max-w-md mx-auto">There are currently no {currentFilter !== 'all' ? currentFilter : ''} projects in this category.</p>
-          {currentFilter !== 'all' && (
-            <a href={`/projects/${category?.id}`} class="mt-6 px-5 py-2.5 bg-surface border border-subtle hover:bg-tx-muted/5 transition-colors text-tx-main text-sm font-semibold rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand">
-              View all levels
-            </a>
-          )}
+          <p class="text-tx-muted max-w-md mx-auto">There are currently no projects in this category.</p>
         </div>
       )}
     </div>
@@ -297,9 +228,7 @@ const dynamicSeo = {
         {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((num) => {
           const isFirst = num === 1;
           const baseUrl = `/projects/${category?.id}`;
-          const targetUrl = isFirst 
-            ? (currentFilter === 'all' ? baseUrl : `${baseUrl}/${currentFilter}`) 
-            : (currentFilter === 'all' ? `${baseUrl}/page/${num}` : `${baseUrl}/${currentFilter}/page/${num}`);
+          const targetUrl = isFirst ? baseUrl : `${baseUrl}/page/${num}`;
 
           return (
             <a 
@@ -359,52 +288,48 @@ const dynamicSeo = {
 </style>
 
 <script>
-  function initFilterDropdown() {
-    const filterBtn = document.getElementById('filterBtn');
-    const filterPopover = document.getElementById('filterPopover');
+  function initClientSideFilter() {
+    const btns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.project-card');
 
-    if (!filterBtn || !filterPopover) return;
-    // Avoid double-binding if this runs more than once for the same DOM
-    if (filterBtn.dataset.bound === 'true') return;
-    filterBtn.dataset.bound = 'true';
+    if (btns.length === 0 || cards.length === 0) return;
 
-    filterBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isExpanded = filterBtn.getAttribute('aria-expanded') === 'true';
-      filterBtn.setAttribute('aria-expanded', String(!isExpanded));
-      filterPopover.classList.toggle('hidden');
-    });
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetFilter = btn.getAttribute('data-filter');
 
-    document.addEventListener('click', (e) => {
-      // Clean, native JS without TypeScript assertions to prevent runtime errors
-      const target = e.target;
-      if (
-        target instanceof Node && 
-        !filterPopover.contains(target) && 
-        target !== filterBtn && 
-        !filterBtn.contains(target)
-      ) {
-        filterBtn.setAttribute('aria-expanded', 'false');
-        filterPopover.classList.add('hidden');
-      }
-    });
+        // 1. Update active states on buttons
+        btns.forEach(b => {
+          const isSelected = b === btn;
+          
+          if (isSelected) {
+            b.className = 'filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-tx-main border-tx-main text-main font-[600] shadow-sm';
+            b.querySelector('span').className = 'ml-1.5 text-[11px] text-main/80';
+          } else {
+            b.className = 'filter-btn inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5';
+            b.querySelector('span').className = 'ml-1.5 text-[11px] text-tx-muted';
+          }
+        });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !filterPopover.classList.contains('hidden')) {
-        filterBtn.setAttribute('aria-expanded', 'false');
-        filterPopover.classList.add('hidden');
-        filterBtn.focus();
-      }
+        // 2. Hide/Show Cards locally
+        cards.forEach(card => {
+          if (targetFilter === 'all' || card.getAttribute('data-difficulty') === targetFilter) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
     });
   }
 
   // Runs on the very first page load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFilterDropdown);
+    document.addEventListener('DOMContentLoaded', initClientSideFilter);
   } else {
-    initFilterDropdown();
+    initClientSideFilter();
   }
 
   // Re-runs after Astro View Transitions swap the DOM (if enabled on this site)
-  document.addEventListener('astro:page-load', initFilterDropdown);
+  document.addEventListener('astro:page-load', initClientSideFilter);
 </script>
