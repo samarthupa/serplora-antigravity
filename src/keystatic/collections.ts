@@ -86,6 +86,36 @@ export const tutorials = collection({
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         category: fields.relationship({ label: 'Category', collection: 'categories', validation: { isRequired: false } }),
         tags: fields.relationship({ label: 'Tags', collection: 'tags', validation: { isRequired: false }, many: true }),
+        
+        // 🟢 NEW: Use Blocks to allow mixing standalone links and groups
+        sidebarItems: fields.blocks(
+            {
+                group: {
+                    label: 'Group (Dropdown)',
+                    schema: fields.object({
+                        groupTitle: fields.text({ label: 'Group Title (e.g., Installation)' }),
+                        lessons: fields.array(
+                            fields.relationship({
+                                label: 'Lesson',
+                                collection: 'lessons',
+                            }),
+                            { label: 'Lessons in this group', itemLabel: props => props.value || 'Select a lesson' }
+                        )
+                    })
+                },
+                link: {
+                    label: 'Standalone Link',
+                    schema: fields.object({
+                        lesson: fields.relationship({
+                            label: 'Lesson',
+                            collection: 'lessons',
+                        })
+                    })
+                }
+            },
+            { label: 'Sidebar Navigation Structure' }
+        ),
+
         excerpt: fields.text({ label: 'Excerpt', multiline: true }),
         seo: seoSchema,
         content: createGlobalEditor('Introduction Content', 'tutorials'),
@@ -271,6 +301,11 @@ export const projectCategories = collection({
             defaultValue: true, 
             description: 'Tell Google not to index Page 2, Page 3, etc. (Recommended to save crawl budget).' 
         }),
+        // ADD THIS:
+        faqs: fields.array(
+            fields.object({ question: fields.text({ label: 'Question' }), answer: fields.text({ label: 'Answer', multiline: true }) }),
+            { label: 'Category FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
+        ),
         
         seo: seoSchema,
         content: createGlobalEditor('Category Details', 'projectCategories'),

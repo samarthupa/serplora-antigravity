@@ -47,11 +47,12 @@ const tags = defineCollection({
 });
 
 // 1. Tutorials (Your Markdown/Markdoc files)
+// 1. Tutorials (Your Markdown/Markdoc files)
 const tutorials = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/tutorials" }),
   schema: z.object({
     title: z.string().optional(),
-    breadcrumbTitle: z.string().optional(), // 🟢 NEW: Breadcrumb support
+    breadcrumbTitle: z.string().optional(),
     draft: z.boolean().optional(),
     excerpt: z.string().optional(),
     
@@ -59,9 +60,27 @@ const tutorials = defineCollection({
     category: z.string().nullable().optional(),
     tags: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
     
+    // 🟢 NEW: Tell Astro to expect Keystatic blocks (discriminants)
+    sidebarItems: z.array(
+      z.discriminatedUnion('discriminant', [
+        z.object({
+          discriminant: z.literal('group'),
+          value: z.object({
+            groupTitle: z.string(),
+            lessons: z.array(z.string())
+          })
+        }),
+        z.object({
+          discriminant: z.literal('link'),
+          value: z.object({
+            lesson: z.string()
+          })
+        })
+      ])
+    ).optional().default([]),
+    
     // Inject SEO Schema
     seo: seoSchema,
-    
     customJs: z.string().optional(),
   }),
 });
@@ -337,6 +356,10 @@ const projectCategories = defineCollection({
     postsPerPage: z.number().default(9),
     paginationTitleTemplate: z.string().default(' - Page {page}'),
     noindexPaginated: z.boolean().default(true),
+    faqs: z.array(z.object({
+      question: z.string(),
+      answer: z.string()
+    })).optional().default([]),
     seo: seoSchema,
   })
 });

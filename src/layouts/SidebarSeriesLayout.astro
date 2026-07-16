@@ -17,7 +17,7 @@ const cleanTitle = (title: string) => {
   return cleaned.replace(/^[\d.]+\s*/, '').trim(); 
 };
 
-// 3. Calculate Breadcrumb Titles (Use custom field if available, fallback to cleaned title)
+// 3. Calculate Breadcrumb Titles
 const parentBreadcrumb = (parent.data.breadcrumbTitle || parent.data.title).toLowerCase();
 const currentBreadcrumb = (currentActiveData.breadcrumbTitle || cleanTitle(currentActiveData.title)).toLowerCase();
 
@@ -65,6 +65,10 @@ if (adsData?.data) {
     adHtml = adsData.data.globalAd;
   }
 }
+
+// 6. Sidebar Mixed Items Logic (Blocks)
+const sidebarItems = parent.data.sidebarItems || [];
+const hasItems = sidebarItems.length > 0;
 ---
 
 <Layout 
@@ -73,20 +77,15 @@ if (adsData?.data) {
   excerptFallback={currentActiveData.excerpt}
   schemaData={currentActiveData}
 >
-  {/* The math: 260 (Left) + 800 (Main) + 320 (Right) + ~60px padding = ~1440px */}
   <div class="flex flex-col lg:flex-row w-full max-w-[1440px] mx-auto justify-center items-start relative font-['Outfit',sans-serif]">
     
     {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
     <div class="lg:hidden w-full flex flex-col pt-4">
-      
-      {/* 🟢 The 800px wrapper fixes the horizontal alignment */}
       <div class="w-full max-w-[800px] mx-auto px-4 sm:px-6">
-        
         {currentSlug === 'overview' ? (
           <Breadcrumb 
             section={basePath as any} 
             current={parentBreadcrumb} 
-            {/* 🟢 Restored exact original padding: pt-4 pb-4 mb-6 */}
             class="pt-4 pb-4 mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap" 
           />
         ) : (
@@ -94,12 +93,10 @@ if (adsData?.data) {
             section={basePath as any} 
             parents={[{ label: parentBreadcrumb, url: `/${basePath}/${parent.id}` }]} 
             current={currentBreadcrumb} 
-            {/* 🟢 Restored exact original padding: pt-4 pb-4 mb-6 */}
             class="pt-4 pb-4 mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap" 
           />
         )}
 
-        {/* 🟢 Restored exact original py-2 */}
         <div class="bg-main/95 backdrop-blur-md py-2 flex items-center justify-between">
           <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95" aria-label="Toggle Menu">
             <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
@@ -119,11 +116,11 @@ if (adsData?.data) {
           </div>
         </div>
       </div>
-      </div>
+    </div>
 
     <div id="mobile-sidebar-backdrop" class="fixed top-[64px] inset-x-0 bottom-0 [.header-hidden_&]:top-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
     
-    {/* Left Sidebar: Max 260px, Min 200px, Shrinks 2nd */}
+    {/* Left Sidebar */}
     <aside id="series-sidebar" class="fixed top-[64px] h-[calc(100dvh-64px)] left-0 z-[150] lg:z-[150] w-[85vw] max-w-[260px] bg-main shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[260px] lg:min-w-[200px] lg:shrink-[999] [.header-hidden_&]:top-0 [.header-hidden_&]:h-[100dvh] border-r border-subtle py-5 px-4 lg:pt-16 lg:pb-6 lg:bg-transparent lg:shadow-none flex flex-col">
       <div class="mb-5 px-1.5 flex justify-between items-center shrink-0">
         <div>
@@ -137,16 +134,93 @@ if (adsData?.data) {
         </button>
       </div>
 
-      <nav class="flex-1 overflow-y-auto min-h-0 custom-scrollbar flex flex-col space-y-0.5 pr-1.5">
-        <a href={`/${basePath}/${parent.id}`} class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === 'overview' ? 'text-brand border-brand/20 font-bold active-item' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}>
-          {cleanTitle(parent.data.title)}
+      <nav id="sidebar-nav-container" class="flex-1 overflow-y-auto min-h-0 custom-scrollbar flex flex-col gap-1 pr-1.5 pb-4 mt-2 relative">
+        
+        {/* Overview Link */}
+        <a href={`/${basePath}/${parent.id}`} class={`block px-2 py-1.5 text-[14px] transition-colors ${currentSlug === 'overview' ? 'text-brand font-semibold active-item' : 'text-tx-main hover:text-brand'}`}>
+          {cleanTitle(parent.data.title)} Overview
         </a>
 
-        {items.map((item: any) => (
-          <a href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} class={`px-2.5 py-1.5 text-[14px] rounded-lg transition-all flex items-center gap-2 border ${currentSlug === item.data.urlSlug ? 'text-brand border-brand/20 font-bold active-item' : 'border-transparent text-tx-muted hover:bg-[rgba(128,128,128,0.08)] hover:text-tx-main'}`}>
-            {cleanTitle(item.data.title)}
-          </a>
-        ))}
+        {/* Grouped Links & Standalone Links */}
+        {hasItems ? (
+          sidebarItems.map((block: any) => {
+            
+            // 🟢 Handle Grouped Dropdowns
+            if (block.discriminant === 'group') {
+              const group = block.value;
+              const isGroupActive = group.lessons.some((lessonId: string) => {
+                const item = items.find((i: any) => i.data.urlSlug === lessonId || i.id === lessonId);
+                return item && item.data.urlSlug === currentSlug;
+              });
+
+              return (
+                <details class="group" open={isGroupActive || undefined}>
+                  {/* Parent Category Title - Normal weight */}
+                  <summary class="flex items-center justify-between cursor-pointer px-2 py-1.5 text-[14px] text-tx-main hover:text-brand transition-colors list-none mt-1">
+                    <span>{group.groupTitle}</span>
+                    <svg class="w-4 h-4 transition-transform duration-200 group-open:rotate-180 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  
+                  {/* Children Links - Only active one is font-semibold */}
+                  <ul class="flex flex-col ml-4 mb-2 mt-0.5">
+                    {group.lessons.map((lessonId: string) => {
+                      const item = items.find((i: any) => i.data.urlSlug === lessonId || i.id === lessonId);
+                      if (!item) return null;
+                      
+                      const isActive = currentSlug === item.data.urlSlug;
+                      
+                      return (
+                        <li>
+                          <a 
+                            href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} 
+                            class={`block px-2 py-1.5 text-[14px] transition-colors ${
+                              isActive 
+                                ? 'text-brand font-semibold active-item' 
+                                : 'text-tx-muted hover:text-tx-main'
+                            }`}
+                          >
+                            {cleanTitle(item.data.title)}
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </details>
+              )
+            }
+            
+            // 🟢 Handle Standalone Links - Only active one is font-semibold
+            else if (block.discriminant === 'link') {
+              const lessonId = block.value.lesson;
+              const item = items.find((i: any) => i.data.urlSlug === lessonId || i.id === lessonId);
+              if (!item) return null;
+              
+              const isActive = currentSlug === item.data.urlSlug;
+              
+              return (
+                <a 
+                  href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} 
+                  class={`block px-2 py-1.5 mt-1 text-[14px] transition-colors ${
+                    isActive 
+                      ? 'text-brand font-semibold active-item' 
+                      : 'text-tx-main hover:text-brand'
+                  }`}
+                >
+                  {cleanTitle(item.data.title)}
+                </a>
+              )
+            }
+          })
+        ) : (
+          /* Fallback for flat lists - Only active one is font-semibold */
+          items.map((item: any) => (
+            <a href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} class={`block px-2 py-1.5 text-[14px] transition-colors ${currentSlug === item.data.urlSlug ? 'text-brand font-semibold active-item' : 'text-tx-main hover:text-brand'}`}>
+              {cleanTitle(item.data.title)}
+            </a>
+          ))
+        )}
       </nav>
       {adHtml && (
         <div class="lg:hidden shrink-0 mt-4 pt-4 border-t border-subtle">
@@ -155,7 +229,7 @@ if (adsData?.data) {
       )}
     </aside>
 
-    {/* Main Content: Max 800px, Min fluid, Refuses to shrink before sidebars do */}
+    {/* Main Content */}
     <main class="flex-1 min-w-0 w-full max-w-[800px] shrink mx-auto px-4 md:px-6 lg:px-8 py-6 lg:py-8">
       {currentSlug === 'overview' ? (
         <Breadcrumb 
@@ -204,7 +278,7 @@ if (adsData?.data) {
       </div>
     </main>
 
-    {/* Right Sidebar: Max 310px, Min 200px, Shrinks 1st, Hides cleanly below 1264px */}
+    {/* Right Sidebar */}
     <aside class="hidden min-[1264px]:flex flex-col w-[310px] min-w-[200px] shrink-[9999] sticky top-[64px] h-[calc(100vh-64px)] py-10 lg:py-16 pl-6 pr-4 z-30">
       {adHtml && (
         <div class="ad-container w-full flex-1 overflow-y-auto custom-scrollbar min-h-0" set:html={adHtml} />
@@ -215,6 +289,14 @@ if (adsData?.data) {
 </Layout>
 
 <style is:global>
+  /* Hide default summary markers for a cleaner look */
+  details > summary {
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+
   .custom-scrollbar::-webkit-scrollbar { width: 4px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb { background-color: var(--color-border-subtle); border-radius: 20px; }
@@ -260,8 +342,18 @@ if (adsData?.data) {
     const toggleBtn = document.getElementById('sidebar-toggle-btn');
     const closeBtn = document.getElementById('sidebar-close-btn');
     const sidebar = document.getElementById('series-sidebar');
+    const navContainer = document.getElementById('sidebar-nav-container');
     const backdrop = document.getElementById('mobile-sidebar-backdrop');
     const activeItem = document.querySelector('.active-item');
+
+    // 🟢 NEW SCROLL LOGIC: Scroll ONLY the nav container, not the whole window
+    if (activeItem && navContainer) {
+      const navRect = navContainer.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      // Calculate offset so the active item sits cleanly in the view
+      const scrollAmount = itemRect.top - navRect.top - (navRect.height / 2) + (itemRect.height / 2);
+      navContainer.scrollTop += scrollAmount;
+    }
 
     function openSidebar() {
       if (!sidebar || !backdrop) return;
@@ -269,10 +361,6 @@ if (adsData?.data) {
       void backdrop.offsetWidth; 
       backdrop.classList.remove('opacity-0');
       sidebar.classList.remove('-translate-x-full');
-
-      if (activeItem) {
-        setTimeout(() => activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); 
-      }
     }
 
     function closeSidebar() {

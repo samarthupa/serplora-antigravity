@@ -26,5 +26,4 @@ pnpm-debug.log*
 # wrangler temporary files
 .wrangler/
 
-#unbuilt projects
-src/pages/projects
+

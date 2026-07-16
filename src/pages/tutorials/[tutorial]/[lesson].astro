@@ -1,4 +1,5 @@
 ---
+// src/pages/tutorials/[tutorial]/[lesson].astro
 import { getCollection, render } from 'astro:content';
 import SidebarSeriesLayout from '../../../layouts/SidebarSeriesLayout.astro';
 
@@ -34,8 +35,12 @@ const seriesLessons = allLessons
 const { Content } = await render(lesson);
 ---
 
-{/* 🟢 FIX: Passed 'series' and 'seriesLessons' to match the variables defined above */}
-<SidebarSeriesLayout parent={series} items={seriesLessons} currentSlug={lesson.data.urlSlug} basePath="tutorials">
+<SidebarSeriesLayout 
+  parent={series} 
+  items={seriesLessons} 
+  currentSlug={lesson.data.urlSlug} 
+  basePath="tutorials"
+>
   
   {/* Wrap the content in data-pagefind-body so the Sidebar is ignored! */}
   <div data-pagefind-body>
@@ -53,5 +58,4 @@ const { Content } = await render(lesson);
     <script is:inline set:html={lesson.data.customJs}></script>
   )}
 
-{/* 🟢 FIX: Corrected the closing tag */}
 </SidebarSeriesLayout>

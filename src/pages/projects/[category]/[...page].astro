@@ -4,13 +4,6 @@ import Layout from '../../../layouts/Layout.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import UtilityActions from '../../../components/ui/UtilityActions.astro';
 
-// Single source of truth for difficulty levels to avoid hardcoding everywhere
-const DIFFICULTY_LEVELS = [
-  { id: 'beginner', label: 'Beginner', dotColor: 'bg-emerald-500' },
-  { id: 'intermediate', label: 'Intermediate', dotColor: 'bg-amber-500' },
-  { id: 'advanced', label: 'Advanced', dotColor: 'bg-rose-500' }
-];
-
 export async function getStaticPaths() {
   const categories = await getCollection('projectCategories');
   const allProjects = await getCollection('projects', ({ data }) => {
@@ -20,14 +13,16 @@ export async function getStaticPaths() {
   return categories.flatMap((category) => {
     const categoryProjects = allProjects.filter(p => p.data.categories.includes(category.id));
     
-    // Calculate counts dynamically based on our levels
-    const counts = { all: categoryProjects.length };
-    DIFFICULTY_LEVELS.forEach(level => {
-      counts[level.id] = categoryProjects.filter(p => p.data.difficulty === level.id).length;
-    });
+    // Calculate counts once at build time to save resources
+    const counts = {
+      all: categoryProjects.length,
+      beginner: categoryProjects.filter(p => p.data.difficulty === 'beginner').length,
+      intermediate: categoryProjects.filter(p => p.data.difficulty === 'intermediate').length,
+      advanced: categoryProjects.filter(p => p.data.difficulty === 'advanced').length,
+    };
 
     const pageSize = category.data.postsPerPage || 9;
-    const difficulties = ['all', ...DIFFICULTY_LEVELS.map(l => l.id)];
+    const difficulties = ['all', 'beginner', 'intermediate', 'advanced'];
     const paths = [];
 
     // Generate static routes for the base category AND each difficulty filter
@@ -35,7 +30,10 @@ export async function getStaticPaths() {
       const filteredProjects = diff === 'all' 
         ? categoryProjects 
         : categoryProjects.filter(p => p.data.difficulty === diff);
-      
+
+      // Skip generating pages for filters that have 0 projects
+      if (filteredProjects.length === 0 && diff !== 'all') return;
+
       const totalPages = Math.ceil(filteredProjects.length / pageSize) || 1;
 
       for (let i = 0; i < totalPages; i++) {
@@ -90,6 +88,7 @@ export async function getStaticPaths() {
   });
 }
 
+// Added safety fallbacks to prevent HMR crashes when saving files
 const { 
   category, 
   page, 
@@ -99,10 +98,16 @@ const {
 
 const projects = page?.data || [];
 
-// Formatting the active label dynamically safely
-const activeLevelConfig = DIFFICULTY_LEVELS.find(lvl => lvl.id === currentFilter);
-const activeLabel = activeLevelConfig ? activeLevelConfig.label : 'All levels';
-const activeCount = counts[currentFilter] || 0;
+// Formatting the active label safely
+const filterLabels = {
+  all: 'All levels',
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced'
+};
+// Use a generic type assertion to keep TS happy without strict template checking
+const activeLabel = (filterLabels as any)[currentFilter] || 'All levels';
+const activeCount = (counts as any)[currentFilter] || 0;
 
 // Dynamic SEO
 let pageTitle = category?.data?.seo?.metaTitle || category?.data?.title || 'Projects';
@@ -134,8 +139,7 @@ const dynamicSeo = {
   seo={dynamicSeo}
   hasNewsletterModal={true} 
 >
-  <!-- Expanded max-w-[1280px] to max-w-[1600px] so it can hold more cards on wider screens -->
-  <main class="w-full bg-main text-tx-main font-['Outfit',sans-serif] px-4 py-8 sm:px-8 md:px-12 lg:px-14 lg:py-10 max-w-[1600px] mx-auto min-h-screen">
+  <main class="w-full bg-main text-tx-main font-['Outfit',sans-serif] px-4 py-8 sm:px-8 md:px-12 lg:px-14 lg:py-10 max-w-[1280px] mx-auto min-h-screen">
     
     <Breadcrumb 
       section="projects"
@@ -156,13 +160,20 @@ const dynamicSeo = {
 
       <div class="flex items-center gap-3 shrink-0 flex-wrap md:flex-nowrap mt-2 md:mt-0">
         
-        <details class="relative shrink-0 w-full sm:w-auto dropdown-details group">
-          <summary class="list-none flex items-center justify-between w-full sm:w-auto gap-2 font-[500] text-sm px-4 py-2.5 rounded-xl border border-subtle bg-surface text-tx-main hover:bg-tx-muted/5 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main marker:hidden [&::-webkit-details-marker]:hidden">
-            <span>{activeLabel}</span>
-            <span class="text-[10px] text-tx-muted ml-2 transition-transform duration-200 group-open:rotate-180">▾</span>
-          </summary>
+        <!-- Filter Dropdown -->
+        <div class="relative shrink-0 w-full sm:w-auto">
+          <button 
+            id="filterBtn" 
+            aria-expanded="false"
+            aria-controls="filterPopover"
+            aria-haspopup="true"
+            class="flex items-center justify-between w-full sm:w-auto gap-2 font-[500] text-sm px-4 py-2.5 rounded-xl border border-subtle bg-surface text-tx-main hover:bg-tx-muted/5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          >
+            <span id="filterLabel">{activeLabel}</span>
+            <span class="text-[10px] text-tx-muted ml-2">▾</span>
+          </button>
 
-          <div class="absolute right-0 left-auto top-[calc(100%+8px)] z-50 bg-surface border border-subtle rounded-2xl p-1.5 flex flex-col gap-0.5 w-[220px] max-w-[calc(100vw-2rem)] max-h-[60vh] overflow-y-auto shadow-xl">
+          <div id="filterPopover" class="hidden absolute right-0 left-auto top-[calc(100%+8px)] z-50 bg-surface border border-subtle rounded-2xl p-1.5 flex flex-col gap-0.5 w-[220px] max-w-[calc(100vw-2rem)] max-h-[60vh] overflow-y-auto shadow-xl">
             <a href={`/projects/${category?.id}`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'all' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
               <span>All levels</span>
               <span class="flex items-center gap-2">
@@ -171,79 +182,91 @@ const dynamicSeo = {
               </span>
             </a>
 
-            {DIFFICULTY_LEVELS.map((level) => counts[level.id] > 0 && (
-              <a href={`/projects/${category?.id}/${level.id}`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === level.id ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-                <span>{level.label}</span>
+            {counts.beginner > 0 && (
+              <a href={`/projects/${category?.id}/beginner`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'beginner' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+                <span>Beginner</span>
                 <span class="flex items-center gap-2">
-                  <span class={`text-xs font-[500] ${currentFilter === level.id ? 'text-brand' : 'text-tx-muted'}`}>{counts[level.id]}</span>
-                  {currentFilter === level.id && <span class="text-brand">✓</span>}
+                  <span class={`text-xs font-[500] ${currentFilter === 'beginner' ? 'text-brand' : 'text-tx-muted'}`}>{counts.beginner}</span>
+                  {currentFilter === 'beginner' && <span class="text-brand">✓</span>}
                 </span>
               </a>
-            ))}
+            )}
+
+            {counts.intermediate > 0 && (
+              <a href={`/projects/${category?.id}/intermediate`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'intermediate' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+                <span>Intermediate</span>
+                <span class="flex items-center gap-2">
+                  <span class={`text-xs font-[500] ${currentFilter === 'intermediate' ? 'text-brand' : 'text-tx-muted'}`}>{counts.intermediate}</span>
+                  {currentFilter === 'intermediate' && <span class="text-brand">✓</span>}
+                </span>
+              </a>
+            )}
+
+            {counts.advanced > 0 && (
+              <a href={`/projects/${category?.id}/advanced`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'advanced' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+                <span>Advanced</span>
+                <span class="flex items-center gap-2">
+                  <span class={`text-xs font-[500] ${currentFilter === 'advanced' ? 'text-brand' : 'text-tx-muted'}`}>{counts.advanced}</span>
+                  {currentFilter === 'advanced' && <span class="text-brand">✓</span>}
+                </span>
+              </a>
+            )}
           </div>
-        </details>
+        </div>
 
         <div class="w-px h-6 bg-subtle hidden sm:block"></div>
         <UtilityActions showShare={true} showNewsletter={true} showGoogle={true} />
       </div>
     </div>
 
-    <!-- Dynamic Flex Container (Switched from Grid to Flex) -->
-    <div id="project-grid" class="flex flex-wrap gap-5 sm:gap-6 items-stretch justify-start relative z-10">
-      {projects.length > 0 ? projects.map((project, index) => {
-        const diffConfig = DIFFICULTY_LEVELS.find(l => l.id === project.data.difficulty) || DIFFICULTY_LEVELS[0];
-        
-        return (
-          <a 
-            href={`/projects/${category?.id}/${project.id}`} 
-            /* Flex layout rules: allows growing, bounds at min 350px (on sm+) and max 400px */
-            class="project-card flex-auto w-full sm:min-w-[350px] max-w-[400px] group bg-surface rounded-2xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
-          >
-            <!-- Graphic Area - Reduced height and capped at 300px max -->
-            <div class="w-full h-[180px] sm:h-[200px] max-h-[300px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center text-4xl relative overflow-hidden shrink-0">
-               {(project.data.image && !project.data.hideImage) ? (
-                 <img 
-                   src={project.data.image} 
-                   alt={project.data.title} 
-                   width="640"
-                   height="360"
-                   loading={index < 4 ? "eager" : "lazy"} 
-                   decoding="async"
-                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                 />
-               ) : (
-                 <div class="w-12 h-12 flex items-center justify-center opacity-90 drop-shadow-md text-main [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain">
-                   <Fragment set:html={category?.data?.iconSvg || '💻'} />
-                 </div>
-               )}
-            </div>
-            
-            <!-- Body Area -->
-            <div class="p-4 flex flex-col flex-1">
-              <span class="inline-flex items-center gap-1.5 text-[11px] font-[600] px-2 py-1 rounded-md border border-subtle text-tx-muted mb-3 w-max">
-                <span class={`w-1.5 h-1.5 rounded-full ${diffConfig.dotColor}`}></span>
-                <span class="capitalize">{project.data.difficulty}</span>
-              </span>
-              <div class="flex items-start justify-between gap-3 flex-1 w-full">
-                <div class="flex-1 min-w-0">
-                  <h3 class="text-[16px] font-[800] mb-1 text-tx-main tracking-tight line-clamp-2 leading-snug group-hover:text-brand transition-colors">
-                    {project.data.title}
-                  </h3>
-                  {project.data.excerpt && (
-                    <p class="text-[13px] text-tx-muted leading-snug line-clamp-2">{project.data.excerpt}</p>
-                  )}
-                </div>
-                <div class="shrink-0 flex flex-col justify-end h-full">
-                  <span class="w-8 h-8 flex items-center justify-center rounded-full border border-subtle text-tx-muted transition-all duration-150 group-hover:bg-brand group-hover:border-brand group-hover:text-main">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-                  </span>
-                </div>
+    <!-- Dynamic Grid -->
+    <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 items-start relative z-10">
+      {projects.length > 0 ? projects.map((project, index) => (
+        <a 
+          href={`/projects/${category?.id}/${project.id}`} 
+          class="project-card group bg-surface rounded-2xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg block outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main flex flex-col h-full w-full max-w-[400px] min-w-0 justify-self-center"
+        >
+          <!-- Graphic Area -->
+          <div class="w-full aspect-[21/9] min-h-[100px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center text-5xl relative overflow-hidden shrink-0">
+             {(project.data.image && !project.data.hideImage) ? (
+               <img 
+                 src={project.data.image} 
+                 alt={project.data.title} 
+                 loading={index < 4 ? "eager" : "lazy"} 
+                 decoding="async"
+                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+               />
+             ) : (
+               <div class="w-14 h-14 flex items-center justify-center opacity-90 drop-shadow-md text-main [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain">
+                 <Fragment set:html={category?.data?.iconSvg || '💻'} />
+               </div>
+             )}
+          </div>
+          <!-- Body Area -->
+          <div class="p-4 flex flex-col flex-1">
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-[600] px-2 py-1 rounded-md border border-subtle text-tx-muted mb-3 w-max">
+              <span class={`w-1.5 h-1.5 rounded-full ${project.data.difficulty === 'beginner' ? 'bg-emerald-500' : project.data.difficulty === 'intermediate' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
+              <span class="capitalize">{project.data.difficulty}</span>
+            </span>
+            <div class="flex items-start justify-between gap-3 flex-1 w-full">
+              <div class="flex-1 min-w-0">
+                <h3 class="text-[17px] font-[800] mb-1 text-tx-main tracking-tight line-clamp-2 leading-snug group-hover:text-brand transition-colors">
+                  {project.data.title}
+                </h3>
+                {project.data.excerpt && (
+                  <p class="text-[13px] text-tx-muted leading-snug line-clamp-2">{project.data.excerpt}</p>
+                )}
+              </div>
+              <div class="shrink-0 flex flex-col justify-end h-full">
+                <span class="w-8 h-8 flex items-center justify-center rounded-full border border-subtle text-tx-muted transition-all duration-150 group-hover:bg-brand group-hover:border-brand group-hover:text-main">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+                </span>
               </div>
             </div>
-          </a>
-        );
-      }) : (
-        <div class="w-full py-16 px-4 text-center bg-surface rounded-2xl border border-subtle flex flex-col items-center justify-center">
+          </div>
+        </a>
+      )) : (
+        <div class="col-span-full py-16 px-4 text-center bg-surface rounded-2xl border border-subtle flex flex-col items-center justify-center">
           <span class="text-4xl mb-4 block">🔍</span>
           <h3 class="text-lg font-bold text-tx-main mb-2">No projects found</h3>
           <p class="text-tx-muted max-w-md mx-auto">There are currently no {currentFilter !== 'all' ? currentFilter : ''} projects in this category.</p>
@@ -314,7 +337,7 @@ const dynamicSeo = {
         <div class="flex flex-col border-t border-subtle">
           {category.data.faqs.map((faq) => (
             <details class="faq group py-5 md:py-6 border-b border-subtle">
-              <summary class="flex items-center justify-between gap-6 cursor-pointer list-none font-[600] text-[16px] md:text-[18px] text-tx-main outline-none focus-visible:ring-2 focus-visible:ring-brand hover:text-brand transition-colors rounded-lg marker:hidden [&::-webkit-details-marker]:hidden">
+              <summary class="flex items-center justify-between gap-6 cursor-pointer list-none font-[600] text-[16px] md:text-[18px] text-tx-main outline-none focus-visible:ring-2 focus-visible:ring-brand hover:text-brand transition-colors rounded-lg">
                 {faq.question}
                 <div class="w-8 h-8 rounded-full border border-subtle flex items-center justify-center shrink-0 text-tx-muted group-hover:border-brand group-hover:text-brand group-hover:bg-brand/5 transition-all group-open:rotate-45">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -329,36 +352,57 @@ const dynamicSeo = {
   </main>
 </Layout>
 
+<style>
+  .faq summary::-webkit-details-marker { display:none; }
+</style>
+
 <script>
   function initFilterDropdown() {
-    const detailsElements = document.querySelectorAll('details.dropdown-details');
-    
+    const filterBtn = document.getElementById('filterBtn');
+    const filterPopover = document.getElementById('filterPopover');
+
+    if (!filterBtn || !filterPopover) return;
+    // Avoid double-binding if this runs more than once for the same DOM
+    if (filterBtn.dataset.bound === 'true') return;
+    filterBtn.dataset.bound = 'true';
+
+    filterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isExpanded = filterBtn.getAttribute('aria-expanded') === 'true';
+      filterBtn.setAttribute('aria-expanded', String(!isExpanded));
+      filterPopover.classList.toggle('hidden');
+    });
+
     document.addEventListener('click', (e) => {
-      detailsElements.forEach(details => {
-        if (details.hasAttribute('open') && !details.contains(e.target as Node)) {
-          details.removeAttribute('open');
-        }
-      });
+      // Clean, native JS without TypeScript assertions to prevent runtime errors
+      const target = e.target;
+      if (
+        target instanceof Node && 
+        !filterPopover.contains(target) && 
+        target !== filterBtn && 
+        !filterBtn.contains(target)
+      ) {
+        filterBtn.setAttribute('aria-expanded', 'false');
+        filterPopover.classList.add('hidden');
+      }
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        detailsElements.forEach(details => {
-          if (details.hasAttribute('open')) {
-            details.removeAttribute('open');
-            const summary = details.querySelector('summary');
-            if (summary) summary.focus();
-          }
-        });
+      if (e.key === 'Escape' && !filterPopover.classList.contains('hidden')) {
+        filterBtn.setAttribute('aria-expanded', 'false');
+        filterPopover.classList.add('hidden');
+        filterBtn.focus();
       }
     });
   }
 
+  // Runs on the very first page load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFilterDropdown);
   } else {
     initFilterDropdown();
   }
 
+  // Re-runs after Astro View Transitions swap the DOM (if enabled on this site)
   document.addEventListener('astro:page-load', initFilterDropdown);
 </script>
