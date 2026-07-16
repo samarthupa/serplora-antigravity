@@ -88,7 +88,6 @@ export async function getStaticPaths() {
   });
 }
 
-// Added safety fallbacks to prevent HMR crashes when saving files
 const { 
   category, 
   page, 
@@ -98,14 +97,12 @@ const {
 
 const projects = page?.data || [];
 
-// Formatting the active label safely
 const filterLabels = {
   all: 'All levels',
   beginner: 'Beginner',
   intermediate: 'Intermediate',
   advanced: 'Advanced'
 };
-// Use a generic type assertion to keep TS happy without strict template checking
 const activeLabel = (filterLabels as any)[currentFilter] || 'All levels';
 const activeCount = (counts as any)[currentFilter] || 0;
 
@@ -139,95 +136,108 @@ const dynamicSeo = {
   seo={dynamicSeo}
   hasNewsletterModal={true} 
 >
-  <main class="w-full bg-main text-tx-main font-['Outfit',sans-serif] px-4 py-8 sm:px-8 md:px-12 lg:px-14 lg:py-10 max-w-[1280px] mx-auto min-h-screen">
+  <main class="w-full bg-main text-tx-main font-['Outfit',sans-serif] px-4 py-8 sm:px-8 md:px-12 lg:px-14 lg:py-10 max-w-[1600px] mx-auto min-h-screen">
     
+    <!-- Top Breadcrumb -->
     <Breadcrumb 
       section="projects"
       parents={[{ label: 'Projects', url: '/projects' }]} 
       current={category?.data?.breadcrumbTitle || category?.data?.title} 
-      class="flex items-center gap-1.5 text-[12px] md:text-[13px] text-tx-muted mt-6 md:mt-8 mb-6 font-['JetBrains_Mono',monospace]"
+      class="flex items-center gap-1.5 text-[12px] md:text-[13px] text-tx-muted mt-2 md:mt-4 mb-4 font-['JetBrains_Mono',monospace]"
     />
 
-    <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
-      <div class="flex-1 min-w-0 md:pr-10">
-        <h1 id="countHeading" class="text-3xl sm:text-4xl md:text-[42px] font-[800] tracking-tight mb-3 text-tx-main">
-           {category?.data?.title} <span class="text-tx-muted font-normal text-2xl ml-1">({activeCount})</span>
-        </h1>
-        <p class="text-[16px] sm:text-[18px] text-tx-muted leading-relaxed max-w-2xl">
-          {category?.data?.description || 'Hands-on projects to build real skills, from your first script to production-ready apps.'}
-        </p>
-      </div>
-
-      <div class="flex items-center gap-3 shrink-0 flex-wrap md:flex-nowrap mt-2 md:mt-0">
-        
-        <!-- Filter Dropdown -->
-        <div class="relative shrink-0 w-full sm:w-auto">
-          <button 
-            id="filterBtn" 
-            aria-expanded="false"
-            aria-controls="filterPopover"
-            aria-haspopup="true"
-            class="flex items-center justify-between w-full sm:w-auto gap-2 font-[500] text-sm px-4 py-2.5 rounded-xl border border-subtle bg-surface text-tx-main hover:bg-tx-muted/5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
-          >
-            <span id="filterLabel">{activeLabel}</span>
-            <span class="text-[10px] text-tx-muted ml-2">▾</span>
-          </button>
-
-          <div id="filterPopover" class="hidden absolute right-0 left-auto top-[calc(100%+8px)] z-50 bg-surface border border-subtle rounded-2xl p-1.5 flex flex-col gap-0.5 w-[220px] max-w-[calc(100vw-2rem)] max-h-[60vh] overflow-y-auto shadow-xl">
-            <a href={`/projects/${category?.id}`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'all' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-              <span>All levels</span>
-              <span class="flex items-center gap-2">
-                <span class={`text-xs font-[500] ${currentFilter === 'all' ? 'text-brand' : 'text-tx-muted'}`}>{counts.all}</span>
-                {currentFilter === 'all' && <span class="text-brand">✓</span>}
-              </span>
-            </a>
-
-            {counts.beginner > 0 && (
-              <a href={`/projects/${category?.id}/beginner`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'beginner' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-                <span>Beginner</span>
-                <span class="flex items-center gap-2">
-                  <span class={`text-xs font-[500] ${currentFilter === 'beginner' ? 'text-brand' : 'text-tx-muted'}`}>{counts.beginner}</span>
-                  {currentFilter === 'beginner' && <span class="text-brand">✓</span>}
-                </span>
-              </a>
-            )}
-
-            {counts.intermediate > 0 && (
-              <a href={`/projects/${category?.id}/intermediate`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'intermediate' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-                <span>Intermediate</span>
-                <span class="flex items-center gap-2">
-                  <span class={`text-xs font-[500] ${currentFilter === 'intermediate' ? 'text-brand' : 'text-tx-muted'}`}>{counts.intermediate}</span>
-                  {currentFilter === 'intermediate' && <span class="text-brand">✓</span>}
-                </span>
-              </a>
-            )}
-
-            {counts.advanced > 0 && (
-              <a href={`/projects/${category?.id}/advanced`} class={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'advanced' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
-                <span>Advanced</span>
-                <span class="flex items-center gap-2">
-                  <span class={`text-xs font-[500] ${currentFilter === 'advanced' ? 'text-brand' : 'text-tx-muted'}`}>{counts.advanced}</span>
-                  {currentFilter === 'advanced' && <span class="text-brand">✓</span>}
-                </span>
-              </a>
-            )}
-          </div>
-        </div>
-
-        <div class="w-px h-6 bg-subtle hidden sm:block"></div>
+    <!-- Header Section with Utilities Below -->
+    <div class="flex flex-col items-center text-center pb-10 mb-10">
+      <h1 id="countHeading" class="text-3xl sm:text-4xl md:text-5xl font-[800] tracking-tight mb-4 text-tx-main">
+          {category?.data?.title} 
+      </h1>
+      <p class="text-[16px] sm:text-[18px] text-tx-muted leading-relaxed max-w-3xl mx-auto mb-6">
+        {category?.data?.description || 'Hands-on projects to build real skills, from your first script to production-ready apps.'}
+      </p>
+      <!-- Centered Utility Icons -->
+      <div class="flex justify-center items-center gap-3 flex-wrap text-tx-muted">
         <UtilityActions showShare={true} showNewsletter={true} showGoogle={true} />
       </div>
     </div>
 
-    <!-- Dynamic Grid -->
-    <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 items-start relative z-10">
+    <!-- Section Header (All Projects + Filter) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <h2 class="text-2xl font-[800] text-tx-main tracking-tight">
+        {currentFilter === 'all' ? 'All Projects' : `${activeLabel} Projects`} <span class="text-tx-muted font-normal text-lg ml-1">({activeCount})</span>
+      </h2>
+
+      <!-- Filter Dropdown (Right Aligned above grid) -->
+      <div class="relative shrink-0 w-full sm:w-auto">
+        <button 
+          id="filterBtn" 
+          aria-expanded="false"
+          aria-controls="filterPopover"
+          aria-haspopup="true"
+          class="flex items-center justify-between w-full sm:w-[180px] gap-2 font-[600] text-sm px-4 py-2 rounded-lg border border-subtle bg-surface text-tx-main hover:bg-tx-muted/5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+        >
+          <span class="text-tx-muted font-normal mr-1">Filter:</span>
+          <span id="filterLabel" class="truncate">{activeLabel}</span>
+          <span class="text-[10px] text-tx-muted ml-auto pl-2">▾</span>
+        </button>
+
+        <div id="filterPopover" class="hidden absolute left-0 sm:left-auto right-0 top-[calc(100%+6px)] z-50 bg-surface border border-subtle rounded-xl p-1.5 flex flex-col gap-0.5 w-full sm:w-[220px] max-h-[60vh] overflow-y-auto shadow-xl">
+          <a href={`/projects/${category?.id}`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'all' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+            <span>All levels</span>
+            <span class="flex items-center gap-2">
+              <span class={`text-xs font-[500] ${currentFilter === 'all' ? 'text-brand' : 'text-tx-muted'}`}>{counts.all}</span>
+              {currentFilter === 'all' && <span class="text-brand">✓</span>}
+            </span>
+          </a>
+
+          {counts.beginner > 0 && (
+            <a href={`/projects/${category?.id}/beginner`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'beginner' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+              <span>Beginner</span>
+              <span class="flex items-center gap-2">
+                <span class={`text-xs font-[500] ${currentFilter === 'beginner' ? 'text-brand' : 'text-tx-muted'}`}>{counts.beginner}</span>
+                {currentFilter === 'beginner' && <span class="text-brand">✓</span>}
+              </span>
+            </a>
+          )}
+
+          {counts.intermediate > 0 && (
+            <a href={`/projects/${category?.id}/intermediate`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'intermediate' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+              <span>Intermediate</span>
+              <span class="flex items-center gap-2">
+                <span class={`text-xs font-[500] ${currentFilter === 'intermediate' ? 'text-brand' : 'text-tx-muted'}`}>{counts.intermediate}</span>
+                {currentFilter === 'intermediate' && <span class="text-brand">✓</span>}
+              </span>
+            </a>
+          )}
+
+          {counts.advanced > 0 && (
+            <a href={`/projects/${category?.id}/advanced`} class={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-[500] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand ${currentFilter === 'advanced' ? 'bg-brand/10 text-brand' : 'text-tx-main hover:bg-tx-muted/5'}`}>
+              <span>Advanced</span>
+              <span class="flex items-center gap-2">
+                <span class={`text-xs font-[500] ${currentFilter === 'advanced' ? 'text-brand' : 'text-tx-muted'}`}>{counts.advanced}</span>
+                {currentFilter === 'advanced' && <span class="text-brand">✓</span>}
+              </span>
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start relative z-10">
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
-          class="project-card group bg-surface rounded-2xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg block outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main flex flex-col h-full w-full max-w-[400px] min-w-0 justify-self-center"
+          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
-          <!-- Graphic Area -->
-          <div class="w-full aspect-[21/9] min-h-[100px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center text-5xl relative overflow-hidden shrink-0">
+          <!-- Graphic Area with Top-Left Badge -->
+          <div class="relative w-full aspect-video min-h-[100px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center overflow-hidden shrink-0">
+             
+             <!-- Floating Badge -->
+             <div class="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 text-[10px] font-[700] uppercase tracking-wider bg-surface/95 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-subtle text-tx-main">
+               <span class={`w-1.5 h-1.5 rounded-full ${project.data.difficulty === 'beginner' ? 'bg-emerald-500' : project.data.difficulty === 'intermediate' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
+               <span>{project.data.difficulty}</span>
+             </div>
+
              {(project.data.image && !project.data.hideImage) ? (
                <img 
                  src={project.data.image} 
@@ -242,26 +252,18 @@ const dynamicSeo = {
                </div>
              )}
           </div>
-          <!-- Body Area -->
-          <div class="p-4 flex flex-col flex-1">
-            <span class="inline-flex items-center gap-1.5 text-[11px] font-[600] px-2 py-1 rounded-md border border-subtle text-tx-muted mb-3 w-max">
-              <span class={`w-1.5 h-1.5 rounded-full ${project.data.difficulty === 'beginner' ? 'bg-emerald-500' : project.data.difficulty === 'intermediate' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
-              <span class="capitalize">{project.data.difficulty}</span>
-            </span>
-            <div class="flex items-start justify-between gap-3 flex-1 w-full">
-              <div class="flex-1 min-w-0">
-                <h3 class="text-[17px] font-[800] mb-1 text-tx-main tracking-tight line-clamp-2 leading-snug group-hover:text-brand transition-colors">
-                  {project.data.title}
-                </h3>
-                {project.data.excerpt && (
-                  <p class="text-[13px] text-tx-muted leading-snug line-clamp-2">{project.data.excerpt}</p>
-                )}
-              </div>
-              <div class="shrink-0 flex flex-col justify-end h-full">
-                <span class="w-8 h-8 flex items-center justify-center rounded-full border border-subtle text-tx-muted transition-all duration-150 group-hover:bg-brand group-hover:border-brand group-hover:text-main">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-                </span>
-              </div>
+          
+          <!-- Body Area (Centred Action Link) -->
+          <div class="p-4 sm:p-5 flex flex-col flex-1 bg-surface">
+            <h3 class="text-[17px] font-[800] mb-2 text-tx-main leading-snug line-clamp-2">
+              {project.data.title}
+            </h3>
+            {project.data.excerpt && (
+              <p class="text-[14px] text-tx-muted leading-relaxed line-clamp-3 mb-4">{project.data.excerpt}</p>
+            )}
+            
+            <div class="mt-auto pt-4 flex justify-center w-full">
+              <span class="text-brand font-[600] text-[15px] transition-all group-hover:underline decoration-2 underline-offset-4">View Project</span>
             </div>
           </div>
         </a>
@@ -283,11 +285,11 @@ const dynamicSeo = {
     {page?.lastPage > 1 && (
       <div id="pagination" class="flex flex-wrap items-center justify-center gap-1.5 mt-10 sm:mt-12">
         {page?.url?.prev ? (
-          <a href={page.url.prev} aria-label="Previous page" class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface hover:bg-tx-muted/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand">
+          <a href={page.url.prev} aria-label="Previous page" class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface hover:bg-tx-muted/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
           </a>
         ) : (
-          <span class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface opacity-40 cursor-not-allowed">
+          <span class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface opacity-40 cursor-not-allowed">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
           </span>
         )}
@@ -303,7 +305,7 @@ const dynamicSeo = {
             <a 
               href={targetUrl}
               aria-current={page.currentPage === num ? 'page' : undefined}
-              class={`w-9 h-9 flex items-center justify-center rounded-lg text-sm transition-colors outline-none border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-main ${
+              class={`w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-sm transition-colors outline-none border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-main ${
                 page.currentPage === num 
                   ? 'font-[600] bg-brand text-main focus-visible:ring-brand' 
                   : 'font-[500] text-tx-muted hover:bg-tx-muted/10 focus-visible:ring-tx-muted'
@@ -315,11 +317,11 @@ const dynamicSeo = {
         })}
 
         {page?.url?.next ? (
-          <a href={page.url.next} aria-label="Next page" class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface hover:bg-tx-muted/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand">
+          <a href={page.url.next} aria-label="Next page" class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface hover:bg-tx-muted/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
           </a>
         ) : (
-          <span class="w-9 h-9 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface opacity-40 cursor-not-allowed">
+          <span class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface opacity-40 cursor-not-allowed">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
           </span>
         )}
