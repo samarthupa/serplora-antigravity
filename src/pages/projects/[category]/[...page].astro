@@ -114,7 +114,7 @@ let canonicalUrl = category?.data?.seo?.canonicalUrl; // Default from CMS if it 
 
 // Construct base category canonical URL
 const siteOrigin = Astro.site ? Astro.site.origin : Astro.url.origin;
-const baseCategoryCanonical = `${siteOrigin}/projects/${category.id}/`;
+const baseCategoryCanonical = `${siteOrigin}/projects/${category.id}`;
 
 // 1. If it's a filtered page (beginner/intermediate/advanced)
 if (currentFilter !== 'all') {
