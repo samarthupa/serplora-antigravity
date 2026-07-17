@@ -212,12 +212,12 @@ const dynamicSeo = {
       )}
     </div>
 
-    <!-- Main Grid -->
-    <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start relative z-10">
+    <!-- Main Grid (Updated with auto-fit) -->
+    <div id="project-grid" class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6 items-start relative z-10">
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
-          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full max-w-[480px] mx-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
           <!-- Graphic Area with Top-Left Badge -->
           <div class="relative w-full aspect-video min-h-[100px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center overflow-hidden shrink-0">
