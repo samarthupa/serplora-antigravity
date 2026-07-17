@@ -162,7 +162,7 @@ const dynamicSeo = {
 
     <!-- Header Section with Utilities Below -->
     <div class="flex flex-col items-center text-center pb-8 mb-8">
-      <h1 id="countHeading" class="text-3xl sm:text-4xl md:text-5xl font-[800] tracking-tight mb-4 text-tx-main">
+      <h1 id="countHeading" class="text-3xl md:text-4xl font-[800] tracking-tight mb-4 text-tx-main">
           {category?.data?.title} 
       </h1>
       <p class="text-[16px] sm:text-[18px] text-tx-muted leading-relaxed max-w-3xl mx-auto mb-6">
@@ -213,11 +213,11 @@ const dynamicSeo = {
     </div>
 
     <!-- Main Grid (Updated with auto-fit, 320px minimum) -->
-    <div id="project-grid" class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-10 items-start relative z-10">
+     <div id="project-grid" class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-8 items-start relative z-10">
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
-          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full max-w-[480px] mx-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full max-w-[480px] mx-auto lg:mx-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
           <!-- Graphic Area (Badge removed, max-h-[280px] added) -->
           <div class="relative w-full aspect-video min-h-[100px] max-h-[180px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center overflow-hidden shrink-0 border-b border-subtle/50">

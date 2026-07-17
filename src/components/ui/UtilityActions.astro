@@ -36,6 +36,13 @@ const {
         </a>
     )}
 
+    {showNewsletter && (
+        <button class="newsletter-btn w-10 h-10 md:w-11 md:h-11 rounded-full border border-subtle bg-surface text-tx-muted flex items-center justify-center hover:text-tx-main hover:border-tx-main hover:-translate-y-0.5 transition-all shadow-sm group relative" aria-label="Get Updates">
+            <svg class="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <span class="absolute bottom-[-30px] text-[12px] bg-tx-main text-main px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">Newsletter</span>
+        </button>
+    )}
+
     {showShare && (
         <div class="relative share-wrapper">
             <button class="share-toggle-btn w-10 h-10 md:w-11 md:h-11 rounded-full border border-subtle bg-surface text-tx-muted flex items-center justify-center hover:text-tx-main hover:border-tx-main hover:-translate-y-0.5 transition-all shadow-sm group relative" aria-label="Share">
@@ -73,13 +80,6 @@ const {
                 </button>
             </div>
         </div>
-    )}
-
-    {showNewsletter && (
-        <button class="newsletter-btn w-10 h-10 md:w-11 md:h-11 rounded-full border border-subtle bg-surface text-tx-muted flex items-center justify-center hover:text-tx-main hover:border-tx-main hover:-translate-y-0.5 transition-all shadow-sm group relative" aria-label="Get Updates">
-            <svg class="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-            <span class="absolute bottom-[-30px] text-[12px] bg-tx-main text-main px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">Newsletter</span>
-        </button>
     )}
 </div>
 
