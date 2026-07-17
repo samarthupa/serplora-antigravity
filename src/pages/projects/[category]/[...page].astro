@@ -212,22 +212,16 @@ const dynamicSeo = {
       )}
     </div>
 
-    <!-- Main Grid (Updated with auto-fit) -->
-    <div id="project-grid" class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6 items-start relative z-10">
+    <!-- Main Grid (Updated with auto-fit, 320px minimum) -->
+    <div id="project-grid" class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-10 items-start relative z-10">
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
           class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full max-w-[480px] mx-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
-          <!-- Graphic Area with Top-Left Badge -->
-          <div class="relative w-full aspect-video min-h-[100px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center overflow-hidden shrink-0">
+          <!-- Graphic Area (Badge removed, max-h-[280px] added) -->
+          <div class="relative w-full aspect-video min-h-[100px] max-h-[180px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center overflow-hidden shrink-0 border-b border-subtle/50">
              
-             <!-- Floating Badge -->
-             <div class="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 text-[10px] font-[700] uppercase tracking-wider bg-surface/95 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-subtle text-tx-main">
-               <span class={`w-1.5 h-1.5 rounded-full ${project.data.difficulty === 'beginner' ? 'bg-emerald-500' : project.data.difficulty === 'intermediate' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
-               <span>{project.data.difficulty}</span>
-             </div>
-
              {(project.data.image && !project.data.hideImage) ? (
                <img 
                  src={project.data.image} 
@@ -243,17 +237,25 @@ const dynamicSeo = {
              )}
           </div>
           
-          <!-- Body Area (Centred Action Link) -->
-          <div class="p-4 sm:p-5 flex flex-col flex-1 bg-surface">
-            <h3 class="text-[17px] font-[800] mb-2 text-tx-main leading-snug line-clamp-2">
+          <!-- Body Area -->
+          <div class="p-3 sm:p-4 flex flex-col flex-1 bg-surface">
+            
+            <!-- Difficulty Badge moved above title -->
+            <div class="inline-flex items-center gap-1.5 text-[10.5px] font-[700] uppercase tracking-wider bg-tx-muted/5 px-2.5 py-1 rounded-md border border-subtle text-tx-main w-fit mb-3.5">
+              <span class={`w-1.5 h-1.5 rounded-full ${project.data.difficulty === 'beginner' ? 'bg-emerald-500' : project.data.difficulty === 'intermediate' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
+              <span>{project.data.difficulty}</span>
+            </div>
+
+            <h3 class="text-[18px] sm:text-[19px] font-[800] mb-2.5 text-tx-main leading-snug line-clamp-2">
               {project.data.title}
             </h3>
+            
             {project.data.excerpt && (
-              <p class="text-[14px] text-tx-muted leading-relaxed line-clamp-3 mb-4">{project.data.excerpt}</p>
+              <p class="text-[14px] text-tx-muted leading-relaxed line-clamp-3 mb-5">{project.data.excerpt}</p>
             )}
             
-            <div class="mt-auto pt-4 flex justify-center w-full">
-              <span class="text-brand font-[600] text-[15px] transition-all group-hover:underline decoration-2 underline-offset-4">View Project</span>
+            <div class="mt-auto pt-2 flex justify-start w-full">
+              <span class="text-brand font-[600] text-[14px] transition-all group-hover:underline decoration-2 underline-offset-4">View Project →</span>
             </div>
           </div>
         </a>
