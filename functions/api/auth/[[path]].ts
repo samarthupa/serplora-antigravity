@@ -1,29 +1,38 @@
 import { betterAuth } from "better-auth";
-import { drizzle } from "drizzle-orm/d1";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { Kysely } from "kysely";
+import { D1Dialect } from "kysely-d1";
 
 export async function onRequest(context) {
-    const url = new URL(context.request.url);
-    
-    // 1. Give Better Auth access to your D1 Database
-    const db = drizzle(context.env.DB); 
+    try {
+        const url = new URL(context.request.url);
+        
+        // 1. Connect to D1 without requiring a strict schema
+        const db = new Kysely({
+            dialect: new D1Dialect({ database: context.env.DB })
+        });
 
-    // 2. Initialize the unified system
-    const auth = betterAuth({
-        baseURL: url.origin, // Dynamically uses your live or staging domain
-        database: drizzleAdapter(db, { provider: "sqlite" }),
-        socialProviders: {
-            github: {
-                clientId: context.env.GITHUB_CLIENT_ID,
-                clientSecret: context.env.GITHUB_CLIENT_SECRET,
+        // 2. Initialize Better Auth
+        const auth = betterAuth({
+            baseURL: url.origin,
+            database: {
+                db: db,
+                type: "sqlite"
             },
-            google: {
-                clientId: context.env.GOOGLE_CLIENT_ID, 
-                clientSecret: context.env.GOOGLE_CLIENT_SECRET,
-            }
-        },
-    });
+            socialProviders: {
+                github: {
+                    clientId: context.env.GITHUB_CLIENT_ID || "",
+                    clientSecret: context.env.GITHUB_CLIENT_SECRET || "",
+                },
+                google: {
+                    clientId: context.env.GOOGLE_CLIENT_ID || "", 
+                    clientSecret: context.env.GOOGLE_CLIENT_SECRET || "",
+                }
+            },
+        });
 
-    // 3. Better Auth magically handles the rest!
-    return auth.handler(context.request);
+        return auth.handler(context.request);
+    } catch (error) {
+        // If anything crashes, tell the browser exactly why
+        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    }
 }
