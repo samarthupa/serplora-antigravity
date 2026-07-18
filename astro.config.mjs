@@ -4,6 +4,8 @@ import markdoc from '@astrojs/markdoc';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import pagefind from 'astro-pagefind';
+// 👇 1. Import the Cloudflare adapter
+import cloudflare from '@astrojs/cloudflare'; 
 
 // Detect if you are running locally
 const isLocalDev = process.argv.includes('dev');
@@ -12,6 +14,9 @@ export default defineConfig({
   site: 'https://serplora.com',
   output: 'static', 
   
+  // 👇 2. Add the adapter here
+  adapter: cloudflare(),
+
   // 👇 1. Tell Astro to build links without trailing slashes
   trailingSlash: 'never',
 
