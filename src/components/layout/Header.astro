@@ -447,49 +447,35 @@ const primaryBtn = {
     lastScrollY = currentScrollY;
   }, { passive: true });
 
-  // --- Client-side Authentication & Page Tracking Logic ---
-  const currentPath = window.location.pathname;
-  const isExcluded = currentPath.includes('/login') || currentPath.includes('/account');
-  const userJson = localStorage.getItem('serplora_user');
+  // --- REVISED CLIENT-SIDE AUTHENTICATION LOGIC ---
+ import { authClient } from '../../lib/auth-client';
 
-  if (!isExcluded) {
-    let cleanTitle = document.title.split('-')[0].trim();
-    if (!cleanTitle || cleanTitle === '') cleanTitle = 'Home';
-    
-    let history = JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
-    
-    history = history.filter((p: any) => p.url !== currentPath);
-    history.unshift({ url: currentPath, title: cleanTitle });
-    if (history.length > 10) history = history.slice(0, 10);
-    localStorage.setItem('serplora_recent_pages', JSON.stringify(history));
-
-    if (userJson) {
-      fetch('/api/sync-history', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: currentPath, title: cleanTitle })
-      }).catch(err => console.error('Failed to sync history', err));
-    }
-  }
-
-  // --- REVISED AUTHENTICATION RENDER LOGIC ---
   const signinHeader = document.getElementById('auth-signin-header');
   const profileHeader = document.getElementById('auth-profile-header');
+  const avatarEl = document.getElementById('profile-avatar-header');
 
-  if (userJson) {
-    const user = JSON.parse(userJson);
-    const avatarEl = document.getElementById('profile-avatar-header');
-    
-    if (avatarEl && user.name) {
-       avatarEl.textContent = user.name.charAt(0).toUpperCase();
+  async function checkAuthSession() {
+    try {
+      const { data } = await authClient.getSession();
+      
+      if (data && data.user) {
+        if (avatarEl && data.user.name) {
+           avatarEl.textContent = data.user.name.charAt(0).toUpperCase();
+        }
+        if (signinHeader) signinHeader.style.display = 'none';
+        if (profileHeader) profileHeader.style.display = 'flex';
+      } else {
+        if (signinHeader) signinHeader.style.display = 'block';
+        if (profileHeader) profileHeader.style.display = 'none';
+      }
+    } catch (error) {
+      if (signinHeader) signinHeader.style.display = 'block';
+      if (profileHeader) profileHeader.style.display = 'none';
     }
-
-    if (signinHeader) signinHeader.style.display = 'none';
-    if (profileHeader) profileHeader.style.display = 'flex';
-  } else {
-    if (signinHeader) signinHeader.style.display = 'block';
-    if (profileHeader) profileHeader.style.display = 'none';
   }
+
+  // Initialize the header session check
+  checkAuthSession();
 
   // --- DYNAMIC SIGN-IN ROUTING ---
   const dynamicSigninBtn = document.getElementById('dynamic-signin-btn');

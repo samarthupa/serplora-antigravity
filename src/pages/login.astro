@@ -14,17 +14,24 @@ import Layout from '../layouts/Layout.astro';
       <h1 class="text-2xl md:text-3xl font-[800] text-tx-main mb-2 tracking-tight">Welcome to Serplora</h1>
       <p class="text-tx-muted text-[15px] mb-8">Sign in securely to continue learning.</p>
 
-      {/* --- SIGN IN SECTION (Both Google and GitHub live here) --- */}
+      {/* --- SIGN IN SECTION --- */}
       <div id="login-section" class="w-full flex flex-col items-center gap-4 transition-all duration-300">
         
-        <div id="g_id_onload"
-             data-client_id="237265144318-6tnfoug73ikcs5rucsa1mhvs16hkchdt.apps.googleusercontent.com"
-             data-callback="handleGoogleLogin"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+        {/* --- NEW STANDARD GOOGLE BUTTON --- */}
+        <button 
+          id="google-login-btn"
+          class="w-full flex items-center justify-center gap-3 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-md font-medium text-[15px] transition-colors shadow-sm"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
       
-        {/* Changed from <a> to <button> for Better Auth onClick handling */}
+        {/* --- GITHUB BUTTON --- */}
         <button 
           id="github-login-btn"
           class="w-full flex items-center justify-center gap-3 py-2.5 bg-[#24292F] hover:bg-[#24292F]/90 text-white rounded-md font-medium text-[15px] transition-colors"
@@ -36,33 +43,9 @@ import Layout from '../layouts/Layout.astro';
         </button>
       </div>
 
-      {/* --- COUNTRY SELECTION SECTION --- */}
-      {/* Note: Better Auth handles social registration automatically in one click. 
-          This section is left in the HTML to preserve your layout, but you may want 
-          to move this to a dedicated 'Complete Your Profile' page later. */}
-      <div id="country-section" class="w-full hidden flex-col items-center gap-5 transition-all duration-300 animate-fade-in">
-        <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-2">
-          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </div>
-        <p class="text-tx-main font-semibold text-lg">Where are you from?</p>
-        
-        <select id="country" class="w-full p-3.5 rounded-xl bg-main border border-subtle text-tx-main text-[16px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer">
-          <option value="India">India</option>
-          <option value="United States">United States</option>
-          <option value="United Kingdom">United Kingdom</option>
-        </select>
-        
-        <button id="finish-btn" class="w-full py-3.5 mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[16px] transition-all active:scale-95 shadow-md flex justify-center items-center gap-2">
-          <span>Complete Profile</span>
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-        </button>
-      </div>
-
     </div>
   </div>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  
 <script>
   import { authClient } from '../lib/auth-client';
 
@@ -73,35 +56,24 @@ import Layout from '../layouts/Layout.astro';
     ? rawReturnUrl 
     : '/';
 
-  const loginSection = document.getElementById('login-section');
-
   // --- GOOGLE LOGIN (Using Better Auth) ---
-  window.handleGoogleLogin = async (response) => {
-    if (loginSection) {
-        loginSection.innerHTML = '<div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div><p class="mt-4 text-tx-main font-semibold">Verifying securely...</p>';
-    }
+  document.getElementById('google-login-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const btn = e.currentTarget as HTMLButtonElement;
+    btn.innerHTML = 'Connecting to Google...';
     
-    // Pass the Google token directly to Better Auth
-    const { data, error } = await authClient.signIn.social({
+    await authClient.signIn.social({
         provider: "google",
-        idToken: response.credential, 
+        callbackURL: safeReturnUrl 
     });
-    
-    if (error) {
-      alert("Google verification failed. Please try again.");
-      window.location.reload();
-    } else {
-      window.location.href = safeReturnUrl; 
-    }
-  };
+  });
 
   // --- GITHUB LOGIN (Using Better Auth) ---
   document.getElementById('github-login-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const btn = e.currentTarget as HTMLButtonElement;
-    btn.innerHTML = 'Connecting...';
+    btn.innerHTML = 'Connecting to GitHub...';
     
-    // Better Auth handles the redirect and callback automatically
     await authClient.signIn.social({
         provider: "github",
         callbackURL: safeReturnUrl 
