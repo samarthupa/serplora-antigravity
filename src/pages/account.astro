@@ -44,33 +44,51 @@ import Layout from '../layouts/Layout.astro';
     const user = getLocalUser();
 
     if (!user) {
-      window.location.href = '/';
+      window.location.href = '/signin';
     } else {
       // Populate Profile Info
-      document.getElementById('acc-avatar').textContent = user.name.charAt(0).toUpperCase();
-      document.getElementById('acc-name').textContent = user.name;
-      document.getElementById('acc-email').textContent = user.email;
-      document.getElementById('acc-country').textContent = user.country || 'Unknown';
+      const avatarEl = document.getElementById('acc-avatar');
+      if (avatarEl) avatarEl.textContent = user.name.charAt(0).toUpperCase();
+      
+      const nameEl = document.getElementById('acc-name');
+      if (nameEl) nameEl.textContent = user.name;
+      
+      const emailEl = document.getElementById('acc-email');
+      if (emailEl) emailEl.textContent = user.email;
+      
+      const countryEl = document.getElementById('acc-country');
+      if (countryEl) countryEl.textContent = user.country || 'Unknown';
 
       // Populate History
       const history = user.recent_pages || JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
       const historyList = document.getElementById('acc-history-list');
       
-      if (history.length === 0) {
-        historyList.innerHTML = '<li class="text-tx-muted py-4">You haven\'t visited any lessons yet.</li>';
-      } else {
-        historyList.innerHTML = history.map(page => `
-          <li>
-            <a href="${page.url}" class="flex items-center justify-between p-4 rounded-xl bg-main border border-transparent hover:border-subtle hover:shadow-sm transition-all group">
-              <span class="text-tx-main font-medium group-hover:text-blue-500 transition-colors">${page.title}</span>
-              <svg class="w-4 h-4 text-tx-muted group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </a>
-          </li>
-        `).join('');
+      if (historyList) {
+        if (history.length === 0) {
+          historyList.innerHTML = '<li class="text-tx-muted py-4">You haven\'t visited any lessons yet.</li>';
+        } else {
+          historyList.innerHTML = history.map((page: any) => `
+            <li>
+              <a href="${page.url}" class="flex items-center justify-between p-4 rounded-xl bg-main border border-transparent hover:border-subtle hover:shadow-sm transition-all group">
+                <span class="text-tx-main font-medium group-hover:text-blue-500 transition-colors">${page.title}</span>
+                <svg class="w-4 h-4 text-tx-muted group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              </a>
+            </li>
+          `).join('');
+        }
       }
 
-      // 2. Use the imported logoutUser function
-      document.getElementById('signout-btn').addEventListener('click', logoutUser);
+      // 2. Handle Sign Out (Clear edge cookie AND local storage)
+      const signoutBtn = document.getElementById('signout-btn');
+      if (signoutBtn) {
+        signoutBtn.addEventListener('click', () => {
+          // 🟢 REMOVE EDGE COOKIE TO LOCK THE ROUTE
+          document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+          
+          // Trigger your existing logout logic
+          logoutUser();
+        });
+      }
     }
   </script>
 </Layout>

@@ -79,6 +79,10 @@ import Layout from '../layouts/Layout.astro';
 
       if (data.success) {
         saveLocalUser(data.user);
+        
+        // 🟢 SET EDGE COOKIE ON LOGIN
+        document.cookie = "auth_token=true; path=/; max-age=604800; Secure; SameSite=Lax";
+        
         window.location.href = safeReturnUrl; // ✅ Secure redirect
       } else if (data.isNew) {
         loginSection.classList.add('hidden');
@@ -112,6 +116,10 @@ import Layout from '../layouts/Layout.astro';
       if (res.ok) {
         const data = await res.json();
         saveLocalUser(data.user);
+        
+        // 🟢 SET EDGE COOKIE ON REGISTRATION
+        document.cookie = "auth_token=true; path=/; max-age=604800; Secure; SameSite=Lax";
+        
         window.location.href = safeReturnUrl; // ✅ Secure redirect
       } else {
         throw new Error("Registration failed");
