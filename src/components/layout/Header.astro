@@ -459,6 +459,14 @@ const primaryBtn = {
       const { data } = await authClient.getSession();
       
       if (data && data.user) {
+        
+        // 🟢 NEW: Redirect to onboarding if country is missing 
+        // (and we aren't already on the onboarding page)
+        if (!data.user.country && window.location.pathname !== '/complete-profile') {
+            window.location.href = '/complete-profile';
+            return;
+        }
+
         if (avatarEl && data.user.name) {
            avatarEl.textContent = data.user.name.charAt(0).toUpperCase();
         }

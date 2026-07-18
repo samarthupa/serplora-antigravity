@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-  <div class="max-w-[800px] mx-auto px-6 py-12 md:py-20 font-['Outfit',sans-serif] min-h-[75vh]">
+  <div class="max-w-[700px] mx-auto px-6 py-12 md:py-20 font-['Outfit',sans-serif] min-h-[75vh]">
     
     <header class="mb-10 flex items-center justify-between">
       <h1 class="text-3xl md:text-4xl font-[800] text-tx-main tracking-tight">Your Account</h1>
@@ -13,16 +13,59 @@ import Layout from '../layouts/Layout.astro';
       </button>
     </header>
 
-    {/* Centered Profile Card (History section removed as requested) */}
-    <div class="max-w-md mx-auto bg-surface border border-subtle rounded-2xl p-8 shadow-sm flex flex-col items-center text-center">
-      <div id="acc-avatar" class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-bold mb-4 shadow-md"></div>
-      <h2 id="acc-name" class="text-2xl font-bold text-tx-main mb-1">Loading...</h2>
-      <p id="acc-email" class="text-md text-tx-muted mb-6"></p>
+    <div class="bg-surface border border-subtle rounded-3xl p-8 shadow-sm">
       
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-main border border-subtle">
-        <svg class="w-5 h-5 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <span id="acc-country" class="text-sm font-bold text-tx-muted uppercase tracking-wider"></span>
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 pb-8 border-b border-subtle">
+        <img id="acc-avatar" src="" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-main shadow-md hidden object-cover" />
+        <div id="acc-avatar-fallback" class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-bold border-4 border-main shadow-md hidden"></div>
+        
+        <div class="text-center sm:text-left mt-2">
+          <h2 id="acc-display-name" class="text-2xl font-bold text-tx-main mb-1">Loading...</h2>
+          <p id="acc-email" class="text-md text-tx-muted bg-main px-3 py-1 rounded-lg inline-block border border-subtle"></p>
+        </div>
       </div>
+
+      <form id="profile-form" class="flex flex-col gap-5">
+        
+        <div>
+          <label class="block text-sm font-semibold text-tx-main mb-1.5">Full Name</label>
+          <input type="text" id="acc-name" required class="w-full p-3 rounded-xl bg-main border border-subtle text-tx-main focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tx-main mb-1.5">Country</label>
+          <select id="acc-country" class="w-full p-3 rounded-xl bg-main border border-subtle text-tx-main focus:ring-2 focus:ring-blue-500 outline-none transition-all cursor-pointer">
+            <option value="IN">India</option>
+            <option value="US">United States</option>
+            <option value="UK">United Kingdom</option>
+            <option value="CA">Canada</option>
+            <option value="AU">Australia</option>
+            <option value="OTHER">Other</option>
+          </select>
+          <p id="country-hint" class="text-xs text-tx-muted mt-1 ml-1 hidden">Auto-detected for your convenience.</p>
+        </div>
+
+        <div class="pt-4 border-t border-subtle">
+          <label class="block text-sm font-semibold text-tx-main mb-1.5">Phone Number (Optional)</label>
+          <input type="tel" id="acc-phone" placeholder="+1 234 567 8900" class="w-full p-3 rounded-xl bg-main border border-subtle text-tx-main focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+        </div>
+
+        <div class="flex items-center gap-2 mt-1">
+          <input type="checkbox" id="acc-same-whatsapp" class="w-4 h-4 rounded border-subtle text-blue-600 focus:ring-blue-500 bg-main cursor-pointer" />
+          <label for="acc-same-whatsapp" class="text-sm font-medium text-tx-muted cursor-pointer">My WhatsApp number is the same</label>
+        </div>
+
+        <div id="whatsapp-container" class="transition-all duration-300 overflow-hidden">
+          <label class="block text-sm font-semibold text-tx-main mb-1.5">WhatsApp Number (Optional)</label>
+          <input type="tel" id="acc-whatsapp" placeholder="+1 234 567 8900" class="w-full p-3 rounded-xl bg-main border border-subtle text-tx-main focus:ring-2 focus:ring-green-500 outline-none transition-all" />
+        </div>
+
+        <button type="submit" id="acc-submit-btn" class="w-full py-3.5 mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[16px] transition-all active:scale-95 shadow-md flex justify-center items-center gap-2">
+          <span>Save Profile</span>
+        </button>
+        <p id="save-success" class="text-green-500 text-sm font-semibold text-center mt-2 opacity-0 transition-opacity">Profile saved successfully!</p>
+
+      </form>
     </div>
 
   </div>
@@ -34,30 +77,133 @@ import Layout from '../layouts/Layout.astro';
       // 1. Fetch user using Better Auth Session
       const { data, error } = await authClient.getSession();
 
-      if (error || !data || !data.session) {
-        // Redirect to login if not authenticated
+      if (error || !data || !data.user) {
         window.location.href = '/login';
         return;
       }
 
-      const user = data.user;
+      const user = data.user as any; // Cast for custom fields
 
-      // Populate Profile Info
-      const avatarEl = document.getElementById('acc-avatar');
-      if (avatarEl && user.name) avatarEl.textContent = user.name.charAt(0).toUpperCase();
-      
-      const nameEl = document.getElementById('acc-name');
-      if (nameEl) nameEl.textContent = user.name;
-      
+      // 2. Populate Avatar & Read-Only Header
+      const avatarImg = document.getElementById('acc-avatar') as HTMLImageElement;
+      const avatarFallback = document.getElementById('acc-avatar-fallback');
+      const displayName = document.getElementById('acc-display-name');
       const emailEl = document.getElementById('acc-email');
-      if (emailEl) emailEl.textContent = user.email;
-      
-      const countryEl = document.getElementById('acc-country');
-      // Custom schema columns like country might require Better Auth plugin config to surface in session,
-      // but we safely bind it here if it exists.
-      if (countryEl) countryEl.textContent = (user as any).country || 'Not specified';
 
-      // 2. Handle Sign Out via Better Auth
+      if (user.image && avatarImg) {
+        avatarImg.src = user.image;
+        avatarImg.classList.remove('hidden');
+      } else if (avatarFallback && user.name) {
+        avatarFallback.textContent = user.name.charAt(0).toUpperCase();
+        avatarFallback.classList.remove('hidden');
+      }
+
+      if (displayName) displayName.textContent = user.name;
+      if (emailEl) emailEl.textContent = user.email;
+
+      // 3. Populate Editable Form Fields
+      const nameInput = document.getElementById('acc-name') as HTMLInputElement;
+      const countrySelect = document.getElementById('acc-country') as HTMLSelectElement;
+      const phoneInput = document.getElementById('acc-phone') as HTMLInputElement;
+      const whatsappInput = document.getElementById('acc-whatsapp') as HTMLInputElement;
+      const sameCheckbox = document.getElementById('acc-same-whatsapp') as HTMLInputElement;
+      const whatsappContainer = document.getElementById('whatsapp-container');
+
+      if (nameInput) nameInput.value = user.name || '';
+      if (phoneInput) phoneInput.value = user.phone || '';
+      if (whatsappInput) whatsappInput.value = user.whatsapp || '';
+
+      // Checkbox Logic Initial State
+      if (user.phone && user.whatsapp && user.phone === user.whatsapp && sameCheckbox && whatsappContainer) {
+          sameCheckbox.checked = true;
+          whatsappContainer.style.height = '0px';
+          whatsappContainer.style.opacity = '0';
+      }
+
+      // Auto-Detect Country ONLY if they don't have one saved yet
+      if (!user.country) {
+        try {
+          const locRes = await fetch('/api/get-location');
+          if (locRes.ok) {
+            const locData = await locRes.json();
+            if (countrySelect && [...countrySelect.options].some(opt => opt.value === locData.country)) {
+              countrySelect.value = locData.country;
+              const hint = document.getElementById('country-hint');
+              if (hint) hint.classList.remove('hidden');
+            }
+          }
+        } catch (err) {
+          console.warn("Could not auto-detect location.");
+        }
+      } else if (countrySelect) {
+        countrySelect.value = user.country;
+      }
+
+      // 4. WhatsApp Checkbox Toggle Logic
+      if (sameCheckbox && whatsappContainer && whatsappInput && phoneInput) {
+        sameCheckbox.addEventListener('change', (e) => {
+          const isChecked = (e.target as HTMLInputElement).checked;
+          if (isChecked) {
+            whatsappContainer.style.height = '0px';
+            whatsappContainer.style.opacity = '0';
+            whatsappInput.value = phoneInput.value; 
+          } else {
+            whatsappContainer.style.height = 'auto';
+            whatsappContainer.style.opacity = '1';
+            if (whatsappInput.value === phoneInput.value) whatsappInput.value = '';
+          }
+        });
+
+        // Sync values while typing if checkbox is checked
+        phoneInput.addEventListener('input', () => {
+          if (sameCheckbox.checked) {
+            whatsappInput.value = phoneInput.value;
+          }
+        });
+      }
+
+      // 5. Handle Form Submission
+      const form = document.getElementById('profile-form');
+      const submitBtn = document.getElementById('acc-submit-btn');
+      const successMsg = document.getElementById('save-success');
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (submitBtn) {
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Saving...';
+            (submitBtn as HTMLButtonElement).disabled = true;
+
+            const updatedName = nameInput?.value;
+            const updatedCountry = countrySelect?.value;
+            const updatedPhone = phoneInput?.value || '';
+            const updatedWhatsapp = whatsappInput?.value || '';
+
+            // Update user profile using Better Auth
+            const { error: updateError } = await authClient.updateUser({
+              name: updatedName,
+              country: updatedCountry,
+              phone: updatedPhone,
+              whatsapp: updatedWhatsapp
+            });
+
+            if (updateError) {
+              alert("Failed to save profile: " + updateError.message);
+            } else {
+              if (displayName) displayName.textContent = updatedName; // Update header instantly
+              if (successMsg) {
+                  successMsg.style.opacity = '1';
+                  setTimeout(() => successMsg.style.opacity = '0', 3000);
+              }
+            }
+
+            submitBtn.innerHTML = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+        }
+      });
+
+      // 6. Handle Sign Out
       const signoutBtn = document.getElementById('signout-btn');
       if (signoutBtn) {
         signoutBtn.addEventListener('click', async () => {
