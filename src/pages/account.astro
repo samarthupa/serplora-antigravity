@@ -4,88 +4,92 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-  <div class="max-w-[640px] mx-auto px-6 py-12 md:py-16 font-['Outfit',sans-serif] min-h-[80vh]">
+  <div class="max-w-[960px] mx-auto px-6 py-12 md:py-16 font-['Outfit',sans-serif] min-h-[80vh]">
     
-    <header class="mb-12 flex items-center justify-between border-b border-subtle pb-6">
+    <header class="mb-8 flex items-center justify-between border-b border-subtle pb-6">
       <h1 class="text-3xl font-[800] text-tx-main tracking-tight">Account Settings</h1>
-      <button id="signout-btn" class="px-4 py-2 text-sm font-semibold text-tx-muted hover:text-red-500 transition-colors focus:outline-none">
+      <button id="signout-btn" class="px-4 py-2 text-sm font-semibold text-tx-muted hover:text-red-500 transition-colors focus:outline-none cursor-pointer">
         Sign Out
       </button>
     </header>
 
-    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-10">
-      <img id="acc-avatar" src="" alt="Profile Picture" class="w-20 h-20 rounded-full border border-subtle hidden object-cover" />
-      <div id="acc-avatar-fallback" class="w-20 h-20 rounded-full bg-tx-main text-main flex items-center justify-center text-3xl font-bold hidden"></div>
+    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-12 p-6 rounded-2xl bg-tx-muted/5 border border-subtle">
+      <img id="acc-avatar" src="" alt="Profile Picture" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-subtle hidden object-cover shadow-sm" />
+      <div id="acc-avatar-fallback" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-tx-main text-main flex items-center justify-center text-3xl sm:text-4xl font-bold hidden shadow-sm"></div>
       
-      <div class="text-center sm:text-left mt-2">
-        <h2 id="acc-display-name" class="text-xl font-bold text-tx-main mb-1">Loading...</h2>
-        <p id="acc-email" class="text-sm font-mono text-tx-muted"></p>
+      <div class="text-center sm:text-left sm:mt-3 flex-1">
+        <h2 id="acc-display-name" class="text-2xl font-bold text-tx-main mb-1.5">Loading...</h2>
+        <p id="acc-email" class="text-sm font-mono text-tx-muted bg-main px-3 py-1 rounded-lg inline-block border border-subtle"></p>
       </div>
     </div>
 
     <form id="profile-form" class="flex flex-col gap-8">
       
-      <!-- Personal Info Section -->
-      <section>
-        <h3 class="text-sm font-bold text-tx-muted uppercase tracking-wider mb-4">Personal Information</h3>
-        <div class="flex flex-col gap-5">
-          <div>
-            <label class="block text-sm font-semibold text-tx-main mb-1.5">Full Name</label>
-            <input type="text" id="acc-name" required class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" />
-          </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        
+        <!-- Personal Info Section -->
+        <section>
+          <h3 class="text-sm font-bold text-tx-muted uppercase tracking-wider mb-5 pb-2 border-b border-subtle/50">Personal Information</h3>
+          <div class="flex flex-col gap-5">
+            <div>
+              <label class="block text-sm font-semibold text-tx-main mb-1.5">Full Name</label>
+              <input type="text" id="acc-name" required class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" />
+            </div>
 
-          <div class="relative" id="country-container">
-            <label class="block text-sm font-semibold text-tx-main mb-1.5">Country</label>
-            <input type="hidden" id="acc-country-code" />
-            <input type="text" id="acc-country-search" placeholder="Search for a country..." autocomplete="off" class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all cursor-text" />
-            <div id="country-dropdown" class="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-surface border border-subtle rounded-md shadow-lg hidden custom-scrollbar">
-              <!-- Populated by JS -->
+            <div class="relative" id="country-container">
+              <label class="block text-sm font-semibold text-tx-main mb-1.5">Country</label>
+              <input type="hidden" id="acc-country-code" />
+              <input type="text" id="acc-country-search" placeholder="Search for a country..." autocomplete="off" class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all cursor-text" />
+              <div id="country-dropdown" class="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-surface border border-subtle rounded-md shadow-lg hidden custom-scrollbar">
+                <!-- Populated by JS -->
+              </div>
+              <p id="country-hint" class="text-xs text-tx-muted mt-2 hidden">Auto-detected for your convenience.</p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Contact Info Section -->
-      <section class="pt-2">
-        <h3 class="text-sm font-bold text-tx-muted uppercase tracking-wider mb-4">Contact Details</h3>
-        <div class="flex flex-col gap-5">
-          
-          <div>
-            <label class="block text-sm font-semibold text-tx-main mb-1.5">Phone Number</label>
-            <div class="flex gap-2">
-              <select id="acc-phone-dial" class="w-[100px] p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main outline-none custom-select-arrow cursor-pointer font-mono text-sm"></select>
-              <input type="tel" id="acc-phone" placeholder="9876543210" class="flex-1 p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" />
+        <!-- Contact Info Section -->
+        <section>
+          <h3 class="text-sm font-bold text-tx-muted uppercase tracking-wider mb-5 pb-2 border-b border-subtle/50">Contact Details</h3>
+          <div class="flex flex-col gap-5">
+            
+            <div>
+              <label class="block text-sm font-semibold text-tx-main mb-1.5">Phone Number</label>
+              <div class="flex gap-2">
+                <select id="acc-phone-dial" class="w-[120px] p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main outline-none custom-select-arrow cursor-pointer font-mono text-xs truncate"></select>
+                <input type="tel" id="acc-phone" placeholder="9876543210" class="flex-1 p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" />
+              </div>
+              <p id="phone-error" class="text-xs text-red-500 mt-1.5 hidden">Please enter a valid phone number.</p>
             </div>
-          </div>
 
-          <div class="flex items-center gap-2 my-1">
-            <input type="checkbox" id="acc-same-whatsapp" class="w-4 h-4 rounded-sm border-subtle text-tx-main focus:ring-tx-main bg-transparent cursor-pointer" />
-            <label for="acc-same-whatsapp" class="text-sm font-medium text-tx-muted cursor-pointer select-none">WhatsApp is the same as Phone</label>
-          </div>
-
-          <div id="whatsapp-container" class="transition-all duration-300 overflow-hidden">
-            <label class="block text-sm font-semibold text-tx-main mb-1.5">WhatsApp Number</label>
-            <div class="flex gap-2">
-              <select id="acc-whatsapp-dial" class="w-[100px] p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main outline-none custom-select-arrow cursor-pointer font-mono text-sm"></select>
-              <input type="tel" id="acc-whatsapp" placeholder="9876543210" class="flex-1 p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" />
+            <div class="flex items-center gap-2 mt-1 mb-2">
+              <input type="checkbox" id="acc-same-whatsapp" class="w-4 h-4 rounded-sm border-subtle text-tx-main focus:ring-tx-main bg-transparent cursor-pointer" />
+              <label for="acc-same-whatsapp" class="text-sm font-medium text-tx-muted cursor-pointer select-none">WhatsApp is the same as Phone</label>
             </div>
+
+            <div id="whatsapp-container" class="transition-all duration-300 overflow-hidden" style="height: 0px; opacity: 0;">
+              <label class="block text-sm font-semibold text-tx-main mb-1.5">WhatsApp Number</label>
+              <div class="flex gap-2">
+                <select id="acc-whatsapp-dial" class="w-[120px] p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main outline-none custom-select-arrow cursor-pointer font-mono text-xs truncate"></select>
+                <input type="tel" id="acc-whatsapp" placeholder="9876543210" class="flex-1 p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" />
+              </div>
+            </div>
+
           </div>
+        </section>
+      </div>
 
-        </div>
-      </section>
-
-      <div class="pt-4 flex flex-col items-center">
-        <button type="submit" id="acc-submit-btn" class="w-full md:w-auto md:px-12 py-3 bg-tx-main text-main rounded-md font-bold text-[15px] hover:opacity-90 transition-opacity active:scale-[0.98] outline-none">
+      <div class="pt-8 mt-2 border-t border-subtle flex flex-col items-center md:items-end">
+        <button type="submit" id="acc-submit-btn" class="w-full md:w-auto md:px-12 py-3 bg-tx-main text-main rounded-md font-bold text-[15px] hover:opacity-90 transition-opacity active:scale-[0.98] outline-none cursor-pointer">
           Save Profile
         </button>
-        <p id="save-success" class="text-green-500 text-sm font-semibold text-center mt-3 opacity-0 transition-opacity">Profile saved successfully.</p>
+        <p id="save-success" class="text-green-500 text-sm font-semibold mt-3 opacity-0 transition-opacity md:mr-4">Profile saved successfully.</p>
       </div>
 
     </form>
   </div>
 
   <style>
-    /* Minimalist styling overrides */
     .custom-select-arrow {
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -101,7 +105,6 @@ import Layout from '../layouts/Layout.astro';
   <script>
     import { authClient } from '../lib/auth-client';
 
-    // Comprehensive Country & Dial Code Dictionary
     const countryData = [
   { code: 'AF', name: 'Afghanistan', dial: '+93' },
   { code: 'AL', name: 'Albania', dial: '+355' },
@@ -310,8 +313,9 @@ import Layout from '../layouts/Layout.astro';
       }
 
       const user = data.user as any; 
+      let isSaving = false;
 
-      // 1. Populate Avatar & Header
+      // 1. Populate Avatar & Header with Error Fallback
       const avatarImg = document.getElementById('acc-avatar') as HTMLImageElement;
       const avatarFallback = document.getElementById('acc-avatar-fallback');
       const displayName = document.getElementById('acc-display-name');
@@ -320,6 +324,10 @@ import Layout from '../layouts/Layout.astro';
       if (user.image && avatarImg) {
         avatarImg.src = user.image;
         avatarImg.classList.remove('hidden');
+        avatarImg.onerror = () => {
+            avatarImg.classList.add("hidden");
+            if(avatarFallback) avatarFallback.classList.remove("hidden");
+        };
       } else if (avatarFallback && user.name) {
         avatarFallback.textContent = user.name.charAt(0).toUpperCase();
         avatarFallback.classList.remove('hidden');
@@ -336,6 +344,8 @@ import Layout from '../layouts/Layout.astro';
       
       const phoneDialSelect = document.getElementById('acc-phone-dial') as HTMLSelectElement;
       const phoneInput = document.getElementById('acc-phone') as HTMLInputElement;
+      const phoneError = document.getElementById('phone-error');
+      
       const whatsappDialSelect = document.getElementById('acc-whatsapp-dial') as HTMLSelectElement;
       const whatsappInput = document.getElementById('acc-whatsapp') as HTMLInputElement;
       const sameCheckbox = document.getElementById('acc-same-whatsapp') as HTMLInputElement;
@@ -343,57 +353,86 @@ import Layout from '../layouts/Layout.astro';
 
       if (nameInput) nameInput.value = user.name || '';
 
-      // Populate Dial Code Selects
-      const uniqueDials = [...new Set(countryData.map(c => c.dial))].sort((a, b) => parseInt(a.replace('+','')) - parseInt(b.replace('+','')));
-      uniqueDials.forEach(dial => {
-        phoneDialSelect.add(new Option(dial, dial));
-        whatsappDialSelect.add(new Option(dial, dial));
+      // Populate Dial Code Selects with Context
+      countryData.forEach(c => {
+        phoneDialSelect.add(new Option(`${c.name} (${c.dial})`, c.dial));
+        whatsappDialSelect.add(new Option(`${c.name} (${c.dial})`, c.dial));
       });
 
-      // Parse existing phone data (Format: "+91 9876543210")
+      // Robust Phone Parsing
       function parsePhone(fullString: string) {
-        if (!fullString) return { dial: '+1', num: '' };
-        const parts = fullString.split(' ');
-        if (parts.length > 1) return { dial: parts[0], num: parts.slice(1).join(' ') };
-        return { dial: '+1', num: fullString }; // Fallback
+        if (!fullString) return { dial: '', num: '' };
+        const match = fullString.match(/^(\+\d+)[-\s]*(.*)$/);
+        if (match) return { dial: match[1], num: match[2].replace(/\D/g, '') };
+        return { dial: '', num: fullString.replace(/\D/g, '') };
       }
 
       const parsedPhone = parsePhone(user.phone);
       const parsedWhatsapp = parsePhone(user.whatsapp);
       
-      phoneDialSelect.value = parsedPhone.dial;
+      if (parsedPhone.dial) phoneDialSelect.value = parsedPhone.dial;
       phoneInput.value = parsedPhone.num;
-      whatsappDialSelect.value = parsedWhatsapp.dial;
+      if (parsedWhatsapp.dial) whatsappDialSelect.value = parsedWhatsapp.dial;
       whatsappInput.value = parsedWhatsapp.num;
 
       // Checkbox Logic Initial State
       if (user.phone && user.whatsapp && user.phone === user.whatsapp) {
           sameCheckbox.checked = true;
-          whatsappContainer.style.height = '0px';
-          whatsappContainer.style.opacity = '0';
+          if (whatsappContainer) {
+            whatsappContainer.style.height = '0px';
+            whatsappContainer.style.opacity = '0';
+          }
+      } else if (whatsappContainer) {
+          whatsappContainer.style.height = whatsappContainer.scrollHeight + 'px';
+          whatsappContainer.style.opacity = '1';
       }
 
-      // 3. Searchable Country Dropdown Logic
+      // 3. Searchable Country Dropdown Logic with Keyboard Nav
+      let activeIndex = -1;
+      let currentFiltered: typeof countryData = [];
+
       function renderDropdown(filterText = '') {
         if (!countryDropdown) return;
         countryDropdown.innerHTML = '';
         const lowerFilter = filterText.toLowerCase();
-        const filtered = countryData.filter(c => c.name.toLowerCase().includes(lowerFilter));
         
-        if (filtered.length === 0) {
+        currentFiltered = countryData.filter(c => 
+          c.name.toLowerCase().includes(lowerFilter) || 
+          c.code.toLowerCase().includes(lowerFilter) ||
+          c.aliases.some(alias => alias.includes(lowerFilter))
+        );
+        
+        if (currentFiltered.length === 0) {
           countryDropdown.innerHTML = `<div class="p-3 text-sm text-tx-muted">No countries found</div>`;
           return;
         }
 
-        filtered.forEach(c => {
+        currentFiltered.forEach((c, index) => {
           const div = document.createElement('div');
-          div.className = 'p-3 text-sm text-tx-main hover:bg-tx-main hover:text-main cursor-pointer transition-colors';
+          div.className = 'country-item p-3 text-sm text-tx-main hover:bg-tx-main hover:text-main cursor-pointer transition-colors';
           div.textContent = c.name;
-          div.addEventListener('mousedown', (e) => { // mousedown fires before blur
+          div.setAttribute('data-index', index.toString());
+          
+          div.addEventListener('mousedown', (e) => { 
             e.preventDefault();
             selectCountry(c);
           });
           countryDropdown.appendChild(div);
+        });
+        activeIndex = -1; 
+      }
+
+      function updateActiveItem() {
+        const items = countryDropdown?.querySelectorAll('.country-item');
+        if (!items) return;
+        
+        items.forEach((item, i) => {
+          if (i === activeIndex) {
+            item.classList.add('bg-tx-main', 'text-main');
+            (item as HTMLElement).scrollIntoView({ block: 'nearest' });
+          } else {
+            item.classList.remove('bg-tx-main', 'text-main');
+          }
         });
       }
 
@@ -402,7 +441,6 @@ import Layout from '../layouts/Layout.astro';
         countryCodeInput.value = country.code;
         countryDropdown?.classList.add('hidden');
         
-        // Auto-update dial codes
         phoneDialSelect.value = country.dial;
         if (!sameCheckbox.checked) whatsappDialSelect.value = country.dial;
       }
@@ -416,45 +454,65 @@ import Layout from '../layouts/Layout.astro';
         renderDropdown((e.target as HTMLInputElement).value);
       });
 
-      countrySearch.addEventListener('blur', () => {
-        countryDropdown?.classList.add('hidden');
-        // If user typed garbage, revert to known valid country code
-        const matchingCountry = countryData.find(c => c.code === countryCodeInput.value);
-        if (matchingCountry && countrySearch.value !== matchingCountry.name) {
-          countrySearch.value = matchingCountry.name;
+      countrySearch.addEventListener('keydown', (e) => {
+        if (countryDropdown?.classList.contains('hidden')) return;
+        
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          activeIndex = (activeIndex + 1) % currentFiltered.length;
+          updateActiveItem();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          activeIndex = (activeIndex - 1 + currentFiltered.length) % currentFiltered.length;
+          updateActiveItem();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (activeIndex >= 0 && currentFiltered[activeIndex]) {
+            selectCountry(currentFiltered[activeIndex]);
+          }
         }
       });
 
-      // 4. Handle Country Auto-Detection (or prefill)
+      countrySearch.addEventListener('blur', () => {
+        countryDropdown?.classList.add('hidden');
+        if (!countryCodeInput.value) {
+            countrySearch.value = ''; 
+        } else {
+            const matchingCountry = countryData.find(c => c.code === countryCodeInput.value);
+            if (matchingCountry && countrySearch.value !== matchingCountry.name) {
+              countrySearch.value = matchingCountry.name;
+            }
+        }
+      });
+
+      // 4. Handle Country Auto-Detection (No US fallback)
       if (!user.country) {
         try {
-          const locRes = await fetch('/api/get-location');
-          if (locRes.ok) {
-            const locData = await locRes.json();
-            const detected = countryData.find(c => c.code === locData.country) || countryData.find(c => c.code === 'US');
-            if (detected) {
-              selectCountry(detected);
-              document.getElementById('country-hint')?.classList.remove('hidden');
-            }
-          }
-        } catch (err) {
-          selectCountry(countryData.find(c => c.code === 'US')!);
-        }
+          fetch('/api/get-location').then(res => res.json()).then(locData => {
+             const detected = countryData.find(c => c.code === locData.country);
+             if (detected) {
+               selectCountry(detected);
+               document.getElementById('country-hint')?.classList.remove('hidden');
+             }
+          }).catch(() => {}); // Fail silently, leave blank
+        } catch (err) {}
       } else {
         const existing = countryData.find(c => c.code === user.country);
         if (existing) selectCountry(existing);
       }
 
-      // 5. WhatsApp Checkbox Toggle Logic
+      // 5. ScrollHeight Toggle Logic
       sameCheckbox.addEventListener('change', (e) => {
         const isChecked = (e.target as HTMLInputElement).checked;
+        if (!whatsappContainer) return;
+
         if (isChecked) {
           whatsappContainer.style.height = '0px';
           whatsappContainer.style.opacity = '0';
           whatsappInput.value = phoneInput.value; 
           whatsappDialSelect.value = phoneDialSelect.value;
         } else {
-          whatsappContainer.style.height = 'auto';
+          whatsappContainer.style.height = whatsappContainer.scrollHeight + 'px';
           whatsappContainer.style.opacity = '1';
           if (whatsappInput.value === phoneInput.value) whatsappInput.value = '';
         }
@@ -467,28 +525,42 @@ import Layout from '../layouts/Layout.astro';
         if (sameCheckbox.checked) whatsappDialSelect.value = phoneDialSelect.value;
       });
 
-      // 6. Handle Form Submission
+      // 6. Handle Form Submission with Lock & Validation
       const form = document.getElementById('profile-form');
       const submitBtn = document.getElementById('acc-submit-btn');
       const successMsg = document.getElementById('save-success');
+      
+      const phoneRegex = /^[0-9\-\s]{6,15}$/;
 
       form?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        if (submitBtn) {
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = 'Saving...';
-            (submitBtn as HTMLButtonElement).disabled = true;
-            submitBtn.classList.add('opacity-50');
+        if (isSaving || !submitBtn) return;
 
-            const finalPhone = phoneInput.value.trim() ? `${phoneDialSelect.value} ${phoneInput.value.trim()}` : '';
+        // Validation
+        const rawPhone = phoneInput.value.trim();
+        if (rawPhone && !phoneRegex.test(rawPhone)) {
+            if (phoneError) phoneError.classList.remove('hidden');
+            phoneInput.focus();
+            return;
+        }
+        if (phoneError) phoneError.classList.add('hidden');
+
+        isSaving = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = 'Saving...';
+        (submitBtn as HTMLButtonElement).disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        try {
+            const finalPhone = rawPhone ? `${phoneDialSelect.value} ${rawPhone}` : '';
             let finalWhatsapp = whatsappInput.value.trim() ? `${whatsappDialSelect.value} ${whatsappInput.value.trim()}` : '';
             
             if (sameCheckbox.checked) finalWhatsapp = finalPhone;
 
             const { error: updateError } = await authClient.updateUser({
               name: nameInput.value,
-              country: countryCodeInput.value, // Save the actual 2-letter code to the DB
+              country: countryCodeInput.value,
               phone: finalPhone,
               whatsapp: finalWhatsapp
             });
@@ -502,10 +574,11 @@ import Layout from '../layouts/Layout.astro';
                   setTimeout(() => successMsg.style.opacity = '0', 3000);
               }
             }
-
+        } finally {
+            isSaving = false;
             submitBtn.innerHTML = originalText;
             (submitBtn as HTMLButtonElement).disabled = false;
-            submitBtn.classList.remove('opacity-50');
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       });
 
