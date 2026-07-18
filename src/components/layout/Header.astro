@@ -112,7 +112,8 @@ const primaryBtn = {
 
         <div id="auth-profile-header" style="display: none;">
           <a href="/account" class="ml-2 md:ml-4 flex items-center justify-center h-[34px] md:h-[36px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
-            <div id="profile-avatar-header" class="w-6 h-6 rounded-full bg-[#5ecb6b] text-[#0d0e0c] flex items-center justify-center font-extrabold text-[12px] shrink-0"></div>
+            <img id="profile-avatar-img-header" src="" alt="Profile" class="w-6 h-6 rounded-full object-cover shrink-0 hidden" />
+            <div id="profile-avatar-header" class="w-6 h-6 rounded-full bg-[#5ecb6b] text-[#0d0e0c] flex items-center justify-center font-extrabold text-[12px] shrink-0 hidden"></div>
             <span class="hidden md:inline ml-2.5">Profile</span>
           </a>
         </div>
@@ -448,28 +449,35 @@ const primaryBtn = {
   }, { passive: true });
 
   // --- REVISED CLIENT-SIDE AUTHENTICATION LOGIC ---
- import { authClient } from '../../lib/auth-client';
+  import { authClient } from '../../lib/auth-client';
 
   const signinHeader = document.getElementById('auth-signin-header');
   const profileHeader = document.getElementById('auth-profile-header');
-  const avatarEl = document.getElementById('profile-avatar-header');
+  const avatarImgEl = document.getElementById('profile-avatar-img-header') as HTMLImageElement;
+  const avatarFallbackEl = document.getElementById('profile-avatar-header');
 
   async function checkAuthSession() {
     try {
       const { data } = await authClient.getSession();
       
       if (data && data.user) {
+        const user = data.user as any;
         
-        // 🟢 NEW: Redirect to onboarding if country is missing 
-        // (and we aren't already on the onboarding page)
-        if (!data.user.country && window.location.pathname !== '/complete-profile') {
-            window.location.href = '/complete-profile';
+        // 🟢 FIXED: Redirect to /account if country is missing 
+        if (!user.country && window.location.pathname !== '/account') {
+            window.location.href = '/account';
             return;
         }
 
-        if (avatarEl && data.user.name) {
-           avatarEl.textContent = data.user.name.charAt(0).toUpperCase();
+        // Show image if it exists, otherwise show initials
+        if (user.image && avatarImgEl) {
+           avatarImgEl.src = user.image;
+           avatarImgEl.classList.remove('hidden');
+        } else if (avatarFallbackEl && user.name) {
+           avatarFallbackEl.textContent = user.name.charAt(0).toUpperCase();
+           avatarFallbackEl.classList.remove('hidden');
         }
+
         if (signinHeader) signinHeader.style.display = 'none';
         if (profileHeader) profileHeader.style.display = 'flex';
       } else {
