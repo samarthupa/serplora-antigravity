@@ -1,7 +1,5 @@
-import type { APIRoute } from 'astro';
-
-export const GET: APIRoute = async ({ request }) => {
-  const url = new URL(request.url);
+export async function onRequest(context) {
+  const url = new URL(context.request.url);
   const code = url.searchParams.get('code');
   
   if (!code) {
@@ -16,8 +14,8 @@ export const GET: APIRoute = async ({ request }) => {
       'Content-Type': 'application/json' 
     },
     body: JSON.stringify({
-      client_id: import.meta.env.GITHUB_CLIENT_ID,
-      client_secret: import.meta.env.GITHUB_CLIENT_SECRET, 
+      client_id: context.env.GITHUB_CLIENT_ID,
+      client_secret: context.env.GITHUB_CLIENT_SECRET, 
       code: code
     })
   });
@@ -33,17 +31,15 @@ export const GET: APIRoute = async ({ request }) => {
   });
   const githubUser = await userResponse.json();
 
-  // 3. Return an HTML script that sets your cookie and localStorage, just like Google!
+  // 3. Return an HTML script that sets your cookie and localStorage
   const html = `
     <!DOCTYPE html>
     <html>
       <head><title>Authenticating...</title></head>
       <body>
         <script>
-          // Set the Edge Bouncer Cookie for Cloudflare Middleware
           document.cookie = "auth_token=true; path=/; max-age=604800; Secure; SameSite=Lax";
           
-          // Save data to localStorage for the Static Shell
           const userData = {
             name: "${githubUser.name || githubUser.login}",
             email: "${githubUser.email || 'Hidden'}",
@@ -51,7 +47,6 @@ export const GET: APIRoute = async ({ request }) => {
           };
           localStorage.setItem('serplora_user', JSON.stringify(userData));
           
-          // Redirect to the homepage
           window.location.href = '/';
         </script>
       </body>
@@ -61,4 +56,4 @@ export const GET: APIRoute = async ({ request }) => {
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' }
   });
-};
+}
