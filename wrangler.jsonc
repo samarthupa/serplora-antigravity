@@ -8,7 +8,7 @@
     "pages_build_output_dir": "./dist",
     "assets": {
         "directory": "./dist",
-        "binding": "ASSETS",
+        "binding": "SITE_ASSETS",
         "not_found_handling": "404-page"
     },
     "observability": {
