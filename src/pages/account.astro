@@ -39,7 +39,15 @@ import Layout from '../layouts/Layout.astro';
             <div class="relative" id="country-container">
               <label class="block text-sm font-semibold text-tx-main mb-1.5">Country</label>
               <input type="hidden" id="acc-country-code" />
-              <input type="text" id="acc-country-search" placeholder="Search for a country..." autocomplete="off" class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all cursor-text" />
+              <div class="relative">
+                <input type="text" id="acc-country-search" placeholder="Search for a country..." autocomplete="off" class="w-full p-3 pr-10 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all cursor-text" />
+                
+                <!-- Cross / Clear Button -->
+                <button type="button" id="clear-country-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-tx-muted hover:text-tx-main hidden transition-colors focus:outline-none cursor-pointer" title="Clear Country">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+
               <div id="country-dropdown" class="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-surface border border-subtle rounded-md shadow-lg hidden custom-scrollbar">
                 <!-- Populated by JS -->
               </div>
@@ -341,6 +349,7 @@ import Layout from '../layouts/Layout.astro';
       const countrySearch = document.getElementById('acc-country-search') as HTMLInputElement;
       const countryCodeInput = document.getElementById('acc-country-code') as HTMLInputElement;
       const countryDropdown = document.getElementById('country-dropdown');
+      const clearCountryBtn = document.getElementById('clear-country-btn');
       
       const phoneDialSelect = document.getElementById('acc-phone-dial') as HTMLSelectElement;
       const phoneInput = document.getElementById('acc-phone') as HTMLInputElement;
@@ -399,7 +408,7 @@ import Layout from '../layouts/Layout.astro';
         currentFiltered = countryData.filter(c => 
           c.name.toLowerCase().includes(lowerFilter) || 
           c.code.toLowerCase().includes(lowerFilter) ||
-          c.aliases.some(alias => alias.includes(lowerFilter))
+          c.aliases?.some(alias => alias.includes(lowerFilter)) // FIX: Added Optional Chaining
         );
         
         if (currentFiltered.length === 0) {
@@ -443,9 +452,33 @@ import Layout from '../layouts/Layout.astro';
         
         phoneDialSelect.value = country.dial;
         if (!sameCheckbox.checked) whatsappDialSelect.value = country.dial;
+
+        // Lock the Input
+        countrySearch.readOnly = true;
+        countrySearch.classList.add('bg-tx-muted/10', 'text-tx-muted', 'cursor-default');
+        countrySearch.classList.remove('bg-transparent', 'cursor-text');
+        clearCountryBtn?.classList.remove('hidden');
       }
 
+      clearCountryBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        countrySearch.value = '';
+        countryCodeInput.value = '';
+        
+        // Unlock the Input
+        countrySearch.readOnly = false;
+        countrySearch.classList.remove('bg-tx-muted/10', 'text-tx-muted', 'cursor-default');
+        countrySearch.classList.add('bg-transparent', 'cursor-text');
+        clearCountryBtn.classList.add('hidden');
+        document.getElementById('country-hint')?.classList.add('hidden');
+        
+        countrySearch.focus();
+        renderDropdown('');
+        countryDropdown?.classList.remove('hidden');
+      });
+
       countrySearch.addEventListener('focus', () => {
+        if (countrySearch.readOnly) return; // Prevent focus dropdown if locked
         renderDropdown(countrySearch.value);
         countryDropdown?.classList.remove('hidden');
       });
@@ -455,6 +488,7 @@ import Layout from '../layouts/Layout.astro';
       });
 
       countrySearch.addEventListener('keydown', (e) => {
+        if (countrySearch.readOnly) return; // Ignore input nav if locked
         if (countryDropdown?.classList.contains('hidden')) return;
         
         if (e.key === 'ArrowDown') {
@@ -474,18 +508,23 @@ import Layout from '../layouts/Layout.astro';
       });
 
       countrySearch.addEventListener('blur', () => {
-        countryDropdown?.classList.add('hidden');
-        if (!countryCodeInput.value) {
-            countrySearch.value = ''; 
-        } else {
-            const matchingCountry = countryData.find(c => c.code === countryCodeInput.value);
-            if (matchingCountry && countrySearch.value !== matchingCountry.name) {
-              countrySearch.value = matchingCountry.name;
-            }
-        }
+        // Set small timeout so clicking the "Clear" button processes correctly
+        setTimeout(() => {
+          countryDropdown?.classList.add('hidden');
+          if (!countrySearch.readOnly) {
+              if (!countryCodeInput.value) {
+                  countrySearch.value = ''; 
+              } else {
+                  const matchingCountry = countryData.find(c => c.code === countryCodeInput.value);
+                  if (matchingCountry && countrySearch.value !== matchingCountry.name) {
+                    countrySearch.value = matchingCountry.name;
+                  }
+              }
+          }
+        }, 150);
       });
 
-      // 4. Handle Country Auto-Detection (No US fallback)
+      // 4. Handle Country Auto-Detection
       if (!user.country) {
         try {
           fetch('/api/get-location').then(res => res.json()).then(locData => {
@@ -525,7 +564,7 @@ import Layout from '../layouts/Layout.astro';
         if (sameCheckbox.checked) whatsappDialSelect.value = phoneDialSelect.value;
       });
 
-      // 6. Handle Form Submission with Lock & Validation
+      // 6. Handle Form Submission
       const form = document.getElementById('profile-form');
       const submitBtn = document.getElementById('acc-submit-btn');
       const successMsg = document.getElementById('save-success');
