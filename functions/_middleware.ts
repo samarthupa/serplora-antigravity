@@ -9,7 +9,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     if (!isLoggedIn) {
       // Bounce unauthenticated users to your signin page
-      return Response.redirect(`${url.origin}/signin`, 307);
+      return Response.redirect(`${url.origin}/login`, 307);
     }
   }
 

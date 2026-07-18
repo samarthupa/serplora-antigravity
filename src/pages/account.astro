@@ -44,7 +44,7 @@ import Layout from '../layouts/Layout.astro';
     const user = getLocalUser();
 
     if (!user) {
-      window.location.href = '/signin';
+      window.location.href = '/login';
     } else {
       // Populate Profile Info
       const avatarEl = document.getElementById('acc-avatar');
