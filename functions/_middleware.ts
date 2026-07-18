@@ -14,20 +14,20 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   // 2. Existing 410 / 503 Logic
-  const gonePaths = ['/tools/wysiwyg-editor/', '/deleted-article'];[cite: 1]
-  const unavailablePaths = ['/compilers/c-compiler/', '/compilers/cpp-compiler/', '/compilers/csharp-compiler/', '/tools/' ];[cite: 1]
+  const gonePaths = ['/tools/wysiwyg-editor/', '/deleted-article'];
+  const unavailablePaths = ['/compilers/c-compiler/', '/compilers/cpp-compiler/', '/compilers/csharp-compiler/', '/tools/' ];
 
   if (gonePaths.includes(url.pathname)) {
-    const response = await env.ASSETS.fetch(new Request(new URL('/410.html', request.url)));[cite: 1]
-    return new Response(response.body, { status: 410, statusText: 'Gone', headers: response.headers });[cite: 1]
+    const response = await env.ASSETS.fetch(new Request(new URL('/410.html', request.url)));
+    return new Response(response.body, { status: 410, statusText: 'Gone', headers: response.headers });
   }
 
   if (unavailablePaths.includes(url.pathname)) {
-    const response = await env.ASSETS.fetch(new Request(new URL('/503.html', request.url)));[cite: 1]
-    const headers = new Headers(response.headers);[cite: 1]
-    headers.set('Retry-After', '1296000');[cite: 1]
-    return new Response(response.body, { status: 503, statusText: 'Service Unavailable', headers: headers });[cite: 1]
+    const response = await env.ASSETS.fetch(new Request(new URL('/503.html', request.url)));
+    const headers = new Headers(response.headers);
+    headers.set('Retry-After', '1296000');
+    return new Response(response.body, { status: 503, statusText: 'Service Unavailable', headers: headers });
   }
 
-  return next();[cite: 1]
+  return next();
 };
