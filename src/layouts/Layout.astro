@@ -113,8 +113,6 @@ const robotsParams = [
     
     <script>
       import PhotoSwipeLightbox from 'photoswipe/lightbox';
-      import { syncUserHistory } from '../lib/api';
-      import { getLocalUser } from '../lib/auth';
 
       document.addEventListener('DOMContentLoaded', () => {
         const lightbox = new PhotoSwipeLightbox({
@@ -137,16 +135,6 @@ const robotsParams = [
 
         lightbox.init();
       });
-
-      const user = getLocalUser();
-      if (user) {
-        const pageTitle = document.title.split(' | ')[0]; 
-        const pageUrl = window.location.pathname;
-
-        if (pageUrl !== '/account' && pageUrl !== '/login' && pageUrl !== '/') {
-          syncUserHistory(pageUrl, pageTitle);
-        }
-      }
     </script>
 
     <script>
