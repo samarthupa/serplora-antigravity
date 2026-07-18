@@ -350,6 +350,7 @@ import Layout from '../layouts/Layout.astro';
       const countryCodeInput = document.getElementById('acc-country-code') as HTMLInputElement;
       const countryDropdown = document.getElementById('country-dropdown');
       const clearCountryBtn = document.getElementById('clear-country-btn');
+      const countryContainer = document.getElementById('country-container');
       
       const phoneDialSelect = document.getElementById('acc-phone-dial') as HTMLSelectElement;
       const phoneInput = document.getElementById('acc-phone') as HTMLInputElement;
@@ -362,10 +363,19 @@ import Layout from '../layouts/Layout.astro';
 
       if (nameInput) nameInput.value = user.name || '';
 
-      // Populate Dial Code Selects with Context
+      // Populate Dial Code Selects with Context (using unique country code as value)
       countryData.forEach(c => {
-        phoneDialSelect.add(new Option(`${c.name} (${c.dial})`, c.dial));
-        whatsappDialSelect.add(new Option(`${c.name} (${c.dial})`, c.dial));
+        const opt1 = document.createElement('option');
+        opt1.text = `${c.name} (${c.dial})`;
+        opt1.value = c.code; // Store country code to prevent US / Antigua collisions
+        opt1.dataset.dial = c.dial;
+        phoneDialSelect.add(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.text = `${c.name} (${c.dial})`;
+        opt2.value = c.code; 
+        opt2.dataset.dial = c.dial;
+        whatsappDialSelect.add(opt2);
       });
 
       // Robust Phone Parsing
@@ -379,9 +389,19 @@ import Layout from '../layouts/Layout.astro';
       const parsedPhone = parsePhone(user.phone);
       const parsedWhatsapp = parsePhone(user.whatsapp);
       
-      if (parsedPhone.dial) phoneDialSelect.value = parsedPhone.dial;
+      // Auto-select the proper option mapped to user's country if possible
+      if (parsedPhone.dial) {
+         let match = countryData.find(c => c.code === user.country && c.dial === parsedPhone.dial) 
+                  || countryData.find(c => c.dial === parsedPhone.dial);
+         if (match) phoneDialSelect.value = match.code;
+      }
       phoneInput.value = parsedPhone.num;
-      if (parsedWhatsapp.dial) whatsappDialSelect.value = parsedWhatsapp.dial;
+
+      if (parsedWhatsapp.dial) {
+         let match = countryData.find(c => c.code === user.country && c.dial === parsedWhatsapp.dial) 
+                  || countryData.find(c => c.dial === parsedWhatsapp.dial);
+         if (match) whatsappDialSelect.value = match.code;
+      }
       whatsappInput.value = parsedWhatsapp.num;
 
       // Checkbox Logic Initial State
@@ -408,7 +428,7 @@ import Layout from '../layouts/Layout.astro';
         currentFiltered = countryData.filter(c => 
           c.name.toLowerCase().includes(lowerFilter) || 
           c.code.toLowerCase().includes(lowerFilter) ||
-          c.aliases?.some(alias => alias.includes(lowerFilter)) // FIX: Added Optional Chaining
+          c.aliases?.some(alias => alias.includes(lowerFilter))
         );
         
         if (currentFiltered.length === 0) {
@@ -450,8 +470,9 @@ import Layout from '../layouts/Layout.astro';
         countryCodeInput.value = country.code;
         countryDropdown?.classList.add('hidden');
         
-        phoneDialSelect.value = country.dial;
-        if (!sameCheckbox.checked) whatsappDialSelect.value = country.dial;
+        // Select country code logically to ensure it maps to the correct duplicate dial (e.g. US vs Antigua)
+        phoneDialSelect.value = country.code;
+        if (!sameCheckbox.checked) whatsappDialSelect.value = country.code;
 
         // Lock the Input
         countrySearch.readOnly = true;
@@ -478,7 +499,7 @@ import Layout from '../layouts/Layout.astro';
       });
 
       countrySearch.addEventListener('focus', () => {
-        if (countrySearch.readOnly) return; // Prevent focus dropdown if locked
+        if (countrySearch.readOnly) return; 
         renderDropdown(countrySearch.value);
         countryDropdown?.classList.remove('hidden');
       });
@@ -488,7 +509,7 @@ import Layout from '../layouts/Layout.astro';
       });
 
       countrySearch.addEventListener('keydown', (e) => {
-        if (countrySearch.readOnly) return; // Ignore input nav if locked
+        if (countrySearch.readOnly) return; 
         if (countryDropdown?.classList.contains('hidden')) return;
         
         if (e.key === 'ArrowDown') {
@@ -507,33 +528,39 @@ import Layout from '../layouts/Layout.astro';
         }
       });
 
-      countrySearch.addEventListener('blur', () => {
-        // Set small timeout so clicking the "Clear" button processes correctly
-        setTimeout(() => {
-          countryDropdown?.classList.add('hidden');
-          if (!countrySearch.readOnly) {
+      // Handle clicking outside the custom country dropdown container
+      document.addEventListener('mousedown', (e) => {
+        if (countryContainer && !countryContainer.contains(e.target as Node)) {
+          if (!countryDropdown?.classList.contains('hidden')) {
+            countryDropdown?.classList.add('hidden');
+            
+            // Revert invalid typing if they clicked away without selecting
+            if (!countrySearch.readOnly) {
               if (!countryCodeInput.value) {
-                  countrySearch.value = ''; 
+                countrySearch.value = ''; 
               } else {
-                  const matchingCountry = countryData.find(c => c.code === countryCodeInput.value);
-                  if (matchingCountry && countrySearch.value !== matchingCountry.name) {
-                    countrySearch.value = matchingCountry.name;
-                  }
+                const matchingCountry = countryData.find(c => c.code === countryCodeInput.value);
+                if (matchingCountry && countrySearch.value !== matchingCountry.name) {
+                  countrySearch.value = matchingCountry.name;
+                }
               }
+            }
           }
-        }, 150);
+        }
       });
 
-      // 4. Handle Country Auto-Detection
+      // 4. Handle Country Auto-Detection safely
       if (!user.country) {
         try {
           fetch('/api/get-location').then(res => res.json()).then(locData => {
              const detected = countryData.find(c => c.code === locData.country);
-             if (detected) {
+             
+             // Only auto-fill if the user hasn't already made a selection or started typing something!
+             if (detected && !countryCodeInput.value && !countrySearch.value && !countrySearch.readOnly) {
                selectCountry(detected);
                document.getElementById('country-hint')?.classList.remove('hidden');
              }
-          }).catch(() => {}); // Fail silently, leave blank
+          }).catch(() => {});
         } catch (err) {}
       } else {
         const existing = countryData.find(c => c.code === user.country);
@@ -592,8 +619,14 @@ import Layout from '../layouts/Layout.astro';
         submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
         try {
-            const finalPhone = rawPhone ? `${phoneDialSelect.value} ${rawPhone}` : '';
-            let finalWhatsapp = whatsappInput.value.trim() ? `${whatsappDialSelect.value} ${whatsappInput.value.trim()}` : '';
+            // Get proper dial codes stored in dataset
+            const pOpt = phoneDialSelect.options[phoneDialSelect.selectedIndex];
+            const wOpt = whatsappDialSelect.options[whatsappDialSelect.selectedIndex];
+            const pDial = pOpt ? pOpt.dataset.dial : '';
+            const wDial = wOpt ? wOpt.dataset.dial : '';
+
+            const finalPhone = rawPhone ? `${pDial} ${rawPhone}` : '';
+            let finalWhatsapp = whatsappInput.value.trim() ? `${wDial} ${whatsappInput.value.trim()}` : '';
             
             if (sameCheckbox.checked) finalWhatsapp = finalPhone;
 
