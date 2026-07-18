@@ -1,7 +1,11 @@
 {
     "compatibility_date": "2026-03-17",
-    "compatibility_flags": ["global_fetch_strictly_public"],
+    "compatibility_flags": [
+        "global_fetch_strictly_public",
+        "nodejs_compat"
+    ],
     "name": "serplora",
+    "pages_build_output_dir": "./dist",
     "assets": {
         "directory": "./dist",
         "binding": "ASSETS",
@@ -9,5 +13,12 @@
     },
     "observability": {
         "enabled": true
-    }
+    },
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "serplora-users",
+            "database_id": "ec0bf5e6-e3ee-4e3c-a478-c8c6eb7c67de"
+        }
+    ]
 }
