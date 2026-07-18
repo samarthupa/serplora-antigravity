@@ -24,18 +24,22 @@ import Layout from '../layouts/Layout.astro';
         </div>
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
       
-        <a 
-          href="/api/github/login" 
+        {/* Changed from <a> to <button> for Better Auth onClick handling */}
+        <button 
+          id="github-login-btn"
           class="w-full flex items-center justify-center gap-3 py-2.5 bg-[#24292F] hover:bg-[#24292F]/90 text-white rounded-md font-medium text-[15px] transition-colors"
         >
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
           </svg>
           Continue with GitHub
-        </a>
+        </button>
       </div>
 
       {/* --- COUNTRY SELECTION SECTION --- */}
+      {/* Note: Better Auth handles social registration automatically in one click. 
+          This section is left in the HTML to preserve your layout, but you may want 
+          to move this to a dedicated 'Complete Your Profile' page later. */}
       <div id="country-section" class="w-full hidden flex-col items-center gap-5 transition-all duration-300 animate-fade-in">
         <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-2">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -60,86 +64,48 @@ import Layout from '../layouts/Layout.astro';
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   
 <script>
-  import { saveLocalUser } from '../lib/auth';
+  import { authClient } from '../lib/auth-client';
 
-  let googleToken = "";
-  
-  // 1. Grab and sanitize the returnUrl to prevent Open Redirect attacks
+  // 1. Safely grab the return URL
   const urlParams = new URLSearchParams(window.location.search);
   let rawReturnUrl = urlParams.get('returnUrl') || '/';
-  
-  // Ensure it's a relative path and NOT a protocol-relative absolute URL (like //evilsite.com)
   const safeReturnUrl = (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) 
     ? rawReturnUrl 
     : '/';
 
-  // Attach to window so Google's external script can find it
-  window.handleGoogleLogin = async (response) => {
-    googleToken = response.credential;
-    
-    const loginSection = document.getElementById('login-section');
-    loginSection.innerHTML = '<div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div><p class="mt-4 text-tx-main font-semibold">Verifying securely...</p>';
-    
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        body: JSON.stringify({ token: googleToken })
-      });
-      
-      const data = await res.json();
+  const loginSection = document.getElementById('login-section');
 
-      if (data.success) {
-        saveLocalUser(data.user);
-        
-        // 🟢 SET EDGE COOKIE ON LOGIN
-        document.cookie = "auth_token=true; path=/; max-age=604800; Secure; SameSite=Lax";
-        
-        window.location.href = safeReturnUrl; // ✅ Secure redirect
-      } else if (data.isNew) {
-        loginSection.classList.add('hidden');
-        const countrySection = document.getElementById('country-section');
-        countrySection.classList.remove('hidden');
-        countrySection.style.display = 'flex';
-      } else {
-        throw new Error(data.message || 'Login failed');
-      }
-    } catch (error) {
-      alert("Verification failed. Please refresh and try again.");
-      console.error(error);
+  // --- GOOGLE LOGIN (Using Better Auth) ---
+  window.handleGoogleLogin = async (response) => {
+    if (loginSection) {
+        loginSection.innerHTML = '<div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div><p class="mt-4 text-tx-main font-semibold">Verifying securely...</p>';
+    }
+    
+    // Pass the Google token directly to Better Auth
+    const { data, error } = await authClient.signIn.social({
+        provider: "google",
+        idToken: response.credential, 
+    });
+    
+    if (error) {
+      alert("Google verification failed. Please try again.");
+      window.location.reload();
+    } else {
+      window.location.href = safeReturnUrl; 
     }
   };
 
-  document.getElementById('finish-btn')?.addEventListener('click', async () => {
-    const country = document.getElementById('country').value;
-    const btn = document.getElementById('finish-btn');
-    const originalText = btn.innerHTML;
+  // --- GITHUB LOGIN (Using Better Auth) ---
+  document.getElementById('github-login-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const btn = e.currentTarget as HTMLButtonElement;
+    btn.innerHTML = 'Connecting...';
     
-    btn.innerHTML = 'Saving...';
-    btn.disabled = true;
-    
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: googleToken, country })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        saveLocalUser(data.user);
-        
-        // 🟢 SET EDGE COOKIE ON REGISTRATION
-        document.cookie = "auth_token=true; path=/; max-age=604800; Secure; SameSite=Lax";
-        
-        window.location.href = safeReturnUrl; // ✅ Secure redirect
-      } else {
-        throw new Error("Registration failed");
-      }
-    } catch (error) {
-      alert("Error saving data. Please try again.");
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-    }
+    // Better Auth handles the redirect and callback automatically
+    await authClient.signIn.social({
+        provider: "github",
+        callbackURL: safeReturnUrl 
+    });
   });
 </script>
 </Layout>
