@@ -13,42 +13,38 @@ import Layout from '../layouts/Layout.astro';
       </button>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {/* Centered Profile Card (History section removed as requested) */}
+    <div class="max-w-md mx-auto bg-surface border border-subtle rounded-2xl p-8 shadow-sm flex flex-col items-center text-center">
+      <div id="acc-avatar" class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-bold mb-4 shadow-md"></div>
+      <h2 id="acc-name" class="text-2xl font-bold text-tx-main mb-1">Loading...</h2>
+      <p id="acc-email" class="text-md text-tx-muted mb-6"></p>
       
-      {/* Profile Card */}
-      <div class="md:col-span-1 bg-surface border border-subtle rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-        <div id="acc-avatar" class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-3xl font-bold mb-4 shadow-md"></div>
-        <h2 id="acc-name" class="text-xl font-bold text-tx-main mb-1"></h2>
-        <p id="acc-email" class="text-sm text-tx-muted mb-4"></p>
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-main border border-subtle">
-          <svg class="w-4 h-4 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <span id="acc-country" class="text-xs font-bold text-tx-muted uppercase tracking-wider"></span>
-        </div>
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-main border border-subtle">
+        <svg class="w-5 h-5 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span id="acc-country" class="text-sm font-bold text-tx-muted uppercase tracking-wider"></span>
       </div>
-
-      {/* History Card */}
-      <div class="md:col-span-2 bg-surface border border-subtle rounded-2xl p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-tx-main mb-4 font-['JetBrains_Mono',monospace]">Recently Visited</h3>
-        <ul id="acc-history-list" class="flex flex-col gap-2">
-           {/* Populated by JS */}
-        </ul>
-      </div>
-
     </div>
+
   </div>
 
- <script>
-    import { getLocalUser, logoutUser } from '../lib/auth';
+  <script>
+    import { authClient } from '../lib/auth-client';
 
-    // 1. Fetch user using our new auth library
-    const user = getLocalUser();
+    async function initAccount() {
+      // 1. Fetch user using Better Auth Session
+      const { data, error } = await authClient.getSession();
 
-    if (!user) {
-      window.location.href = '/login';
-    } else {
+      if (error || !data || !data.session) {
+        // Redirect to login if not authenticated
+        window.location.href = '/login';
+        return;
+      }
+
+      const user = data.user;
+
       // Populate Profile Info
       const avatarEl = document.getElementById('acc-avatar');
-      if (avatarEl) avatarEl.textContent = user.name.charAt(0).toUpperCase();
+      if (avatarEl && user.name) avatarEl.textContent = user.name.charAt(0).toUpperCase();
       
       const nameEl = document.getElementById('acc-name');
       if (nameEl) nameEl.textContent = user.name;
@@ -57,38 +53,27 @@ import Layout from '../layouts/Layout.astro';
       if (emailEl) emailEl.textContent = user.email;
       
       const countryEl = document.getElementById('acc-country');
-      if (countryEl) countryEl.textContent = user.country || 'Unknown';
+      // Custom schema columns like country might require Better Auth plugin config to surface in session,
+      // but we safely bind it here if it exists.
+      if (countryEl) countryEl.textContent = (user as any).country || 'Not specified';
 
-      // Populate History
-      const history = user.recent_pages || JSON.parse(localStorage.getItem('serplora_recent_pages') || '[]');
-      const historyList = document.getElementById('acc-history-list');
-      
-      if (historyList) {
-        if (history.length === 0) {
-          historyList.innerHTML = '<li class="text-tx-muted py-4">You haven\'t visited any lessons yet.</li>';
-        } else {
-          historyList.innerHTML = history.map((page: any) => `
-            <li>
-              <a href="${page.url}" class="flex items-center justify-between p-4 rounded-xl bg-main border border-transparent hover:border-subtle hover:shadow-sm transition-all group">
-                <span class="text-tx-main font-medium group-hover:text-blue-500 transition-colors">${page.title}</span>
-                <svg class="w-4 h-4 text-tx-muted group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-              </a>
-            </li>
-          `).join('');
-        }
-      }
-
-      // 2. Handle Sign Out (Clear edge cookie AND local storage)
+      // 2. Handle Sign Out via Better Auth
       const signoutBtn = document.getElementById('signout-btn');
       if (signoutBtn) {
-        signoutBtn.addEventListener('click', () => {
-          // 🟢 REMOVE EDGE COOKIE TO LOCK THE ROUTE
-          document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-          
-          // Trigger your existing logout logic
-          logoutUser();
+        signoutBtn.addEventListener('click', async () => {
+          signoutBtn.textContent = 'Signing out...';
+          await authClient.signOut({
+            fetchOptions: {
+              onSuccess: () => {
+                window.location.href = '/login';
+              }
+            }
+          });
         });
       }
     }
+
+    // Run the initialization
+    initAccount();
   </script>
 </Layout>
