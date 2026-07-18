@@ -2,18 +2,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
-  // 1. Edge Authentication Guard
-  if (url.pathname.startsWith("/account")) {
-    const cookieHeader = request.headers.get("Cookie") || "";
-    const isLoggedIn = cookieHeader.includes("auth_token=true"); 
-
-    if (!isLoggedIn) {
-      // Bounce unauthenticated users to your signin page
-      return Response.redirect(`${url.origin}/login`, 307);
-    }
-  }
-
-  // 2. Existing 410 / 503 Logic
+  // Existing 410 / 503 Logic
   const gonePaths = ['/tools/wysiwyg-editor/', '/deleted-article'];
   const unavailablePaths = ['/compilers/c-compiler/', '/compilers/cpp-compiler/', '/compilers/csharp-compiler/', '/tools/' ];
 
