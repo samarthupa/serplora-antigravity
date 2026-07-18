@@ -1,11 +1,7 @@
 {
     "compatibility_date": "2026-03-17",
-    "compatibility_flags": [
-        "global_fetch_strictly_public",
-        "nodejs_compat" 
-    ],
+    "compatibility_flags": ["global_fetch_strictly_public"],
     "name": "serplora",
-    "pages_build_output_dir": "./dist",
     "assets": {
         "directory": "./dist",
         "binding": "ASSETS",
