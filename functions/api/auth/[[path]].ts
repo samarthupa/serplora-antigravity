@@ -16,12 +16,18 @@ export async function onRequest(context) {
                 db: db,
                 type: "sqlite"
             },
-            // 🟢 NEW: Tell Better Auth about your custom columns
             user: {
                 additionalFields: {
                     country: { type: "string", required: false },
                     phone: { type: "string", required: false },
                     whatsapp: { type: "string", required: false }
+                }
+            },
+            // 🟢 NEW: Enable account linking to prevent the 'account_not_linked' error
+            account: {
+                accountLinking: {
+                    enabled: true,
+                    trustedProviders: ["google", "github", "microsoft"]
                 }
             },
             socialProviders: {
