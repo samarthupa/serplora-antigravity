@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
-import { emailOTP, passkey } from "better-auth/plugins"; // 🟢 FIX: Swapped plugins
+import { emailOTP } from "better-auth/plugins";
+import { passkey } from "@better-auth/passkey"; // 🟢 Fixed import
 import { Kysely } from "kysely";
 import { D1Dialect } from "kysely-d1";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
