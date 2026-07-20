@@ -78,10 +78,8 @@ export async function onRequest(context) {
                         } catch (sesError) {
                             console.error("SES Email Failed:", sesError);
                             throw new Error("Failed to send login email.");
-                        } finally {
-                            // 🟢 FIX 2: Destroy the AWS client so Cloudflare doesn't hang and throw a 500
-                            ses.destroy();
-                        }
+                        } 
+                        // 🟢 FIX 2: Destroy block completely removed so Cloudflare fetch doesn't crash
                     },
                 }),
             ],
