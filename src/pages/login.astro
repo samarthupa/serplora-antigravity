@@ -17,7 +17,32 @@ import Layout from '../layouts/Layout.astro';
       {/* --- SIGN IN SECTION --- */}
       <div id="login-section" class="w-full flex flex-col items-center gap-4 transition-all duration-300">
         
-        {/* --- NEW STANDARD GOOGLE BUTTON (Dark Mode Optimized) --- */}
+        {/* --- EMAIL LOGIN SECTION --- */}
+        <div class="w-full flex flex-col gap-3 mb-2">
+          <input 
+            type="email" 
+            id="email-input" 
+            placeholder="name@example.com" 
+            class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" 
+          />
+          <button 
+            id="email-login-btn"
+            class="w-full py-2.5 bg-tx-main text-main rounded-md font-medium text-[15px] hover:opacity-90 transition-opacity"
+          >
+            Continue with Email
+          </button>
+          <p id="email-status" class="text-sm text-green-600 dark:text-green-400 font-medium hidden mt-1.5 text-center">
+            Check your inbox for the login link!
+          </p>
+        </div>
+
+        <div class="flex items-center w-full my-2">
+          <hr class="flex-1 border-subtle" />
+          <span class="px-3 text-xs text-tx-muted uppercase font-bold tracking-wider">OR</span>
+          <hr class="flex-1 border-subtle" />
+        </div>
+
+        {/* --- GOOGLE BUTTON --- */}
         <button 
           id="google-login-btn"
           class="w-full flex items-center justify-center gap-3 py-2.5 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-subtle hover:bg-gray-50 dark:hover:bg-[#2a2a2a] text-gray-700 dark:text-tx-main rounded-md font-medium text-[15px] transition-colors shadow-sm"
@@ -69,6 +94,36 @@ import Layout from '../layouts/Layout.astro';
   const safeReturnUrl = (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) 
     ? rawReturnUrl 
     : '/';
+
+  // --- EMAIL LOGIN (Magic Link) ---
+  document.getElementById('email-login-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('email-input') as HTMLInputElement;
+    const email = emailInput.value.trim();
+    const btn = e.currentTarget as HTMLButtonElement;
+    const statusMsg = document.getElementById('email-status');
+    
+    if (!email) return;
+
+    btn.innerHTML = 'Sending link...';
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    const { data, error } = await authClient.signIn.magicLink({
+        email: email,
+        callbackURL: safeReturnUrl
+    });
+
+    if (error) {
+        alert("Failed to send link: " + error.message);
+        btn.innerHTML = 'Continue with Email';
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        btn.innerHTML = 'Link Sent';
+        if (statusMsg) statusMsg.classList.remove('hidden');
+    }
+  });
 
   // --- GOOGLE LOGIN (Using Better Auth) ---
   document.getElementById('google-login-btn')?.addEventListener('click', async (e) => {
