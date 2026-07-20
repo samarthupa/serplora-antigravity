@@ -14,7 +14,7 @@
         "AWS_REGION": "us-east-1",
         // IMPORTANT: Because you are in the SES Sandbox, change this to the exact 
         // Gmail address you verified in the AWS console to prevent a crash.
-        "EMAIL_FROM": "samarthu100@gmail.com" 
+        "EMAIL_FROM": "noreply@serplora.com" 
     },
     "d1_databases": [
         {
