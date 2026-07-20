@@ -33,20 +33,26 @@ export async function onRequest(context) {
                 github: {
                     clientId: context.env.GITHUB_CLIENT_ID || "",
                     clientSecret: context.env.GITHUB_CLIENT_SECRET || "",
+                    // 🟢 Automates emailVerified = 1 for new GitHub logins
+                    mapProfileToUser: (profile) => ({
+                        emailVerified: true
+                    })
                 },
                 google: {
                     clientId: context.env.GOOGLE_CLIENT_ID || "", 
                     clientSecret: context.env.GOOGLE_CLIENT_SECRET || "",
+                    // 🟢 Automates emailVerified = 1 for new Google logins
+                    mapProfileToUser: (profile) => ({
+                        emailVerified: true
+                    })
                 },
                 microsoft: {
                     clientId: context.env.MICROSOFT_CLIENT_ID || "",
                     clientSecret: context.env.MICROSOFT_CLIENT_SECRET || "",
-                    // 🟢 NEW: Override Microsoft's missing verification claim
-                    mapProfileToUser: (profile) => {
-                        return {
-                            emailVerified: true 
-                        };
-                    }
+                    // 🟢 Automates emailVerified = 1 for new Microsoft logins
+                    mapProfileToUser: (profile) => ({
+                        emailVerified: true 
+                    })
                 }
             },
         });
