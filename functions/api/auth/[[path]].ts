@@ -12,7 +12,6 @@ export async function onRequest(context) {
             dialect: new D1Dialect({ database: context.env.DB })
         });
 
-        // Initialize the AWS SES Client using your Cloudflare environment variables
         const ses = new SESClient({
             region: context.env.AWS_REGION,
             credentials: {
@@ -23,6 +22,8 @@ export async function onRequest(context) {
 
         const auth = betterAuth({
             baseURL: url.origin,
+            // 🟢 FIX 1: Explicitly pass the secret for Cloudflare
+            secret: context.env.BETTER_AUTH_SECRET || "fallback-dev-secret-key-12345",
             database: {
                 db: db,
                 type: "sqlite"
@@ -44,9 +45,7 @@ export async function onRequest(context) {
                 magicLink({
                     sendMagicLink: async ({ email, token, url }) => {
                         const command = new SendEmailCommand({
-                            Destination: {
-                                ToAddresses: [email],
-                            },
+                            Destination: { ToAddresses: [email] },
                             Message: {
                                 Body: {
                                     Html: {
@@ -58,7 +57,6 @@ export async function onRequest(context) {
                                                 <a href="${url}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 10px;">
                                                     Sign In
                                                 </a>
-                                                <p style="margin-top: 20px; font-size: 12px; color: #666;">If you didn't request this, you can safely ignore this email.</p>
                                             </div>
                                         `,
                                     },
@@ -80,6 +78,9 @@ export async function onRequest(context) {
                         } catch (sesError) {
                             console.error("SES Email Failed:", sesError);
                             throw new Error("Failed to send login email.");
+                        } finally {
+                            // 🟢 FIX 2: Destroy the AWS client so Cloudflare doesn't hang and throw a 500
+                            ses.destroy();
                         }
                     },
                 }),
@@ -88,35 +89,26 @@ export async function onRequest(context) {
                 github: {
                     clientId: context.env.GITHUB_CLIENT_ID || "",
                     clientSecret: context.env.GITHUB_CLIENT_SECRET || "",
-                    mapProfileToUser: (profile) => ({
-                        emailVerified: true
-                    })
+                    mapProfileToUser: () => ({ emailVerified: true })
                 },
                 google: {
                     clientId: context.env.GOOGLE_CLIENT_ID || "", 
                     clientSecret: context.env.GOOGLE_CLIENT_SECRET || "",
-                    mapProfileToUser: (profile) => ({
-                        emailVerified: true
-                    })
+                    mapProfileToUser: () => ({ emailVerified: true })
                 },
                 microsoft: {
                     clientId: context.env.MICROSOFT_CLIENT_ID || "",
                     clientSecret: context.env.MICROSOFT_CLIENT_SECRET || "",
-                    mapProfileToUser: (profile) => ({
-                        emailVerified: true 
-                    })
+                    mapProfileToUser: () => ({ emailVerified: true })
                 }
             },
         });
 
-        // 🟢 FIX: Added await to prevent Cloudflare from terminating the request early
         const response = await auth.handler(context.request);
         return response;
 
     } catch (error: any) {
-        // 🟢 FIX: Detailed error logging for Cloudflare Real-time Logs
         console.error("🔥 AUTH FATAL ERROR:", error);
-        
         return new Response(JSON.stringify({ 
             error: error?.message || "Internal Server Error",
             stack: error?.stack || "No stack trace available"
