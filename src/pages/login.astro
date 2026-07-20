@@ -17,8 +17,8 @@ import Layout from '../layouts/Layout.astro';
       {/* --- SIGN IN SECTION --- */}
       <div id="login-section" class="w-full flex flex-col items-center gap-4 transition-all duration-300">
         
-        {/* --- EMAIL LOGIN SECTION --- */}
-        <div class="w-full flex flex-col gap-3 mb-2">
+        {/* --- STEP 1: EMAIL INPUT --- */}
+        <div id="email-step" class="w-full flex flex-col gap-3 mb-2 animate-fade-in">
           <input 
             type="email" 
             id="email-input" 
@@ -26,14 +26,32 @@ import Layout from '../layouts/Layout.astro';
             class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" 
           />
           <button 
-            id="email-login-btn"
+            id="send-otp-btn"
             class="w-full py-2.5 bg-tx-main text-main rounded-md font-medium text-[15px] hover:opacity-90 transition-opacity"
           >
             Continue with Email
           </button>
-          <p id="email-status" class="text-sm text-green-600 dark:text-green-400 font-medium hidden mt-1.5 text-center">
-            Check your inbox for the login link!
-          </p>
+        </div>
+
+        {/* --- STEP 2: OTP VERIFICATION (Hidden by default) --- */}
+        <div id="otp-step" class="w-full hidden flex-col gap-3 mb-2 animate-fade-in">
+          <p class="text-sm text-tx-muted mb-1">Enter the 6-digit code sent to <span id="display-email" class="font-bold text-tx-main"></span></p>
+          <input 
+            type="text" 
+            id="otp-input" 
+            placeholder="123456" 
+            maxlength="6"
+            class="w-full p-3 text-center tracking-[0.5em] font-bold text-xl rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" 
+          />
+          <button 
+            id="verify-otp-btn"
+            class="w-full py-2.5 bg-tx-main text-main rounded-md font-medium text-[15px] hover:opacity-90 transition-opacity"
+          >
+            Verify & Sign In
+          </button>
+          <button id="back-to-email-btn" class="text-xs text-tx-muted hover:text-tx-main underline mt-2">
+            Use a different email
+          </button>
         </div>
 
         <div class="flex items-center w-full my-2">
@@ -41,6 +59,17 @@ import Layout from '../layouts/Layout.astro';
           <span class="px-3 text-xs text-tx-muted uppercase font-bold tracking-wider">OR</span>
           <hr class="flex-1 border-subtle" />
         </div>
+
+        {/* --- PASSKEY BUTTON --- */}
+        <button 
+          id="passkey-login-btn"
+          class="w-full flex items-center justify-center gap-3 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-md font-medium text-[15px] transition-colors shadow-sm mb-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
+          </svg>
+          Sign in with Passkey
+        </button>
 
         {/* --- GOOGLE BUTTON --- */}
         <button 
@@ -95,78 +124,138 @@ import Layout from '../layouts/Layout.astro';
     ? rawReturnUrl 
     : '/';
 
-  // --- EMAIL LOGIN (Magic Link) ---
-  document.getElementById('email-login-btn')?.addEventListener('click', async (e) => {
+  // State Management for OTP UI
+  let currentEmail = "";
+  const emailStep = document.getElementById('email-step');
+  const otpStep = document.getElementById('otp-step');
+  const displayEmail = document.getElementById('display-email');
+  const emailInput = document.getElementById('email-input') as HTMLInputElement;
+  const otpInput = document.getElementById('otp-input') as HTMLInputElement;
+
+  // --- STEP 1: SEND OTP ---
+  document.getElementById('send-otp-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
-    const emailInput = document.getElementById('email-input') as HTMLInputElement;
     const email = emailInput.value.trim();
     const btn = e.currentTarget as HTMLButtonElement;
-    const statusMsg = document.getElementById('email-status');
     
     if (!email) return;
 
-    btn.innerHTML = 'Sending link...';
+    btn.innerHTML = 'Sending Code...';
     btn.disabled = true;
     btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-    const { data, error } = await authClient.signIn.magicLink({
+    const { data, error } = await authClient.emailOtp.sendVerificationOtp({
         email: email,
+        type: "sign-in"
+    });
+
+    btn.innerHTML = 'Continue with Email';
+    btn.disabled = false;
+    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+    if (error) {
+        const errorDetails = error.message || JSON.stringify(error) || "Unknown frontend error";
+        alert("Failed to send code: " + errorDetails);
+    } else {
+        // Hide Email step, Show OTP step
+        currentEmail = email;
+        if(displayEmail) displayEmail.textContent = email;
+        emailStep?.classList.add('hidden');
+        emailStep?.classList.remove('flex');
+        otpStep?.classList.remove('hidden');
+        otpStep?.classList.add('flex');
+        otpInput?.focus();
+    }
+  });
+
+  // --- STEP 2: VERIFY OTP ---
+  document.getElementById('verify-otp-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const otp = otpInput.value.trim();
+    const btn = e.currentTarget as HTMLButtonElement;
+
+    if (!otp || otp.length < 6) {
+        alert("Please enter the full 6-digit code.");
+        return;
+    }
+
+    btn.innerHTML = 'Verifying...';
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    const { data, error } = await authClient.signIn.emailOtp({
+        email: currentEmail,
+        otp: otp,
         callbackURL: safeReturnUrl
     });
 
     if (error) {
-        // 🟢 FIX: Extract exact error details to prevent "undefined"
-        const errorDetails = error.message || JSON.stringify(error) || "Unknown frontend error";
-        alert("Failed to send link: " + errorDetails);
-        
-        btn.innerHTML = 'Continue with Email';
+        alert("Invalid code: " + error.message);
+        btn.innerHTML = 'Verify & Sign In';
         btn.disabled = false;
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
-    } else {
-        btn.innerHTML = 'Link Sent';
-        if (statusMsg) statusMsg.classList.remove('hidden');
+    }
+    // If successful, Better Auth automatically handles the redirect to callbackURL
+  });
+
+  // --- BACK TO EMAIL BUTTON ---
+  document.getElementById('back-to-email-btn')?.addEventListener('click', () => {
+      otpStep?.classList.add('hidden');
+      otpStep?.classList.remove('flex');
+      emailStep?.classList.remove('hidden');
+      emailStep?.classList.add('flex');
+      otpInput.value = '';
+  });
+
+  // --- PASSKEY LOGIN ---
+  document.getElementById('passkey-login-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const btn = e.currentTarget as HTMLButtonElement;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Prompting Device...';
+    btn.disabled = true;
+
+    const { data, error } = await authClient.signIn.passkey({
+        callbackURL: safeReturnUrl
+    });
+
+    if (error) {
+        console.error("Passkey error:", error);
+        alert("Passkey login failed or cancelled.");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
   });
 
-  // --- GOOGLE LOGIN (Using Better Auth) ---
+  // --- GOOGLE LOGIN ---
   document.getElementById('google-login-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const btn = e.currentTarget as HTMLButtonElement;
     btn.innerHTML = 'Connecting to Google...';
-    
-    await authClient.signIn.social({
-        provider: "google",
-        callbackURL: safeReturnUrl 
-    });
+    await authClient.signIn.social({ provider: "google", callbackURL: safeReturnUrl });
   });
 
-  // --- GITHUB LOGIN (Using Better Auth) ---
+  // --- GITHUB LOGIN ---
   document.getElementById('github-login-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const btn = e.currentTarget as HTMLButtonElement;
     btn.innerHTML = 'Connecting to GitHub...';
-    
-    await authClient.signIn.social({
-        provider: "github",
-        callbackURL: safeReturnUrl 
-    });
+    await authClient.signIn.social({ provider: "github", callbackURL: safeReturnUrl });
   });
 
-  // --- MICROSOFT LOGIN (Using Better Auth) ---
+  // --- MICROSOFT LOGIN ---
   document.getElementById('microsoft-login-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const btn = e.currentTarget as HTMLButtonElement;
     btn.innerHTML = 'Connecting to Microsoft...';
-    
-    await authClient.signIn.social({
-        provider: "microsoft",
-        callbackURL: safeReturnUrl 
-    });
+    await authClient.signIn.social({ provider: "microsoft", callbackURL: safeReturnUrl });
   });
 </script>
 </Layout>
 
 <style>
+  .flex { display: flex; }
+  .hidden { display: none !important; }
   .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>

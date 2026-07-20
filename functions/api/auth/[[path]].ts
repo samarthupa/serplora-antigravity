@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { magicLink } from "better-auth/plugins";
+import { emailOTP, passkey } from "better-auth/plugins"; // 🟢 FIX: Swapped plugins
 import { Kysely } from "kysely";
 import { D1Dialect } from "kysely-d1";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
@@ -41,8 +41,12 @@ export async function onRequest(context) {
                 }
             },
             plugins: [
-                magicLink({
-                    sendMagicLink: async ({ email, token, url }) => {
+                // 🟢 NEW: Passkey Plugin configured
+                passkey(), 
+                
+                // 🟢 NEW: Email OTP Plugin configured
+                emailOTP({
+                    async sendVerificationOTP({ email, otp, type }) {
                         const command = new SendEmailCommand({
                             Destination: { ToAddresses: [email] },
                             Message: {
@@ -52,21 +56,22 @@ export async function onRequest(context) {
                                         Data: `
                                             <div style="font-family: sans-serif; padding: 20px;">
                                                 <h2>Sign in to Serplora</h2>
-                                                <p>Click the button below to securely sign in to your account. This link expires in 15 minutes.</p>
-                                                <a href="${url}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 10px;">
-                                                    Sign In
-                                                </a>
+                                                <p>Your secure login code is:</p>
+                                                <h1 style="letter-spacing: 4px; font-size: 32px; background: #f4f4f5; padding: 12px; border-radius: 8px; display: inline-block;">
+                                                    ${otp}
+                                                </h1>
+                                                <p>This code expires in 10 minutes. Do not share this with anyone.</p>
                                             </div>
                                         `,
                                     },
                                     Text: {
                                         Charset: "UTF-8",
-                                        Data: `Sign in to Serplora by clicking this link: ${url}`,
+                                        Data: `Your Serplora login code is: ${otp}`,
                                     },
                                 },
                                 Subject: {
                                     Charset: "UTF-8",
-                                    Data: "Sign in to Serplora",
+                                    Data: `${otp} is your Serplora login code`,
                                 },
                             },
                             Source: context.env.EMAIL_FROM, 
@@ -75,15 +80,13 @@ export async function onRequest(context) {
                         try {
                             await ses.send(command);
                         } catch (sesError: any) {
-                            // 🟢 FIX: Intercept and ignore the AWS SDK XML parsing bug in Cloudflare
+                            // Retaining the DOMParser bypass fix for Cloudflare/AWS SDK
                             if (sesError?.message?.includes("DOMParser is not defined")) {
-                                console.log("Email sent successfully! (Ignored AWS SDK DOMParser bug)");
+                                console.log("OTP sent successfully! (Ignored AWS SDK DOMParser bug)");
                             } else {
                                 console.error("SES Email Failed:", sesError);
-                                throw new Error("Failed to send login email.");
+                                throw new Error("Failed to send OTP email.");
                             }
-                        } finally {
-                            ses.destroy();
                         }
                     },
                 }),
