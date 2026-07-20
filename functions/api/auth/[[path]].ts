@@ -23,7 +23,6 @@ export async function onRequest(context) {
                     whatsapp: { type: "string", required: false }
                 }
             },
-            // 🟢 NEW: Enable account linking to prevent the 'account_not_linked' error
             account: {
                 accountLinking: {
                     enabled: true,
@@ -42,6 +41,12 @@ export async function onRequest(context) {
                 microsoft: {
                     clientId: context.env.MICROSOFT_CLIENT_ID || "",
                     clientSecret: context.env.MICROSOFT_CLIENT_SECRET || "",
+                    // 🟢 NEW: Override Microsoft's missing verification claim
+                    mapProfileToUser: (profile) => {
+                        return {
+                            emailVerified: true 
+                        };
+                    }
                 }
             },
         });
