@@ -115,7 +115,10 @@ import Layout from '../layouts/Layout.astro';
     });
 
     if (error) {
-        alert("Failed to send link: " + error.message);
+        // 🟢 FIX: Extract exact error details to prevent "undefined"
+        const errorDetails = error.message || JSON.stringify(error) || "Unknown frontend error";
+        alert("Failed to send link: " + errorDetails);
+        
         btn.innerHTML = 'Continue with Email';
         btn.disabled = false;
         btn.classList.remove('opacity-50', 'cursor-not-allowed');

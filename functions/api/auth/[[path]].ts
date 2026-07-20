@@ -109,8 +109,20 @@ export async function onRequest(context) {
             },
         });
 
-        return auth.handler(context.request);
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+        // 🟢 FIX: Added await to prevent Cloudflare from terminating the request early
+        const response = await auth.handler(context.request);
+        return response;
+
+    } catch (error: any) {
+        // 🟢 FIX: Detailed error logging for Cloudflare Real-time Logs
+        console.error("🔥 AUTH FATAL ERROR:", error);
+        
+        return new Response(JSON.stringify({ 
+            error: error?.message || "Internal Server Error",
+            stack: error?.stack || "No stack trace available"
+        }), { 
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
     }
 }
