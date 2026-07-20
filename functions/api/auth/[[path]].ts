@@ -32,6 +32,10 @@ export async function onRequest(context) {
                 google: {
                     clientId: context.env.GOOGLE_CLIENT_ID || "", 
                     clientSecret: context.env.GOOGLE_CLIENT_SECRET || "",
+                },
+                microsoft: {
+                    clientId: context.env.MICROSOFT_CLIENT_ID || "",
+                    clientSecret: context.env.MICROSOFT_CLIENT_SECRET || "",
                 }
             },
         });

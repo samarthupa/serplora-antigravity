@@ -41,6 +41,20 @@ import Layout from '../layouts/Layout.astro';
           </svg>
           Continue with GitHub
         </button>
+
+        {/* --- MICROSOFT BUTTON --- */}
+        <button 
+          id="microsoft-login-btn"
+          class="w-full flex items-center justify-center gap-3 py-2.5 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-subtle hover:bg-gray-50 dark:hover:bg-[#2a2a2a] text-gray-700 dark:text-tx-main rounded-md font-medium text-[15px] transition-colors shadow-sm"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 21 21" aria-hidden="true">
+            <path fill="#f35325" d="M0 0h10v10H0z"/>
+            <path fill="#81bc06" d="M11 0h10v10H11z"/>
+            <path fill="#05a6f0" d="M0 11h10v10H0z"/>
+            <path fill="#ffba08" d="M11 11h10v10H11z"/>
+          </svg>
+          Continue with Microsoft
+        </button>
       </div>
 
     </div>
@@ -76,6 +90,18 @@ import Layout from '../layouts/Layout.astro';
     
     await authClient.signIn.social({
         provider: "github",
+        callbackURL: safeReturnUrl 
+    });
+  });
+
+  // --- MICROSOFT LOGIN (Using Better Auth) ---
+  document.getElementById('microsoft-login-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const btn = e.currentTarget as HTMLButtonElement;
+    btn.innerHTML = 'Connecting to Microsoft...';
+    
+    await authClient.signIn.social({
+        provider: "microsoft",
         callbackURL: safeReturnUrl 
     });
   });
