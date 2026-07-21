@@ -4,12 +4,15 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
+  <!-- Load the Turnstile script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
   <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[75vh] font-['Outfit',sans-serif] bg-neutral-50 dark:bg-[#0a0a0a]">
     
-    <div class="w-full max-w-sm bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-8 flex flex-col items-center">
+    <div class="w-full max-w-sm bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-8 flex flex-col items-center relative">
       
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center tracking-tight">Welcome to Serplora</h1>
-      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 text-center">Sign in / Signup securely to continue.</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 text-center">Sign in or up securely to continue.</p>
 
       {/* --- STATE 1: SOCIAL LOGINS --- */}
       <div id="social-step" class="w-full flex flex-col gap-3 animate-fade-in">
@@ -60,6 +63,11 @@ import Layout from '../layouts/Layout.astro';
           placeholder="name@example.com" 
           class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm focus:border-gray-400 dark:focus:border-gray-600 focus:outline-none transition-colors" 
         />
+        
+        {/* Turnstile Widget */}
+        <div id="turnstile-widget" class="cf-turnstile w-full flex justify-center mt-2" data-sitekey="YOUR_PUBLIC_SITE_KEY" data-theme="auto"></div>
+        
+        <p id="email-error" class="hidden text-red-500 text-xs font-medium px-1 text-center"></p>
         <button id="send-otp-btn" class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors">
           Send Code
         </button>
@@ -78,9 +86,20 @@ import Layout from '../layouts/Layout.astro';
           maxlength="6"
           class="w-full p-3 text-center tracking-[0.5em] font-mono font-bold text-lg rounded-lg bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white focus:border-gray-400 dark:focus:border-gray-600 focus:outline-none transition-colors" 
         />
+        <p id="otp-error" class="hidden text-red-500 text-xs font-medium px-1 text-center"></p>
         <button id="verify-otp-btn" class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors mt-2">
           Verify Code
         </button>
+
+        {/* Action Links for OTP Step */}
+        <div class="flex flex-col items-center gap-3 mt-4 w-full">
+          <button id="resend-otp-btn" class="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Resend Code
+          </button>
+          <button id="back-to-email-from-otp-btn" class="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+            &larr; Change Email
+          </button>
+        </div>
       </div>
 
     </div>
@@ -95,17 +114,60 @@ import Layout from '../layouts/Layout.astro';
     ? rawReturnUrl 
     : '/';
 
+  // State Variables
   let currentEmail = "";
+  let failedAttempts = 0;
+  const MAX_ATTEMPTS = 3;
+  let resendTimer: ReturnType<typeof setInterval> | null = null;
+  let countdown = 0;
   
   // UI Elements
   const socialStep = document.getElementById('social-step');
   const emailStep = document.getElementById('email-step');
   const otpStep = document.getElementById('otp-step');
   const displayEmail = document.getElementById('display-email');
+  
   const emailInput = document.getElementById('email-input') as HTMLInputElement;
   const otpInput = document.getElementById('otp-input') as HTMLInputElement;
+  const emailError = document.getElementById('email-error');
+  const otpError = document.getElementById('otp-error');
+  const resendBtn = document.getElementById('resend-otp-btn') as HTMLButtonElement;
+  const verifyBtn = document.getElementById('verify-otp-btn') as HTMLButtonElement;
 
-  // --- UI TOGGLES ---
+  // --- HELPER FUNCTIONS ---
+  function showInlineError(element: HTMLElement | null, message: string) {
+    if (element) {
+      element.innerText = message;
+      element.classList.remove('hidden');
+    }
+  }
+
+  function hideInlineError(element: HTMLElement | null) {
+    if (element) {
+      element.innerText = '';
+      element.classList.add('hidden');
+    }
+  }
+
+  function startResendCooldown() {
+    countdown = 60;
+    resendBtn.disabled = true;
+    resendBtn.innerText = `Resend Code (${countdown}s)`;
+    
+    if (resendTimer) clearInterval(resendTimer);
+    
+    resendTimer = setInterval(() => {
+      countdown--;
+      resendBtn.innerText = `Resend Code (${countdown}s)`;
+      if (countdown <= 0) {
+        clearInterval(resendTimer!);
+        resendBtn.disabled = false;
+        resendBtn.innerText = 'Resend Code';
+      }
+    }, 1000);
+  }
+
+  // --- NAVIGATION TOGGLES ---
   document.getElementById('show-email-btn')?.addEventListener('click', () => {
       socialStep?.classList.add('hidden');
       socialStep?.classList.remove('flex');
@@ -115,6 +177,7 @@ import Layout from '../layouts/Layout.astro';
   });
 
   document.getElementById('back-to-social-btn')?.addEventListener('click', () => {
+      hideInlineError(emailError);
       emailStep?.classList.add('hidden');
       emailStep?.classList.remove('flex');
       socialStep?.classList.remove('hidden');
@@ -122,30 +185,87 @@ import Layout from '../layouts/Layout.astro';
       emailInput.value = '';
   });
 
+  document.getElementById('back-to-email-from-otp-btn')?.addEventListener('click', () => {
+      hideInlineError(otpError);
+      otpStep?.classList.add('hidden');
+      otpStep?.classList.remove('flex');
+      emailStep?.classList.remove('hidden');
+      emailStep?.classList.add('flex');
+      otpInput.value = '';
+      failedAttempts = 0; 
+      verifyBtn.disabled = false;
+      verifyBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+      // Reset turnstile when changing email so they can solve it again if needed
+      if ((window as any).turnstile) (window as any).turnstile.reset();
+  });
+
   // --- SEND OTP ---
+  async function requestOTP(emailAddress: string, isResend = false) {
+    const btnToUpdate = isResend ? resendBtn : (document.getElementById('send-otp-btn') as HTMLButtonElement);
+    
+    // Capture Turnstile Token
+    const turnstileInput = document.querySelector('[name="cf-turnstile-response"]') as HTMLInputElement;
+    const token = turnstileInput?.value;
+
+    if (!token) {
+        showInlineError(emailError, "Please complete the security check.");
+        return false;
+    }
+
+    hideInlineError(emailError);
+    hideInlineError(otpError);
+
+    btnToUpdate.innerText = 'Sending...';
+    btnToUpdate.disabled = true;
+    btnToUpdate.classList.add('opacity-70', 'cursor-not-allowed');
+
+    const { data, error } = await authClient.emailOtp.sendVerificationOtp({
+        email: emailAddress,
+        type: "sign-in",
+        fetchOptions: {
+            headers: {
+                "X-Turnstile-Token": token
+            }
+        }
+    });
+
+    // Reset Turnstile widget after requesting so it doesn't use a stale token
+    if ((window as any).turnstile) {
+        (window as any).turnstile.reset();
+    }
+
+    if (!isResend) {
+        btnToUpdate.innerText = 'Send Code';
+        btnToUpdate.disabled = false;
+        btnToUpdate.classList.remove('opacity-70', 'cursor-not-allowed');
+    }
+
+    if (error) {
+        if (isResend) {
+            showInlineError(otpError, "Failed to resend: " + (error.message || "Unknown error"));
+            btnToUpdate.innerText = 'Resend Code';
+            btnToUpdate.disabled = false;
+        } else {
+            const errorMsg = error.status === 403 ? "Security check failed. Please try again." : error.message;
+            showInlineError(emailError, errorMsg || "Failed to send code. Try again.");
+        }
+        return false;
+    } 
+    
+    return true;
+  }
+
+  // Trigger Send
   document.getElementById('send-otp-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();
-    const btn = e.currentTarget as HTMLButtonElement;
-    
-    if (!email) return;
+    if (!email) {
+      showInlineError(emailError, "Please enter a valid email address.");
+      return;
+    }
 
-    btn.innerHTML = 'Sending...';
-    btn.disabled = true;
-    btn.classList.add('opacity-70', 'cursor-not-allowed');
-
-    const { data, error } = await authClient.emailOtp.sendVerificationOtp({
-        email: email,
-        type: "sign-in"
-    });
-
-    btn.innerHTML = 'Send Code';
-    btn.disabled = false;
-    btn.classList.remove('opacity-70', 'cursor-not-allowed');
-
-    if (error) {
-        alert("Failed to send code: " + (error.message || "Unknown error"));
-    } else {
+    const success = await requestOTP(email, false);
+    if (success) {
         currentEmail = email;
         if(displayEmail) displayEmail.textContent = email;
         emailStep?.classList.add('hidden');
@@ -153,23 +273,47 @@ import Layout from '../layouts/Layout.astro';
         otpStep?.classList.remove('hidden');
         otpStep?.classList.add('flex');
         otpInput?.focus();
+        
+        failedAttempts = 0;
+        verifyBtn.disabled = false;
+        verifyBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+        startResendCooldown();
     }
   });
 
+  // Trigger Resend
+  resendBtn?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (countdown > 0) return; 
+    
+    const success = await requestOTP(currentEmail, true);
+    if (success) {
+        failedAttempts = 0;
+        otpInput.value = '';
+        verifyBtn.disabled = false;
+        verifyBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+        startResendCooldown();
+        showInlineError(otpError, "A new code has been sent."); 
+        setTimeout(() => hideInlineError(otpError), 4000);
+    }
+  });
+
+
   // --- VERIFY OTP ---
-  document.getElementById('verify-otp-btn')?.addEventListener('click', async (e) => {
+  verifyBtn?.addEventListener('click', async (e) => {
     e.preventDefault();
     const otp = otpInput.value.trim();
-    const btn = e.currentTarget as HTMLButtonElement;
+
+    hideInlineError(otpError);
 
     if (!otp || otp.length < 6) {
-        alert("Please enter the 6-digit code.");
+        showInlineError(otpError, "Please enter the 6-digit code.");
         return;
     }
 
-    btn.innerHTML = 'Verifying...';
-    btn.disabled = true;
-    btn.classList.add('opacity-70', 'cursor-not-allowed');
+    verifyBtn.innerText = 'Verifying...';
+    verifyBtn.disabled = true;
+    verifyBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
     const { data, error } = await authClient.signIn.emailOtp({
         email: currentEmail,
@@ -177,37 +321,37 @@ import Layout from '../layouts/Layout.astro';
     });
 
     if (error) {
-        alert("Invalid code: " + error.message);
-        btn.innerHTML = 'Verify Code';
-        btn.disabled = false;
-        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        failedAttempts++;
+        
+        if (failedAttempts >= MAX_ATTEMPTS) {
+            showInlineError(otpError, "Too many failed attempts. Please request a new code.");
+            verifyBtn.innerText = 'Verify Code';
+        } else {
+            showInlineError(otpError, `Invalid code. ${MAX_ATTEMPTS - failedAttempts} attempts remaining.`);
+            verifyBtn.innerText = 'Verify Code';
+            verifyBtn.disabled = false;
+            verifyBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            otpInput.value = ''; 
+            otpInput.focus();
+        }
     } else {
-        btn.innerHTML = 'Success!';
+        verifyBtn.innerText = 'Success!';
         window.location.href = safeReturnUrl; 
     }
   });
 
   // --- SOCIAL LOGINS ---
-  document.getElementById('google-login-btn')?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const btn = e.currentTarget as HTMLButtonElement;
+  const handleSocialLogin = async (provider: 'google' | 'github' | 'microsoft', btn: HTMLButtonElement) => {
     btn.innerHTML = 'Connecting...';
-    await authClient.signIn.social({ provider: "google", callbackURL: safeReturnUrl });
-  });
+    btn.disabled = true;
+    btn.classList.add('opacity-70');
+    await authClient.signIn.social({ provider, callbackURL: safeReturnUrl });
+  };
 
-  document.getElementById('github-login-btn')?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const btn = e.currentTarget as HTMLButtonElement;
-    btn.innerHTML = 'Connecting...';
-    await authClient.signIn.social({ provider: "github", callbackURL: safeReturnUrl });
-  });
+  document.getElementById('google-login-btn')?.addEventListener('click', (e) => handleSocialLogin('google', e.currentTarget as HTMLButtonElement));
+  document.getElementById('github-login-btn')?.addEventListener('click', (e) => handleSocialLogin('github', e.currentTarget as HTMLButtonElement));
+  document.getElementById('microsoft-login-btn')?.addEventListener('click', (e) => handleSocialLogin('microsoft', e.currentTarget as HTMLButtonElement));
 
-  document.getElementById('microsoft-login-btn')?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const btn = e.currentTarget as HTMLButtonElement;
-    btn.innerHTML = 'Connecting...';
-    await authClient.signIn.social({ provider: "microsoft", callbackURL: safeReturnUrl });
-  });
 </script>
 </Layout>
 
