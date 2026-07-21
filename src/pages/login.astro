@@ -12,7 +12,7 @@ import Layout from '../layouts/Layout.astro';
     <div class="w-full max-w-sm bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-8 flex flex-col items-center relative">
       
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center tracking-tight">Welcome to Serplora</h1>
-      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 text-center">Sign in or up securely to continue.</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 text-center">Sign in / Sign up securely to continue.</p>
 
       {/* --- STATE 1: SOCIAL LOGINS --- */}
       <div id="social-step" class="w-full flex flex-col gap-3 animate-fade-in">
@@ -65,7 +65,7 @@ import Layout from '../layouts/Layout.astro';
         />
         
         {/* Turnstile Widget */}
-        <div id="turnstile-widget" class="cf-turnstile w-full flex justify-center mt-2" data-sitekey="YOUR_PUBLIC_SITE_KEY" data-theme="auto"></div>
+        <div id="turnstile-widget" class="cf-turnstile w-full flex justify-center mt-2" data-sitekey="0x4AAAAAACLWm3FCc_775_md" data-theme="auto"></div>
         
         <p id="email-error" class="hidden text-red-500 text-xs font-medium px-1 text-center"></p>
         <button id="send-otp-btn" class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors">
