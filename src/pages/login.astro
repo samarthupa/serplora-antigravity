@@ -60,17 +60,6 @@ import Layout from '../layouts/Layout.astro';
           <hr class="flex-1 border-subtle" />
         </div>
 
-        {/* --- PASSKEY BUTTON --- */}
-        <button 
-          id="passkey-login-btn"
-          class="w-full flex items-center justify-center gap-3 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-md font-medium text-[15px] transition-colors shadow-sm mb-2"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
-          </svg>
-          Sign in with Passkey
-        </button>
-
         {/* --- GOOGLE BUTTON --- */}
         <button 
           id="google-login-btn"
@@ -117,14 +106,12 @@ import Layout from '../layouts/Layout.astro';
 <script>
   import { authClient } from '../lib/auth-client';
 
-  // 1. Safely grab the return URL
   const urlParams = new URLSearchParams(window.location.search);
   let rawReturnUrl = urlParams.get('returnUrl') || '/';
   const safeReturnUrl = (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) 
     ? rawReturnUrl 
     : '/';
 
-  // State Management for OTP UI
   let currentEmail = "";
   const emailStep = document.getElementById('email-step');
   const otpStep = document.getElementById('otp-step');
@@ -157,7 +144,6 @@ import Layout from '../layouts/Layout.astro';
         const errorDetails = error.message || JSON.stringify(error) || "Unknown frontend error";
         alert("Failed to send code: " + errorDetails);
     } else {
-        // Hide Email step, Show OTP step
         currentEmail = email;
         if(displayEmail) displayEmail.textContent = email;
         emailStep?.classList.add('hidden');
@@ -195,7 +181,6 @@ import Layout from '../layouts/Layout.astro';
         btn.disabled = false;
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
-    // If successful, Better Auth automatically handles the redirect to callbackURL
   });
 
   // --- BACK TO EMAIL BUTTON ---
@@ -205,26 +190,6 @@ import Layout from '../layouts/Layout.astro';
       emailStep?.classList.remove('hidden');
       emailStep?.classList.add('flex');
       otpInput.value = '';
-  });
-
-  // --- PASSKEY LOGIN ---
-  document.getElementById('passkey-login-btn')?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const btn = e.currentTarget as HTMLButtonElement;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = 'Prompting Device...';
-    btn.disabled = true;
-
-    const { data, error } = await authClient.signIn.passkey({
-        callbackURL: safeReturnUrl
-    });
-
-    if (error) {
-        console.error("Passkey error:", error);
-        alert("Passkey login failed or cancelled.");
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
   });
 
   // --- GOOGLE LOGIN ---
