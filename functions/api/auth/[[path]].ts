@@ -39,46 +39,9 @@ export async function onRequest(context) {
                 }             
             },             
             plugins: [                 
+                //   Email OTP Plugin configured                 
                 emailOTP({                     
                     async sendVerificationOTP({ email, otp, type }) {                         
-                        
-                        // --- 1. SECURITY: BLOCK PLUS ADDRESSING ---
-                        const [localPart, domain] = email.toLowerCase().split('@');
-                        if (localPart.includes('+')) {
-                            // Throwing an error here automatically cancels the OTP and sends the message to the frontend
-                            throw new Error("Email aliases (+ addressing) are not permitted.");
-                        }
-
-                        // --- 2. SECURITY: BLOCK DISPOSABLE DOMAINS ---
-                        const blocklistUrl = "https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/main/disposable_email_blocklist.conf";
-                        
-                        // Check Cloudflare Edge Cache first for extreme speed
-                        const cache = await caches.open("disposable-domains-cache");
-                        let listRes = await cache.match(blocklistUrl);
-
-                        if (!listRes) {
-                            listRes = await fetch(blocklistUrl);
-                            if (listRes.ok) {
-                                // Clone response, set it to cache for 24 hours (86400 seconds)
-                                const cacheRes = new Response(listRes.clone().body, {
-                                    headers: { "Cache-Control": "max-age=86400" } 
-                                });
-                                context.waitUntil(cache.put(blocklistUrl, cacheRes));
-                            }
-                        }
-
-                        if (listRes && listRes.ok) {
-                            const text = await listRes.text();
-                            
-                            // Pad with newlines to ensure an EXACT match. 
-                            // (This prevents "gmail.com" from accidentally matching a blocked "mail.com")
-                            const paddedText = '\n' + text + '\n';
-                            if (paddedText.includes('\n' + domain + '\n')) {
-                                throw new Error("Disposable/temporary email addresses are not permitted.");
-                            }
-                        }
-
-                        // --- 3. PROCEED WITH SES OTP EMAIL ---
                         const command = new SendEmailCommand({                             
                             Destination: { ToAddresses: [email] },                             
                             Message: {                                 
