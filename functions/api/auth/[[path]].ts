@@ -87,7 +87,8 @@ export async function onRequest(context) {
             socialProviders: {                 
                 github: {                     
                     clientId: context.env.GITHUB_CLIENT_ID || "",                     
-                    clientSecret: context.env.GITHUB_CLIENT_SECRET || "",                     
+                    clientSecret: context.env.GITHUB_CLIENT_SECRET || "",   
+                    prompt: "select_account",                  
                     mapProfileToUser: () => ({ emailVerified: true })                 
                 },                 
                 google: {                     
