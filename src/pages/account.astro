@@ -315,10 +315,7 @@ import Layout from '../layouts/Layout.astro';
     async function initAccount() {
       const { data, error } = await authClient.getSession();
 
-      if (error || !data || !data.user) {
-        window.location.href = '/login';
-        return;
-      }
+      if (!data || !data.user) return;
 
       const user = data.user as any; 
       let isSaving = false;

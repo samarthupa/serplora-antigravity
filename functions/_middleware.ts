@@ -26,7 +26,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return new Response(response.body, { status: 503, statusText: 'Service Unavailable', headers: headers });
   }
 
-  // --- 2. NEW TURNSTILE VERIFICATION LOGIC ---
+  // --- 2. TURNSTILE VERIFICATION LOGIC ---
   if (request.method === "POST" && url.pathname.includes("/email-otp/send-verification-otp")) {
     const token = request.headers.get("X-Turnstile-Token");
     
@@ -75,6 +75,30 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   }
 
-  // --- 3. PROCEED TO NEXT HANDLER (e.g., Better Auth) ---
+  // --- 3. EDGE ROUTE PROTECTION ---
+  const protectedRoutes = ['/account'];
+  const isProtected = protectedRoutes.some(route => url.pathname.startsWith(route));
+
+  if (isProtected) {
+    const cookieHeader = request.headers.get('Cookie') || '';
+
+    try {
+      const sessionReq = await fetch(new URL('/api/auth/get-session', request.url).toString(), {
+        headers: { 'Cookie': cookieHeader }
+      });
+
+      const sessionData = await sessionReq.json() as any;
+
+      if (!sessionData || !sessionData.session) {
+        const loginUrl = new URL(`/login?returnUrl=${encodeURIComponent(url.pathname)}`, request.url);
+        return Response.redirect(loginUrl.toString(), 302);
+      }
+    } catch (err) {
+      console.error("Edge Auth Check Failed:", err);
+      return Response.redirect(new URL('/login', request.url).toString(), 302);
+    }
+  }
+
+  // --- 4. PROCEED TO NEXT HANDLER (e.g., Better Auth) ---
   return next();
 };
