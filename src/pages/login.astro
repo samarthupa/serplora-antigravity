@@ -4,67 +4,17 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-  <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[75vh] font-['Outfit',sans-serif]">
+  <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[75vh] font-['Outfit',sans-serif] bg-neutral-50 dark:bg-[#0a0a0a]">
     
-    <div class="w-full max-w-md bg-surface border border-subtle rounded-2xl shadow-xl p-8 text-center flex flex-col items-center relative overflow-hidden">
+    <div class="w-full max-w-sm bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-8 flex flex-col items-center">
       
-      {/* Subtle background glow */}
-      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center tracking-tight">Welcome to Serplora</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 text-center">Sign in / Signup securely to continue.</p>
 
-      <h1 class="text-2xl md:text-3xl font-[800] text-tx-main mb-2 tracking-tight">Welcome to Serplora</h1>
-      <p class="text-tx-muted text-[15px] mb-8">Sign in securely to continue learning.</p>
-
-      {/* --- SIGN IN SECTION --- */}
-      <div id="login-section" class="w-full flex flex-col items-center gap-4 transition-all duration-300">
+      {/* --- STATE 1: SOCIAL LOGINS --- */}
+      <div id="social-step" class="w-full flex flex-col gap-3 animate-fade-in">
         
-        {/* --- STEP 1: EMAIL INPUT --- */}
-        <div id="email-step" class="w-full flex flex-col gap-3 mb-2 animate-fade-in">
-          <input 
-            type="email" 
-            id="email-input" 
-            placeholder="name@example.com" 
-            class="w-full p-3 rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" 
-          />
-          <button 
-            id="send-otp-btn"
-            class="w-full py-2.5 bg-tx-main text-main rounded-md font-medium text-[15px] hover:opacity-90 transition-opacity"
-          >
-            Continue with Email
-          </button>
-        </div>
-
-        {/* --- STEP 2: OTP VERIFICATION (Hidden by default) --- */}
-        <div id="otp-step" class="w-full hidden flex-col gap-3 mb-2 animate-fade-in">
-          <p class="text-sm text-tx-muted mb-1">Enter the 6-digit code sent to <span id="display-email" class="font-bold text-tx-main"></span></p>
-          <input 
-            type="text" 
-            id="otp-input" 
-            placeholder="123456" 
-            maxlength="6"
-            class="w-full p-3 text-center tracking-[0.5em] font-bold text-xl rounded-md bg-transparent border border-subtle text-tx-main focus:border-tx-main focus:ring-1 focus:ring-tx-main outline-none transition-all" 
-          />
-          <button 
-            id="verify-otp-btn"
-            class="w-full py-2.5 bg-tx-main text-main rounded-md font-medium text-[15px] hover:opacity-90 transition-opacity"
-          >
-            Verify & Sign In
-          </button>
-          <button id="back-to-email-btn" class="text-xs text-tx-muted hover:text-tx-main underline mt-2">
-            Use a different email
-          </button>
-        </div>
-
-        <div class="flex items-center w-full my-2">
-          <hr class="flex-1 border-subtle" />
-          <span class="px-3 text-xs text-tx-muted uppercase font-bold tracking-wider">OR</span>
-          <hr class="flex-1 border-subtle" />
-        </div>
-
-        {/* --- GOOGLE BUTTON --- */}
-        <button 
-          id="google-login-btn"
-          class="w-full flex items-center justify-center gap-3 py-2.5 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-subtle hover:bg-gray-50 dark:hover:bg-[#2a2a2a] text-gray-700 dark:text-tx-main rounded-md font-medium text-[15px] transition-colors shadow-sm"
-        >
+        <button id="google-login-btn" class="w-full flex items-center justify-center gap-3 py-2.5 bg-transparent border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg font-medium text-sm transition-colors">
           <svg class="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -74,22 +24,14 @@ import Layout from '../layouts/Layout.astro';
           Continue with Google
         </button>
       
-        {/* --- GITHUB BUTTON --- */}
-        <button 
-          id="github-login-btn"
-          class="w-full flex items-center justify-center gap-3 py-2.5 bg-[#24292F] hover:bg-[#24292F]/90 text-white rounded-md font-medium text-[15px] transition-colors"
-        >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <button id="github-login-btn" class="w-full flex items-center justify-center gap-3 py-2.5 bg-transparent border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg font-medium text-sm transition-colors">
+          <svg class="w-5 h-5 text-black dark:text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
           </svg>
           Continue with GitHub
         </button>
 
-        {/* --- MICROSOFT BUTTON --- */}
-        <button 
-          id="microsoft-login-btn"
-          class="w-full flex items-center justify-center gap-3 py-2.5 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-subtle hover:bg-gray-50 dark:hover:bg-[#2a2a2a] text-gray-700 dark:text-tx-main rounded-md font-medium text-[15px] transition-colors shadow-sm"
-        >
+        <button id="microsoft-login-btn" class="w-full flex items-center justify-center gap-3 py-2.5 bg-transparent border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg font-medium text-sm transition-colors">
           <svg class="w-5 h-5" viewBox="0 0 21 21" aria-hidden="true">
             <path fill="#f35325" d="M0 0h10v10H0z"/>
             <path fill="#81bc06" d="M11 0h10v10H11z"/>
@@ -97,6 +39,47 @@ import Layout from '../layouts/Layout.astro';
             <path fill="#ffba08" d="M11 11h10v10H11z"/>
           </svg>
           Continue with Microsoft
+        </button>
+
+        <div class="flex items-center w-full my-3">
+          <hr class="flex-1 border-gray-200 dark:border-gray-800" />
+          <span class="px-4 text-xs text-gray-400 font-medium bg-white dark:bg-[#121212]">or</span>
+          <hr class="flex-1 border-gray-200 dark:border-gray-800" />
+        </div>
+
+        <button id="show-email-btn" class="w-full flex items-center justify-center py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors">
+          Continue with Email
+        </button>
+      </div>
+
+      {/* --- STATE 2: EMAIL INPUT (Hidden by default) --- */}
+      <div id="email-step" class="w-full hidden flex-col gap-3 animate-fade-in">
+        <input 
+          type="email" 
+          id="email-input" 
+          placeholder="name@example.com" 
+          class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm focus:border-gray-400 dark:focus:border-gray-600 focus:outline-none transition-colors" 
+        />
+        <button id="send-otp-btn" class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors">
+          Send Code
+        </button>
+        <button id="back-to-social-btn" class="mt-3 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+          &larr; Other login methods
+        </button>
+      </div>
+
+      {/* --- STATE 3: OTP VERIFICATION (Hidden by default) --- */}
+      <div id="otp-step" class="w-full hidden flex-col gap-3 animate-fade-in">
+        <p class="text-sm text-gray-500 text-center mb-2">Enter the 6-digit code sent to <br/><span id="display-email" class="font-medium text-gray-900 dark:text-white"></span></p>
+        <input 
+          type="text" 
+          id="otp-input" 
+          placeholder="123456" 
+          maxlength="6"
+          class="w-full p-3 text-center tracking-[0.5em] font-mono font-bold text-lg rounded-lg bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white focus:border-gray-400 dark:focus:border-gray-600 focus:outline-none transition-colors" 
+        />
+        <button id="verify-otp-btn" class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors mt-2">
+          Verify Code
         </button>
       </div>
 
@@ -113,13 +96,33 @@ import Layout from '../layouts/Layout.astro';
     : '/';
 
   let currentEmail = "";
+  
+  // UI Elements
+  const socialStep = document.getElementById('social-step');
   const emailStep = document.getElementById('email-step');
   const otpStep = document.getElementById('otp-step');
   const displayEmail = document.getElementById('display-email');
   const emailInput = document.getElementById('email-input') as HTMLInputElement;
   const otpInput = document.getElementById('otp-input') as HTMLInputElement;
 
-  // --- STEP 1: SEND OTP ---
+  // --- UI TOGGLES ---
+  document.getElementById('show-email-btn')?.addEventListener('click', () => {
+      socialStep?.classList.add('hidden');
+      socialStep?.classList.remove('flex');
+      emailStep?.classList.remove('hidden');
+      emailStep?.classList.add('flex');
+      emailInput?.focus();
+  });
+
+  document.getElementById('back-to-social-btn')?.addEventListener('click', () => {
+      emailStep?.classList.add('hidden');
+      emailStep?.classList.remove('flex');
+      socialStep?.classList.remove('hidden');
+      socialStep?.classList.add('flex');
+      emailInput.value = '';
+  });
+
+  // --- SEND OTP ---
   document.getElementById('send-otp-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();
@@ -127,22 +130,21 @@ import Layout from '../layouts/Layout.astro';
     
     if (!email) return;
 
-    btn.innerHTML = 'Sending Code...';
+    btn.innerHTML = 'Sending...';
     btn.disabled = true;
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    btn.classList.add('opacity-70', 'cursor-not-allowed');
 
     const { data, error } = await authClient.emailOtp.sendVerificationOtp({
         email: email,
         type: "sign-in"
     });
 
-    btn.innerHTML = 'Continue with Email';
+    btn.innerHTML = 'Send Code';
     btn.disabled = false;
-    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    btn.classList.remove('opacity-70', 'cursor-not-allowed');
 
     if (error) {
-        const errorDetails = error.message || JSON.stringify(error) || "Unknown frontend error";
-        alert("Failed to send code: " + errorDetails);
+        alert("Failed to send code: " + (error.message || "Unknown error"));
     } else {
         currentEmail = email;
         if(displayEmail) displayEmail.textContent = email;
@@ -154,65 +156,56 @@ import Layout from '../layouts/Layout.astro';
     }
   });
 
-  // --- STEP 2: VERIFY OTP ---
+  // --- VERIFY OTP ---
   document.getElementById('verify-otp-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const otp = otpInput.value.trim();
     const btn = e.currentTarget as HTMLButtonElement;
 
     if (!otp || otp.length < 6) {
-        alert("Please enter the full 6-digit code.");
+        alert("Please enter the 6-digit code.");
         return;
     }
 
     btn.innerHTML = 'Verifying...';
     btn.disabled = true;
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    btn.classList.add('opacity-70', 'cursor-not-allowed');
 
     const { data, error } = await authClient.signIn.emailOtp({
         email: currentEmail,
-        otp: otp,
-        callbackURL: safeReturnUrl
+        otp: otp
     });
 
     if (error) {
         alert("Invalid code: " + error.message);
-        btn.innerHTML = 'Verify & Sign In';
+        btn.innerHTML = 'Verify Code';
         btn.disabled = false;
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+    } else {
+        btn.innerHTML = 'Success!';
+        window.location.href = safeReturnUrl; 
     }
   });
 
-  // --- BACK TO EMAIL BUTTON ---
-  document.getElementById('back-to-email-btn')?.addEventListener('click', () => {
-      otpStep?.classList.add('hidden');
-      otpStep?.classList.remove('flex');
-      emailStep?.classList.remove('hidden');
-      emailStep?.classList.add('flex');
-      otpInput.value = '';
-  });
-
-  // --- GOOGLE LOGIN ---
+  // --- SOCIAL LOGINS ---
   document.getElementById('google-login-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const btn = e.currentTarget as HTMLButtonElement;
-    btn.innerHTML = 'Connecting to Google...';
+    btn.innerHTML = 'Connecting...';
     await authClient.signIn.social({ provider: "google", callbackURL: safeReturnUrl });
   });
 
-  // --- GITHUB LOGIN ---
   document.getElementById('github-login-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const btn = e.currentTarget as HTMLButtonElement;
-    btn.innerHTML = 'Connecting to GitHub...';
+    btn.innerHTML = 'Connecting...';
     await authClient.signIn.social({ provider: "github", callbackURL: safeReturnUrl });
   });
 
-  // --- MICROSOFT LOGIN ---
   document.getElementById('microsoft-login-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const btn = e.currentTarget as HTMLButtonElement;
-    btn.innerHTML = 'Connecting to Microsoft...';
+    btn.innerHTML = 'Connecting...';
     await authClient.signIn.social({ provider: "microsoft", callbackURL: safeReturnUrl });
   });
 </script>
@@ -221,6 +214,9 @@ import Layout from '../layouts/Layout.astro';
 <style>
   .flex { display: flex; }
   .hidden { display: none !important; }
-  .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+  @keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(4px); } 
+    to { opacity: 1; transform: translateY(0); } 
+  }
 </style>
