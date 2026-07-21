@@ -89,17 +89,26 @@ export async function onRequest(context) {
                     clientId: context.env.GITHUB_CLIENT_ID || "",                     
                     clientSecret: context.env.GITHUB_CLIENT_SECRET || "",   
                     prompt: "select_account",                  
-                    mapProfileToUser: () => ({ emailVerified: true })                 
+                    mapProfileToUser: (profile) => ({ 
+                        emailVerified: true,
+                        image: profile.avatar_url || null
+                    })                 
                 },                 
                 google: {                     
                     clientId: context.env.GOOGLE_CLIENT_ID || "",                      
                     clientSecret: context.env.GOOGLE_CLIENT_SECRET || "",                     
-                    mapProfileToUser: () => ({ emailVerified: true })                 
+                    mapProfileToUser: (profile) => ({ 
+                        emailVerified: true,
+                        image: profile.picture || null
+                    })                 
                 },                 
                 microsoft: {                     
                     clientId: context.env.MICROSOFT_CLIENT_ID || "",                     
                     clientSecret: context.env.MICROSOFT_CLIENT_SECRET || "",                     
-                    mapProfileToUser: () => ({ emailVerified: true })                 
+                    mapProfileToUser: (profile) => ({ 
+                        emailVerified: true,
+                        image: profile.picture || null
+                    })                 
                 }             
             },         
         });         
