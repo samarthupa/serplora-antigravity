@@ -38,7 +38,7 @@ const {
         </a>
     )}
 
-    {/* 3. NEWSLETTER SLIDING POPUP */}
+    {/* 3. NEWSLETTER SLIDING POPUP (DYNAMIC) */}
     {showNewsletter && (
         <div class="newsletter-wrapper">
             <button class="newsletter-toggle-btn w-10 h-10 md:w-11 md:h-11 rounded-full border border-subtle bg-surface text-tx-muted flex items-center justify-center hover:text-tx-main hover:border-tx-main hover:-translate-y-0.5 transition-all shadow-sm group relative" aria-label="Get Updates">
@@ -46,20 +46,17 @@ const {
                 <span class="newsletter-tooltip absolute bottom-[-30px] text-[12px] bg-tx-main text-main px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">Newsletter</span>
             </button>
 
-            <!-- Fixed Sliding Popover (Bottom Sheet on Mobile, Floating on Desktop) -->
+            <!-- Fixed Sliding Popover -->
             <div class="newsletter-popup fixed bottom-0 left-0 w-full md:w-[380px] md:bottom-6 md:left-auto md:right-6 bg-surface border-t md:border border-subtle md:rounded-2xl rounded-t-2xl shadow-2xl p-6 md:p-7 z-[100] transform translate-y-full opacity-0 pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col text-left">
                 
-                <button class="newsletter-close-btn absolute top-4 right-4 p-2 text-tx-muted hover:text-tx-main bg-main hover:bg-tx-muted/10 rounded-full transition-colors outline-none" aria-label="Close">
+                <button class="newsletter-close-btn absolute top-4 right-4 p-2 text-tx-muted hover:text-tx-main bg-main hover:bg-tx-muted/10 rounded-full transition-colors outline-none z-50" aria-label="Close">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
                 
-                <h3 class="text-[20px] font-[800] text-tx-main mb-2 tracking-tight">Stay Updated</h3>
-                <p class="text-[14px] text-tx-muted mb-6 leading-relaxed pr-6">Get our latest technical guides and project updates delivered straight to your inbox.</p>
-                
-                <form class="flex flex-col gap-3" onsubmit="event.preventDefault(); alert('Subscribed!'); this.closest('.newsletter-popup').querySelector('.newsletter-close-btn').click();">
-                    <input type="email" class="w-full bg-main border border-subtle text-tx-main text-[15px] px-4 py-3 rounded-xl outline-none focus:border-tx-main focus:ring-2 focus:ring-tx-main/20 transition-all" placeholder="Email address" required />
-                    <button type="submit" class="w-full bg-tx-main text-main font-[600] text-[15px] px-4 py-3 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all">Subscribe</button>
-                </form>
+                <!-- Dynamic Content Container -->
+                <div class="newsletter-dynamic-content min-h-[160px] flex flex-col justify-center relative">
+                    <!-- Javascript will inject state here -->
+                </div>
             </div>
         </div>
     )}
@@ -72,31 +69,13 @@ const {
                 <span class="share-tooltip absolute bottom-[-30px] text-[12px] bg-tx-main text-main px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">Share</span>
             </button>
 
-            <!-- Fallback Dropdown (For unsupported browsers) -->
+            <!-- Fallback Dropdown -->
             <div class="share-dropdown absolute top-[calc(100%+8px)] right-0 md:-right-2 bg-surface border border-subtle rounded-xl shadow-lg p-1.5 flex flex-col min-w-[160px] z-[100] hidden">
-                
-                <a href="#" class="x-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 24.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    X (Twitter)
-                </a>
-                
-                <a href="#" class="linkedin-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                    LinkedIn
-                </a>
-                
-                <a href="#" class="reddit-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.248-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-2.752 4.432c-1.514 0-2.616-.482-2.736-.535a.346.346 0 0 1-.186-.319.349.349 0 0 1 .536-.264c.036.023.957.433 2.386.433 1.428 0 2.348-.41 2.384-.433a.35.35 0 0 1 .475.068.35.35 0 0 1-.068.475c-.12.053-1.222.535-2.736.535z"/></svg>
-                    Reddit
-                </a>
-                
-                <a href="#" class="facebook-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    Facebook
-                </a>
-                
+                <a href="#" class="x-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 24.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X (Twitter)</a>
+                <a href="#" class="linkedin-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</a>
+                <a href="#" class="reddit-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.248-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-2.752 4.432c-1.514 0-2.616-.482-2.736-.535a.346.346 0 0 1-.186-.319.349.349 0 0 1 .536-.264c.036.023.957.433 2.386.433 1.428 0 2.348-.41 2.384-.433a.35.35 0 0 1 .475.068.35.35 0 0 1-.068.475c-.12.053-1.222.535-2.736.535z"/></svg>Reddit</a>
+                <a href="#" class="facebook-share flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</a>
                 <div class="h-px bg-subtle my-1 w-full"></div>
-
                 <button class="copy-link-btn flex items-center gap-3 px-3 py-2.5 text-[14px] font-[500] text-tx-muted hover:text-tx-main hover:bg-main rounded-lg transition-colors w-full text-left">
                     <svg class="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                     <span class="copy-text">Copy Link</span>
@@ -107,37 +86,37 @@ const {
 </div>
 
 <script>
-    // Universal function to close all popups (both share and newsletter)
+    import { authClient } from '../../lib/auth-client';
+
+    // Global UI Controls
     function closeAllPopovers() {
-        // 1. Close Share Dropdowns
         document.querySelectorAll('.share-dropdown:not(.hidden)').forEach(d => {
             d.classList.add('hidden');
             const tooltip = d.parentElement?.querySelector('.share-tooltip');
             if (tooltip) (tooltip as HTMLElement).style.display = '';
         });
 
-        // 2. Close Newsletter Popups (Slide them back down)
         document.querySelectorAll('.newsletter-popup.translate-y-0').forEach(p => {
             p.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
             p.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
         });
     }
 
-    // --- HANDLE NEWSLETTER SLIDING POPUP ---
+    // --- PHASE 3 & 4: NEWSLETTER STATE MACHINE ---
     const newsletterWrappers = document.querySelectorAll('.newsletter-wrapper');
     newsletterWrappers.forEach(wrapper => {
         const toggleBtn = wrapper.querySelector('.newsletter-toggle-btn');
         const popup = wrapper.querySelector('.newsletter-popup');
         const closeBtn = wrapper.querySelector('.newsletter-close-btn');
         const tooltip = wrapper.querySelector('.newsletter-tooltip');
-        const input = wrapper.querySelector('input');
+        const contentDiv = wrapper.querySelector('.newsletter-dynamic-content');
 
+        // Core Functions
         const openPopup = () => {
             closeAllPopovers();
             popup?.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
             popup?.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
             if (tooltip) (tooltip as HTMLElement).style.display = 'none';
-            setTimeout(() => { if (input) (input as HTMLInputElement).focus(); }, 300);
         };
 
         const closePopup = () => {
@@ -146,6 +125,153 @@ const {
             if (tooltip) (tooltip as HTMLElement).style.display = '';
         };
 
+        // UI STATE 1: Loading
+        const renderLoading = () => {
+            if (!contentDiv) return;
+            contentDiv.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-6 gap-3 opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
+                    <svg class="animate-spin w-7 h-7 text-tx-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            `;
+        };
+
+        // UI STATE 2: Guest (Logged Out)
+        const renderGuest = () => {
+            if (!contentDiv) return;
+            contentDiv.innerHTML = `
+                <div class="opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
+                    <h3 class="text-[20px] font-[800] text-tx-main mb-2 tracking-tight">Stay Updated</h3>
+                    <p class="text-[14px] text-tx-muted mb-5 leading-relaxed pr-6">Sign in to subscribe to our technical guides and project updates.</p>
+                    <div class="flex flex-col gap-2.5">
+                        <button data-provider="google" class="social-login-btn flex items-center justify-center gap-3 py-2.5 bg-transparent border border-subtle hover:bg-main text-tx-main rounded-xl font-medium text-sm transition-colors">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            Continue with Google
+                        </button>
+                        <button data-provider="github" class="social-login-btn flex items-center justify-center gap-3 py-2.5 bg-transparent border border-subtle hover:bg-main text-tx-main rounded-xl font-medium text-sm transition-colors">
+                            <svg class="w-4 h-4 text-tx-main" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path></svg>
+                            Continue with GitHub
+                        </button>
+                        <button data-provider="microsoft" class="social-login-btn flex items-center justify-center gap-3 py-2.5 bg-transparent border border-subtle hover:bg-main text-tx-main rounded-xl font-medium text-sm transition-colors">
+                            <svg class="w-4 h-4" viewBox="0 0 21 21"><path fill="#f35325" d="M0 0h10v10H0z"/><path fill="#81bc06" d="M11 0h10v10H11z"/><path fill="#05a6f0" d="M0 11h10v10H0z"/><path fill="#ffba08" d="M11 11h10v10H11z"/></svg>
+                            Continue with Microsoft
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Phase 4 Magic: Set Intent Flag before logging in
+            contentDiv.querySelectorAll('.social-login-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const provider = (e.currentTarget as HTMLElement).dataset.provider as 'google' | 'github' | 'microsoft';
+                    localStorage.setItem('intentToSubscribe', 'true');
+                    
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = 'Connecting...';
+                    (btn as HTMLButtonElement).disabled = true;
+                    
+                    await authClient.signIn.social({ 
+                        provider, 
+                        callbackURL: window.location.href 
+                    });
+                });
+            });
+        };
+
+        // UI STATE 3: Authenticated, Not Subscribed
+        const renderSubscribe = (name: string) => {
+            if (!contentDiv) return;
+            const safeName = name ? name.split(' ')[0] : 'Developer'; // Get first name
+            contentDiv.innerHTML = `
+                <div class="opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
+                    <h3 class="text-[20px] font-[800] text-tx-main mb-2 tracking-tight">Welcome, ${safeName}!</h3>
+                    <p class="text-[14px] text-tx-muted mb-5 leading-relaxed pr-6">Get our latest technical guides and project updates delivered directly to your inbox.</p>
+                    <button id="action-subscribe-btn" class="w-full bg-tx-main text-main font-[600] text-[15px] px-4 py-3 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all">Subscribe Now</button>
+                </div>
+            `;
+
+            contentDiv.querySelector('#action-subscribe-btn')?.addEventListener('click', async () => {
+                renderLoading();
+                try {
+                    await fetch('/api/newsletter', { method: 'POST' });
+                    renderSubscribed();
+                } catch (err) {
+                    console.error(err);
+                    renderSubscribe(name); // Revert on failure
+                }
+            });
+        };
+
+        // UI STATE 4: Authenticated, Subscribed
+        const renderSubscribed = () => {
+            if (!contentDiv) return;
+            contentDiv.innerHTML = `
+                <div class="flex flex-col items-center text-center py-2 opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
+                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>
+                    </div>
+                    <h3 class="text-[18px] font-[800] text-tx-main mb-1.5 tracking-tight">You're Subscribed!</h3>
+                    <p class="text-[13px] text-tx-muted mb-6">Thanks for joining. We'll keep you updated.</p>
+                    <button id="action-unsubscribe-btn" class="text-[12px] text-tx-muted hover:text-rose-500 font-medium flex items-center gap-1.5 transition-colors outline-none bg-surface border border-subtle px-3 py-1.5 rounded-md hover:border-rose-500/30 hover:bg-rose-500/5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        Unsubscribe
+                    </button>
+                </div>
+            `;
+
+            contentDiv.querySelector('#action-unsubscribe-btn')?.addEventListener('click', async () => {
+                renderLoading();
+                try {
+                    await fetch('/api/newsletter', { method: 'DELETE' });
+                    initNewsletterState(); // Re-evaluate state
+                } catch (err) {
+                    console.error(err);
+                    renderSubscribed(); // Revert on failure
+                }
+            });
+        };
+
+        // Core State Evaluator
+        const initNewsletterState = async () => {
+            renderLoading();
+            try {
+                // 1. Check Better Auth Session
+                const { data: sessionData } = await authClient.getSession();
+                
+                if (!sessionData || !sessionData.user) {
+                    renderGuest();
+                    return;
+                }
+
+                // Phase 4 Magic Execution: They returned from login with the intent flag set
+                const hasIntent = localStorage.getItem('intentToSubscribe') === 'true';
+                if (hasIntent) {
+                    await fetch('/api/newsletter', { method: 'POST' });
+                    localStorage.removeItem('intentToSubscribe');
+                    renderSubscribed();
+                    openPopup(); // Auto-open to show them the success state!
+                    return;
+                }
+
+                // 2. Normal Auth Flow: Check DB via our new GET endpoint
+                const res = await fetch('/api/newsletter');
+                const { isSubscribed } = await res.json();
+
+                if (isSubscribed) {
+                    renderSubscribed();
+                } else {
+                    renderSubscribe(sessionData.user.name || '');
+                }
+
+            } catch (error) {
+                console.error("Newsletter initialization failed", error);
+                renderGuest(); // Fallback safely
+            }
+        };
+
+        // Listeners
         toggleBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
             if (popup?.classList.contains('translate-y-full')) {
@@ -160,11 +286,13 @@ const {
             closePopup();
         });
 
-        // Prevent clicking inside the form from closing the popup
         popup?.addEventListener('click', (e) => e.stopPropagation());
+
+        // Boot the state machine immediately in the background
+        initNewsletterState();
     });
 
-    // --- HANDLE SHARE INTERCEPT & DROPDOWN ---
+    // --- SHARE INTERCEPT & DROPDOWN ---
     const shareWrappers = document.querySelectorAll('.share-wrapper');
     shareWrappers.forEach(wrapper => {
         const toggleBtn = wrapper.querySelector('.share-toggle-btn');
@@ -182,27 +310,14 @@ const {
 
         toggleBtn?.addEventListener('click', async (e) => {
             e.stopPropagation();
-            
-            // 💡 NATIVE SHARE INTERCEPT
-            // If the device supports the OS share menu (iOS, Android, macOS Safari)
             if (navigator.share) {
                 try {
-                    await navigator.share({
-                        title: document.title,
-                        url: window.location.href
-                    });
-                    // Success! Native sheet opened, do NOT open the custom dropdown.
+                    await navigator.share({ title: document.title, url: window.location.href });
                     return; 
-                } catch (err) {
-                    // User closed the share sheet, or an error occurred. 
-                    // Fail silently and do NOT open the custom dropdown.
-                    return; 
-                }
+                } catch (err) { return; }
             }
 
-            // Fallback for browsers that DO NOT support native sharing (Windows Desktop, older browsers)
             const isCurrentlyHidden = dropdown?.classList.contains('hidden');
-            
             closeAllPopovers();
 
             if (isCurrentlyHidden) {
@@ -210,7 +325,6 @@ const {
                 if (tooltip) (tooltip as HTMLElement).style.display = 'none';
             }
             
-            // Generate dynamic URLs for the fallback menu
             const url = encodeURIComponent(window.location.href);
             const title = encodeURIComponent(document.title);
             
@@ -220,32 +334,29 @@ const {
             if(facebookShare) facebookShare.setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${url}`);
         });
 
-        // Copy Link Action
         copyBtn?.addEventListener('click', async (e) => {
             e.stopPropagation();
             try {
                 await navigator.clipboard.writeText(window.location.href);
-                
                 if (copyText) copyText.textContent = 'Copied!';
                 if (copyIcon) copyIcon.innerHTML = `<polyline points="20 6 9 17 4 12"></polyline>`;
-                
                 setTimeout(() => { 
                     if (copyText) copyText.textContent = 'Copy Link';
                     if (copyIcon) copyIcon.innerHTML = `<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>`;
                     dropdown?.classList.add('hidden'); 
                     if (tooltip) (tooltip as HTMLElement).style.display = '';
                 }, 2000);
-            } catch (err) {
-                console.error('Failed to copy', err);
-            }
+            } catch (err) { console.error('Failed to copy', err); }
         });
     });
 
-    // Global listener to close all popups when clicking anywhere outside
     document.addEventListener('click', closeAllPopovers);
-    
-    // Allow closing with Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeAllPopovers();
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllPopovers(); });
 </script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
