@@ -1,10 +1,7 @@
-export const prerender = false;
-
-import type { APIRoute } from 'astro';
+// functions/api/newsletter.ts
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
 
-// 1. Define the DB Types for Kysely Type Safety
 interface Database {
     newsletter_subscribers: {
         id: string;
@@ -13,23 +10,19 @@ interface Database {
         name: string | null;
         subscribed_url: string;
     };
-    // Include Better Auth tables for direct session checking
     session: { id: string; token: string; userId: string; expiresAt: Date | string; };
     user: { id: string; email: string; name: string; };
 }
 
-// 2. Direct DB Session Validator (Bypasses Cloudflare Loopback Block)
+// Direct DB Session Validator
 async function getSecureSession(request: Request, db: Kysely<Database>) {
     try {
         const cookieHeader = request.headers.get('Cookie') || '';
-        
-        // Extract the Better Auth token from the cookie string
         const match = cookieHeader.match(/(?:^|;\s*)(?:__Secure-)?better-auth\.session_token=([^;]+)/);
         const token = match ? match[1] : null;
 
         if (!token) return null;
 
-        // Verify the token exists in D1 and hasn't expired
         const session = await db.selectFrom('session')
             .selectAll()
             .where('token', '=', token)
@@ -37,7 +30,6 @@ async function getSecureSession(request: Request, db: Kysely<Database>) {
 
         if (!session || new Date(session.expiresAt) < new Date()) return null;
 
-        // Fetch the associated user data
         const user = await db.selectFrom('user')
             .selectAll()
             .where('id', '=', session.userId)
@@ -53,11 +45,9 @@ async function getSecureSession(request: Request, db: Kysely<Database>) {
 // ==========================================
 // [GET] Check if the user is subscribed
 // ==========================================
-export const GET: APIRoute = async ({ request, locals }) => {
-    const env = (locals as any).runtime.env;
-    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.DB }) });
-
-    const sessionData = await getSecureSession(request, db);
+export async function onRequestGet(context: any) {
+    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: context.env.DB }) });
+    const sessionData = await getSecureSession(context.request, db);
     
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ isSubscribed: false, error: 'Unauthorized' }), { 
@@ -80,16 +70,14 @@ export const GET: APIRoute = async ({ request, locals }) => {
             status: 500, headers: { "Content-Type": "application/json" } 
         });
     }
-};
+}
 
 // ==========================================
 // [POST] Subscribe the user
 // ==========================================
-export const POST: APIRoute = async ({ request, locals }) => {
-    const env = (locals as any).runtime.env;
-    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.DB }) });
-
-    const sessionData = await getSecureSession(request, db);
+export async function onRequestPost(context: any) {
+    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: context.env.DB }) });
+    const sessionData = await getSecureSession(context.request, db);
     
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
@@ -97,7 +85,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         });
     }
 
-    const referer = request.headers.get('referer') || '/';
+    const referer = context.request.headers.get('referer') || '/';
     const user = sessionData.user;
 
     try {
@@ -131,16 +119,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
             status: 500, headers: { "Content-Type": "application/json" } 
         });
     }
-};
+}
 
 // ==========================================
 // [DELETE] Unsubscribe the user
 // ==========================================
-export const DELETE: APIRoute = async ({ request, locals }) => {
-    const env = (locals as any).runtime.env;
-    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.DB }) });
-
-    const sessionData = await getSecureSession(request, db);
+export async function onRequestDelete(context: any) {
+    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: context.env.DB }) });
+    const sessionData = await getSecureSession(context.request, db);
     
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
@@ -162,4 +148,4 @@ export const DELETE: APIRoute = async ({ request, locals }) => {
             status: 500, headers: { "Content-Type": "application/json" } 
         });
     }
-};
+}
