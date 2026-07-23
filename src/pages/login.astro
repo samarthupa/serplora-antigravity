@@ -3,8 +3,8 @@
 import Layout from '../layouts/Layout.astro';
 import AuthWidget from '../components/auth/AuthWidget.astro';
 
-// Capture return URL if one was provided in the query string
-const returnUrl = Astro.url.searchParams.get('returnUrl') || '/';
+// Capture return URL if one was provided in the query string, otherwise default to /account
+const returnUrl = Astro.url.searchParams.get('returnUrl') || '/account';
 ---
 
 <Layout>

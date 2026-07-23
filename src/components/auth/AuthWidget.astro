@@ -187,7 +187,17 @@ const { mode = 'page', returnUrl = '/' } = Astro.props;
           (btn as HTMLButtonElement).disabled = true;
           btn.classList.add('opacity-70');
           
-          await authClient.signIn.social({ provider, callbackURL: this.getSafeReturnUrl() });
+          // 1. Set the auto-subscribe flag ONLY if they are logging in from the newsletter modal
+          if (this.dataset.mode === 'modal') {
+              localStorage.setItem('intentToSubscribe', 'true');
+          }
+          
+          // 2. Add newUserCallbackURL to force first-time signups to return to the exact same page
+          await authClient.signIn.social({ 
+              provider, 
+              callbackURL: this.getSafeReturnUrl(),
+              newUserCallbackURL: this.getSafeReturnUrl() 
+          });
         });
       });
 

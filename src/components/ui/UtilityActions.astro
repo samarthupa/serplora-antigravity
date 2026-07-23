@@ -138,17 +138,17 @@ const {
         const contentDiv = wrapper.querySelector('.newsletter-dynamic-content');
         if (!contentDiv) return;
 
-        // Listen for internal success from AuthWidget
-        contentDiv.querySelector('#action-subscribe-btn')?.addEventListener('click', async () => {
-                renderLoading();
-                try {
-                    const res = await fetch('/api/newsletter', { method: 'POST' });
-                    if (!res.ok) throw new Error('Server rejected subscription');
-                    renderSubscribed();
-                } catch (err) {
-                    renderSubscribe(name);
-                }
-            });
+        // Listen for internal success from AuthWidget (OTP flow)
+        contentDiv.addEventListener('auth:success', async () => {
+            renderLoading();
+            try {
+                const res = await fetch('/api/newsletter', { method: 'POST' });
+                if (!res.ok) throw new Error('Server rejected subscription');
+                renderSubscribed();
+            } catch (err) {
+                initNewsletterState();
+            }
+        });
 
         const openPopup = () => {
             closeAllPopovers();
@@ -206,7 +206,8 @@ const {
             contentDiv.querySelector('#action-subscribe-btn')?.addEventListener('click', async () => {
                 renderLoading();
                 try {
-                    await fetch('/api/newsletter', { method: 'POST' });
+                    const res = await fetch('/api/newsletter', { method: 'POST' });
+                    if (!res.ok) throw new Error('Server rejected subscription');
                     renderSubscribed();
                 } catch (err) {
                     renderSubscribe(name);
@@ -232,7 +233,8 @@ const {
             contentDiv.querySelector('#action-unsubscribe-btn')?.addEventListener('click', async () => {
                 renderLoading();
                 try {
-                    await fetch('/api/newsletter', { method: 'DELETE' });
+                    const res = await fetch('/api/newsletter', { method: 'DELETE' });
+                    if (!res.ok) throw new Error('Server rejected unsubscription');
                     initNewsletterState();
                 } catch (err) {
                     initNewsletterState();
@@ -252,16 +254,22 @@ const {
                 }
 
                 if (localStorage.getItem('intentToSubscribe') === 'true') {
-                    await fetch('/api/newsletter', { method: 'POST' });
-                    localStorage.removeItem('intentToSubscribe');
-                    renderSubscribed();
-                    openPopup();
-                    return;
+                    const res = await fetch('/api/newsletter', { method: 'POST' });
+                    if (res.ok) {
+                        localStorage.removeItem('intentToSubscribe');
+                        renderSubscribed();
+                        openPopup();
+                        return;
+                    }
                 }
 
                 const res = await fetch('/api/newsletter');
-                const { isSubscribed } = await res.json();
-                isSubscribed ? renderSubscribed() : renderSubscribe(sessionData.user.name || '');
+                if (res.ok) {
+                    const { isSubscribed } = await res.json();
+                    isSubscribed ? renderSubscribed() : renderSubscribe(sessionData.user.name || '');
+                } else {
+                    renderSubscribe(sessionData.user.name || '');
+                }
 
             } catch (error) {
                 console.error("Newsletter initialization failed", error);
