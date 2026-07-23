@@ -139,15 +139,16 @@ const {
         if (!contentDiv) return;
 
         // Listen for internal success from AuthWidget
-        contentDiv.addEventListener('auth:success', async () => {
-            renderLoading();
-            try {
-                await fetch('/api/newsletter', { method: 'POST' });
-                renderSubscribed();
-            } catch (err) {
-                initNewsletterState();
-            }
-        });
+        contentDiv.querySelector('#action-subscribe-btn')?.addEventListener('click', async () => {
+                renderLoading();
+                try {
+                    const res = await fetch('/api/newsletter', { method: 'POST' });
+                    if (!res.ok) throw new Error('Server rejected subscription');
+                    renderSubscribed();
+                } catch (err) {
+                    renderSubscribe(name);
+                }
+            });
 
         const openPopup = () => {
             closeAllPopovers();

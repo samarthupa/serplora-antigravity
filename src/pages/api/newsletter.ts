@@ -11,22 +11,39 @@ interface Database {
         name: string | null;
         subscribed_url: string;
     };
+    // Include Better Auth tables for direct session checking
+    session: { id: string; token: string; userId: string; expiresAt: Date | string; };
+    user: { id: string; email: string; name: string; };
 }
 
-// 2. Helper Function to Securely Validate Session via Better Auth
-async function getSession(request: Request) {
+// 2. Direct DB Session Validator (Bypasses Cloudflare Loopback Block)
+async function getSecureSession(request: Request, db: Kysely<Database>) {
     try {
         const cookieHeader = request.headers.get('Cookie') || '';
-        const sessionReq = await fetch(new URL('/api/auth/get-session', request.url).toString(), {
-            headers: { 'Cookie': cookieHeader }
-        });
         
-        if (!sessionReq.ok) return null;
-        
-        const data = await sessionReq.json() as any;
-        return data?.user ? data : null;
+        // Extract the Better Auth token from the cookie string
+        const match = cookieHeader.match(/(?:^|;\s*)(?:__Secure-)?better-auth\.session_token=([^;]+)/);
+        const token = match ? match[1] : null;
+
+        if (!token) return null;
+
+        // Verify the token exists in D1 and hasn't expired
+        const session = await db.selectFrom('session')
+            .selectAll()
+            .where('token', '=', token)
+            .executeTakeFirst();
+
+        if (!session || new Date(session.expiresAt) < new Date()) return null;
+
+        // Fetch the associated user data
+        const user = await db.selectFrom('user')
+            .selectAll()
+            .where('id', '=', session.userId)
+            .executeTakeFirst();
+
+        return user ? { user } : null;
     } catch (error) {
-        console.error("Session verification failed:", error);
+        console.error("Direct session verification failed:", error);
         return null;
     }
 }
@@ -35,18 +52,16 @@ async function getSession(request: Request) {
 // [GET] Check if the user is subscribed
 // ==========================================
 export const GET: APIRoute = async ({ request, locals }) => {
-    const sessionData = await getSession(request);
+    const env = (locals as any).runtime.env;
+    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.DB }) });
+
+    const sessionData = await getSecureSession(request, db);
     
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ isSubscribed: false, error: 'Unauthorized' }), { 
             status: 401, headers: { "Content-Type": "application/json" } 
         });
     }
-
-    const env = (locals as any).runtime.env;
-    const db = new Kysely<Database>({
-        dialect: new D1Dialect({ database: env.DB })
-    });
 
     try {
         const subscriber = await db.selectFrom('newsletter_subscribers')
@@ -69,7 +84,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 // [POST] Subscribe the user
 // ==========================================
 export const POST: APIRoute = async ({ request, locals }) => {
-    const sessionData = await getSession(request);
+    const env = (locals as any).runtime.env;
+    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.DB }) });
+
+    const sessionData = await getSecureSession(request, db);
     
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
@@ -77,17 +95,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
         });
     }
 
-    const env = (locals as any).runtime.env;
-    const db = new Kysely<Database>({
-        dialect: new D1Dialect({ database: env.DB })
-    });
-
-    // Capture the exact page they subscribed from using the HTTP Referer header
     const referer = request.headers.get('referer') || '/';
     const user = sessionData.user;
 
     try {
-        // Double-check they aren't already subscribed to avoid SQLite unique constraint crashes
         const existing = await db.selectFrom('newsletter_subscribers')
             .select('id')
             .where('user_id', '=', user.id)
@@ -99,7 +110,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
             });
         }
 
-        // Insert new subscriber utilizing native Cloudflare Crypto API for UUID
         await db.insertInto('newsletter_subscribers')
             .values({
                 id: crypto.randomUUID(),
@@ -125,18 +135,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
 // [DELETE] Unsubscribe the user
 // ==========================================
 export const DELETE: APIRoute = async ({ request, locals }) => {
-    const sessionData = await getSession(request);
+    const env = (locals as any).runtime.env;
+    const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.DB }) });
+
+    const sessionData = await getSecureSession(request, db);
     
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
             status: 401, headers: { "Content-Type": "application/json" } 
         });
     }
-
-    const env = (locals as any).runtime.env;
-    const db = new Kysely<Database>({
-        dialect: new D1Dialect({ database: env.DB })
-    });
 
     try {
         await db.deleteFrom('newsletter_subscribers')
