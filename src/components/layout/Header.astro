@@ -462,12 +462,6 @@ const primaryBtn = {
       
       if (data && data.user) {
         const user = data.user as any;
-        
-        // 🟢 FIXED: Redirect to /account if country is missing 
-        if (!user.country && window.location.pathname !== '/account') {
-            window.location.href = '/account';
-            return;
-        }
 
         // Show image if it exists, otherwise show initials
         if (user.image && avatarImgEl) {
