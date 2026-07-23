@@ -179,7 +179,7 @@ const dynamicSeo = {
       
       <a 
         href={`/projects/${category?.id}`}
-        class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'all' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
+        class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'all' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
       >
         All <span class={`ml-1.5 text-[11px] ${currentFilter === 'all' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.all})</span>
       </a>
@@ -187,7 +187,7 @@ const dynamicSeo = {
       {counts.beginner > 0 && (
         <a 
           href={`/projects/${category?.id}/beginner`}
-          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'beginner' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'beginner' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
         >
           Beginner <span class={`ml-1.5 text-[11px] ${currentFilter === 'beginner' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.beginner})</span>
         </a>
@@ -196,7 +196,7 @@ const dynamicSeo = {
       {counts.intermediate > 0 && (
         <a 
           href={`/projects/${category?.id}/intermediate`}
-          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'intermediate' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'intermediate' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
         >
           Intermediate <span class={`ml-1.5 text-[11px] ${currentFilter === 'intermediate' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.intermediate})</span>
         </a>
@@ -205,7 +205,7 @@ const dynamicSeo = {
       {counts.advanced > 0 && (
         <a 
           href={`/projects/${category?.id}/advanced`}
-          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'advanced' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'advanced' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
         >
           Advanced <span class={`ml-1.5 text-[11px] ${currentFilter === 'advanced' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.advanced})</span>
         </a>
@@ -217,7 +217,7 @@ const dynamicSeo = {
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
-          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-6px_rgba(0,0,0,0.12)] hover:border-tx-main/30 flex flex-col h-full w-full max-w-[480px] mx-auto lg:mx-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          class="project-card group rounded-xl overflow-hidden border border-subtle shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-tx-main/30 flex flex-col h-full w-full max-w-[480px] mx-auto lg:mx-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
           <div class="p-5 sm:p-6 flex flex-col flex-1">
             
