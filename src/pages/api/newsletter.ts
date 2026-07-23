@@ -1,3 +1,5 @@
+export const prerender = false;
+
 import type { APIRoute } from 'astro';
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
