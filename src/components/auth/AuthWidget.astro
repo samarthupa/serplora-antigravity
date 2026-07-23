@@ -241,8 +241,11 @@ const { mode = 'page', returnUrl = '/' } = Astro.props;
 
     getSafeReturnUrl() {
         const urlParams = new URLSearchParams(window.location.search);
-        let rawReturnUrl = this.dataset.returnUrl || urlParams.get('returnUrl') || '/';
-        return (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) ? rawReturnUrl : '/';
+        
+        // 🟢 FIX: Prioritize the live browser URL over the static dataset attribute
+        let rawReturnUrl = urlParams.get('returnUrl') || this.dataset.returnUrl || '/account';
+        
+        return (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) ? rawReturnUrl : '/account';
     }
 
     renderTurnstile() {
