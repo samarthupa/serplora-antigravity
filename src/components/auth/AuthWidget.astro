@@ -1,0 +1,403 @@
+---
+// src/components/auth/AuthWidget.astro
+
+interface Props {
+  mode?: 'page' | 'modal';
+  returnUrl?: string;
+}
+
+const { mode = 'page', returnUrl = '/' } = Astro.props;
+---
+
+<!-- Explicit Turnstile Load (Required for Modals) -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+
+<auth-widget data-mode={mode} data-return-url={returnUrl} class="block w-full max-w-sm mx-auto font-['Outfit',sans-serif]">
+  <div class="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-8 flex flex-col items-center relative">
+    
+    {mode === 'page' && (
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center tracking-tight">Welcome to Serplora</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 text-center">Sign in / Sign up securely to continue.</p>
+    )}
+
+    {/* --- STATE 1: SOCIAL LOGINS --- */}
+    <div class="step-social w-full flex flex-col gap-3 animate-fade-in">
+      
+      <button data-provider="google" class="social-login-btn w-full flex items-center justify-center gap-3 py-2.5 bg-transparent border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg font-medium text-sm transition-colors">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+    
+      <button data-provider="github" class="social-login-btn w-full flex items-center justify-center gap-3 py-2.5 bg-transparent border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg font-medium text-sm transition-colors">
+        <svg class="w-5 h-5 text-black dark:text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+        </svg>
+        Continue with GitHub
+      </button>
+
+      <button data-provider="microsoft" class="social-login-btn w-full flex items-center justify-center gap-3 py-2.5 bg-transparent border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg font-medium text-sm transition-colors">
+        <svg class="w-5 h-5" viewBox="0 0 21 21" aria-hidden="true">
+          <path fill="#f35325" d="M0 0h10v10H0z"/>
+          <path fill="#81bc06" d="M11 0h10v10H11z"/>
+          <path fill="#05a6f0" d="M0 11h10v10H0z"/>
+          <path fill="#ffba08" d="M11 11h10v10H11z"/>
+        </svg>
+        Continue with Microsoft
+      </button>
+
+      <div class="flex items-center w-full my-3">
+        <hr class="flex-1 border-gray-200 dark:border-gray-800" />
+        <span class="px-4 text-xs text-gray-400 font-medium bg-white dark:bg-[#121212]">or</span>
+        <hr class="flex-1 border-gray-200 dark:border-gray-800" />
+      </div>
+
+      <button class="show-email-btn w-full flex items-center justify-center py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors">
+        Continue with Email
+      </button>
+    </div>
+
+    {/* --- STATE 2: EMAIL INPUT (Hidden by default) --- */}
+    <div class="step-email w-full hidden flex-col gap-3 animate-fade-in">
+      <input 
+        type="email" 
+        class="email-input w-full p-3 rounded-lg bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm focus:border-gray-400 dark:focus:border-gray-600 focus:outline-none transition-colors" 
+        placeholder="name@example.com" 
+      />
+      
+      {/* Turnstile Container */}
+      <div class="turnstile-container w-full flex justify-center mt-2 min-h-[65px]"></div>
+      
+      <p class="email-error hidden text-red-500 text-xs font-medium px-1 text-center"></p>
+      <button class="send-otp-btn w-full py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors">
+        Send Code
+      </button>
+      <button class="back-to-social-btn mt-3 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+        &larr; Other login methods
+      </button>
+    </div>
+
+    {/* --- STATE 3: OTP VERIFICATION (Hidden by default) --- */}
+    <div class="step-otp w-full hidden flex-col gap-3 animate-fade-in">
+      <p class="text-sm text-gray-500 text-center mb-2">Enter the 6-digit code sent to <br/><span class="display-email font-medium text-gray-900 dark:text-white"></span></p>
+      <input 
+        type="text" 
+        class="otp-input w-full p-3 text-center tracking-[0.5em] font-mono font-bold text-lg rounded-lg bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white focus:border-gray-400 dark:focus:border-gray-600 focus:outline-none transition-colors" 
+        placeholder="123456" 
+        maxlength="6"
+      />
+      <p class="otp-error hidden text-red-500 text-xs font-medium px-1 text-center"></p>
+      <button class="verify-otp-btn w-full py-2.5 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-black rounded-lg font-medium text-sm transition-colors mt-2">
+        Verify Code
+      </button>
+
+      {/* Action Links for OTP Step */}
+      <div class="flex flex-col items-center gap-3 mt-4 w-full">
+        <button class="resend-otp-btn text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          Resend Code
+        </button>
+        <button class="back-to-email-btn text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+          &larr; Change Email
+        </button>
+      </div>
+    </div>
+
+  </div>
+</auth-widget>
+
+<script>
+  import { authClient } from '../../lib/auth-client';
+
+  class AuthWidget extends HTMLElement {
+    constructor() {
+      super();
+      
+      // DOM Elements mapping to your original IDs
+      this.socialStep = this.querySelector('.step-social');
+      this.emailStep = this.querySelector('.step-email');
+      this.otpStep = this.querySelector('.step-otp');
+      this.displayEmail = this.querySelector('.display-email');
+      
+      this.emailInput = this.querySelector('.email-input') as HTMLInputElement;
+      this.otpInput = this.querySelector('.otp-input') as HTMLInputElement;
+      this.emailError = this.querySelector('.email-error');
+      this.otpError = this.querySelector('.otp-error');
+      
+      this.sendOtpBtn = this.querySelector('.send-otp-btn') as HTMLButtonElement;
+      this.resendOtpBtn = this.querySelector('.resend-otp-btn') as HTMLButtonElement;
+      this.verifyOtpBtn = this.querySelector('.verify-otp-btn') as HTMLButtonElement;
+      this.turnstileContainer = this.querySelector('.turnstile-container');
+
+      // State Variables exactly as you wrote them
+      this.currentEmail = "";
+      this.failedAttempts = 0;
+      this.MAX_ATTEMPTS = 3;
+      this.resendTimer = null;
+      this.countdown = 0;
+      this.turnstileWidgetId = null;
+    }
+
+    connectedCallback() {
+      this.bindEvents();
+    }
+
+    bindEvents() {
+      // Navigation Toggles
+      this.querySelector('.show-email-btn')?.addEventListener('click', () => {
+          this.socialStep?.classList.add('hidden');
+          this.socialStep?.classList.remove('flex');
+          this.emailStep?.classList.remove('hidden');
+          this.emailStep?.classList.add('flex');
+          this.emailInput?.focus();
+          this.renderTurnstile();
+      });
+
+      this.querySelector('.back-to-social-btn')?.addEventListener('click', () => {
+          this.hideInlineError(this.emailError);
+          this.emailStep?.classList.add('hidden');
+          this.emailStep?.classList.remove('flex');
+          this.socialStep?.classList.remove('hidden');
+          this.socialStep?.classList.add('flex');
+          this.emailInput.value = '';
+      });
+
+      this.querySelector('.back-to-email-btn')?.addEventListener('click', () => {
+          this.hideInlineError(this.otpError);
+          this.otpStep?.classList.add('hidden');
+          this.otpStep?.classList.remove('flex');
+          this.emailStep?.classList.remove('hidden');
+          this.emailStep?.classList.add('flex');
+          this.otpInput.value = '';
+          this.failedAttempts = 0; 
+          this.verifyOtpBtn.disabled = false;
+          this.verifyOtpBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+          if (this.turnstileWidgetId !== null) (window as any).turnstile?.reset(this.turnstileWidgetId);
+      });
+
+      // Social Logins
+      this.querySelectorAll('.social-login-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const provider = (e.currentTarget as HTMLElement).dataset.provider as 'google' | 'github' | 'microsoft';
+          
+          btn.innerHTML = 'Connecting...';
+          (btn as HTMLButtonElement).disabled = true;
+          btn.classList.add('opacity-70');
+          
+          await authClient.signIn.social({ provider, callbackURL: this.getSafeReturnUrl() });
+        });
+      });
+
+      // OTP Actions
+      this.sendOtpBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = this.emailInput.value.trim();
+        if (!email) {
+          this.showInlineError(this.emailError, "Please enter a valid email address.");
+          return;
+        }
+        this.requestOTP(email, false);
+      });
+
+      this.resendOtpBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (this.countdown > 0) return; 
+        this.requestOTP(this.currentEmail, true);
+      });
+
+      this.verifyOtpBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.handleVerifyOTP();
+      });
+    }
+
+    // --- HELPER FUNCTIONS ---
+    showInlineError(element: HTMLElement | null, message: string) {
+      if (element) {
+        element.innerText = message;
+        element.classList.remove('hidden');
+      }
+    }
+
+    hideInlineError(element: HTMLElement | null) {
+      if (element) {
+        element.innerText = '';
+        element.classList.add('hidden');
+      }
+    }
+
+    getSafeReturnUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let rawReturnUrl = this.dataset.returnUrl || urlParams.get('returnUrl') || '/';
+        return (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) ? rawReturnUrl : '/';
+    }
+
+    renderTurnstile() {
+      // Explicitly render Turnstile when email view opens
+      if ((window as any).turnstile && this.turnstileContainer) {
+        if (this.turnstileWidgetId !== null) {
+          (window as any).turnstile.reset(this.turnstileWidgetId);
+        } else {
+          this.turnstileWidgetId = (window as any).turnstile.render(this.turnstileContainer, {
+            sitekey: '0x4AAAAAACLWm3FCc_775_md',
+            theme: 'auto'
+          });
+        }
+      }
+    }
+
+    startResendCooldown() {
+      this.countdown = 30;
+      this.resendOtpBtn.disabled = true;
+      this.resendOtpBtn.innerText = `Resend Code (${this.countdown}s)`;
+      
+      if (this.resendTimer) clearInterval(this.resendTimer);
+      
+      this.resendTimer = setInterval(() => {
+        this.countdown--;
+        this.resendOtpBtn.innerText = `Resend Code (${this.countdown}s)`;
+        if (this.countdown <= 0) {
+          clearInterval(this.resendTimer!);
+          this.resendOtpBtn.disabled = false;
+          this.resendOtpBtn.innerText = 'Resend Code';
+        }
+      }, 1000);
+    }
+
+    // --- SEND OTP ---
+    async requestOTP(emailAddress: string, isResend = false) {
+      const btnToUpdate = isResend ? this.resendOtpBtn : this.sendOtpBtn;
+      
+      // Capture Turnstile Token safely
+      let token = null;
+      if (this.turnstileWidgetId !== null) {
+          token = (window as any).turnstile.getResponse(this.turnstileWidgetId);
+      }
+
+      if (!token) {
+          this.showInlineError(this.emailError, "Please complete the security check.");
+          return false;
+      }
+
+      this.hideInlineError(this.emailError);
+      this.hideInlineError(this.otpError);
+
+      btnToUpdate.innerText = 'Sending...';
+      btnToUpdate.disabled = true;
+      btnToUpdate.classList.add('opacity-70', 'cursor-not-allowed');
+
+      const { data, error } = await authClient.emailOtp.sendVerificationOtp({
+          email: emailAddress,
+          type: "sign-in",
+          fetchOptions: {
+              headers: { "X-Turnstile-Token": token }
+          }
+      });
+
+      if (this.turnstileWidgetId !== null) {
+          (window as any).turnstile.reset(this.turnstileWidgetId);
+      }
+
+      if (!isResend) {
+          btnToUpdate.innerText = 'Send Code';
+          btnToUpdate.disabled = false;
+          btnToUpdate.classList.remove('opacity-70', 'cursor-not-allowed');
+      }
+
+      if (error) {
+          if (isResend) {
+              this.showInlineError(this.otpError, "Failed to resend: " + (error.message || "Unknown error"));
+              btnToUpdate.innerText = 'Resend Code';
+              btnToUpdate.disabled = false;
+          } else {
+              const errorMsg = error.status === 403 ? "Security check failed. Please try again." : error.message;
+              this.showInlineError(this.emailError, errorMsg || "Failed to send code. Try again.");
+          }
+          return false;
+      } 
+      
+      this.currentEmail = emailAddress;
+      if(this.displayEmail) this.displayEmail.textContent = emailAddress;
+      
+      if (!isResend) {
+          this.emailStep?.classList.add('hidden');
+          this.emailStep?.classList.remove('flex');
+          this.otpStep?.classList.remove('hidden');
+          this.otpStep?.classList.add('flex');
+          this.otpInput?.focus();
+      }
+      
+      this.failedAttempts = 0;
+      this.verifyOtpBtn.disabled = false;
+      this.verifyOtpBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+      this.startResendCooldown();
+      
+      if (isResend) {
+          this.showInlineError(this.otpError, "A new code has been sent."); 
+          setTimeout(() => this.hideInlineError(this.otpError), 4000);
+      }
+      return true;
+    }
+
+    // --- VERIFY OTP ---
+    async handleVerifyOTP() {
+      const otp = this.otpInput.value.trim();
+      this.hideInlineError(this.otpError);
+
+      if (!otp || otp.length < 6) {
+          this.showInlineError(this.otpError, "Please enter the 6-digit code.");
+          return;
+      }
+
+      this.verifyOtpBtn.innerText = 'Verifying...';
+      this.verifyOtpBtn.disabled = true;
+      this.verifyOtpBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+      const { data, error } = await authClient.signIn.emailOtp({
+          email: this.currentEmail,
+          otp: otp
+      });
+
+      if (error) {
+          this.failedAttempts++;
+          
+          if (this.failedAttempts >= this.MAX_ATTEMPTS) {
+              this.showInlineError(this.otpError, "Too many failed attempts. Please request a new code.");
+              this.verifyOtpBtn.innerText = 'Verify Code';
+          } else {
+              this.showInlineError(this.otpError, `Invalid code. ${this.MAX_ATTEMPTS - this.failedAttempts} attempts remaining.`);
+              this.verifyOtpBtn.innerText = 'Verify Code';
+              this.verifyOtpBtn.disabled = false;
+              this.verifyOtpBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+              this.otpInput.value = ''; 
+              this.otpInput.focus();
+          }
+      } else {
+          this.verifyOtpBtn.innerText = 'Success!';
+          
+          if (this.dataset.mode === 'modal') {
+              // Fire an event if it's inside the Newsletter Modal
+              this.dispatchEvent(new CustomEvent('auth:success', { bubbles: true, composed: true }));
+          } else {
+              // Standard redirect if on the /login page
+              window.location.href = this.getSafeReturnUrl(); 
+          }
+      }
+    }
+  }
+
+  customElements.define('auth-widget', AuthWidget);
+</script>
+
+<style>
+  .flex { display: flex; }
+  .hidden { display: none !important; }
+  .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+  @keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(4px); } 
+    to { opacity: 1; transform: translateY(0); } 
+  }
+</style>
