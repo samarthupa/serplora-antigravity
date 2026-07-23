@@ -44,52 +44,55 @@ export async function onRequest(context) {
                     trustedProviders: ["google", "github", "microsoft"]                 
                 }             
             },             
-            plugins: [                 
-                //   Email OTP Plugin configured                 
-                emailOTP({                     
-                    async sendVerificationOTP({ email, otp, type }) {                         
-                        const command = new SendEmailCommand({                             
-                            Destination: { ToAddresses: [email] },                             
-                            Message: {                                 
-                                Body: {                                     
-                                    Html: {                                         
-                                        Charset: "UTF-8",                                         
-                                        Data: `                                             
-                                            <div style="font-family: sans-serif; padding: 20px;">                                                 
-                                                <h2>Sign in to Serplora</h2>                                                 
-                                                <p>Your secure login code is:</p>                                                 
-                                                <h1 style="letter-spacing: 4px; font-size: 32px; background: #f4f4f5; padding: 12px; border-radius: 8px; display: inline-block;">                                                     
-                                                    ${otp}                                                 
-                                                </h1>                                                 
-                                                <p>This code expires in 10 minutes. Do not share this with anyone.</p>                                             
-                                            </div>                                         
-                                        `,                                     
-                                    },                                     
-                                    Text: {                                         
-                                        Charset: "UTF-8",                                         
-                                        Data: `Your Serplora login code is: ${otp}`,                                     
-                                    },                                 
-                                },                                 
-                                Subject: {                                     
-                                    Charset: "UTF-8",                                     
-                                    Data: `${otp} is your Serplora login code`,                                 
-                                },                             
-                            },                             
-                            Source: context.env.EMAIL_FROM,                          
-                        });                         
-                        try {                             
-                            await ses.send(command);                         
-                        } catch (sesError: any) {                             
-                            if (sesError?.message?.includes("DOMParser is not defined")) {                                 
-                                console.log("OTP sent successfully! (Ignored AWS SDK DOMParser bug)");                             
-                            } else {                                 
-                                console.error("SES Email Failed:", sesError);                                 
-                                throw new Error("Failed to send OTP email.");                             
-                            }                         
-                        }                     
-                    },                 
-                }),             
-            ],             
+            plugins: [
+    emailOTP({
+        async sendVerificationOTP({ email, otp }) {
+            const command = new SendEmailCommand({
+                Source: `Serplora Accounts <${context.env.EMAIL_FROM}>`,
+                Destination: {
+                    ToAddresses: [email],
+                },
+                Message: {
+                    Subject: {
+                        Charset: "UTF-8",
+                        Data: `${otp} is your Serplora login code`,
+                    },
+                    Body: {
+                        Html: {
+                            Charset: "UTF-8",
+                            Data: `
+<div style="font:16px Arial,sans-serif">
+    <p>Your secure login code to sign in to <strong>Serplora</strong> is:</p>
+    <p style="font:700 32px monospace;letter-spacing:4px">${otp}</p>
+    <p>This code expires in 10 minutes. Do not share this with anyone.</p>
+</div>
+                            `,
+                        },
+                        Text: {
+                            Charset: "UTF-8",
+                            Data: `Your secure login code to sign in to Serplora is:
+
+${otp}
+
+This code expires in 10 minutes. Do not share this with anyone.`,
+                        },
+                    },
+                },
+            });
+
+            try {
+                await ses.send(command);
+            } catch (sesError: any) {
+                if (sesError?.message?.includes("DOMParser is not defined")) {
+                    console.log("OTP sent successfully! (Ignored AWS SDK DOMParser bug)");
+                } else {
+                    console.error("SES Email Failed:", sesError);
+                    throw new Error("Failed to send OTP email.");
+                }
+            }
+        },
+    }),
+],           
             socialProviders: {                 
                 github: {                     
                     clientId: context.env.GITHUB_CLIENT_ID || "",                     
