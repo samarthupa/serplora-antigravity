@@ -38,7 +38,7 @@ const {
         </a>
     )}
 
-    {/* 3. NEWSLETTER SLIDING POPUP (DYNAMIC) */}
+    {/* 3. NEWSLETTER MODAL WITH BACKDROP */}
     {showNewsletter && (
         <div class="newsletter-wrapper">
             <button class="newsletter-toggle-btn w-10 h-10 md:w-11 md:h-11 rounded-full border border-subtle bg-surface text-tx-muted flex items-center justify-center hover:text-tx-main hover:border-tx-main hover:-translate-y-0.5 transition-all shadow-sm group relative" aria-label="Get Updates">
@@ -46,16 +46,20 @@ const {
                 <span class="newsletter-tooltip absolute bottom-[-30px] text-[12px] bg-tx-main text-main px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">Newsletter</span>
             </button>
 
-            <!-- Fixed Sliding Popover -->
-            <div class="newsletter-popup fixed bottom-0 left-0 w-full md:w-[380px] md:bottom-6 md:left-auto md:right-6 bg-surface border-t md:border border-subtle md:rounded-2xl rounded-t-2xl shadow-2xl p-6 md:p-7 z-[100] transform translate-y-full opacity-0 pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col text-left">
+            <!-- Blur Backdrop (Fixed Full Screen) -->
+            <div class="newsletter-backdrop fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-[4px] opacity-0 pointer-events-none transition-opacity duration-300">
                 
-                <button class="newsletter-close-btn absolute top-4 right-4 p-2 text-tx-muted hover:text-tx-main bg-main hover:bg-tx-muted/10 rounded-full transition-colors outline-none z-50" aria-label="Close">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-                
-                <!-- Dynamic Content Container -->
-                <div class="newsletter-dynamic-content min-h-[160px] flex flex-col justify-center relative">
-                    <!-- Javascript will inject state here -->
+                <!-- Centered Modal Box (Slides up on mobile, scales up on desktop) -->
+                <div class="newsletter-popup w-full md:w-[400px] bg-surface border-t md:border border-subtle md:rounded-2xl rounded-t-3xl shadow-2xl p-6 md:p-8 transform translate-y-full md:translate-y-8 md:scale-95 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col text-left relative">
+                    
+                    <button class="newsletter-close-btn absolute top-4 right-4 md:top-5 md:right-5 p-2 text-tx-muted hover:text-tx-main bg-main hover:bg-tx-muted/10 rounded-full transition-colors outline-none z-50" aria-label="Close">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                    
+                    <!-- Dynamic Content Container -->
+                    <div class="newsletter-dynamic-content min-h-[170px] flex flex-col justify-center relative">
+                        <!-- Javascript will inject state here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,15 +94,23 @@ const {
 
     // Global UI Controls
     function closeAllPopovers() {
+        // Close Share Dropdowns
         document.querySelectorAll('.share-dropdown:not(.hidden)').forEach(d => {
             d.classList.add('hidden');
             const tooltip = d.parentElement?.querySelector('.share-tooltip');
             if (tooltip) (tooltip as HTMLElement).style.display = '';
         });
 
-        document.querySelectorAll('.newsletter-popup.translate-y-0').forEach(p => {
-            p.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
-            p.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+        // Close Newsletter Modal
+        document.querySelectorAll('.newsletter-backdrop.opacity-100').forEach(backdrop => {
+            backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
+            
+            const popup = backdrop.querySelector('.newsletter-popup');
+            if (popup) {
+                popup.classList.remove('translate-y-0', 'md:translate-y-0', 'md:scale-100', 'opacity-100');
+                popup.classList.add('translate-y-full', 'md:translate-y-8', 'md:scale-95', 'opacity-0');
+            }
         });
     }
 
@@ -106,22 +118,35 @@ const {
     const newsletterWrappers = document.querySelectorAll('.newsletter-wrapper');
     newsletterWrappers.forEach(wrapper => {
         const toggleBtn = wrapper.querySelector('.newsletter-toggle-btn');
+        const backdrop = wrapper.querySelector('.newsletter-backdrop');
         const popup = wrapper.querySelector('.newsletter-popup');
         const closeBtn = wrapper.querySelector('.newsletter-close-btn');
         const tooltip = wrapper.querySelector('.newsletter-tooltip');
         const contentDiv = wrapper.querySelector('.newsletter-dynamic-content');
 
-        // Core Functions
+        // Core Open/Close Modal Functions
         const openPopup = () => {
             closeAllPopovers();
-            popup?.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
-            popup?.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            if (backdrop) {
+                backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                backdrop.classList.add('opacity-100', 'pointer-events-auto');
+            }
+            if (popup) {
+                popup.classList.remove('translate-y-full', 'md:translate-y-8', 'md:scale-95', 'opacity-0');
+                popup.classList.add('translate-y-0', 'md:translate-y-0', 'md:scale-100', 'opacity-100');
+            }
             if (tooltip) (tooltip as HTMLElement).style.display = 'none';
         };
 
         const closePopup = () => {
-            popup?.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
-            popup?.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+            if (backdrop) {
+                backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+            }
+            if (popup) {
+                popup.classList.remove('translate-y-0', 'md:translate-y-0', 'md:scale-100', 'opacity-100');
+                popup.classList.add('translate-y-full', 'md:translate-y-8', 'md:scale-95', 'opacity-0');
+            }
             if (tooltip) (tooltip as HTMLElement).style.display = '';
         };
 
@@ -130,7 +155,7 @@ const {
             if (!contentDiv) return;
             contentDiv.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-6 gap-3 opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
-                    <svg class="animate-spin w-7 h-7 text-tx-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin w-8 h-8 text-tx-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -143,8 +168,8 @@ const {
             if (!contentDiv) return;
             contentDiv.innerHTML = `
                 <div class="opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
-                    <h3 class="text-[20px] font-[800] text-tx-main mb-2 tracking-tight">Stay Updated</h3>
-                    <p class="text-[14px] text-tx-muted mb-5 leading-relaxed pr-6">Sign in to subscribe to our technical guides and project updates.</p>
+                    <h3 class="text-[22px] font-[800] text-tx-main mb-2 tracking-tight">Newsletter</h3>
+                    <p class="text-[14.5px] text-tx-muted mb-6 leading-relaxed pr-6">Sign in to subscribe to our weekly newsletter.</p>
                     <div class="flex flex-col gap-2.5">
                         <button data-provider="google" class="social-login-btn flex items-center justify-center gap-3 py-2.5 bg-transparent border border-subtle hover:bg-main text-tx-main rounded-xl font-medium text-sm transition-colors">
                             <svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
@@ -186,8 +211,8 @@ const {
             const safeName = name ? name.split(' ')[0] : 'Developer'; // Get first name
             contentDiv.innerHTML = `
                 <div class="opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
-                    <h3 class="text-[20px] font-[800] text-tx-main mb-2 tracking-tight">Welcome, ${safeName}!</h3>
-                    <p class="text-[14px] text-tx-muted mb-5 leading-relaxed pr-6">Get our latest technical guides and project updates delivered directly to your inbox.</p>
+                    <h3 class="text-[22px] font-[800] text-tx-main mb-2 tracking-tight">Welcome, ${safeName}!</h3>
+                    <p class="text-[14.5px] text-tx-muted mb-6 leading-relaxed pr-6">Subscribe to our weekly newsletter to get the latest technical guides and updates.</p>
                     <button id="action-subscribe-btn" class="w-full bg-tx-main text-main font-[600] text-[15px] px-4 py-3 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all">Subscribe Now</button>
                 </div>
             `;
@@ -208,13 +233,13 @@ const {
         const renderSubscribed = () => {
             if (!contentDiv) return;
             contentDiv.innerHTML = `
-                <div class="flex flex-col items-center text-center py-2 opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
-                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>
+                <div class="flex flex-col items-center text-center py-3 opacity-0 animate-fade-in" style="animation: fadeIn 0.3s forwards;">
+                    <div class="w-14 h-14 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>
                     </div>
-                    <h3 class="text-[18px] font-[800] text-tx-main mb-1.5 tracking-tight">You're Subscribed!</h3>
-                    <p class="text-[13px] text-tx-muted mb-6">Thanks for joining. We'll keep you updated.</p>
-                    <button id="action-unsubscribe-btn" class="text-[12px] text-tx-muted hover:text-rose-500 font-medium flex items-center gap-1.5 transition-colors outline-none bg-surface border border-subtle px-3 py-1.5 rounded-md hover:border-rose-500/30 hover:bg-rose-500/5">
+                    <h3 class="text-[20px] font-[800] text-tx-main mb-2 tracking-tight">You're Subscribed!</h3>
+                    <p class="text-[14px] text-tx-muted mb-7">Thanks for joining. We'll keep you updated.</p>
+                    <button id="action-unsubscribe-btn" class="text-[13px] text-tx-muted hover:text-rose-500 font-medium flex items-center gap-1.5 transition-colors outline-none bg-surface border border-subtle px-3 py-1.5 rounded-md hover:border-rose-500/30 hover:bg-rose-500/5">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         Unsubscribe
                     </button>
@@ -271,10 +296,10 @@ const {
             }
         };
 
-        // Listeners
+        // Listeners for Opening/Closing
         toggleBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (popup?.classList.contains('translate-y-full')) {
+            if (backdrop?.classList.contains('opacity-0')) {
                 openPopup();
             } else {
                 closePopup();
@@ -286,7 +311,15 @@ const {
             closePopup();
         });
 
+        // Prevent clicking inside the popup from closing it
         popup?.addEventListener('click', (e) => e.stopPropagation());
+
+        // Close when clicking the backdrop overlay itself
+        backdrop?.addEventListener('click', (e) => {
+            if (e.target === backdrop) {
+                closePopup();
+            }
+        });
 
         // Boot the state machine immediately in the background
         initNewsletterState();
@@ -350,7 +383,6 @@ const {
         });
     });
 
-    document.addEventListener('click', closeAllPopovers);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllPopovers(); });
 </script>
 
