@@ -1,4 +1,5 @@
 // functions/api/newsletter.ts
+import { betterAuth } from "better-auth";
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
 
@@ -10,34 +11,34 @@ interface Database {
         name: string | null;
         subscribed_url: string;
     };
-    session: { id: string; token: string; userId: string; expiresAt: Date | string; };
-    user: { id: string; email: string; name: string; };
+    // We no longer need to manually define user/session tables here
+    // because Better Auth handles them automatically!
 }
 
-// Direct DB Session Validator
-async function getSecureSession(request: Request, db: Kysely<Database>) {
+// 1. Use Better Auth's Native API to validate the signed cookie securely
+async function getSecureSession(context: any, db: Kysely<Database>) {
     try {
-        const cookieHeader = request.headers.get('Cookie') || '';
-        const match = cookieHeader.match(/(?:^|;\s*)(?:__Secure-)?better-auth\.session_token=([^;]+)/);
-        const token = match ? match[1] : null;
+        const url = new URL(context.request.url);
+        
+        // Initialize a lightweight Better Auth instance just for session validation
+        const auth = betterAuth({
+            baseURL: url.origin,
+            secret: context.env.BETTER_AUTH_SECRET || "fallback-dev-secret-key-12345",
+            database: {
+                db: db,
+                type: "sqlite"
+            }
+        });
 
-        if (!token) return null;
+        // This built-in method automatically unsigns the cookie, 
+        // hashes the token (if needed), and verifies it against the D1 database.
+        const sessionData = await auth.api.getSession({
+            headers: context.request.headers
+        });
 
-        const session = await db.selectFrom('session')
-            .selectAll()
-            .where('token', '=', token)
-            .executeTakeFirst();
-
-        if (!session || new Date(session.expiresAt) < new Date()) return null;
-
-        const user = await db.selectFrom('user')
-            .selectAll()
-            .where('id', '=', session.userId)
-            .executeTakeFirst();
-
-        return user ? { user } : null;
+        return sessionData;
     } catch (error) {
-        console.error("Direct session verification failed:", error);
+        console.error("Better Auth session verification failed:", error);
         return null;
     }
 }
@@ -47,8 +48,8 @@ async function getSecureSession(request: Request, db: Kysely<Database>) {
 // ==========================================
 export async function onRequestGet(context: any) {
     const db = new Kysely<Database>({ dialect: new D1Dialect({ database: context.env.DB }) });
-    const sessionData = await getSecureSession(context.request, db);
     
+    const sessionData = await getSecureSession(context, db);
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ isSubscribed: false, error: 'Unauthorized' }), { 
             status: 401, headers: { "Content-Type": "application/json" } 
@@ -77,8 +78,8 @@ export async function onRequestGet(context: any) {
 // ==========================================
 export async function onRequestPost(context: any) {
     const db = new Kysely<Database>({ dialect: new D1Dialect({ database: context.env.DB }) });
-    const sessionData = await getSecureSession(context.request, db);
     
+    const sessionData = await getSecureSession(context, db);
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
             status: 401, headers: { "Content-Type": "application/json" } 
@@ -89,6 +90,7 @@ export async function onRequestPost(context: any) {
     const user = sessionData.user;
 
     try {
+        // Prevent duplicate subscriptions
         const existing = await db.selectFrom('newsletter_subscribers')
             .select('id')
             .where('user_id', '=', user.id)
@@ -100,6 +102,7 @@ export async function onRequestPost(context: any) {
             });
         }
 
+        // Generate ID and insert into database
         await db.insertInto('newsletter_subscribers')
             .values({
                 id: crypto.randomUUID(),
@@ -126,8 +129,8 @@ export async function onRequestPost(context: any) {
 // ==========================================
 export async function onRequestDelete(context: any) {
     const db = new Kysely<Database>({ dialect: new D1Dialect({ database: context.env.DB }) });
-    const sessionData = await getSecureSession(context.request, db);
     
+    const sessionData = await getSecureSession(context, db);
     if (!sessionData?.user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
             status: 401, headers: { "Content-Type": "application/json" } 
