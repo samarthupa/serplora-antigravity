@@ -27,7 +27,7 @@ export async function onRequest(context) {
             },
             // --- SESSION EXPIRATION ADDED HERE ---
             session: {
-                expiresIn: 60, // Set to 60 seconds (1 minute) for testing
+                expiresIn: 60 * 60 * 24 * 15, // Set to 60 seconds (1 minute) for testing
                 disableSessionRefresh: true // Strict cutoff; prevents activity from resetting the timer
             },
             // -------------------------------------             
@@ -110,7 +110,8 @@ export async function onRequest(context) {
                 },                 
                 microsoft: {                     
                     clientId: context.env.MICROSOFT_CLIENT_ID || "",                     
-                    clientSecret: context.env.MICROSOFT_CLIENT_SECRET || "",                     
+                    clientSecret: context.env.MICROSOFT_CLIENT_SECRET || "",    
+                    prompt: "select_account",                 
                     mapProfileToUser: (profile) => ({ 
                         emailVerified: true,
                         image: profile.picture || null
