@@ -243,6 +243,13 @@ export const projects = collection({
             description: 'Check this to visually hide the image on the page, while keeping it in the HTML for SEO and social sharing.',
             defaultValue: false 
         }),
+
+        // ADD THIS NEW FIELD
+        views: fields.integer({ 
+            label: 'Project Views', 
+            defaultValue: 10,
+            description: 'Manually set the number of views for this project.' 
+        }),
         
         // NEW FIELDS FOR PROJECT DESIGN
         difficulty: fields.select({

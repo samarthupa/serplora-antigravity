@@ -335,6 +335,9 @@ const projects = defineCollection({
     // NEW: Array of relational category IDs
     // Preprocess the incoming value: if it's a single string, wrap it in an array so .includes() works later
 categories: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
+
+// ADD THIS NEW VALIDATION
+    views: z.number().default(10),
     
     difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
     duration: z.string().default('2 Hrs'),

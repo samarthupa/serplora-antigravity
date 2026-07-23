@@ -174,89 +174,87 @@ const dynamicSeo = {
       </div>
     </div>
 
-    <!-- Filter Section (Inline Selectable Pills - Server Driven) -->
+    <!-- Filter Section -->
     <div class="flex flex-wrap items-center justify-start gap-2 sm:gap-2.5 mb-10 relative z-20">
       
       <a 
         href={`/projects/${category?.id}`}
-        class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'all' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
+        class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'all' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
       >
-        All <span class={`ml-1.5 text-[11px] ${currentFilter === 'all' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.all})</span>
+        All <span class={`ml-1.5 text-[11px] ${currentFilter === 'all' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.all})</span>
       </a>
 
       {counts.beginner > 0 && (
         <a 
           href={`/projects/${category?.id}/beginner`}
-          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'beginner' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'beginner' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
         >
-          Beginner <span class={`ml-1.5 text-[11px] ${currentFilter === 'beginner' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.beginner})</span>
+          Beginner <span class={`ml-1.5 text-[11px] ${currentFilter === 'beginner' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.beginner})</span>
         </a>
       )}
 
       {counts.intermediate > 0 && (
         <a 
           href={`/projects/${category?.id}/intermediate`}
-          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'intermediate' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'intermediate' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
         >
-          Intermediate <span class={`ml-1.5 text-[11px] ${currentFilter === 'intermediate' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.intermediate})</span>
+          Intermediate <span class={`ml-1.5 text-[11px] ${currentFilter === 'intermediate' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.intermediate})</span>
         </a>
       )}
 
       {counts.advanced > 0 && (
         <a 
           href={`/projects/${category?.id}/advanced`}
-          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'advanced' ? 'bg-tx-main border-tx-main text-main font-[600] shadow-sm' : 'bg-surface border-subtle text-tx-main font-[500] hover:bg-tx-muted/5'}`}
+          class={`inline-flex items-center justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border text-[14px] sm:text-[15px] transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main ${currentFilter === 'advanced' ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600]' : 'bg-transparent border-subtle text-tx-muted font-[500] hover:border-tx-main/30 hover:text-tx-main'}`}
         >
-          Advanced <span class={`ml-1.5 text-[11px] ${currentFilter === 'advanced' ? 'text-main/80' : 'text-tx-muted'}`}>({counts.advanced})</span>
+          Advanced <span class={`ml-1.5 text-[11px] ${currentFilter === 'advanced' ? 'text-tx-main/80' : 'text-tx-muted'}`}>({counts.advanced})</span>
         </a>
       )}
     </div>
 
-    <!-- Main Grid (Updated with auto-fit, 320px minimum) -->
-     <div id="project-grid" class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-8 items-start relative z-10">
+    <!-- Main Grid -->
+     <div id="project-grid" class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 items-stretch relative z-10">
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
-          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle transition-transform duration-150 hover:-translate-y-1 hover:shadow-lg flex flex-col h-full w-full max-w-[480px] mx-auto lg:mx-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          class="project-card group bg-surface rounded-xl overflow-hidden border border-subtle shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-6px_rgba(0,0,0,0.12)] hover:border-tx-main/30 flex flex-col h-full w-full max-w-[480px] mx-auto lg:mx-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
-          <!-- Graphic Area (Badge removed, max-h-[280px] added) -->
-          <div class="relative w-full aspect-video min-h-[100px] max-h-[180px] bg-gradient-to-br from-[#241f18] to-[#3a352b] flex items-center justify-center overflow-hidden shrink-0 border-b border-subtle/50">
-             
-             {(project.data.image && !project.data.hideImage) ? (
-               <img 
-                 src={project.data.image} 
-                 alt={project.data.title} 
-                 loading={index < 4 ? "eager" : "lazy"} 
-                 decoding="async"
-                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-               />
-             ) : (
-               <div class="w-14 h-14 flex items-center justify-center opacity-90 drop-shadow-md text-main [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain">
-                 <Fragment set:html={category?.data?.iconSvg || '💻'} />
-               </div>
-             )}
-          </div>
-          
-          <!-- Body Area -->
-          <div class="p-3 sm:p-4 flex flex-col flex-1 bg-surface">
+          <div class="p-5 sm:p-6 flex flex-col flex-1">
             
-            <!-- Difficulty Badge moved above title -->
-            <div class="inline-flex items-center gap-1.5 text-[10.5px] font-[700] uppercase tracking-wider bg-tx-muted/5 px-2.5 py-1 rounded-md border border-subtle text-tx-main w-fit mb-3.5">
-              <span class={`w-1.5 h-1.5 rounded-full ${project.data.difficulty === 'beginner' ? 'bg-emerald-500' : project.data.difficulty === 'intermediate' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
-              <span>{project.data.difficulty}</span>
+            <!-- Eyebrow Tags Array (Moved Above Title) -->
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md border border-subtle text-[11px] font-[500] text-tx-muted capitalize tracking-wide">
+                    {project.data.difficulty}
+                </span>
             </div>
 
-            <h3 class="text-[18px] sm:text-[19px] font-[800] mb-2.5 text-tx-main leading-snug line-clamp-2">
+            <!-- Title -->
+            <h3 class="text-[18px] sm:text-[19px] font-[800] mb-6 text-tx-main leading-snug">
               {project.data.title}
             </h3>
             
+            <!-- Excerpt -->
             {project.data.excerpt && (
-              <p class="text-[14px] text-tx-muted leading-relaxed line-clamp-3 mb-5">{project.data.excerpt}</p>
+              <p class="text-[14px] sm:text-[15px] text-tx-muted leading-relaxed mb-12">
+                {project.data.excerpt}
+              </p>
             )}
             
-            <div class="mt-auto pt-2 flex justify-start w-full">
-              <span class="text-brand font-[600] text-[14px] transition-all group-hover:underline decoration-2 underline-offset-4">View Project →</span>
+            <!-- Separator & Action Footer (Pushed to bottom) -->
+            <div class="mt-auto pt-2 flex items-center justify-between w-full">
+                
+                <!-- View Counter -->
+                <span class="text-tx-muted text-[12px] font-[500] flex items-center gap-1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    {project.data.views}
+                </span>
+                
+                <span class="text-brand font-[600] text-[13px] transition-all duration-200 group-hover:underline decoration-2 underline-offset-4 inline-flex items-center">
+                    View Project 
+                    <span class="ml-1 transition-transform duration-200 group-hover:translate-x-1">→</span>
+                </span>
             </div>
+
           </div>
         </a>
       )) : (
@@ -296,8 +294,8 @@ const dynamicSeo = {
               aria-current={page.currentPage === num ? 'page' : undefined}
               class={`w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-sm transition-colors outline-none border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-main ${
                 page.currentPage === num 
-                  ? 'font-[600] bg-brand text-main focus-visible:ring-brand' 
-                  : 'font-[500] text-tx-muted hover:bg-tx-muted/10 focus-visible:ring-tx-muted'
+                  ? 'bg-tx-main/5 border-tx-main text-tx-main font-[600] focus-visible:ring-brand' 
+                  : 'font-[500] text-tx-muted hover:border-tx-main/30 hover:text-tx-main focus-visible:ring-tx-muted'
               }`}
             >
               {num}
