@@ -213,11 +213,11 @@ const dynamicSeo = {
     </div>
 
     <!-- Main Grid -->
-     <div id="project-grid" class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 items-stretch relative z-10">
+     <div id="project-grid" class="grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-8 items-stretch relative z-10">
       {projects.length > 0 ? projects.map((project, index) => (
         <a 
           href={`/projects/${category?.id}/${project.id}`} 
-          class="project-card group rounded-xl overflow-hidden border border-subtle shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-tx-main/30 flex flex-col h-full w-full max-w-[480px] mx-auto lg:mx-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
+          class="project-card group rounded-xl overflow-hidden border border-subtle transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-tx-main/30 flex flex-col h-full w-full max-w-[420px] mx-auto lg:mx-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-main"
         >
           <div class="p-5 sm:p-6 flex flex-col flex-1">
             
@@ -268,7 +268,7 @@ const dynamicSeo = {
 
     <!-- Pagination -->
     {page?.lastPage > 1 && (
-      <div id="pagination" class="flex flex-wrap items-center justify-center gap-1.5 mt-10 sm:mt-12">
+      <div id="pagination" class="flex flex-wrap items-center justify-center gap-1.5 mt-14 sm:mt-18">
         {page?.url?.prev ? (
           <a href={page.url.prev} aria-label="Previous page" class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-tx-muted border border-subtle bg-surface hover:bg-tx-muted/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
@@ -317,7 +317,7 @@ const dynamicSeo = {
 
     <!-- Dynamic FAQs -->
     {category?.data?.faqs && category.data.faqs.length > 0 && (
-      <div class="mt-20 sm:mt-24 max-w-[800px] mx-auto">
+      <div class="mt-30 sm:mt-30 max-w-[800px] mx-auto">
         <div class="text-center mb-10">
           <h2 class="text-2xl sm:text-3xl md:text-4xl font-[800] tracking-tight mb-3 text-tx-main">Frequently asked questions</h2>
         </div>
