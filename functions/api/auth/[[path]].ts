@@ -24,7 +24,13 @@ export async function onRequest(context) {
             database: {                 
                 db: db,                 
                 type: "sqlite"             
-            },             
+            },
+            // --- SESSION EXPIRATION ADDED HERE ---
+            session: {
+                expiresIn: 60, // Set to 60 seconds (1 minute) for testing
+                disableSessionRefresh: true // Strict cutoff; prevents activity from resetting the timer
+            },
+            // -------------------------------------             
             user: {                 
                 additionalFields: {                     
                     country: { type: "string", required: false },                     
