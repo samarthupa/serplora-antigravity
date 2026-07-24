@@ -220,6 +220,7 @@ export const quizzes = collection({
 });
 
 // Add this to your exports in src/keystatic/collections.ts
+// Add this to your exports in src/keystatic/collections.ts
 export const projects = collection({
     label: 'Projects',
     slugField: 'title',
@@ -246,10 +247,10 @@ export const projects = collection({
 
         // ADD THIS NEW FIELD
         views: fields.text({ 
-    label: 'Project Views',
-    defaultValue: '10',
-    description: 'Manually set the number of views for this project (e.g., "20k").'
-}),
+            label: 'Project Views',
+            defaultValue: '10',
+            description: 'Manually set the number of views for this project (e.g., "20k").'
+        }),
         
         // NEW FIELDS FOR PROJECT DESIGN
         difficulty: fields.select({
@@ -274,6 +275,12 @@ export const projects = collection({
             many: true,
              validation: { length: { min: 1 } }
         }),
+        
+        // 🟢 ADDED FAQS FIELD HERE
+        faqs: fields.array(
+            fields.object({ question: fields.text({ label: 'Question' }), answer: fields.text({ label: 'Answer', multiline: true }) }),
+            { label: 'Project FAQs (Optional)', itemLabel: props => props.fields.question.value || 'New FAQ' }
+        ),
         
         seo: seoSchema,
         content: createGlobalEditor('Project Details', 'projects'),

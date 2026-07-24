@@ -321,6 +321,7 @@ const homePage = defineCollection({
 });
 
 // Update the existing Projects collection
+// Update the existing Projects collection
 const projects = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx,mdoc}", base: "./src/content/projects" }),
   schema: z.object({
@@ -334,14 +335,21 @@ const projects = defineCollection({
     
     // NEW: Array of relational category IDs
     // Preprocess the incoming value: if it's a single string, wrap it in an array so .includes() works later
-categories: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
+    categories: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
 
-// ADD THIS NEW VALIDATION
+    // ADD THIS NEW VALIDATION
     views: z.string().default('10'),
     
     difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
     githubUrl: z.string().optional(),
     heroCode: z.string().optional(),
+    
+    // 🟢 ADDED FAQS VALIDATION HERE
+    faqs: z.array(z.object({
+      question: z.string(),
+      answer: z.string()
+    })).optional().default([]),
+    
     seo: seoSchema,
   }),
 });

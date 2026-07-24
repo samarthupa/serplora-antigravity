@@ -59,7 +59,6 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
                     <span class="capitalize">{project.data.difficulty}</span>
                 </span>
                 
-                <!-- 🟢 Replaced Timer with Views -->
                 <span class="text-[13px] font-medium px-2 py-1 bg-transparent border border-subtle/60 rounded-md inline-flex items-center gap-1.5 opacity-90 text-tx-main">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-60"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     {project.data.views}
@@ -106,13 +105,36 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
 
     <!-- LARGE BOTTOM GITHUB CTA BUTTON -->
     {project.data.githubUrl && (
-        <footer class="mt-16 pt-10 border-t border-subtle/50 flex justify-center">
+        <footer class="mt-16 pt-10 flex justify-center">
             <a href={project.data.githubUrl} target="_blank" rel="noopener noreferrer" 
                class="text-[16px] font-[500] px-8 py-3.5 rounded-lg bg-transparent text-tx-main border border-subtle/80 inline-flex items-center gap-3 transition-all duration-300 hover:border-tx-main hover:-translate-y-0.5 hover:shadow-sm max-sm:w-full max-sm:justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
                 View Source Code on GitHub
             </a>
         </footer>
+    )}
+
+    <!-- 🟢 DYNAMIC FAQS FOR INDIVIDUAL PROJECTS -->
+    {project.data.faqs && project.data.faqs.length > 0 && (
+      <div class="mt-20 sm:mt-24 max-w-[800px] mx-auto">
+        <div class="text-center mb-10 ">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-[800] tracking-tight mb-3 text-tx-main">Frequently asked questions</h2>
+        </div>
+
+        <div class="flex flex-col border-t border-subtle">
+          {project.data.faqs.map((faq) => (
+            <details class="faq group py-5 md:py-6 border-b border-subtle">
+              <summary class="flex items-center justify-between gap-6 cursor-pointer list-none font-[600] text-[16px] md:text-[18px] text-tx-main outline-none focus-visible:ring-2 focus-visible:ring-brand hover:text-brand transition-colors rounded-lg">
+                {faq.question}
+                <div class="w-8 h-8 rounded-full border border-subtle flex items-center justify-center shrink-0 text-tx-muted group-hover:border-brand group-hover:text-brand group-hover:bg-brand/5 transition-all group-open:rotate-45">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+              </summary>
+              <p class="text-[15px] md:text-[16px] text-tx-muted leading-relaxed mt-4 md:mt-5 pr-12">{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
     )}
   </main>
 </Layout>
@@ -134,4 +156,7 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
         border: 1px solid var(--color-border-subtle);
         padding: 2px 6px; border-radius: 4px; color: var(--color-tx-main);
     }
+
+    /* 🟢 Hides the default browser triangle for details/summary */
+    .faq summary::-webkit-details-marker { display: none; }
 </style>

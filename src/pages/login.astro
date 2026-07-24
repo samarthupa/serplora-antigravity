@@ -8,7 +8,9 @@ const returnUrl = Astro.url.searchParams.get('returnUrl') || '/account';
 ---
 
 <Layout>
-  <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[75vh] bg-neutral-50 dark:bg-[#0a0a0a]">
+<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[93vh]">
+  <div class="-translate-y-10">
     <AuthWidget mode="page" returnUrl={returnUrl} />
   </div>
+</div>
 </Layout>
