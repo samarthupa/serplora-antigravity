@@ -261,7 +261,6 @@ export const projects = collection({
             ],
             defaultValue: 'beginner'
         }),
-        duration: fields.text({ label: 'Estimated Duration (e.g., 2 Hrs)', defaultValue: '2 Hrs' }),
         githubUrl: fields.text({ label: 'GitHub Repository URL' }),
         heroCode: fields.text({ 
             label: 'Hero Terminal Code (Python/JS)', 

@@ -53,17 +53,20 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
         
         <div class="flex justify-between items-center flex-wrap gap-4 mb-8 max-sm:flex-row max-sm:flex-nowrap max-sm:pb-6 max-[360px]:flex-wrap">
             
-            <!-- Left Side: Difficulty & Timer -->
+            <!-- Left Side: Difficulty & VIEWS -->
             <div class="flex flex-wrap gap-2 max-sm:flex-1">
                 <span class="text-[13px] font-medium px-2 py-1 bg-transparent border border-subtle/60 rounded-md inline-flex items-center gap-1.5 opacity-90 text-tx-main">
                     <span class="capitalize">{project.data.difficulty}</span>
                 </span>
+                
+                <!-- 🟢 Replaced Timer with Views -->
                 <span class="text-[13px] font-medium px-2 py-1 bg-transparent border border-subtle/60 rounded-md inline-flex items-center gap-1.5 opacity-90 text-tx-main">
-                    <span class="opacity-60">⏱️</span> {project.data.duration}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-60"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    {project.data.views}
                 </span>
             </div>
 
-            <!-- 🟢 Right Side: Utility Actions -->
+            <!-- Right Side: Utility Actions -->
             <div class="flex items-center gap-2 flex-shrink-0 text-tx-muted">
                 <UtilityActions showShare={true} />
             </div>
@@ -131,4 +134,4 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
         border: 1px solid var(--color-border-subtle);
         padding: 2px 6px; border-radius: 4px; color: var(--color-tx-main);
     }
-</style>s
+</style>

@@ -340,7 +340,6 @@ categories: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array
     views: z.string().default('10'),
     
     difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
-    duration: z.string().default('2 Hrs'),
     githubUrl: z.string().optional(),
     heroCode: z.string().optional(),
     seo: seoSchema,
