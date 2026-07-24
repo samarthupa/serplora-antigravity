@@ -337,7 +337,7 @@ const projects = defineCollection({
 categories: z.preprocess((val) => typeof val === 'string' ? [val] : val, z.array(z.string())).optional().default([]),
 
 // ADD THIS NEW VALIDATION
-    views: z.number().default(10),
+    views: z.string().default('10'),
     
     difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
     duration: z.string().default('2 Hrs'),

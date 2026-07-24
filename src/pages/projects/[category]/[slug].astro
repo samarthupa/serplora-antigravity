@@ -1,13 +1,15 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
+// 🟢 IMPORTED COMPONENTS
+import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
+import UtilityActions from '../../../components/ui/UtilityActions.astro';
 
 export async function getStaticPaths() {
   const allProjects = await getCollection('projects', ({ data }) => {
     return import.meta.env.PROD ? !data.draft : true;
   });
 
-  // FlatMap is required here because one project can generate multiple URLs
   return allProjects.flatMap((project) => {
     return project.data.categories.map((catId) => ({
       params: { category: catId, slug: project.id },
@@ -34,46 +36,50 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
   description={project.data.seo?.metaDescription || project.data.excerpt}
   image={project.data.image}
 >
-  <main class="article-container">
+  <main class="max-w-[900px] mx-auto mt-10 px-6 pb-20 font-sans text-tx-main animate-[fadeIn_0.6s_ease-out]">
     
-    <nav class="top-nav">
-        <div class="breadcrumbs" aria-label="Breadcrumb">
-            <a href="/">Home</a> / 
-            <a href="/projects">Projects</a> / 
-            <a href={`/projects/${currentCategory}`} class="capitalize">{currentCategory}</a> / 
-            <span>{project.data.breadcrumbTitle || project.data.title}</span>
-        </div>
-    </nav>
+    <Breadcrumb 
+      parents={[
+        { label: 'projects', url: '/projects' },
+        { label: currentCategory, url: `/projects/${currentCategory}` }
+      ]} 
+      current={project.data.breadcrumbTitle || project.data.title} 
+    />
 
     <header>
-        <h1 class="project-title">{project.data.title}</h1>
+        <h1 class="text-[28px] sm:text-[32px] font-bold tracking-tight leading-tight mb-6">
+            {project.data.title}
+        </h1>
         
-        <div class="meta-section">
-            <div class="meta-pills">
-                <span class="pill"><span style="opacity:0.6">{difficultyEmoji[project.data.difficulty]}</span> <span class="capitalize">{project.data.difficulty}</span></span>
-                <span class="pill"><span style="opacity:0.6">⏱️</span> {project.data.duration}</span>
+        <div class="flex justify-between items-center flex-wrap gap-4 mb-8 max-sm:flex-row max-sm:flex-nowrap max-sm:pb-6 max-[360px]:flex-wrap">
+            
+            <!-- Left Side: Difficulty & Timer -->
+            <div class="flex flex-wrap gap-2 max-sm:flex-1">
+                <span class="text-[13px] font-medium px-2 py-1 bg-transparent border border-subtle/60 rounded-md inline-flex items-center gap-1.5 opacity-90 text-tx-main">
+                    <span class="capitalize">{project.data.difficulty}</span>
+                </span>
+                <span class="text-[13px] font-medium px-2 py-1 bg-transparent border border-subtle/60 rounded-md inline-flex items-center gap-1.5 opacity-90 text-tx-main">
+                    <span class="opacity-60">⏱️</span> {project.data.duration}
+                </span>
             </div>
 
-            <div class="utility-actions">
-                <!-- TOP GITHUB ICON BUTTON -->
-                {project.data.githubUrl && (
-                    <a href={project.data.githubUrl} target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="View on GitHub">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                    </a>
-                )}
+            <!-- 🟢 Right Side: Utility Actions -->
+            <div class="flex items-center gap-2 flex-shrink-0 text-tx-muted">
+                <UtilityActions showShare={true} />
             </div>
+
         </div>
     </header>
 
     <!-- TERMINAL HERO CODE -->
     {project.data.heroCode && (
-        <figure class="hero-visual">
-            <div class="terminal-header">
-                <div class="dot dot-red"></div>
-                <div class="dot dot-yellow"></div>
-                <div class="dot dot-green"></div>
+        <figure class="w-full h-[300px] sm:aspect-video sm:h-auto bg-[#0D1117] rounded-xl overflow-hidden mb-12 shadow-[0_20px_40px_rgba(0,0,0,0.08)] flex flex-col">
+            <div class="h-10 bg-white/5 flex items-center px-4 gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-[#FF5F56]"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]"></div>
             </div>
-            <div class="terminal-body">
+            <div class="p-6 font-mono text-[14px] text-[#C9D1D9] leading-relaxed">
                 <pre style="margin:0; font-family:inherit; color:inherit; white-space:pre-wrap;"><code>{project.data.heroCode}</code></pre>
             </div>
         </figure>
@@ -97,8 +103,9 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
 
     <!-- LARGE BOTTOM GITHUB CTA BUTTON -->
     {project.data.githubUrl && (
-        <footer class="bottom-cta">
-            <a href={project.data.githubUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
+        <footer class="mt-16 pt-10 border-t border-subtle/50 flex justify-center">
+            <a href={project.data.githubUrl} target="_blank" rel="noopener noreferrer" 
+               class="text-[16px] font-[500] px-8 py-3.5 rounded-lg bg-transparent text-tx-main border border-subtle/80 inline-flex items-center gap-3 transition-all duration-300 hover:border-tx-main hover:-translate-y-0.5 hover:shadow-sm max-sm:w-full max-sm:justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
                 View Source Code on GitHub
             </a>
@@ -108,128 +115,20 @@ const canonicalOverride = `/projects/${primaryCategory}/${project.id}`;
 </Layout>
 
 <style>
-    .article-container { 
-        max-width: 720px; 
-        margin: 0 auto; 
-        padding: 0 24px; 
-        padding-bottom: 80px;
-        font-family: 'Inter', -apple-system, sans-serif;
-        color: #111111;
-        animation: fadeIn 0.6s ease-out;
-    }
-
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    .top-nav { margin-top: 64px; margin-bottom: 40px; }
-    .breadcrumbs { font-size: 14px; color: #888888; display: flex; gap: 8px; }
-    .breadcrumbs a { transition: color 0.3s; text-decoration: none; color: inherit; }
-    .breadcrumbs a:hover { color: #111111; }
-
-    .project-title {
-        font-size: 40px; font-weight: 700; letter-spacing: -0.02em;
-        line-height: 1.2; margin-bottom: 24px;
-    }
-
-    .meta-section {
-        display: flex; justify-content: space-between; align-items: center;
-        flex-wrap: wrap; gap: 16px; margin-bottom: 48px;
-    }
-
-    .meta-pills { display: flex; flex-wrap: wrap; gap: 12px; }
-
-    .pill {
-        font-size: 13px; font-weight: 500; padding: 6px 12px;
-        background-color: #FFFFFF; border: 1px solid #EAEAEA;
-        border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;
-        color: #444444;
-    }
-
-    .utility-actions { display: flex; gap: 8px; }
-
-    .icon-btn {
-        width: 40px; height: 40px; border-radius: 50%;
-        border: 1px solid #EAEAEA; background-color: #FFFFFF;
-        color: #444444; display: flex; align-items: center; justify-content: center;
-        transition: all 0.3s ease; position: relative; cursor: pointer;
-    }
-
-    .icon-btn:hover {
-        color: #111111; border-color: #111111; transform: translateY(-2px);
-    }
-
-    .icon-btn::after {
-        content: attr(aria-label); position: absolute; bottom: -30px;
-        font-size: 12px; background: #111111; color: white;
-        padding: 4px 8px; border-radius: 4px; white-space: nowrap; opacity: 0;
-        pointer-events: none; transition: opacity 0.2s;
-    }
-    .icon-btn:hover::after { opacity: 1; }
-
-    .hero-visual {
-        width: 100%; aspect-ratio: 16 / 9; background-color: #0D1117;
-        border-radius: 12px; overflow: hidden; margin-bottom: 48px; margin-top: 0;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.08); display: flex; flex-direction: column;
-    }
-
-    .terminal-header {
-        height: 40px; background-color: rgba(255,255,255,0.05);
-        display: flex; align-items: center; padding: 0 16px; gap: 8px;
-    }
-
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-red { background-color: #FF5F56; }
-    .dot-yellow { background-color: #FFBD2E; }
-    .dot-green { background-color: #27C93F; }
-
-    .terminal-body {
-        padding: 24px; font-family: 'JetBrains Mono', monospace;
-        font-size: 14px; color: #C9D1D9; line-height: 1.6;
-    }
-
-    .prose :global(h2) { font-size: 24px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; color: #111;}
-    .prose :global(p) { margin-bottom: 24px; color: #444444; line-height: 1.6; font-size: 18px; }
-    .prose :global(ul) { margin-bottom: 24px; padding-left: 24px; color: #444444; }
+    .prose :global(h2) { font-size: 24px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; color: var(--color-tx-main); }
+    .prose :global(p) { margin-bottom: 24px; color: var(--color-tx-main); opacity: 0.85; line-height: 1.6; font-size: 18px; }
+    .prose :global(ul) { margin-bottom: 24px; padding-left: 24px; color: var(--color-tx-main); opacity: 0.85; }
     .prose :global(li) { margin-bottom: 12px; font-size: 18px; }
+    
     .prose :global(code) {
-        font-family: 'JetBrains Mono', monospace; font-size: 14px;
-        background-color: #FFFFFF; border: 1px solid #EAEAEA;
-        padding: 2px 6px; border-radius: 4px; color: #111111;
+        font-family: var(--font-mono, monospace); font-size: 14px;
+        background-color: var(--color-bg-surface); 
+        border: 1px solid var(--color-border-subtle);
+        padding: 2px 6px; border-radius: 4px; color: var(--color-tx-main);
     }
-
-    .bottom-cta {
-        margin-top: 64px; padding-top: 40px; border-top: 1px solid #EAEAEA;
-        display: flex; justify-content: center;
-    }
-
-    .btn-primary {
-        font-size: 16px; font-weight: 500; padding: 14px 32px;
-        border-radius: 8px; background-color: #111111; color: #FFFFFF;
-        display: inline-flex; align-items: center; gap: 12px;
-        transition: all 0.3s ease; text-decoration: none; cursor: pointer;
-    }
-
-    .btn-primary:hover { background-color: #333333; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
-
-    @media (max-width: 600px) {
-        .project-title { font-size: 32px; }
-        .meta-section {
-            flex-direction: row; 
-            flex-wrap: nowrap;
-            align-items: center;
-            padding-bottom: 24px;
-            border-bottom: 1px solid #EAEAEA;
-        }
-        .meta-pills { flex: 1; }
-        .utility-actions { flex-shrink: 0; }
-        .hero-visual { aspect-ratio: auto; height: 300px; }
-        .btn-primary { width: 100%; justify-content: center; }
-    }
-
-    @media (max-width: 360px) {
-        .meta-section { flex-wrap: wrap; }
-        .utility-actions { width: 100%; justify-content: flex-end; }
-    }
-</style>
+</style>s

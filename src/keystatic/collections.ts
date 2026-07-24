@@ -245,11 +245,11 @@ export const projects = collection({
         }),
 
         // ADD THIS NEW FIELD
-        views: fields.integer({ 
-            label: 'Project Views', 
-            defaultValue: 10,
-            description: 'Manually set the number of views for this project.' 
-        }),
+        views: fields.text({ 
+    label: 'Project Views',
+    defaultValue: '10',
+    description: 'Manually set the number of views for this project (e.g., "20k").'
+}),
         
         // NEW FIELDS FOR PROJECT DESIGN
         difficulty: fields.select({
