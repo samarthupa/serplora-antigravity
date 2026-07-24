@@ -76,17 +76,19 @@ import Layout from '../layouts/Layout.astro';
   let pagefindInstance: any = null;
   let searchTimeout: ReturnType<typeof setTimeout>;
 
-  // 1. Load Pagefind dynamically (only happens once)
+ // 1. Load Pagefind dynamically (only happens once)
   async function initPagefind() {
     if (pagefindInstance) return pagefindInstance;
     try {
-      // The path to Pagefind depends on your build output. Usually it's at /pagefind/pagefind.js
+      // TRICK VITE: Use a variable for the path so Vite doesn't try to bundle a file that doesn't exist yet
+      const pagefindUrl = '/pagefind/pagefind.js';
+      
       // @ts-ignore
-      pagefindInstance = await import('/pagefind/pagefind.js');
+      pagefindInstance = await import(/* @vite-ignore */ pagefindUrl);
       await pagefindInstance.init();
       return pagefindInstance;
     } catch (e) {
-      console.error("Pagefind failed to load. (Note: Search only works after a production build using 'astro build')", e);
+      console.error("Pagefind failed to load.", e);
       return null;
     }
   }
