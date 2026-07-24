@@ -13,20 +13,6 @@ import Layout from '../layouts/Layout.astro';
 
   <main class="min-h-screen bg-main pt-24 pb-20 px-4 md:px-8 font-['Outfit',sans-serif]">
     <div class="max-w-3xl mx-auto w-full">
-      
-      <!-- On-Page Search Input (For refining queries) -->
-      <div class="relative w-full mb-12 group">
-        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-tx-muted group-focus-within:text-tx-main transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <input 
-          type="search" 
-          id="search-page-input" 
-          placeholder="Search Serplora..." 
-          class="w-full bg-surface border-2 border-subtle focus:border-tx-main text-tx-main text-xl md:text-2xl font-[600] rounded-2xl py-4 pl-14 pr-6 outline-none transition-all shadow-sm"
-          autocomplete="off"
-        />
-      </div>
 
       <!-- Results Header -->
       <div class="flex items-center justify-between mb-6 pb-4 border-b border-subtle">
@@ -58,7 +44,7 @@ import Layout from '../layouts/Layout.astro';
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <h2 class="text-xl font-bold text-tx-main mb-2">No results found</h2>
-        <p class="text-tx-muted">We couldn't find anything matching your query. Try adjusting your keywords.</p>
+        <p class="text-tx-muted">We couldn't find anything matching your query. Try adjusting your keywords in the search menu.</p>
       </div>
 
     </div>
@@ -66,7 +52,6 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  const searchInput = document.getElementById('search-page-input') as HTMLInputElement;
   const resultsContainer = document.getElementById('search-results');
   const loadingIndicator = document.getElementById('search-loading');
   const emptyState = document.getElementById('search-empty');
@@ -74,7 +59,6 @@ import Layout from '../layouts/Layout.astro';
   const countDisplay = document.getElementById('search-count');
 
   let pagefindInstance: any = null;
-  let searchTimeout: ReturnType<typeof setTimeout>;
 
  // 1. Load Pagefind dynamically (only happens once)
   async function initPagefind() {
@@ -169,30 +153,17 @@ import Layout from '../layouts/Layout.astro';
     if (resultsContainer) resultsContainer.innerHTML = '';
   }
 
-  // --- Initialization & Event Listeners ---
+  // --- Initialization ---
   
-  // A. Check URL for query on load
+  // A. Check URL for query on load and perform search
   const urlParams = new URLSearchParams(window.location.search);
   const initialQuery = urlParams.get('q');
 
-  if (initialQuery && searchInput) {
-    searchInput.value = initialQuery;
+  if (initialQuery) {
     performSearch(initialQuery);
+  } else {
+    showEmpty();
   }
-
-  // B. Handle live typing in the on-page input (Debounced)
-  searchInput?.addEventListener('input', (e) => {
-    const query = (e.target as HTMLInputElement).value;
-    
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      // Update URL without reloading the page
-      const newUrl = query ? `/search?q=${encodeURIComponent(query)}` : '/search';
-      window.history.replaceState({}, '', newUrl);
-      
-      performSearch(query);
-    }, 300); // 300ms delay to prevent excessive processing while typing
-  });
 
 </script>
 
