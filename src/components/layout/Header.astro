@@ -159,7 +159,6 @@ const primaryBtn = {
   </div>
 </header>
 
-<!-- 🟢 NEW MINIMALIST SEARCH OVERLAY -->
 <!-- 🟢 MINIMALIST SEARCH OVERLAY -->
 <div id="minimal-search-overlay" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-md opacity-0 invisible pointer-events-none transition-all duration-300 flex flex-col pt-[12vh] px-5">
   <div class="absolute inset-0" id="search-overlay-backdrop"></div>
@@ -173,26 +172,10 @@ const primaryBtn = {
       <button
         type="button"
         id="close-search-overlay"
-        class="text-tx-muted hover:text-tx-main transition-colors outline-none"
+        class="text-xs uppercase tracking-[0.2em] text-tx-muted hover:text-tx-main transition-colors outline-none"
         aria-label="Close"
       >
-        <span class="hidden md:block text-xs uppercase tracking-[0.2em]">
-          Esc
-        </span>
-
-        <svg
-          class="w-5 h-5 md:hidden"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
+        Esc
       </button>
     </div>
 
