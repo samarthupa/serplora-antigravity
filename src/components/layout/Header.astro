@@ -160,34 +160,57 @@ const primaryBtn = {
 </header>
 
 <!-- 🟢 NEW MINIMALIST SEARCH OVERLAY -->
-<div id="minimal-search-overlay" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-md opacity-0 invisible pointer-events-none transition-all duration-300 flex flex-col justify-start pt-[15vh] px-6 md:px-8">
+<!-- 🟢 MINIMALIST SEARCH OVERLAY -->
+<div id="minimal-search-overlay" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-md opacity-0 invisible pointer-events-none transition-all duration-300 flex flex-col pt-[12vh] px-5">
   <div class="absolute inset-0" id="search-overlay-backdrop"></div>
-  
-  <div class="w-full max-w-3xl mx-auto relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="search-overlay-content">
-    
-    <button id="close-search-overlay" class="absolute -top-12 right-0 text-tx-muted hover:text-tx-main focus:outline-none flex items-center gap-2 text-[12px] font-['JetBrains_Mono',monospace] transition-colors" aria-label="Close search">
-      <span class="hidden md:block">ESC</span>
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-    </button>
-    
-    <form action="/search" method="GET" class="w-full relative group">
-      <input 
-        type="search" 
-        name="q" 
-        id="overlay-search-input" 
-        placeholder="What are you looking for?" 
-        class="w-full bg-transparent text-2xl md:text-4xl font-[800] tracking-tight text-tx-main placeholder:text-tx-muted/40 border-none outline-none pb-4 border-b-2 border-tx-muted/20 focus:border-tx-main transition-colors rounded-none appearance-none font-['Outfit',sans-serif]" 
-        autocomplete="off" 
-      />
-      
-      <button type="submit" class="absolute right-0 bottom-4 text-tx-muted group-focus-within:text-tx-main hover:!text-[#5ecb6b] transition-colors" aria-label="Submit search">
-        <svg width="28" height="28" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="7.5" cy="7.5" r="4.75"></circle>
-          <line x1="11" y1="11" x2="16" y2="16"></line>
+
+  <div
+    id="search-overlay-content"
+    class="relative z-10 w-full max-w-2xl mx-auto transform scale-95 opacity-0 transition-all duration-500 ease-out"
+  >
+    <!-- Close Button -->
+    <div class="flex justify-end mb-5">
+      <button
+        type="button"
+        id="close-search-overlay"
+        class="text-tx-muted hover:text-tx-main transition-colors outline-none"
+        aria-label="Close"
+      >
+        <span class="hidden md:block text-xs uppercase tracking-[0.2em]">
+          Esc
+        </span>
+
+        <svg
+          class="w-5 h-5 md:hidden"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
+    </div>
+
+    <!-- Search Form -->
+    <form
+      action="/search"
+      method="GET"
+      class="w-full border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-colors"
+    >
+      <input
+        type="search"
+        name="q"
+        id="overlay-search-input"
+        placeholder="Search..."
+        autocomplete="off"
+        class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40"
+      />
     </form>
-    
   </div>
 </div>
 
