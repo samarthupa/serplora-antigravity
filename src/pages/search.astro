@@ -1,0 +1,209 @@
+---
+// Note: Adjust this import to match the actual path to your global layout wrapper
+import Layout from '../layouts/Layout.astro';
+
+// We explicitly tell Google NOT to index search result pages to prevent infinite empty URLs
+---
+
+<Layout title="Search Results | Serplora">
+  <!-- SEO Protection -->
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+  </Fragment>
+
+  <main class="min-h-screen bg-main pt-24 pb-20 px-4 md:px-8 font-['Outfit',sans-serif]">
+    <div class="max-w-3xl mx-auto w-full">
+      
+      <!-- On-Page Search Input (For refining queries) -->
+      <div class="relative w-full mb-12 group">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-tx-muted group-focus-within:text-tx-main transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input 
+          type="search" 
+          id="search-page-input" 
+          placeholder="Search Serplora..." 
+          class="w-full bg-surface border-2 border-subtle focus:border-tx-main text-tx-main text-xl md:text-2xl font-[600] rounded-2xl py-4 pl-14 pr-6 outline-none transition-all shadow-sm"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Results Header -->
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-subtle">
+        <h1 class="text-2xl font-[800] tracking-tight text-tx-main">
+          Results <span id="search-term-display" class="text-tx-muted font-[500]"></span>
+        </h1>
+        <span id="search-count" class="text-sm font-[600] text-tx-muted bg-surface px-3 py-1 rounded-full border border-subtle"></span>
+      </div>
+
+      <!-- Loading State -->
+      <div id="search-loading" class="hidden flex-col gap-4">
+        {[1, 2, 3].map(() => (
+          <div class="w-full p-6 bg-surface rounded-2xl border border-subtle animate-pulse">
+            <div class="h-6 bg-tx-muted/20 rounded-md w-2/3 mb-4"></div>
+            <div class="h-4 bg-tx-muted/10 rounded-md w-full mb-2"></div>
+            <div class="h-4 bg-tx-muted/10 rounded-md w-4/5"></div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Results Container -->
+      <div id="search-results" class="flex flex-col gap-4">
+        <!-- JS will inject results here -->
+      </div>
+
+      <!-- Empty State (Hidden by default) -->
+      <div id="search-empty" class="hidden flex-col items-center justify-center py-20 text-center">
+        <svg class="w-16 h-16 text-tx-muted/50 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h2 class="text-xl font-bold text-tx-main mb-2">No results found</h2>
+        <p class="text-tx-muted">We couldn't find anything matching your query. Try adjusting your keywords.</p>
+      </div>
+
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const searchInput = document.getElementById('search-page-input') as HTMLInputElement;
+  const resultsContainer = document.getElementById('search-results');
+  const loadingIndicator = document.getElementById('search-loading');
+  const emptyState = document.getElementById('search-empty');
+  const termDisplay = document.getElementById('search-term-display');
+  const countDisplay = document.getElementById('search-count');
+
+  let pagefindInstance: any = null;
+  let searchTimeout: ReturnType<typeof setTimeout>;
+
+  // 1. Load Pagefind dynamically (only happens once)
+  async function initPagefind() {
+    if (pagefindInstance) return pagefindInstance;
+    try {
+      // The path to Pagefind depends on your build output. Usually it's at /pagefind/pagefind.js
+      // @ts-ignore
+      pagefindInstance = await import('/pagefind/pagefind.js');
+      await pagefindInstance.init();
+      return pagefindInstance;
+    } catch (e) {
+      console.error("Pagefind failed to load. (Note: Search only works after a production build using 'astro build')", e);
+      return null;
+    }
+  }
+
+  // 2. Perform the actual search
+  async function performSearch(query: string) {
+    if (!query.trim()) {
+      clearResults();
+      return;
+    }
+
+    // Update UI text immediately
+    if (termDisplay) termDisplay.textContent = `for "${query}"`;
+    showLoading();
+
+    const pf = await initPagefind();
+    if (!pf) {
+      showEmpty();
+      return;
+    }
+
+    // Execute headless search
+    const searchResult = await pf.search(query);
+    
+    // Process results concurrently
+    const resultsData = await Promise.all(searchResult.results.map((r: any) => r.data()));
+
+    renderResults(resultsData);
+  }
+
+  // 3. Render HTML dynamically
+  function renderResults(results: any[]) {
+    hideLoading();
+
+    if (results.length === 0) {
+      showEmpty();
+      if (countDisplay) countDisplay.textContent = "0 results";
+      return;
+    }
+
+    if (countDisplay) countDisplay.textContent = `${results.length} result${results.length === 1 ? '' : 's'}`;
+    if (emptyState) emptyState.classList.add('hidden');
+    
+    if (resultsContainer) {
+      resultsContainer.innerHTML = results.map(item => `
+        <a href="${item.url}" class="block group p-5 md:p-6 bg-surface border border-subtle rounded-2xl hover:border-tx-muted focus:outline-none focus:ring-2 focus:ring-tx-main transition-all shadow-sm hover:shadow-md">
+          <h2 class="text-xl font-[800] tracking-tight text-tx-main group-hover:text-[#5ecb6b] transition-colors mb-2">${item.meta.title || 'Untitled'}</h2>
+          <p class="text-tx-muted text-[15px] leading-relaxed line-clamp-2">${item.excerpt}</p>
+        </a>
+      `).join('');
+    }
+  }
+
+  // --- UI Helpers ---
+  function showLoading() {
+    if (resultsContainer) resultsContainer.innerHTML = '';
+    if (emptyState) emptyState.classList.add('hidden');
+    if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+    if (loadingIndicator) loadingIndicator.classList.add('flex');
+  }
+
+  function hideLoading() {
+    if (loadingIndicator) loadingIndicator.classList.add('hidden');
+    if (loadingIndicator) loadingIndicator.classList.remove('flex');
+  }
+
+  function showEmpty() {
+    if (resultsContainer) resultsContainer.innerHTML = '';
+    if (emptyState) emptyState.classList.remove('hidden');
+    if (emptyState) emptyState.classList.add('flex');
+  }
+
+  function clearResults() {
+    hideLoading();
+    if (emptyState) emptyState.classList.add('hidden');
+    if (termDisplay) termDisplay.textContent = '';
+    if (countDisplay) countDisplay.textContent = '';
+    if (resultsContainer) resultsContainer.innerHTML = '';
+  }
+
+  // --- Initialization & Event Listeners ---
+  
+  // A. Check URL for query on load
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialQuery = urlParams.get('q');
+
+  if (initialQuery && searchInput) {
+    searchInput.value = initialQuery;
+    performSearch(initialQuery);
+  }
+
+  // B. Handle live typing in the on-page input (Debounced)
+  searchInput?.addEventListener('input', (e) => {
+    const query = (e.target as HTMLInputElement).value;
+    
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      // Update URL without reloading the page
+      const newUrl = query ? `/search?q=${encodeURIComponent(query)}` : '/search';
+      window.history.replaceState({}, '', newUrl);
+      
+      performSearch(query);
+    }, 300); // 300ms delay to prevent excessive processing while typing
+  });
+
+</script>
+
+<style is:global>
+  /* 
+    Pagefind wraps highlighted keywords in a <mark> tag. 
+    This styles them to match your theme perfectly.
+  */
+  #search-results mark {
+    background-color: rgba(94, 203, 107, 0.15); /* #5ecb6b with opacity */
+    color: #5ecb6b;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 0px 4px;
+  }
+</style>
