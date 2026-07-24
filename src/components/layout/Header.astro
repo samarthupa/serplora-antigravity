@@ -172,7 +172,7 @@ const primaryBtn = {
       <button
         type="button"
         id="close-search-overlay"
-        class="text-xs tracking-[0.2em] text-tx-muted hover:text-tx-main transition-colors outline-none"
+        class="text-s tracking-[0.2em] text-tx-muted hover:text-tx-main transition-colors outline-none"
         aria-label="Close"
       >
         Close
@@ -180,22 +180,44 @@ const primaryBtn = {
     </div>
 
     <!-- Search Form -->
-    <form
-      action="/search"
-      method="GET"
-      class="w-full border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-colors"
-    >
-      <input
-        type="search"
-        name="q"
-        id="overlay-search-input"
-        placeholder="Search..."
-        autocomplete="off"
-        spellcheck="true"
-        autocorrect="on"
-        autocapitalize="off"
-        class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40"
-      />
+    <form action="/search" method="GET" class="w-full">
+      <div class="border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-colors">
+        <input
+          type="search"
+          name="q"
+          id="overlay-search-input"
+          placeholder="Search..."
+          autocomplete="off"
+          spellcheck="true"
+          autocorrect="on"
+          autocapitalize="off"
+          class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40"
+        />
+      </div>
+
+      <!-- Search Button (Hidden by default) -->
+      <div id="search-submit-container" class="mt-6 flex justify-end opacity-0 invisible transition-all duration-200">
+        <button
+          type="submit"
+          class="inline-flex items-center gap-2 rounded-full border border-subtle px-4 py-2 text-sm font-medium text-tx-main transition-all duration-200 hover:border-tx-main hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-tx-main/20"
+        >
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <span>Search</span>
+        </button>
+      </div>
     </form>
   </div>
 </div>
@@ -238,6 +260,7 @@ const primaryBtn = {
   const searchContent = document.getElementById('search-overlay-content');
   const searchInput = document.getElementById('overlay-search-input') as HTMLInputElement;
   const closeSearchBtn = document.getElementById('close-search-overlay');
+  const searchSubmitContainer = document.getElementById('search-submit-container');
 
   function openSearch() {
     searchOverlay?.classList.remove('opacity-0', 'invisible', 'pointer-events-none');
@@ -255,7 +278,22 @@ const primaryBtn = {
     searchContent?.classList.remove('scale-100', 'opacity-100');
     searchContent?.classList.add('scale-95', 'opacity-0');
     document.body.style.overflow = '';
+    
+    // Clear input and hide button after closing animation finishes
+    setTimeout(() => {
+      if (searchInput) searchInput.value = '';
+      searchSubmitContainer?.classList.add('opacity-0', 'invisible');
+    }, 300);
   }
+
+  // Toggle button visibility based on input text
+  searchInput?.addEventListener('input', () => {
+    if (searchInput.value.trim().length > 0) {
+      searchSubmitContainer?.classList.remove('opacity-0', 'invisible');
+    } else {
+      searchSubmitContainer?.classList.add('opacity-0', 'invisible');
+    }
+  });
 
   searchTrigger?.addEventListener('click', openSearch);
   searchBackdrop?.addEventListener('click', closeSearch);
@@ -269,7 +307,6 @@ const primaryBtn = {
       openSearch();
     }
   });
-
 
   // Mobile Menu Logic
   const btn = document.getElementById('mobile-menu-btn');
