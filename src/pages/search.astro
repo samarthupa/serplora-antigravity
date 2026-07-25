@@ -30,7 +30,7 @@ import Layout from '../layouts/Layout.astro';
             
             <!-- Tutorials -->
             <button data-tab="tutorials" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
-              <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
               Tutorials
               <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
             </button>
@@ -90,7 +90,7 @@ import Layout from '../layouts/Layout.astro';
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <h2 class="text-xl font-bold text-tx-main mb-2">No results found</h2>
-        <p class="text-tx-muted" id="empty-state-message">We couldn't find anything matching your query.</p>
+        <p class="text-tx-muted" id="empty-state-message">We couldn't find anything matching your query. Try modifying your search terms.</p>
       </div>
 
     </div>
@@ -108,7 +108,119 @@ import Layout from '../layouts/Layout.astro';
   let pagefindInstance: any = null;
   let allFetchedResults: any[] = []; 
   let currentTab = 'all'; 
-  let currentQuery = ''; // 🟢 Added this to track the active search term
+  let currentQuery = ''; 
+
+  // 🟢 Comprehensive Intent & Tech Synonym Dictionary
+  const searchSynonyms: Record<string, string> = {
+    "how to": "tutorial",
+    "how do i": "tutorial",
+    "learn": "tutorial",
+    "learning": "tutorial",
+    "beginner": "tutorial",
+    "beginners": "tutorial",
+    "starting": "tutorial",
+    "starter": "tutorial",
+    "intro": "tutorial",
+    "introduction": "tutorial",
+    "basics": "tutorial",
+    "basic": "tutorial",
+    "fundamentals": "tutorial",
+    "handbook": "guide",
+    "cheat sheet": "guide",
+    "cheatsheet": "guide",
+    "roadmap": "guide",
+    "course": "tutorial",
+    "courses": "tutorial",
+    "class": "tutorial",
+    "lesson": "tutorial",
+    "lessons": "tutorial",
+    "walkthrough": "tutorial",
+    "how to build": "project",
+    "how to make": "project",
+    "how to create": "project",
+    "build": "project",
+    "building": "project",
+    "make": "project",
+    "making": "project",
+    "create": "project",
+    "creating": "project",
+    "clone": "project",
+    "app": "project",
+    "application": "project",
+    "demo": "project",
+    "example": "project",
+    "examples": "project",
+    "sample": "project",
+    "exercise": "project",
+    "exercises": "project",
+    "hands on": "project",
+    "hands-on": "project",
+    "interview questions": "quiz",
+    "practice questions": "quiz",
+    "test": "quiz",
+    "tests": "quiz",
+    "testing": "quiz",
+    "exam": "quiz",
+    "exams": "quiz",
+    "assessment": "quiz",
+    "practice": "quiz",
+    "questions": "quiz",
+    "question": "quiz",
+    "mcq": "quiz",
+    "mcqs": "quiz",
+    "challenge": "quiz",
+    "challenges": "quiz",
+    "difference between": "vs",
+    "comparison": "vs",
+    "versus": "vs",
+    "blog": "article",
+    "blogs": "article",
+    "news": "article",
+    "post": "article",
+    "posts": "article",
+    "explained": "article",
+    "explanation": "article",
+    "overview": "article",
+    "understanding": "article",
+    "deep dive": "article",
+    "how to fix": "guide",
+    "fix": "guide",
+    "solve": "guide",
+    "error": "guide",
+    "bug": "guide",
+    "issue": "guide",
+    "solution": "guide",
+    "py": "python",
+    "py3": "python",
+    "js": "javascript",
+    "ts": "typescript",
+    "reactjs": "react",
+    "nodejs": "node",
+    "nextjs": "next",
+    "astrojs": "astro",
+    "tailwind": "tailwindcss",
+    "css3": "css",
+    "html5": "html"
+  };
+
+  // Helper function to safely replace phrases & words (sorted long-to-short)
+  function optimizeSearchQuery(rawQuery: string): string {
+    let query = rawQuery.toLowerCase();
+    
+    // Sort keys by character length descending so multi-word phrases match before single words
+    const sortedKeys = Object.keys(searchSynonyms).sort((a, b) => b.length - a.length);
+
+    for (const phrase of sortedKeys) {
+      const replacement = searchSynonyms[phrase];
+      // Escape special characters for regex
+      const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedPhrase}\\b`, 'gi');
+      
+      query = query.replace(regex, replacement);
+    }
+
+    return query;
+  }
 
   // 1. Load Pagefind dynamically
   async function initPagefind() {
@@ -132,8 +244,11 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    currentQuery = query; // 🟢 Save the query to our global variable
+    currentQuery = query; // Save the original query to our global variable
     showLoading();
+
+    // 🟢 Intercept and replace synonyms automatically
+    const optimizedQuery = optimizeSearchQuery(query);
 
     const pf = await initPagefind();
     if (!pf) {
@@ -141,7 +256,8 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    const searchResult = await pf.search(query);
+    // Pass the hidden, optimized query into Pagefind
+    const searchResult = await pf.search(optimizedQuery);
     allFetchedResults = await Promise.all(searchResult.results.map((r: any) => r.data()));
 
     renderResults();
@@ -157,12 +273,10 @@ import Layout from '../layouts/Layout.astro';
 
     if (filteredResults.length === 0) {
       showEmpty(currentTab);
-      // 🟢 Updated the empty count display to include the query
       if (countDisplay) countDisplay.textContent = `About 0 search results for "${currentQuery}"`;
       return;
     }
 
-    // 🟢 Updated the successful count display to include the query
     if (countDisplay) {
       countDisplay.textContent = `About ${filteredResults.length.toLocaleString()} search results for "${currentQuery}"`;
     }
@@ -234,7 +348,7 @@ import Layout from '../layouts/Layout.astro';
     
     if (emptyStateMessage) {
       if (tab === 'all') {
-        emptyStateMessage.textContent = "We couldn't find anything matching your query.";
+        emptyStateMessage.textContent = "We couldn't find anything matching your query. Try modifying your search terms.";
       } else {
         emptyStateMessage.textContent = `No ${tab} found for this query.`;
       }
