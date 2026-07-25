@@ -41,7 +41,7 @@ export async function onRequest(context) {
             account: {                 
                 accountLinking: {                     
                     enabled: true,                     
-                    trustedProviders: ["google", "github", "microsoft"]                 
+                    trustedProviders: ["google", "github", "microsoft", "linkedin"]                 
                 }             
             },             
             plugins: [
@@ -119,7 +119,16 @@ This code expires in 10 minutes. Do not share this with anyone.`,
                         emailVerified: true,
                         image: profile.picture || null
                     })                 
-                }             
+                },
+                
+                linkedin: {                     
+                    clientId: context.env.LINKEDIN_CLIENT_ID || "",                     
+                    clientSecret: context.env.LINKEDIN_CLIENT_SECRET || "",    
+                    mapProfileToUser: (profile) => ({ 
+                        emailVerified: true,
+                        image: profile.picture || null
+                    })                 
+                }
             },         
         });         
         const response = await auth.handler(context.request);         
