@@ -99,6 +99,7 @@ import Layout from '../layouts/Layout.astro';
   let pagefindInstance: any = null;
   let allFetchedResults: any[] = []; 
   let currentTab = 'all'; 
+  let currentQuery = ''; // 🟢 Added this to track the active search term
 
   // 1. Load Pagefind dynamically
   async function initPagefind() {
@@ -122,6 +123,7 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
+    currentQuery = query; // 🟢 Save the query to our global variable
     showLoading();
 
     const pf = await initPagefind();
@@ -146,18 +148,19 @@ import Layout from '../layouts/Layout.astro';
 
     if (filteredResults.length === 0) {
       showEmpty(currentTab);
-      if (countDisplay) countDisplay.textContent = `About 0 search results`;
+      // 🟢 Updated the empty count display to include the query
+      if (countDisplay) countDisplay.textContent = `About 0 search results for "${currentQuery}"`;
       return;
     }
 
+    // 🟢 Updated the successful count display to include the query
     if (countDisplay) {
-      countDisplay.textContent = `About ${filteredResults.length.toLocaleString()} search results`;
+      countDisplay.textContent = `About ${filteredResults.length.toLocaleString()} search results for "${currentQuery}"`;
     }
     
     if (emptyState) emptyState.classList.add('hidden');
     
     if (resultsContainer) {
-      // Note: Removed the URL span entirely based on your request
       resultsContainer.innerHTML = filteredResults.map(item => `
         <div class="flex flex-col group">
           <a href="${item.url}" class="inline-block focus:outline-none mb-1">
@@ -169,7 +172,7 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  // 4. Tab Click Listeners (Updated to be more robust)
+  // 4. Tab Click Listeners
   searchTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       const target = e.currentTarget as HTMLElement;
