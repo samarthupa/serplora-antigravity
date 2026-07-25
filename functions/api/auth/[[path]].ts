@@ -124,6 +124,10 @@ This code expires in 10 minutes. Do not share this with anyone.`,
                 linkedin: {                     
                     clientId: context.env.LINKEDIN_CLIENT_ID || "",                     
                     clientSecret: context.env.LINKEDIN_CLIENT_SECRET || "",    
+                    prompt: "select_account", // Keeps your code consistent; LinkedIn may interpret this as a prompt to re-authenticate
+                    authorizationUrlParams: {
+                        enable_extended_login: "true"
+                    },
                     mapProfileToUser: (profile) => ({ 
                         emailVerified: true,
                         image: profile.picture || null
