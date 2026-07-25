@@ -1,17 +1,28 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 
 export const GET: APIRoute = async (context) => {
   const siteUrl = context.site?.toString() || 'https://serplora.com';
+
+  // 1. Fetch the Articles/Blog Index Page
+  const blogPage = await getEntry('blogPage', 'data');
+  let indexUrl = '';
+  if (blogPage && blogPage.data.seo?.robotsIndex !== false) {
+    indexUrl = `
+      <url>
+        <loc>${new URL('/articles', siteUrl).toString()}</loc>
+      </url>
+    `;
+  }
+
+  // 2. Fetch all posts
+  const posts = await getCollection('posts', (entry) => 
+    !entry.data.draft && entry.data.seo?.robotsIndex !== false
+  );
   
-  // Fetch all posts and filter out the ones marked as draft
-  const posts = await getCollection('posts', (entry) => !entry.data.draft && entry.data.seo?.robotsIndex !== false);
-
-  const urls = posts.map(post => {
-    // Keystatic saves in folders, so we extract the base slug (e.g., 'mera-desh-badal-raha-hai')
-    const slug = post.id.split('/')[0]; 
+  const postUrls = posts.map(post => {
+    const slug = post.id.split('/')[0];
     const date = post.data.updatedDate || post.data.publishDate || new Date();
-
     return `
       <url>
         <loc>${new URL(`/articles/${slug}`, siteUrl).toString()}</loc>
@@ -22,10 +33,11 @@ export const GET: APIRoute = async (context) => {
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      ${urls}
+      ${indexUrl}
+      ${postUrls}
     </urlset>`;
 
   return new Response(sitemap, {
     headers: { 'Content-Type': 'application/xml' }
   });
-}
+};
