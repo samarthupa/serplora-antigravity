@@ -12,29 +12,73 @@ import Layout from '../layouts/Layout.astro';
   </Fragment>
 
   <main class="min-h-screen bg-main pt-24 pb-20 px-4 md:px-8 font-['Outfit',sans-serif]">
-    <div class="max-w-3xl mx-auto w-full">
+    <div class="max-w-4xl mx-auto w-full"> <!-- Widened slightly to accommodate tabs -->
+
+      <!-- 🟢 NEW: Yahoo-Style Tab Navigation -->
+      <div class="flex items-center justify-between border-b border-subtle mb-6 overflow-x-auto hide-scrollbar">
+        <div class="flex items-center gap-6 md:gap-8" id="search-tabs">
+          <!-- All -->
+          <button data-tab="all" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-main font-[600] outline-none">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            All
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm transition-opacity duration-200"></span>
+          </button>
+          
+          <!-- Tutorials -->
+          <button data-tab="tutorials" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+            <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            Tutorials
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+          </button>
+
+          <!-- Projects -->
+          <button data-tab="projects" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+            <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            Projects
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+          </button>
+
+          <!-- Quizzes -->
+          <button data-tab="quizzes" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+            <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Quizzes
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+          </button>
+
+          <!-- Articles -->
+          <button data-tab="articles" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+            <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+            Articles
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+          </button>
+        </div>
+        
+        <!-- Dropdown placeholder mimicking Yahoo's 'Anytime' -->
+        <div class="hidden md:flex items-center text-sm text-tx-muted cursor-pointer hover:text-tx-main pb-3">
+          Anytime
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </div>
+      </div>
 
       <!-- Results Header -->
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-subtle">
-        <h1 class="text-2xl font-[800] tracking-tight text-tx-main">
-          Results <span id="search-term-display" class="text-tx-muted font-[500]"></span>
-        </h1>
-        <span id="search-count" class="text-sm font-[600] text-tx-muted bg-surface px-3 py-1 rounded-full border border-subtle"></span>
+      <div class="flex items-center justify-between mb-6">
+        <span id="search-count" class="text-[15px] font-[400] text-tx-muted">About 0 search results</span>
       </div>
 
       <!-- Loading State -->
-      <div id="search-loading" class="hidden flex-col gap-4">
+      <div id="search-loading" class="hidden flex-col gap-6">
         {[1, 2, 3].map(() => (
-          <div class="w-full p-6 bg-surface rounded-2xl border border-subtle animate-pulse">
-            <div class="h-6 bg-tx-muted/20 rounded-md w-2/3 mb-4"></div>
-            <div class="h-4 bg-tx-muted/10 rounded-md w-full mb-2"></div>
+          <div class="w-full bg-transparent animate-pulse">
+            <div class="h-4 bg-tx-muted/20 rounded-md w-1/3 mb-2"></div>
+            <div class="h-6 bg-tx-muted/20 rounded-md w-2/3 mb-3"></div>
+            <div class="h-4 bg-tx-muted/10 rounded-md w-full mb-1"></div>
             <div class="h-4 bg-tx-muted/10 rounded-md w-4/5"></div>
           </div>
         ))}
       </div>
 
       <!-- Results Container -->
-      <div id="search-results" class="flex flex-col gap-4">
+      <div id="search-results" class="flex flex-col gap-8">
         <!-- JS will inject results here -->
       </div>
 
@@ -44,7 +88,7 @@ import Layout from '../layouts/Layout.astro';
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <h2 class="text-xl font-bold text-tx-main mb-2">No results found</h2>
-        <p class="text-tx-muted">We couldn't find anything matching your query. Try adjusting your keywords in the search menu.</p>
+        <p class="text-tx-muted" id="empty-state-message">We couldn't find anything matching your query.</p>
       </div>
 
     </div>
@@ -55,18 +99,19 @@ import Layout from '../layouts/Layout.astro';
   const resultsContainer = document.getElementById('search-results');
   const loadingIndicator = document.getElementById('search-loading');
   const emptyState = document.getElementById('search-empty');
-  const termDisplay = document.getElementById('search-term-display');
+  const emptyStateMessage = document.getElementById('empty-state-message');
   const countDisplay = document.getElementById('search-count');
+  const searchTabs = document.querySelectorAll('.search-tab');
 
   let pagefindInstance: any = null;
+  let allFetchedResults: any[] = []; // Caches the master list of results
+  let currentTab = 'all'; // Tracks active tab
 
- // 1. Load Pagefind dynamically (only happens once)
+  // 1. Load Pagefind dynamically
   async function initPagefind() {
     if (pagefindInstance) return pagefindInstance;
     try {
-      // TRICK VITE: Use a variable for the path so Vite doesn't try to bundle a file that doesn't exist yet
       const pagefindUrl = '/pagefind/pagefind.js';
-      
       // @ts-ignore
       pagefindInstance = await import(/* @vite-ignore */ pagefindUrl);
       await pagefindInstance.init();
@@ -77,15 +122,13 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  // 2. Perform the actual search
+  // 2. Perform the actual search (Only happens once on page load)
   async function performSearch(query: string) {
     if (!query.trim()) {
       clearResults();
       return;
     }
 
-    // Update UI text immediately
-    if (termDisplay) termDisplay.textContent = `for "${query}"`;
     showLoading();
 
     const pf = await initPagefind();
@@ -97,34 +140,80 @@ import Layout from '../layouts/Layout.astro';
     // Execute headless search
     const searchResult = await pf.search(query);
     
-    // Process results concurrently
-    const resultsData = await Promise.all(searchResult.results.map((r: any) => r.data()));
+    // Process results concurrently and store in our global array
+    allFetchedResults = await Promise.all(searchResult.results.map((r: any) => r.data()));
 
-    renderResults(resultsData);
+    // Render using the default "all" tab
+    renderResults();
   }
 
-  // 3. Render HTML dynamically
-  function renderResults(results: any[]) {
+  // 3. Render and Filter HTML dynamically
+  function renderResults() {
     hideLoading();
 
-    if (results.length === 0) {
-      showEmpty();
-      if (countDisplay) countDisplay.textContent = "0 results";
+    // FILTER LOGIC: Checks if the result URL contains the tab name
+    // e.g., if tab is 'tutorials', it looks for /tutorials/ in the URL path.
+    const filteredResults = currentTab === 'all' 
+      ? allFetchedResults 
+      : allFetchedResults.filter(item => item.url.includes(`/${currentTab}/`));
+
+    if (filteredResults.length === 0) {
+      showEmpty(currentTab);
+      if (countDisplay) countDisplay.textContent = `About 0 search results`;
       return;
     }
 
-    if (countDisplay) countDisplay.textContent = `${results.length} result${results.length === 1 ? '' : 's'}`;
+    // Format like Yahoo: "About X search results"
+    if (countDisplay) {
+      countDisplay.textContent = `About ${filteredResults.length.toLocaleString()} search results`;
+    }
+    
     if (emptyState) emptyState.classList.add('hidden');
     
     if (resultsContainer) {
-      resultsContainer.innerHTML = results.map(item => `
-        <a href="${item.url}" class="block group p-5 md:p-6 bg-surface border border-subtle rounded-2xl hover:border-tx-muted focus:outline-none focus:ring-2 focus:ring-tx-main transition-all shadow-sm hover:shadow-md">
-          <h2 class="text-xl font-[800] tracking-tight text-tx-main group-hover:text-[#5ecb6b] transition-colors mb-2">${item.meta.title || 'Untitled'}</h2>
-          <p class="text-tx-muted text-[15px] leading-relaxed line-clamp-2">${item.excerpt}</p>
-        </a>
+      // Adjusted the HTML to match a standard search engine layout (Title, URL, Excerpt)
+      resultsContainer.innerHTML = filteredResults.map(item => `
+        <div class="flex flex-col group">
+          <div class="flex items-center gap-2 text-sm text-tx-muted mb-1">
+            <span class="truncate max-w-[300px]">serplora.com${item.url}</span>
+          </div>
+          <a href="${item.url}" class="inline-block focus:outline-none">
+            <h2 class="text-[20px] md:text-[22px] font-[500] text-[#1a0dab] dark:text-[#8ab4f8] group-hover:underline mb-1">${item.meta.title || 'Untitled'}</h2>
+          </a>
+          <p class="text-tx-main text-[14px] leading-snug line-clamp-2">${item.excerpt}</p>
+        </div>
       `).join('');
     }
   }
+
+  // 4. Tab Click Listeners
+  searchTabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      const target = e.currentTarget as HTMLElement;
+      const clickedTab = target.getAttribute('data-tab') || 'all';
+
+      // Don't re-render if clicking the active tab
+      if (currentTab === clickedTab) return;
+
+      // Update state
+      currentTab = clickedTab;
+
+      // Reset styling for all tabs
+      searchTabs.forEach(t => {
+        t.classList.remove('text-tx-main', 'font-[600]');
+        t.classList.add('text-tx-muted', 'font-[500]');
+        t.querySelector('.tab-indicator')?.classList.replace('opacity-100', 'opacity-0');
+      });
+
+      // Apply active styling to clicked tab
+      target.classList.remove('text-tx-muted', 'font-[500]');
+      target.classList.add('text-tx-main', 'font-[600]');
+      target.querySelector('.tab-indicator')?.classList.replace('opacity-0', 'opacity-100');
+
+      // Re-render results based on new filter
+      renderResults();
+    });
+  });
 
   // --- UI Helpers ---
   function showLoading() {
@@ -139,23 +228,29 @@ import Layout from '../layouts/Layout.astro';
     if (loadingIndicator) loadingIndicator.classList.remove('flex');
   }
 
-  function showEmpty() {
+  function showEmpty(tab: string = 'all') {
     if (resultsContainer) resultsContainer.innerHTML = '';
     if (emptyState) emptyState.classList.remove('hidden');
     if (emptyState) emptyState.classList.add('flex');
+    
+    if (emptyStateMessage) {
+      if (tab === 'all') {
+        emptyStateMessage.textContent = "We couldn't find anything matching your query.";
+      } else {
+        // e.g., "No tutorials found for this query."
+        emptyStateMessage.textContent = `No ${tab} found for this query.`;
+      }
+    }
   }
 
   function clearResults() {
     hideLoading();
     if (emptyState) emptyState.classList.add('hidden');
-    if (termDisplay) termDisplay.textContent = '';
     if (countDisplay) countDisplay.textContent = '';
     if (resultsContainer) resultsContainer.innerHTML = '';
   }
 
   // --- Initialization ---
-  
-  // A. Check URL for query on load and perform search
   const urlParams = new URLSearchParams(window.location.search);
   const initialQuery = urlParams.get('q');
 
@@ -168,15 +263,19 @@ import Layout from '../layouts/Layout.astro';
 </script>
 
 <style is:global>
-  /* 
-    Pagefind wraps highlighted keywords in a <mark> tag. 
-    This styles them to match your theme perfectly.
-  */
+  /* Pagefind mark highlighting matching Yahoo/Google standard bolding */
   #search-results mark {
-    background-color: rgba(94, 203, 107, 0.15); /* #5ecb6b with opacity */
-    color: #5ecb6b;
+    background-color: transparent;
+    color: inherit;
     font-weight: 700;
-    border-radius: 4px;
-    padding: 0px 4px;
+  }
+  
+  /* Hide scrollbar for the tab navigation on mobile */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 </style>
