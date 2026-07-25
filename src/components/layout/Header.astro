@@ -268,21 +268,43 @@ const primaryBtn = {
     searchContent?.classList.add('scale-95', 'opacity-0');
     document.body.style.overflow = '';
     
-    // Clear input and hide button after closing animation finishes
-    setTimeout(() => {
-      if (searchInput) searchInput.value = '';
-      searchSubmitContainer?.classList.add('opacity-0', 'invisible');
-    }, 300);
+    // We intentionally removed the setTimeout here that was clearing the input. 
+    // Now, whatever the user typed stays there if they reopen the search overlay!
   }
 
-  // Toggle button visibility based on input text
-  searchInput?.addEventListener('input', () => {
-    if (searchInput.value.trim().length > 0) {
+  // --- SEARCH MEMORY LOGIC ---
+  function restoreSearchState() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryFromUrl = urlParams.get('q');
+    const savedQuery = sessionStorage.getItem('lastSearchQuery');
+
+    if (queryFromUrl) {
+      // If we are on a search results page, use the URL as the source of truth
+      if (searchInput) searchInput.value = queryFromUrl;
+      sessionStorage.setItem('lastSearchQuery', queryFromUrl);
       searchSubmitContainer?.classList.remove('opacity-0', 'invisible');
-    } else {
-      searchSubmitContainer?.classList.add('opacity-0', 'invisible');
+    } else if (savedQuery) {
+      // If we are on another page, restore their last search from session memory
+      if (searchInput) searchInput.value = savedQuery;
+      searchSubmitContainer?.classList.remove('opacity-0', 'invisible');
+    }
+  }
+
+  // Toggle button visibility & save whatever the user types to memory immediately
+  searchInput?.addEventListener('input', () => {
+    if (searchInput) {
+      sessionStorage.setItem('lastSearchQuery', searchInput.value);
+      
+      if (searchInput.value.trim().length > 0) {
+        searchSubmitContainer?.classList.remove('opacity-0', 'invisible');
+      } else {
+        searchSubmitContainer?.classList.add('opacity-0', 'invisible');
+      }
     }
   });
+
+  // Run the restore function immediately when the script loads
+  restoreSearchState();
 
   searchTrigger?.addEventListener('click', openSearch);
   searchBackdrop?.addEventListener('click', closeSearch);
