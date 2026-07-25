@@ -12,51 +12,45 @@ import Layout from '../layouts/Layout.astro';
   </Fragment>
 
   <main class="min-h-screen bg-main pt-24 pb-20 px-4 md:px-8 font-['Outfit',sans-serif]">
-    <div class="max-w-4xl mx-auto w-full"> <!-- Widened slightly to accommodate tabs -->
+    <div class="max-w-4xl mx-auto w-full">
 
-      <!-- 🟢 NEW: Yahoo-Style Tab Navigation -->
-      <div class="flex items-center justify-between border-b border-subtle mb-6 overflow-x-auto hide-scrollbar">
+      <!-- 🟢 Tab Navigation -->
+      <div class="flex items-center border-b border-subtle mb-6 overflow-x-auto hide-scrollbar">
         <div class="flex items-center gap-6 md:gap-8" id="search-tabs">
-          <!-- All -->
-          <button data-tab="all" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-main font-[600] outline-none">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          
+          <!-- All (SVG Removed, dynamically handles opacity-100) -->
+          <button data-tab="all" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-main font-[600] outline-none cursor-pointer">
             All
-            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm transition-opacity duration-200"></span>
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-100 transition-opacity duration-200"></span>
           </button>
           
           <!-- Tutorials -->
-          <button data-tab="tutorials" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+          <button data-tab="tutorials" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
             <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             Tutorials
-            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
           </button>
 
           <!-- Projects -->
-          <button data-tab="projects" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+          <button data-tab="projects" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
             <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
             Projects
-            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
           </button>
 
           <!-- Quizzes -->
-          <button data-tab="quizzes" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+          <button data-tab="quizzes" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
             <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             Quizzes
-            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
           </button>
 
           <!-- Articles -->
-          <button data-tab="articles" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none">
+          <button data-tab="articles" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
             <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
             Articles
-            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-[#3b82f6] rounded-t-sm opacity-0 transition-opacity duration-200"></span>
+            <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
           </button>
-        </div>
-        
-        <!-- Dropdown placeholder mimicking Yahoo's 'Anytime' -->
-        <div class="hidden md:flex items-center text-sm text-tx-muted cursor-pointer hover:text-tx-main pb-3">
-          Anytime
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
         </div>
       </div>
 
@@ -69,7 +63,6 @@ import Layout from '../layouts/Layout.astro';
       <div id="search-loading" class="hidden flex-col gap-6">
         {[1, 2, 3].map(() => (
           <div class="w-full bg-transparent animate-pulse">
-            <div class="h-4 bg-tx-muted/20 rounded-md w-1/3 mb-2"></div>
             <div class="h-6 bg-tx-muted/20 rounded-md w-2/3 mb-3"></div>
             <div class="h-4 bg-tx-muted/10 rounded-md w-full mb-1"></div>
             <div class="h-4 bg-tx-muted/10 rounded-md w-4/5"></div>
@@ -104,8 +97,8 @@ import Layout from '../layouts/Layout.astro';
   const searchTabs = document.querySelectorAll('.search-tab');
 
   let pagefindInstance: any = null;
-  let allFetchedResults: any[] = []; // Caches the master list of results
-  let currentTab = 'all'; // Tracks active tab
+  let allFetchedResults: any[] = []; 
+  let currentTab = 'all'; 
 
   // 1. Load Pagefind dynamically
   async function initPagefind() {
@@ -122,7 +115,7 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  // 2. Perform the actual search (Only happens once on page load)
+  // 2. Perform the actual search
   async function performSearch(query: string) {
     if (!query.trim()) {
       clearResults();
@@ -137,13 +130,9 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    // Execute headless search
     const searchResult = await pf.search(query);
-    
-    // Process results concurrently and store in our global array
     allFetchedResults = await Promise.all(searchResult.results.map((r: any) => r.data()));
 
-    // Render using the default "all" tab
     renderResults();
   }
 
@@ -151,8 +140,6 @@ import Layout from '../layouts/Layout.astro';
   function renderResults() {
     hideLoading();
 
-    // FILTER LOGIC: Checks if the result URL contains the tab name
-    // e.g., if tab is 'tutorials', it looks for /tutorials/ in the URL path.
     const filteredResults = currentTab === 'all' 
       ? allFetchedResults 
       : allFetchedResults.filter(item => item.url.includes(`/${currentTab}/`));
@@ -163,7 +150,6 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    // Format like Yahoo: "About X search results"
     if (countDisplay) {
       countDisplay.textContent = `About ${filteredResults.length.toLocaleString()} search results`;
     }
@@ -171,14 +157,11 @@ import Layout from '../layouts/Layout.astro';
     if (emptyState) emptyState.classList.add('hidden');
     
     if (resultsContainer) {
-      // Adjusted the HTML to match a standard search engine layout (Title, URL, Excerpt)
+      // Note: Removed the URL span entirely based on your request
       resultsContainer.innerHTML = filteredResults.map(item => `
         <div class="flex flex-col group">
-          <div class="flex items-center gap-2 text-sm text-tx-muted mb-1">
-            <span class="truncate max-w-[300px]">serplora.com${item.url}</span>
-          </div>
-          <a href="${item.url}" class="inline-block focus:outline-none">
-            <h2 class="text-[20px] md:text-[22px] font-[500] text-[#1a0dab] dark:text-[#8ab4f8] group-hover:underline mb-1">${item.meta.title || 'Untitled'}</h2>
+          <a href="${item.url}" class="inline-block focus:outline-none mb-1">
+            <h2 class="text-[20px] md:text-[22px] font-[500] text-[#1a0dab] dark:text-[#8ab4f8] group-hover:underline">${item.meta.title || 'Untitled'}</h2>
           </a>
           <p class="text-tx-main text-[14px] leading-snug line-clamp-2">${item.excerpt}</p>
         </div>
@@ -186,31 +169,35 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  // 4. Tab Click Listeners
+  // 4. Tab Click Listeners (Updated to be more robust)
   searchTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       const target = e.currentTarget as HTMLElement;
       const clickedTab = target.getAttribute('data-tab') || 'all';
 
-      // Don't re-render if clicking the active tab
       if (currentTab === clickedTab) return;
-
-      // Update state
       currentTab = clickedTab;
 
-      // Reset styling for all tabs
+      // Reset styling for all tabs securely
       searchTabs.forEach(t => {
         t.classList.remove('text-tx-main', 'font-[600]');
         t.classList.add('text-tx-muted', 'font-[500]');
-        t.querySelector('.tab-indicator')?.classList.replace('opacity-100', 'opacity-0');
+        const indicator = t.querySelector('.tab-indicator');
+        if (indicator) {
+          indicator.classList.remove('opacity-100');
+          indicator.classList.add('opacity-0');
+        }
       });
 
-      // Apply active styling to clicked tab
+      // Apply active styling to clicked tab securely
       target.classList.remove('text-tx-muted', 'font-[500]');
       target.classList.add('text-tx-main', 'font-[600]');
-      target.querySelector('.tab-indicator')?.classList.replace('opacity-0', 'opacity-100');
+      const targetIndicator = target.querySelector('.tab-indicator');
+      if (targetIndicator) {
+        targetIndicator.classList.remove('opacity-0');
+        targetIndicator.classList.add('opacity-100');
+      }
 
-      // Re-render results based on new filter
       renderResults();
     });
   });
@@ -237,7 +224,6 @@ import Layout from '../layouts/Layout.astro';
       if (tab === 'all') {
         emptyStateMessage.textContent = "We couldn't find anything matching your query.";
       } else {
-        // e.g., "No tutorials found for this query."
         emptyStateMessage.textContent = `No ${tab} found for this query.`;
       }
     }
