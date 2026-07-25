@@ -167,17 +167,6 @@ const primaryBtn = {
     id="search-overlay-content"
     class="relative z-10 w-full max-w-2xl mx-auto transform scale-95 opacity-0 transition-all duration-500 ease-out"
   >
-    <!-- Close Button -->
-    <div class="flex justify-end mb-5">
-      <button
-        type="button"
-        id="close-search-overlay"
-        class="text-s tracking-[0.2em] text-tx-muted hover:text-tx-main transition-colors outline-none"
-        aria-label="Close"
-      >
-        Close
-      </button>
-    </div>
 
     <!-- Search Form -->
     <form action="/search" method="GET" class="w-full">
@@ -199,7 +188,7 @@ const primaryBtn = {
       <div id="search-submit-container" class="mt-6 flex justify-end opacity-0 invisible transition-all duration-200">
         <button
           type="submit"
-          class="inline-flex items-center gap-2 rounded-full border border-subtle px-4 py-2 text-sm font-medium text-tx-main transition-all duration-200 hover:border-tx-main hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-tx-main/20"
+          class="inline-flex items-center gap-2 rounded-sm border border-subtle px-4 py-2 text-sm font-medium text-tx-main transition-all duration-200 hover:border-tx-main hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-tx-main/20"
         >
           <svg
             class="h-4 w-4"

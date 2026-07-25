@@ -50,15 +50,19 @@
   "socialLinks": [
     {
       "platform": "youtube",
-      "url": "https://www.youtube.com/@serplora"
+      "url": "https://www.youtube.com/@serplora?sub_confirmation=1"
     },
     {
-      "platform": "twitter",
-      "url": "https://x.com/serplora_acad"
+      "platform": "linkedin",
+      "url": "https://www.linkedin.com/company/serplora/"
     },
     {
       "platform": "github",
       "url": "https://github.com/serplora-academy"
+    },
+    {
+      "platform": "twitter",
+      "url": "https://x.com/serplora_acad"
     }
   ],
   "copyrightText": "© 2026 Serplora. All rights reserved."
