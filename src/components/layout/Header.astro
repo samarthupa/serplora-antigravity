@@ -168,6 +168,20 @@ const primaryBtn = {
     class="relative z-10 w-full max-w-2xl mx-auto transform scale-95 opacity-0 transition-all duration-500 ease-out"
   >
 
+    <!-- 🟢 BACKWARD ARROW (Aligned with search bar) -->
+    <div class="mb-12 flex">
+      <button 
+        id="close-search-overlay" 
+        type="button" 
+        class="inline-flex items-center justify-center p-2.5 -ml-3 text-tx-muted hover:text-tx-main hover:bg-tx-muted/10 rounded-full transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-tx-main/50"
+        aria-label="Close search"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+      </button>
+    </div>
+
     <!-- Search Form -->
     <form action="/search" method="GET" class="w-full">
       <div class="border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-colors">
