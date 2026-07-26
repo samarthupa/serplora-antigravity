@@ -320,7 +320,7 @@ export default function EditorArea({
 
       {showConsole && (isConsoleOpen || (isMobile && mobileActiveTab === 'console')) && (
         <div style={{ height: (isConsoleFullscreen || isMobile) ? '100%' : `${consoleHeight}px` }} 
-             className={`${(isMobile && mobileActiveTab !== 'console') ? 'hidden' : 'flex'} flex-col bg-gray-50 dark:bg-[#1e1e1e] border-t border-gray-300 dark:border-[#3c3c3c] shrink-0 relative transition-colors`}>
+             className={`${(isMobile && mobileActiveTab !== 'console') ? 'hidden' : 'flex'} flex-col bg-gray-50 dark:bg-[#1e1e1e] shrink-0 relative transition-colors`}>
           
           {!isConsoleFullscreen && !isMobile && <div className="absolute left-0 right-0 top-[-2px] h-1.5 cursor-row-resize hover:bg-[#007acc] z-20" onMouseDown={() => setIsResizingConsole(true)} />}
           {isResizingConsole && <div className="fixed inset-0 z-[9999] cursor-row-resize" />}
