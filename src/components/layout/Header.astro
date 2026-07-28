@@ -29,24 +29,28 @@ const primaryBtn = {
   <div class="w-full px-4 md:px-10 flex items-center gap-2 md:gap-4 relative">
     
     <!-- Grid Menu Icon (Now visible on Desktop and Mobile) -->
-  <button 
-      type="button" 
-      class="flex justify-center items-center w-[28px] h-[28px] rounded-[10px] hover:bg-tx-muted/10 transition-colors focus:outline-none cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main" 
-      id="mobile-menu-btn" 
-      aria-label="Toggle navigation menu"
-    >
-      <svg class="w-[20px] h-[20px] fill-current transition-transform duration-200 active:scale-95" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="4" height="4" rx="1" />
-        <rect x="10" y="3" width="4" height="4" rx="1" />
-        <rect x="17" y="3" width="4" height="4" rx="1" />
-        <rect x="3" y="10" width="4" height="4" rx="1" />
-        <rect x="10" y="10" width="4" height="4" rx="1" />
-        <rect x="17" y="10" width="4" height="4" rx="1" />
-        <rect x="3" y="17" width="4" height="4" rx="1" />
-        <rect x="10" y="17" width="4" height="4" rx="1" />
-        <rect x="17" y="17" width="4" height="4" rx="1" />
-      </svg>
-    </button>
+  <button
+  type="button"
+  class="flex justify-center items-center w-[30px] h-[30px] md:w-[28px] md:h-[28px] rounded-[10px] transition-colors focus:outline-none cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main"
+  id="mobile-menu-btn"
+  aria-label="Toggle navigation menu"
+>
+  <svg
+    class="w-[22px] h-[22px] md:w-[20px] md:h-[20px] fill-current transition-transform duration-200 active:scale-95"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect x="3" y="3" width="4" height="4" rx="1" />
+    <rect x="10" y="3" width="4" height="4" rx="1" />
+    <rect x="17" y="3" width="4" height="4" rx="1" />
+    <rect x="3" y="10" width="4" height="4" rx="1" />
+    <rect x="10" y="10" width="4" height="4" rx="1" />
+    <rect x="17" y="10" width="4" height="4" rx="1" />
+    <rect x="3" y="17" width="4" height="4" rx="1" />
+    <rect x="10" y="17" width="4" height="4" rx="1" />
+    <rect x="17" y="17" width="4" height="4" rx="1" />
+  </svg>
+</button>
 
     <a href="/" class="flex flex-col items-start justify-center gap-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted rounded mr-auto md:mr-0">
       <div class="flex items-center">
@@ -316,13 +320,13 @@ const primaryBtn = {
       if (menu.classList.contains('hidden')) {
         // MENU IS CLOSED: Restore scrolling and normal color
         document.body.style.overflow = '';
-        btn.classList.remove('text-[#5ecb6b]'); // Remove the active color
+        btn.classList.remove('text-blue-500'); // Remove the active color
         btn.classList.add('text-tx-main');      // Add back the default color
       } else {
         // MENU IS OPEN: Disable scrolling and apply active color
         document.body.style.overflow = 'hidden';
         btn.classList.remove('text-tx-main');   // Remove the default color
-        btn.classList.add('text-[#5ecb6b]');    // Add the active color
+        btn.classList.add('text-blue-500');    // Add the active color
       }
     });
   }
