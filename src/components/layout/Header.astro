@@ -320,13 +320,13 @@ const primaryBtn = {
       if (menu.classList.contains('hidden')) {
         // MENU IS CLOSED: Restore scrolling and normal color
         document.body.style.overflow = '';
-        btn.classList.remove('text-blue-500'); // Remove the active color
+        btn.classList.remove('text-[#5ecb6b]'); // Remove the active color
         btn.classList.add('text-tx-main');      // Add back the default color
       } else {
         // MENU IS OPEN: Disable scrolling and apply active color
         document.body.style.overflow = 'hidden';
         btn.classList.remove('text-tx-main');   // Remove the default color
-        btn.classList.add('text-blue-500');    // Add the active color
+        btn.classList.add('text-[#5ecb6b]');    // Add the active color
       }
     });
   }
