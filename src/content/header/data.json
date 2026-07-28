@@ -7,21 +7,44 @@
     {
       "label": "Tutorials",
       "url": "/tutorials",
-      "subItems": []
-    },
-    {
-      "label": "Articles",
-      "url": "/articles",
-      "subItems": []
+      "subItems": [
+        {
+          "label": "Python Tutorials",
+          "url": "/tutorials/python"
+        }
+      ]
     },
     {
       "label": "Quizzes",
       "url": "/quizzes",
-      "subItems": []
+      "subItems": [
+        {
+          "label": "Python Quiz",
+          "url": "/quizzes/python"
+        }
+      ]
     },
     {
       "label": "Compilers",
       "url": "/compilers",
+      "subItems": [
+        {
+          "label": "Python Compiler",
+          "url": "/compilers/python"
+        },
+        {
+          "label": "HTML Compiler",
+          "url": "/compilers/html"
+        },
+        {
+          "label": "JavaScript Compiler",
+          "url": "/compilers/javascript"
+        }
+      ]
+    },
+    {
+      "label": "Articles",
+      "url": "/articles",
       "subItems": []
     }
   ],
