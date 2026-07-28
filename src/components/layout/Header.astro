@@ -506,8 +506,9 @@ const primaryBtn = {
         if (user.image && avatarImgEl) {
            avatarImgEl.src = user.image;
            avatarImgEl.classList.remove('hidden');
-        } else if (avatarFallbackEl && user.name) {
-           avatarFallbackEl.textContent = user.name.charAt(0).toUpperCase();
+        } else if (avatarFallbackEl && (user.name || user.email)) {
+           const initial = user.name ? user.name : user.email;
+           avatarFallbackEl.textContent = initial.charAt(0).toUpperCase();
            avatarFallbackEl.classList.remove('hidden');
         }
 

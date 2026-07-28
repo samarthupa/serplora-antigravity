@@ -333,8 +333,9 @@ import Layout from '../layouts/Layout.astro';
             avatarImg.classList.add("hidden");
             if(avatarFallback) avatarFallback.classList.remove("hidden");
         };
-      } else if (avatarFallback && user.name) {
-        avatarFallback.textContent = user.name.charAt(0).toUpperCase();
+      } else if (avatarFallback && (user.name || user.email)) {
+        const initial = user.name ? user.name : user.email;
+        avatarFallback.textContent = initial.charAt(0).toUpperCase();
         avatarFallback.classList.remove('hidden');
       }
 
