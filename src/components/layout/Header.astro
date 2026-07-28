@@ -24,9 +24,9 @@ const primaryBtn = {
 <header 
   id="site-header" 
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
-  class={`inset-x-0 w-full z-[200] h-[58px] md:h-[58px] bg-main/95 backdrop-blur-[12px] shadow-sm border-b border-transparent dark:border-white/6 flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class={`inset-x-0 w-full z-[200] h-[58px] md:h-[48px] bg-main/95 backdrop-blur-[12px] shadow-sm border-b border-transparent dark:border-white/6 flex items-center justify-center font-['Outfit',sans-serif] transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
-  <div class="w-full px-4 md:px-8 flex items-center gap-3 md:gap-6 relative">
+  <div class="w-full px-4 md:px-6 flex items-center gap-3 md:gap-6 relative">
     
     <button 
       type="button" 
@@ -43,8 +43,8 @@ const primaryBtn = {
       <div class="flex items-center">
         {logo && (
           <>
-            <img src={logo} alt={siteTitle} width="160" height="40" class="h-9 md:h-9.5 w-auto object-contain dark:hidden" />
-            <img src={logoDark} alt={siteTitle} width="160" height="40" class="h-9 md:h-9.5 w-auto object-contain hidden dark:block" />
+            <img src={logo} alt={siteTitle} width="100" height="34" class="h-8 md:h-8 w-auto object-contain dark:hidden" />
+            <img src={logoDark} alt={siteTitle} width="100" height="34" class="h-8 md:h-8 w-auto object-contain hidden dark:block" />
           </>
         )}
         {!logo && <span class="text-[18px] md:text-[20px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
@@ -86,7 +86,7 @@ const primaryBtn = {
     <div class="flex items-center justify-end gap-1.5 md:gap-4 md:ml-auto">
       
       <!-- Search Triggers -->
-      <button id="search-trigger" class="flex items-center justify-center w-[36px] h-[36px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[36px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/50 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Open Search">
+      <button id="search-trigger" class="flex items-center justify-center w-[36px] h-[36px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[32px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/50 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Open Search">
         <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 md:opacity-70">
           <circle cx="7.5" cy="7.5" r="4.75"></circle>
           <line x1="11" y1="11" x2="16" y2="16"></line>
@@ -104,7 +104,7 @@ const primaryBtn = {
         
         <div id="auth-signin-header" style="display: none;">
           {primaryBtn.show && (
-            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[32px] md:h-[34px] px-3 md:px-4 rounded-[8px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-[#4eb95a] hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5ecb6b] outline-none whitespace-nowrap">
+            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[32px] md:h-[30px] px-3 md:px-4 rounded-[8px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-[#4eb95a] hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5ecb6b] outline-none whitespace-nowrap">
               <span>{primaryBtn.label}</span>
             </button>
           )}
@@ -121,8 +121,8 @@ const primaryBtn = {
       </div>
     </div>
 
-    <div id="mobile-menu" class="hidden absolute top-[50px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-50px)] overflow-y-auto z-[190]">
-      <div class="flex flex-col h-full px-6 py-6 w-full max-w-[500px] mx-auto">
+    <div id="mobile-menu" class="hidden absolute top-[58px] left-0 w-full bg-main shadow-xl flex-col h-[calc(100dvh-58px)] overflow-y-auto z-[190]">  
+    <div class="flex flex-col h-full px-6 py-6 w-full max-w-[500px] mx-auto">
         <nav class="flex flex-col gap-2 mb-8 mt-4">
           {navItems.map((item: any) => {
              const hasSubItems = item.subItems && item.subItems.length > 0;
@@ -380,36 +380,6 @@ const primaryBtn = {
     });
   });
 
-  // Smart header logic
-  const header = document.getElementById('site-header');
-  const isStickyDisabled = header?.getAttribute('data-disable-sticky') === 'true';
-  let lastScrollY = window.scrollY;
-
-  window.addEventListener('scroll', () => {
-    if (!header || isStickyDisabled) return;
-    
-    const currentScrollY = window.scrollY;
-    
-    if (Math.abs(currentScrollY - lastScrollY) < 5) return;
-
-    const isMenuClosed = !document.getElementById('mobile-menu')?.classList.contains('flex');
-    const isSearchClosed = searchOverlay?.classList.contains('invisible');
-    
-    if (currentScrollY > 48 && isMenuClosed && isSearchClosed) {
-      if (currentScrollY > lastScrollY) {
-        header.classList.add('-translate-y-full');
-        document.documentElement.classList.add('header-hidden'); 
-      } else {
-        header.classList.remove('-translate-y-full');
-        document.documentElement.classList.remove('header-hidden'); 
-      }
-    } else if (currentScrollY <= 48) {
-      header.classList.remove('-translate-y-full');
-      document.documentElement.classList.remove('header-hidden');
-    }
-    
-    lastScrollY = currentScrollY;
-  }, { passive: true });
 
   // --- REVISED CLIENT-SIDE AUTHENTICATION LOGIC ---
   import { authClient } from '../../lib/auth-client';
