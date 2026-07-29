@@ -156,7 +156,7 @@ const primaryBtn = {
                 {hasSubItems ? (
                   <div class="flex flex-col h-full">
                     {/* 🟢 Vertical-first Grid Layout */}
-                    <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[none] md:grid-rows-4 md:grid-flow-col md:auto-cols-fr gap-x-8 gap-y-3 list-disc list-inside marker:text-tx-muted/40 mb-8 w-full">
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[none] md:grid-rows-4 md:grid-flow-col md:auto-cols-fr gap-x-8 gap-y-3 list-disc list-inside marker:text-tx-main mb-8 w-full">
                       {item.subItems.map((subItem: any) => (
                         <li class="text-tx-muted">
                           <a href={subItem.url || '#'} class="inline-block text-[15px] font-[450] text-tx-muted hover:text-tx-main transition-colors">
@@ -168,7 +168,8 @@ const primaryBtn = {
                     
                     {/* 🟢 Centered View All Link */}
                     <div class="mt-2 pt-4 border-t border-subtle/10 w-full flex justify-center">
-                      <a href={item.url || '#'} class="group inline-flex items-center gap-1.5 text-[15px] font-[600] text-[#5ecb6b] hover:text-[#4eb95a] transition-colors py-2">
+                    <a href={item.url || '#'} class="group inline-flex items-center gap-1.5 text-[15px] font-[600] text-tx-main hover:text-tx-muted transition-colors py-2">
+
                         View all {item.label} 
                         <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                       </a>
@@ -177,7 +178,7 @@ const primaryBtn = {
                 ) : (
                   <div class="flex flex-col h-full w-full">
                     {/* 🟢 Left-aligned View All Link (Empty Category) */}
-                    <a href={item.url || '#'} class="group mr-auto inline-flex items-center gap-1.5 text-[15px] font-[600] text-[#5ecb6b] hover:text-[#4eb95a] transition-colors mt-2 w-fit">
+                    <a href={item.url || '#'} class="group mr-auto inline-flex items-center gap-1.5 text-[15px] font-[600] text-tx-main hover:text-tx-muted transition-colors mt-2 w-fit">
                       View all {item.label} 
                       <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </a>

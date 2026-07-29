@@ -77,7 +77,7 @@ const hasItems = sidebarItems.length > 0;
   excerptFallback={currentActiveData.excerpt}
   schemaData={currentActiveData}
 >
-  <div class="flex flex-col lg:flex-row w-full max-w-[1440px] mx-auto justify-center items-start relative font-['Outfit',sans-serif]">
+  <div class="flex flex-col lg:flex-row w-full mx-auto justify-center items-start relative font-['Outfit',sans-serif]">
     
     {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
     <div class="lg:hidden w-full flex flex-col pt-4">
@@ -98,11 +98,11 @@ const hasItems = sidebarItems.length > 0;
         )}
 
         <div class="bg-main/95 backdrop-blur-md py-2 flex items-center justify-between">
-          <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95" aria-label="Toggle Menu">
-            <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
-          </button>
+  <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95" aria-label="Toggle Menu">
+    <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+  </button>
 
-          <div class="flex items-center gap-2">
+  <div class="flex items-center gap-2">
             {prevLink && (
               <a href={prevLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:text-brand transition-colors active:scale-95" aria-label="Previous">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
@@ -121,13 +121,13 @@ const hasItems = sidebarItems.length > 0;
     <div id="mobile-sidebar-backdrop" class="fixed top-[64px] inset-x-0 bottom-0 [.header-hidden_&]:top-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
     
     {/* Left Sidebar */}
-    <aside id="series-sidebar" class="fixed top-[64px] h-[calc(100dvh-64px)] left-0 z-[150] lg:z-[150] w-[85vw] max-w-[260px] bg-main shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[260px] lg:min-w-[200px] lg:shrink-[999] [.header-hidden_&]:top-0 [.header-hidden_&]:h-[100dvh] border-r border-subtle py-5 px-4 lg:pt-16 lg:pb-6 lg:bg-transparent lg:shadow-none flex flex-col">
-      <div class="mb-5 px-1.5 flex justify-between items-center shrink-0">
+    <aside id="series-sidebar" class="fixed top-[54px] h-[calc(100dvh-54px)] md:top-[48px] md:h-[calc(100dvh-48px)] left-0 z-[150] lg:z-[150] w-[85vw] max-w-[260px] bg-surface shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[260px] lg:min-w-[200px] lg:shrink-[999] [.header-hidden_&]:top-0 [.header-hidden_&]:h-[100dvh] border-r border-subtle py-5 px-4 lg:pt-10 lg:pb-6 lg:bg-surface lg:shadow-none flex flex-col">
+      <div class="mb-5 px-2 flex justify-between items-center shrink-0">
         <div>
-          <h3 class="text-[11px] uppercase tracking-widest font-['JetBrains_Mono',monospace] text-tx-muted mb-1 font-bold">
+          <p class="text-[10px] uppercase tracking-widest font-['JetBrains_Mono',monospace] text-tx-muted mb-2 font-bold">
             {basePath === 'tutorials' ? 'Tutorial Series' : 'Quiz Series'}
-          </h3>
-          <p class="text-[18px] font-black text-tx-main leading-tight">{parent.data.title}</p>
+          </p>
+          <p class="text-[14px] font-black text-tx-main leading-tight">{parent.data.title}</p>
         </div>
         <button id="sidebar-close-btn" class="lg:hidden p-2 text-tx-muted hover:text-tx-main bg-main rounded-lg border border-subtle active:scale-95 transition-all">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -253,7 +253,7 @@ const hasItems = sidebarItems.length > 0;
       {/* Pagination Footer */}
       <div class="mt-8 pt-6 border-t border-subtle flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
         {prevLink ? (
-          <a href={prevLink.url} class="group flex items-center gap-3 px-5 py-3.5 rounded-xl bg-surface hover:border-brand/50 hover:shadow-sm transition-all w-full sm:w-auto sm:max-w-[48%]">
+<a href={nextLink.url} class="group flex items-center justify-start gap-3 py-3.5 w-full sm:w-auto sm:max-w-[48%] sm:ml-auto">
             <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-brand/10 group-hover:text-brand transition-colors">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
             </div>
@@ -265,7 +265,7 @@ const hasItems = sidebarItems.length > 0;
         ) : <div class="hidden sm:block"></div>}
 
         {nextLink ? (
-          <a href={nextLink.url} class="group flex items-center gap-3 px-5 py-3.5 rounded-xl bg-surface hover:border-brand/50 hover:shadow-sm transition-all w-fit max-w-[100%] sm:max-w-[48%] ml-auto">
+          <a href={nextLink.url} class="group flex items-center gap-3 py-3.5 w-fit max-w-[100%] sm:max-w-[48%] ml-auto">
             <div class="flex flex-col text-right overflow-hidden">
               <span class="text-[11px] uppercase tracking-widest text-tx-muted font-bold mb-0.5">Up Next</span>
               <span class="text-[14px] text-tx-main font-semibold group-hover:text-brand transition-colors truncate">{nextLink.title}</span>
