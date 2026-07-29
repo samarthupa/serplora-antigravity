@@ -13,7 +13,7 @@ const { mode = 'page', returnUrl = '/' } = Astro.props;
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
 <auth-widget data-mode={mode} data-return-url={returnUrl} class="block w-full max-w-md mx-auto font-['Outfit',sans-serif]">
-  <div class="w-full bg-main p-8 flex flex-col items-center relative mt-[-60px]">
+  <div class={`w-full bg-main p-8 flex flex-col items-center relative ${mode === 'page' ? 'mt-[-60px]' : ''}`}>
     
     {mode === 'page' && (
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center tracking-tight">Welcome to Serplora</h1>

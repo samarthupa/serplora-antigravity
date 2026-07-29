@@ -48,7 +48,7 @@ export async function onRequest(context) {
     emailOTP({
         async sendVerificationOTP({ email, otp }) {
             const command = new SendEmailCommand({
-                Source: `Serplora Accounts <${context.env.EMAIL_FROM}>`,
+                Source: `Serplora Login <${context.env.EMAIL_FROM}>`,
                 Destination: {
                     ToAddresses: [email],
                 },
