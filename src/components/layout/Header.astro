@@ -31,7 +31,7 @@ const primaryBtn = {
     <!-- Grid Menu Icon (Elevated z-index to stay above the mobile overlay) -->
     <button
       type="button"
-      class="relative z-[210] flex justify-center items-center w-[30px] h-[30px] md:w-[28px] md:h-[28px] rounded-[10px] transition-colors focus:outline-none cursor-pointer shrink-0 border-none p-0 -ml-2 text-tx-main"
+      class="relative z-[210] flex justify-center items-center w-[30px] h-[30px] md:w-[28px] md:h-[28px] rounded-[10px] transition-colors focus:outline-none cursor-pointer shrink-0 border-none p-0 text-tx-main"
       id="mobile-menu-btn"
       aria-label="Toggle navigation menu"
     >
@@ -67,8 +67,8 @@ const primaryBtn = {
     <div class="flex items-center justify-end gap-1.5 md:gap-4 md:ml-auto">
       
       <!-- Search Triggers -->
-      <button id="search-trigger" class="flex items-center justify-center w-[36px] h-[36px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[30px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/20 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Open Search">
-        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 md:opacity-70">
+      <button id="search-trigger" class="flex items-center justify-center md:justify-start w-[36px] h-[36px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[32px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/20 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Open Search">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 md:opacity-70">
           <circle cx="7.5" cy="7.5" r="4.75"></circle>
           <line x1="11" y1="11" x2="16" y2="16"></line>
         </svg>
@@ -76,7 +76,7 @@ const primaryBtn = {
         <span class="hidden md:flex items-center justify-center border border-subtle/60 rounded-[4px] px-1.5 py-0.5 text-[10px] font-mono opacity-60">⌘K</span>
       </button>
 
-      <button class="theme-toggle-btn flex items-center justify-center w-[36px] h-[36px] rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
+      <button class="theme-toggle-btn flex items-center justify-center w-[36px] h-[36px] md:w-[32px] md:h-[32px] rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
         <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
@@ -85,14 +85,14 @@ const primaryBtn = {
         
         <div id="auth-signin-header" style="display: none;">
           {primaryBtn.show && (
-            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[32px] md:h-[30px] px-3 md:px-4 rounded-[8px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-[#4eb95a] hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5ecb6b] outline-none whitespace-nowrap">
+            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[32px] px-3 md:px-4 rounded-[8px] bg-[#5ecb6b] text-[#0d0e0c] font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-[#4eb95a] hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5ecb6b] outline-none whitespace-nowrap">
               <span>{primaryBtn.label}</span>
             </button>
           )}
         </div>
 
         <div id="auth-profile-header" style="display: none;">
-          <a href="/account" class="ml-2 md:ml-4 flex items-center justify-center h-[36px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
+          <a href="/account" class="ml-2 md:ml-4 flex items-center justify-center h-[36px] md:h-[32px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main font-['DM_Sans',sans-serif] text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
             <img id="profile-avatar-img-header" src="" alt="Profile" class="w-6 h-6 rounded-full object-cover shrink-0 hidden" />
             <div id="profile-avatar-header" class="w-7 h-7 rounded-full bg-[#5ecb6b] text-[#0d0e0c] flex items-center justify-center font-extrabold text-[12px] shrink-0 hidden"></div>
             <span class="hidden md:inline ml-2.5">Profile</span>
