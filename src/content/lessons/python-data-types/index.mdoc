@@ -1,0 +1,157 @@
+---
+title: Python Data Types
+breadcrumbTitle: data types
+urlSlug: data-types
+tutorial: python
+order: 24
+seo:
+  metaTitle: Python Data Types Explained for Beginners with Examples
+  metaDescription: >-
+    Understand Python data types with examples. Learn built-in data types, and
+    dynamic typing.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+Look at this code:
+
+```python
+name = "Sam"
+age = 20
+height = 5.8
+is_student = True
+```
+
+You just created four different values in four Python variables. Here:
+
+- `"Sam"` is text.
+- `20` is a whole number.
+- `5.8` is a decimal number.
+- `True` is a true or false value (Boolean).
+
+These are different data types.
+
+## What is a Data Type?
+
+**Definition:** A data type tells Python what kind of data a value is, such as text, a decimal number, or a list.
+
+## Python Built-in Data Types
+
+Python has several built-in data types. Here is a quick reference:
+
+{% table %}
+- Data Type
+- Description
+- Example
+---
+- `int`
+- Whole numbers
+- `10`, `-5`
+---
+- `float`
+- Decimal numbers
+- `3.14`, `9.8`
+---
+- `str`
+- Text strings
+- `"Hello"`
+---
+- `bool`
+- True or False values
+- `True`, `False`
+---
+- `list`
+- Ordered collection
+- `[1, 2, 3]`
+---
+- `tuple`
+- Unchangeable ordered collection
+- `(1, 2, 3)`
+---
+- `set`
+- Unordered collection of unique values
+- `{1, 2, 3}`
+---
+- `dict`
+- Key-value pairs
+- `{"name": "Sam"}`
+---
+- `NoneType`
+- Represents no value
+- `None`
+{% /table %}
+
+Do not try to memorize this table. You will learn each of these in detail as you build more Python programs.
+
+## Why Data Types Matter
+
+Look at these two print statements:
+
+{% codeEditor
+   language="python"
+   code="print(10 + 20)\nprint(\"Hello \" + \"World\")" /%}
+
+The first outputs `30`. The second outputs `Hello World`.
+
+The `+` operator adds numbers, but it joins text together.
+
+Now, predict the output of this code:
+
+```python
+print("10" + "20")
+```
+
+If you guessed `30`, you made a common beginner mistake. The output is:
+
+```text
+1020
+```
+
+Why?
+
+Because `"10"` and `"20"` are inside quotes, Python treats them as strings, not numbers. It joins them together instead of adding them.
+
+This is why data types matter. The data type determines what operations Python performs on a value.
+
+## How Does Python Know Data Types?
+
+In many programming languages, you must declare a variable's data type when you create it. For example, whether it stores text, an integer, or some other type.
+
+But in Python, you don't have to.
+
+Python determines the data type by looking at the value you assign.
+
+- `10` → **int** (whole number)
+- `3.14` → **float** (because it contains a decimal point)
+- `"Hello"` or `'Hello'` → **str** (because it is inside quotes)
+- `True` or `False` → **bool** (Boolean value)
+- `[1, 2, 3]` → **list** (because it uses square brackets `[]`)
+- `(1, 2, 3)` → **tuple** (because it uses parentheses `()`)
+- `{"name": "Sam"}` → **dict** (because it uses curly braces `{}`)
+
+Python automatically recognizes these patterns and assigns the appropriate data type. There is no need to declare the data type yourself.
+
+## Checking Data Types
+
+To check the data type of a Python variable, use the `type()` function.
+
+{% codeEditor
+   language="python"
+   code="name = \"Sam\"\nage = 20\nheight = 5.8\nis_student = True\n\nprint(type(name))\nprint(type(age))\nprint(type(height))\nprint(type(is_student))" /%}
+
+## Dynamic Typing
+
+You may have heard that Python is a dynamically typed language. What does that mean?
+
+In some programming languages, if a variable is declared to store text, it cannot later store numbers. Python is different.
+
+Look at this code:
+
+{% codeEditor
+   language="python"
+   code="x = 10\nprint(type(x))\n\nx = \"Sam\"\nprint(type(x))" /%}
+
+The same variable `x` first stores an integer and then stores a string.
+
+When you assign a new value, Python automatically treats the variable as having the data type of that new value. This behavior is called **dynamic typing**.
