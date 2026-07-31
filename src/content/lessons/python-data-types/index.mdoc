@@ -23,7 +23,7 @@ height = 5.8
 is_student = True
 ```
 
-You just created four different values in four Python variables. Here:
+You just created four different values and stored them in four variables. Here:
 
 - `"Sam"` is text.
 - `20` is a whole number.
@@ -35,6 +35,12 @@ These are different data types.
 ## What is a Data Type?
 
 **Definition:** A data type tells Python what kind of data a value is, such as text, a decimal number, or a list.
+
+In many programming languages, you must declare a variable's data type when you create it. For example, whether it stores text, an integer, or some other type.
+
+But in Python, you don't have to.
+
+**Python automatically determines the data type from the value you assign.**
 
 ## Python Built-in Data Types
 
@@ -54,7 +60,7 @@ Python has several built-in data types. Here is a quick reference:
 - `3.14`, `9.8`
 ---
 - `str`
-- Text strings
+- Text / strings
 - `"Hello"`
 ---
 - `bool`
@@ -66,7 +72,7 @@ Python has several built-in data types. Here is a quick reference:
 - `[1, 2, 3]`
 ---
 - `tuple`
-- Unchangeable ordered collection
+- Immutable (unchangeable) ordered collection
 - `(1, 2, 3)`
 ---
 - `set`
@@ -92,9 +98,7 @@ Look at these two print statements:
    language="python"
    code="print(10 + 20)\nprint(\"Hello \" + \"World\")" /%}
 
-The first outputs `30`. The second outputs `Hello World`.
-
-The `+` operator adds numbers, but it joins text together.
+The first outputs `30`. The second outputs `Hello World`. The `+` operator adds numbers, but it joins text together.
 
 Now, predict the output of this code:
 
@@ -113,24 +117,6 @@ Why?
 Because `"10"` and `"20"` are inside quotes, Python treats them as strings, not numbers. It joins them together instead of adding them.
 
 This is why data types matter. The data type determines what operations Python performs on a value.
-
-## How Does Python Know Data Types?
-
-In many programming languages, you must declare a variable's data type when you create it. For example, whether it stores text, an integer, or some other type.
-
-But in Python, you don't have to.
-
-Python determines the data type by looking at the value you assign.
-
-- `10` → **int** (whole number)
-- `3.14` → **float** (because it contains a decimal point)
-- `"Hello"` or `'Hello'` → **str** (because it is inside quotes)
-- `True` or `False` → **bool** (Boolean value)
-- `[1, 2, 3]` → **list** (because it uses square brackets `[]`)
-- `(1, 2, 3)` → **tuple** (because it uses parentheses `()`)
-- `{"name": "Sam"}` → **dict** (because it uses curly braces `{}`)
-
-Python automatically recognizes these patterns and assigns the appropriate data type. There is no need to declare the data type yourself.
 
 ## Checking Data Types
 
