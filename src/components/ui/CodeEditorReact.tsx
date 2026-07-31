@@ -263,7 +263,7 @@ export default function CodeEditorReact({ code, language }: any) {
 
         {/* REAL-TIME TERMINAL OUTPUT */}
         {(logs.length > 0) && (
-          <div className={`shrink-0 bg-main border-t border-subtle flex flex-col ${isOutputVisible ? (isFullscreen ? 'h-1/3' : 'max-h-[250px]') : ''}`}>
+          <div className={`shrink-0 bg-main border-t border-subtle flex flex-col ${isOutputVisible ? (isFullscreen ? 'h-2/5' : 'max-h-[300px]') : ''}`}>
             
             {/* Terminal Header */}
             <div className="flex justify-between items-center px-4 pt-3 pb-2">
