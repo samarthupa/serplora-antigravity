@@ -3,28 +3,14 @@
 import Layout from '../layouts/Layout.astro';
 import AuthWidget from '../components/auth/AuthWidget.astro';
 
-// 1. Capture the raw return URL from the query string
-const rawReturnUrl = Astro.url.searchParams.get('returnUrl');
-
-// 2. Set your default safe fallback
-let safeReturnUrl = '/account';
-
-// 3. Strict validation: Must be a relative path and NOT protocol-relative
-if (
-  rawReturnUrl && 
-  rawReturnUrl.startsWith('/') && 
-  !rawReturnUrl.startsWith('//') && 
-  !rawReturnUrl.startsWith('/\\')
-) {
-  safeReturnUrl = rawReturnUrl;
-}
+// Capture return URL if one was provided in the query string, otherwise default to /account
+const returnUrl = Astro.url.searchParams.get('returnUrl') || '/account';
 ---
 
 <Layout>
 <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[93vh]">
   <div class="-translate-y-10">
-    <!-- 4. Pass the sanitized URL into the widget -->
-    <AuthWidget mode="page" returnUrl={safeReturnUrl} />
+    <AuthWidget mode="page" returnUrl={returnUrl} />
   </div>
 </div>
 </Layout>

@@ -1,18 +1,27 @@
 ---
-// src/components/auth/AuthWidget.astro
-
 interface Props {
   mode?: 'page' | 'modal';
   returnUrl?: string;
 }
 
 const { mode = 'page', returnUrl = '/' } = Astro.props;
+
+// 🟢 NEW: The security check is now here!
+let safeReturnUrl = '/account';
+if (
+  returnUrl && 
+  returnUrl.startsWith('/') && 
+  !returnUrl.startsWith('//') && 
+  !returnUrl.startsWith('/\\')
+) {
+  safeReturnUrl = returnUrl;
+}
 ---
 
-<!-- Explicit Turnstile Load (Required for Modals) -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
-<auth-widget data-mode={mode} data-return-url={returnUrl} class="block w-full max-w-md mx-auto font-['Outfit',sans-serif]">
+<!-- 🟢 CHANGED: We use safeReturnUrl here now instead of returnUrl -->
+<auth-widget data-mode={mode} data-return-url={safeReturnUrl} class="block w-full max-w-md mx-auto font-['Outfit',sans-serif]">
   <div class={`w-full bg-main p-8 flex flex-col items-center relative ${mode === 'page' ? 'mt-[-60px]' : ''}`}>
     
     {mode === 'page' && (
@@ -262,10 +271,19 @@ const { mode = 'page', returnUrl = '/' } = Astro.props;
     getSafeReturnUrl() {
         const urlParams = new URLSearchParams(window.location.search);
         
-        // 🟢 FIX: Prioritize the live browser URL over the static dataset attribute
         let rawReturnUrl = urlParams.get('returnUrl') || this.dataset.returnUrl || '/account';
         
-        return (rawReturnUrl.startsWith('/') && !rawReturnUrl.startsWith('//')) ? rawReturnUrl : '/account';
+        // 🟢 CHANGED: Added the strict rule to block /\\
+        if (
+            rawReturnUrl && 
+            rawReturnUrl.startsWith('/') && 
+            !rawReturnUrl.startsWith('//') && 
+            !rawReturnUrl.startsWith('/\\')
+        ) {
+            return rawReturnUrl;
+        }
+        
+        return '/account';
     }
 
     renderTurnstile() {
