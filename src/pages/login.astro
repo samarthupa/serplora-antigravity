@@ -2,28 +2,9 @@
 // src/pages/login.astro
 import Layout from '../layouts/Layout.astro';
 import AuthWidget from '../components/auth/AuthWidget.astro';
-import { authClient } from '../lib/auth-client'; // 🟢 1. Import the auth client
-
-// 🟢 2. Check the session securely on the server
-let sessionUser = null;
-try {
-  const { data } = await authClient.getSession({
-    fetchOptions: {
-      headers: Astro.request.headers,
-    },
-  });
-  sessionUser = data?.user || null;
-} catch (e) {
-  sessionUser = null;
-}
 
 // Capture return URL if one was provided in the query string, otherwise default to /account
 const returnUrl = Astro.url.searchParams.get('returnUrl') || '/account';
-
-// 🟢 3. If the user is logged in, instantly redirect them!
-if (sessionUser) {
-  return Astro.redirect(returnUrl);
-}
 ---
 
 <Layout>

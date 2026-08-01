@@ -75,11 +75,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   }
 
-  // --- 3. EDGE ROUTE PROTECTION ---
+  // --- 3. EDGE ROUTE PROTECTION & LOGIN REDIRECT ---
   const protectedRoutes = ['/account'];
   const isProtected = protectedRoutes.some(route => url.pathname.startsWith(route));
+  
+  // Check if they are visiting the login page
+  const isLoginPage = url.pathname === '/login' || url.pathname === '/login/';
 
-  if (isProtected) {
+  if (isProtected || isLoginPage) {
     const cookieHeader = request.headers.get('Cookie') || '';
 
     try {
@@ -88,14 +91,31 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       });
 
       const sessionData = await sessionReq.json() as any;
+      const hasSession = sessionData && sessionData.session;
 
-      if (!sessionData || !sessionData.session) {
+      // Scenario A: Logged OUT but trying to access a protected route
+      if (isProtected && !hasSession) {
         const loginUrl = new URL(`/login?returnUrl=${encodeURIComponent(url.pathname)}`, request.url);
         return Response.redirect(loginUrl.toString(), 302);
       }
+
+      // Scenario B: Logged IN but trying to access the login page
+      if (isLoginPage && hasSession) {
+        let returnUrl = url.searchParams.get('returnUrl') || '/account';
+        
+        // Safety check to prevent Open Redirect attacks at the Edge
+        if (!returnUrl.startsWith('/') || returnUrl.startsWith('//') || returnUrl.startsWith('/\\')) {
+          returnUrl = '/account';
+        }
+        
+        return Response.redirect(new URL(returnUrl, request.url).toString(), 302);
+      }
+      
     } catch (err) {
       console.error("Edge Auth Check Failed:", err);
-      return Response.redirect(new URL('/login', request.url).toString(), 302);
+      if (isProtected) {
+        return Response.redirect(new URL('/login', request.url).toString(), 302);
+      }
     }
   }
 
