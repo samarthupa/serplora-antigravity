@@ -44,49 +44,12 @@ But in Python, you don't have to.
 
 ## Python Built-in Data Types
 
-Python has several built-in data types. Here is a quick reference:
+Python has 14 <abbr data-tooltip="Built-in data types are the data types that come with Python. You can use them directly without importing anything or creating them yourself."> built-in data types </abbr>. To make them easier to understand, they are grouped into categories based on what they do.
 
-{% table %}
-- Data Type
-- Description
-- Example
----
-- `int`
-- Whole numbers
-- `10`, `-5`
----
-- `float`
-- Decimal numbers
-- `3.14`, `9.8`
----
-- `str`
-- Text / strings
-- `"Hello"`
----
-- `bool`
-- True or False values
-- `True`, `False`
----
-- `list`
-- Ordered collection
-- `[1, 2, 3]`
----
-- `tuple`
-- Immutable (unchangeable) ordered collection
-- `(1, 2, 3)`
----
-- `set`
-- Unordered collection of unique values
-- `{1, 2, 3}`
----
-- `dict`
-- Key-value pairs
-- `{"name": "Sam"}`
----
-- `NoneType`
-- Represents no value
-- `None`
-{% /table %}
+{% rawHtml
+   html="<table>\n  <thead>\n    <tr>\n      <th>Category</th>\n      <th>Data Type</th>\n      <th>Description</th>\n      <th>Level</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><strong>Text</strong></td>\n      <td><code>str</code></td>\n      <td>Text / strings (e.g., <code>\"Hello\"</code>)</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td rowspan=\"3\"><strong>Numeric</strong></td>\n      <td><code>int</code></td>\n      <td>Whole numbers (e.g., <code>10</code>)</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td><code>float</code></td>\n      <td>Decimal numbers (e.g., <code>3.14</code>)</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td><code>complex</code></td>\n      <td>Complex numbers for advanced math</td>\n      <td><em>Advanced</em></td>\n    </tr>\n    <tr>\n      <td><strong>Boolean</strong></td>\n      <td><code>bool</code></td>\n      <td>True or False values</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td rowspan=\"3\"><strong>Sequence</strong></td>\n      <td><code>list</code></td>\n      <td>Ordered, changeable collection</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td><code>tuple</code></td>\n      <td>Ordered, unchangeable collection</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td><code>range</code></td>\n      <td>A sequence of numbers</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td><strong>Mapping</strong></td>\n      <td><code>dict</code></td>\n      <td>Key-value pairs</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td rowspan=\"2\"><strong>Set</strong></td>\n      <td><code>set</code></td>\n      <td>Unordered collection of unique values</td>\n      <td>Core</td>\n    </tr>\n    <tr>\n      <td><code>frozenset</code></td>\n      <td>Unchangeable version of a set</td>\n      <td><em>Advanced</em></td>\n    </tr>\n    <tr>\n      <td rowspan=\"3\"><strong>Binary</strong></td>\n      <td><code>bytes</code></td>\n      <td>Sequence of bytes</td>\n      <td><em>Advanced</em></td>\n    </tr>\n    <tr>\n      <td><code>bytearray</code></td>\n      <td>Changeable sequence of bytes</td>\n      <td><em>Advanced</em></td>\n    </tr>\n    <tr>\n      <td><code>memoryview</code></td>\n      <td>Memory access for bytes</td>\n      <td><em>Advanced</em></td>\n    </tr>\n    <tr>\n      <td><strong>None</strong></td>\n      <td><code>NoneType</code></td>\n      <td>Represents the absence of a value</td>\n      <td>Core</td>\n    </tr>\n  </tbody>\n</table>\n<br>" /%}
+
+> *Note:* As you can see, there are a few advanced data types (`complex`, `frozenset`, `bytes`, `bytearray`, and `memoryview`). If you are a beginner, you do not need to worry about these right now, focus only on the "Core" types.
 
 Do not try to memorize this table. You will learn each of these in detail as you build more Python programs.
 
@@ -130,7 +93,7 @@ To check the data type of a Python variable, use the `type()` function.
 
 You may have heard that Python is a dynamically typed language. What does that mean?
 
-In some programming languages, if a variable is declared to store text, it cannot later store numbers. Python is different.
+In many programming languages, a variable is like a rigid box. if you create it to hold text, it can never hold numbers. Python is different.
 
 Look at this code:
 
@@ -138,6 +101,6 @@ Look at this code:
    language="python"
    code="x = 10\nprint(type(x))\n\nx = \"Sam\"\nprint(type(x))" /%}
 
-The same variable `x` first stores an integer and then stores a string.
+The same variable `x` is first used for an integer and then used for a string.
 
-When you assign a new value, Python automatically treats the variable as having the data type of that new value. This behavior is called **dynamic typing**.
+Why does this work? In Python, **variables don't have fixed data types; only the values do.** Think of a variable as a sticky note or name tag. First, Python sticks the `x` name tag on the integer `10`. Then, it moves the `x` name tag to the string `"Sam"`. Because the variable is just a label pointing to data, it can point to a new data type at any time. This behavior is called **dynamic typing**.

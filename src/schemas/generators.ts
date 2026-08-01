@@ -29,7 +29,7 @@ export function getArticleSchema(type: string, data: any, url: string) {
     "@type": type,
     "@id": `${url}#article`,
     "isPartOf": { "@id": `${SITE_URL}/#website` },
-    "author": { "@id": `${SITE_URL}/#samarth` },
+    "author": { "@id": `${SITE_URL}/#organization` },
     "headline": data.title,
     "description": data.description,
     "datePublished": data.publishDate ? new Date(data.publishDate).toISOString() : undefined,

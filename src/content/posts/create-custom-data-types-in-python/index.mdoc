@@ -1,0 +1,140 @@
+---
+title: How to Create Custom Data Types in Python
+draft: false
+category: python
+tags: how-to
+author: editorial-team
+publishDate: 2026-08-01
+faqs:
+  - question: Why do I have to write "self" so many times in standard classes?
+    answer: >-
+      This is the most common question beginners ask. The word "self" is how
+      Python knows exactly which piece of data it is working with.
+
+
+      Imagine you have two players in a game: Player A and Player B. If Player A
+      takes damage, Python needs a way to know it should lower Player A's
+      health, not Player B's health. The word "self" simply means "the specific
+      player we are looking at right now."
+  - question: Can I put a custom data type inside another custom data type?
+    answer: >
+      Yes. This is actually the best way to write code for large applications.
+      You can use an "Enum" as one of the variables inside your dataclass.
+
+
+      # Here is a quick example of mixing custom types:
+
+
+      from dataclasses import dataclass
+
+      from enum import Enum
+
+
+      class OrderStatus(Enum):
+          PENDING = 1
+          SHIPPED = 2
+
+      @dataclass
+
+      class StoreOrder:
+          order_number: int
+          # We use our custom Enum type as a variable inside our Data Class
+          status: OrderStatus 
+
+      # Creating the order
+
+      my_order = StoreOrder(order_number=9945, status=OrderStatus.PENDING)
+  - question: Should I stop using dictionaries completely?
+    answer: >-
+      No, you should still use dictionaries. Dictionaries are the best choice
+      when you do not know exactly what the data will look like ahead of time.
+      For example, if you are downloading a list of information from a random
+      website, you should put it in a dictionary first. Use custom data types
+      only when you know the exact, permanent structure your data needs to have.
+  - question: Do custom data types slow down my program?
+    answer: >-
+      No. In fact, using modern tools like @dataclass can sometimes make your
+      code run slightly faster and use less memory than large, messy
+      dictionaries. More importantly, custom data types save you time by
+      preventing bugs and stopping you from making spelling mistakes in your
+      code.
+seo:
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+When you first learn Python, you use the basic built-in data types. You use `str` for text, `int` for whole numbers, and `list` to hold multiple items. These basic types are great for simple programs.
+
+But as your programs grow larger, you will need to group different pieces of information together.
+
+To make your code safer and easier to read, you can create your own **custom data types**. By doing this, you tell Python exactly what information is allowed and how it should behave.
+
+## When to Use Custom Types
+
+You do not always need custom data types. Knowing when to use the built-in types (like lists and dictionaries) saves you a lot of time.
+
+**Use Built-in Data Types When:**
+
+- You are writing a quick, short script.
+- The data is simple and temporary.
+- **Example:** If you just need to read a text file and count how many times the word "Python" appears, you only need built-in strings (`str`) and numbers (`int`).
+
+**Use Custom Data Types When:**
+
+- You are building a large application that you will maintain for a long time.
+- Specific pieces of data always travel together.
+- The data has strict rules.
+- **Example:** If you are building an email application, you should create a custom `Email` data type. An email must always have a sender, a receiver, a subject line, and a true/false value showing if it has been read. If you just use a dictionary, another programmer might forget to include the "sender" information, which would break the application. A custom type prevents this mistake.
+
+Here are three ways to create custom data types in Python, starting with the most common way.
+
+## 1. Using Standard Classes (For Data and Actions)
+
+In Python, the most common way to create a custom data type is by using a `class`.
+
+You can think of a class as a strict blueprint. It tells Python exactly what pieces of information belong together. It also lets you create actions that the data can perform.
+
+{% codeEditor
+   language="python"
+   code="# We use the 'class' keyword to define our new custom data type named 'Player'\nclass Player:\n    \n    # The __init__ function is the setup function. \n    # It runs automatically every time you create a new Player.\n    # 'self' refers to the specific player object being created right now.\n    # 'name' and 'health' are the starting values we will provide.\n    def __init__(self, name, health):\n        # We take the 'name' provided and store it inside this player\n        self.name = name\n        # We take the 'health' provided and store it inside this player\n        self.health = health\n        \n    # This is an action (called a method) that only a Player can do.\n    # We must include 'self' so the function knows which player is taking damage.\n    def take_damage(self, amount):\n        # We subtract the damage amount from this player's current health\n        self.health = self.health - amount\n        print(f\"{self.name} has {self.health} health left.\")\n\n# Now we create a real piece of data using our new custom type.\n# We pass \"Sam\" as the name, and 100 as the health.\nplayer_one = Player(\"Sam\", 100)\n\n# We can tell our player to perform its specific action\nplayer_one.take_damage(20)\n\n# If we check the type, Python knows it is our custom Player type\nprint(type(player_one))" /%}
+
+## 2. Using Data Classes (For Just Holding Information)
+
+Writing the setup function (the `__init__` part in the code above) can take a lot of time if you have 10 or 20 pieces of information to store.
+
+If you want to create a custom data type that only holds information and does not need to perform actions, you should use a **Data Class**. Python added Data Classes to write all the repetitive setup code for you behind the scenes.
+
+{% codeEditor
+   language="python"
+   code="# We must import 'dataclass' from Python's built-in tools before we can use it\nfrom dataclasses import dataclass\n\n# The @dataclass label tells Python to automatically create the setup code for us\n@dataclass\nclass Product:\n    # We just list the names of the variables and what built-in type they should be.\n    # Python handles the rest.\n    name: str\n    price: float\n    \n    # We can also set a default starting value.\n    # If we don't specify otherwise, a product will always start as True for in_stock.\n    in_stock: bool = True  \n\n# Creating a new product is simple and clean. \n# We only need to provide the name and the price.\nmy_item = Product(\"Laptop\", 999.50)\n\n# Data classes also automatically make the data look nice when you print it.\n# It will print exactly what information is stored inside.\nprint(my_item)" /%}
+
+## 3. Using Enums (For a Strict List of Choices)
+
+Sometimes, a piece of data should only be allowed to be one of a few exact choices.
+
+For example, an order status in a store application should only be "Pending", "Shipped", or "Delivered". If you use regular text strings for this, someone might accidentally type "Shiped" with one "p".
+
+To prevent these spelling mistakes, you can use an `Enum`. This simply means a numbered list of specific choices.
+
+{% codeEditor
+   language="python"
+   code="# We must import 'Enum' from Python's built-in tools\nfrom enum import Enum\n\n# We create our custom type by putting '(Enum)' after the name\nclass OrderStatus(Enum):\n    # We list the only choices that are allowed.\n    # It is standard practice to write Enum choices in ALL CAPS.\n    PENDING = 1\n    SHIPPED = 2\n    DELIVERED = 3\n\n# We can now set a variable using one of our strict choices\ncurrent_status = OrderStatus.SHIPPED\n\n# If we try to type OrderStatus.SHIPED (with one 'P'), \n# Python will show an error before the program even runs. This keeps the code safe.\n\n# Python recognizes this as our custom OrderStatus type\nprint(type(current_status))" /%}
+
+## Summary
+
+Here is a simple guide to help you choose which method to use:
+
+{% table %}
+- What do you need your custom data type to do?
+- What should you use?
+---
+- It needs to hold information **and** perform specific actions.
+- Use a standard `class`.
+---
+- It only needs to hold information.
+- Use a `@dataclass`.
+---
+- It needs to restrict information to a specific list of choices.
+- Use an `Enum`.
+{% /table %}
