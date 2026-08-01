@@ -429,6 +429,9 @@ if (
       } else {
           this.verifyOtpBtn.innerText = 'Success!';
           
+          // 🟢 ADDED: Instantly set the auth flag so the header updates immediately on the next page
+          try { localStorage.setItem('auth_valid', 'true'); } catch (e) {}
+          
           if (this.dataset.mode === 'modal') {
               // Fire an event if it's inside the Newsletter Modal
               this.dispatchEvent(new CustomEvent('auth:success', { bubbles: true, composed: true }));

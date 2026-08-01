@@ -1,13 +1,12 @@
 ---
 import { getEntry } from 'astro:content';
-import { authClient } from '../../lib/auth-client';
+// (authClient import is removed from here because we only use it on the client side now)
 
 // 🟢 Define Props
 interface Props {
   disableStickyHeader?: boolean;
 }
 
-// 🟢 Extract the prop
 const { disableStickyHeader = false } = Astro.props;
 
 const headerEntry = await getEntry('header', 'data');
@@ -20,21 +19,25 @@ const primaryBtn = {
   label: headerEntry?.data?.primaryButton?.label || 'Sign up for free',
   show: headerEntry?.data?.primaryButton?.show !== false
 };
-
-// 🟢 SERVER-SIDE AUTH CHECK
-// Fetches session data before the HTML is built, eliminating the layout flash.
-let sessionUser: any = null;
-try {
-  const { data } = await authClient.getSession({
-    fetchOptions: {
-      headers: Astro.request.headers,
-    },
-  });
-  sessionUser = data?.user || null;
-} catch (e) {
-  sessionUser = null;
-}
 ---
+
+<!-- 🟢 1. INSTANT PAINT SCRIPT (Prevents layout shift before HTML loads) -->
+<script is:inline>
+  try {
+    if (localStorage.getItem('auth_valid') === 'true') {
+      document.documentElement.classList.add('is-auth');
+    }
+  } catch(e) {}
+</script>
+
+<style>
+  /* 🟢 2. CSS TOGGLE LOGIC */
+  #auth-signin-header { display: block; }
+  #auth-profile-header { display: none; }
+  
+  html.is-auth #auth-signin-header { display: none !important; }
+  html.is-auth #auth-profile-header { display: flex !important; }
+</style>
 
 <header 
   id="site-header" 
@@ -43,8 +46,7 @@ try {
 >
   <div class="w-full px-3 md:px-4 flex items-center gap-2 md:gap-4">
     
-    <!-- Grid Menu Icon (Elevated z-index to stay above the mobile overlay) -->
-    <!-- Hamburger Menu Icon (Elevated z-index to stay above the mobile overlay) -->
+    <!-- Hamburger Menu Icon -->
     <button
       type="button"
       class="relative z-[210] flex justify-center items-center w-[30px] h-[30px] md:w-[28px] md:h-[28px] rounded-[10px] transition-colors focus:outline-none cursor-pointer shrink-0 border-none p-0 text-tx-main"
@@ -76,7 +78,7 @@ try {
 
     <div class="flex items-center justify-end gap-1.5 md:gap-4 md:ml-auto">
       
-      <!-- Search Triggers -->
+      <!-- Search Trigger -->
       <button id="search-trigger" class="flex items-center justify-center md:justify-start w-[36px] h-[36px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[32px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/20 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Open Search">
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 md:opacity-70">
           <circle cx="7.5" cy="7.5" r="4.75"></circle>
@@ -86,43 +88,46 @@ try {
         <span class="hidden md:flex items-center justify-center border border-subtle/60 rounded-[4px] px-1.5 py-0.5 text-[10px] font-mono opacity-60">⌘K</span>
       </button>
 
+      <!-- Theme Toggle -->
       <button class="theme-toggle-btn flex items-center justify-center w-[36px] h-[36px] md:w-[32px] md:h-[32px] rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
-        <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <svg class="block dark:hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg class="hidden dark:block w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
 
-      <!-- 🟢 SERVER-RENDERED AUTH SLOT (No Layout Shift) -->
+      <!-- AUTH SLOT CONTAINER -->
       <div class="flex items-center">
-        {sessionUser ? (
-          <a href="/account" class="ml-2 md:ml-4 flex items-center justify-center h-[36px] md:h-[32px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
-            {sessionUser.image ? (
-              <img src={sessionUser.image} alt="Profile" class="w-6 h-6 rounded-full object-cover shrink-0" />
-            ) : (
-              <div class="w-7 h-7 rounded-full bg-cta text-cta-text flex items-center justify-center font-extrabold text-[12px] shrink-0">
-                {(sessionUser.name || sessionUser.email || 'U').charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span class="hidden md:inline ml-2.5">Profile</span>
-          </a>
-        ) : (
-          primaryBtn.show && (
+        
+        <div id="auth-signin-header">
+          {primaryBtn.show && (
             <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[30px] px-3 md:px-4 rounded-[8px] bg-cta text-cta-text text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-cta-hover hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cta outline-none whitespace-nowrap">
               <span>{primaryBtn.label}</span>
             </button>
-          )
-        )}
+          )}
+        </div>
+
+        <div id="auth-profile-header" class="items-center">
+          <a href="/account" class="ml-2 md:ml-4 flex items-center justify-center h-[36px] md:h-[32px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
+            <img id="profile-avatar-img-header" src="" alt="Profile" class="w-6 h-6 rounded-full object-cover shrink-0 hidden" />
+            
+            <div id="profile-avatar-header" class="w-7 h-7 rounded-full bg-cta text-cta-text flex items-center justify-center font-extrabold text-[12px] shrink-0">
+              <!-- Generic fallback icon before sync finishes -->
+              <svg id="profile-avatar-fallback-icon" class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            
+            <span class="hidden md:inline ml-2.5">Profile</span>
+          </a>
+        </div>
+
       </div>
 
     </div>
 
-    <!-- Navigation Dropdown (Sleek Split-Pane) -->
+    <!-- Navigation Dropdown -->
     <div 
       id="mobile-menu" 
       class="hidden absolute top-0 md:top-[58px] left-0 w-full bg-main flex-col h-[100dvh] md:h-[calc(100dvh-58px)] pt-[58px] md:pt-0 overflow-hidden z-[200] md:z-[190] border-t-0 md:border-t md:border-subtle/15 opacity-0 -translate-y-1.5 transition-[opacity,transform] duration-250 ease-out"
     >
       <div class="flex flex-col md:flex-row h-full w-full max-w-[1200px] mx-auto">
-
-        <!-- LEFT PANE: Categories Sidebar -->
         <div id="menu-sidebar" class="w-full md:w-[250px] lg:w-[280px] h-full overflow-y-auto md:border-r md:border-subtle/12 py-3 md:py-8 px-3 md:px-4 shrink-0 flex flex-col gap-1">
           {navItems.map((item: any, index: number) => {
             const isFirst = index === 0;
@@ -149,26 +154,20 @@ try {
           })}
         </div>
 
-        <!-- RIGHT PANE: Bullet Lists & View All Link -->
         <div id="menu-content" class="hidden md:flex flex-1 flex-col h-full overflow-y-auto bg-main p-6 md:px-12 md:py-10">
-
-          <!-- Mobile "Back" Button -->
           <button id="mobile-back-btn" class="md:hidden flex items-center gap-1.5 text-tx-muted hover:text-tx-main font-[500] text-[14px] mb-5 pb-4 border-b border-subtle/15 w-fit focus:outline-none cursor-pointer">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
             Back
           </button>
 
-          <!-- Render a panel for each category -->
           {navItems.map((item: any, index: number) => {
             const hasSubItems = item.subItems && item.subItems.length > 0;
             const isHidden = index === 0 ? "flex" : "hidden";
 
             return (
               <div id={`submenu-${index}`} class={`submenu-panel flex-col h-full ${isHidden}`}>
-                
                 {hasSubItems ? (
                   <div class="flex flex-col h-full">
-                    {/* 🟢 Vertical-first Grid Layout */}
                     <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[none] md:grid-rows-4 md:grid-flow-col md:auto-cols-fr gap-x-8 gap-y-3 list-disc list-inside marker:text-tx-main mb-8 w-full">
                       {item.subItems.map((subItem: any) => (
                         <li class="text-tx-muted">
@@ -178,11 +177,8 @@ try {
                         </li>
                       ))}
                     </ul>
-                    
-                    {/* 🟢 Centered View All Link */}
                     <div class="mt-2 pt-4 border-t border-subtle/10 w-full flex justify-center">
                     <a href={item.url || '#'} class="group inline-flex items-center gap-1.5 text-[15px] font-[600] text-tx-main hover:text-tx-muted transition-colors py-2">
-
                         View all {item.label} 
                         <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                       </a>
@@ -190,14 +186,12 @@ try {
                   </div>
                 ) : (
                   <div class="flex flex-col h-full w-full">
-                    {/* 🟢 Left-aligned View All Link (Empty Category) */}
                     <a href={item.url || '#'} class="group mr-auto inline-flex items-center gap-1.5 text-[15px] font-[600] text-tx-main hover:text-tx-muted transition-colors mt-2 w-fit">
                       View all {item.label} 
                       <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </a>
                   </div>
                 )}
-                
               </div>
             );
           })}
@@ -207,65 +201,22 @@ try {
   </div>
 </header>
 
-<!-- 🟢 MINIMALIST SEARCH OVERLAY -->
+<!-- Minimal Search Overlay -->
 <div id="minimal-search-overlay" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-md opacity-0 invisible pointer-events-none transition-all duration-300 flex flex-col pt-[12vh] px-5">
   <div class="absolute inset-0" id="search-overlay-backdrop"></div>
-
-  <div
-    id="search-overlay-content"
-    class="relative z-10 w-full max-w-2xl mx-auto transform scale-95 opacity-0 transition-all duration-500 ease-out"
-  >
-
-    <!-- 🟢 BACKWARD ARROW (Aligned with search bar) -->
+  <div id="search-overlay-content" class="relative z-10 w-full max-w-2xl mx-auto transform scale-95 opacity-0 transition-all duration-500 ease-out">
     <div class="mb-12 flex">
-      <button 
-        id="close-search-overlay" 
-        type="button" 
-        class="inline-flex items-center justify-center p-2.5 -ml-3 text-tx-muted hover:text-tx-main hover:bg-tx-muted/10 rounded-full transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-tx-main/50"
-        aria-label="Close search"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
+      <button id="close-search-overlay" type="button" class="inline-flex items-center justify-center p-2.5 -ml-3 text-tx-muted hover:text-tx-main hover:bg-tx-muted/10 rounded-full transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-tx-main/50" aria-label="Close search">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
       </button>
     </div>
-
-    <!-- Search Form -->
     <form action="/search" method="GET" class="w-full">
       <div class="border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-colors">
-        <input
-          type="search"
-          name="q"
-          id="overlay-search-input"
-          placeholder="Search..."
-          autocomplete="off"
-          spellcheck="true"
-          autocorrect="on"
-          autocapitalize="off"
-          class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40"
-        />
+        <input type="search" name="q" id="overlay-search-input" placeholder="Search..." autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="off" class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40" />
       </div>
-
-      <!-- Search Button (Hidden by default) -->
       <div id="search-submit-container" class="mt-6 flex justify-end opacity-0 invisible transition-all duration-200">
-        <button
-          type="submit"
-          class="inline-flex items-center gap-2 rounded-sm border border-subtle px-4 py-2 text-sm font-medium text-tx-main transition-all duration-200 hover:border-tx-main hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-tx-main/20"
-        >
-          <svg
-            class="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+        <button type="submit" class="inline-flex items-center gap-2 rounded-sm border border-subtle px-4 py-2 text-sm font-medium text-tx-main transition-all duration-200 hover:border-tx-main hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-tx-main/20">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <span>Search</span>
         </button>
       </div>
@@ -274,31 +225,58 @@ try {
 </div>
 
 <script>
-  // Theme Toggle Logic
-  const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
-  const darkIcons = document.querySelectorAll('.theme-toggle-dark-icon');
-  const lightIcons = document.querySelectorAll('.theme-toggle-light-icon');
+  // 🟢 3. BACKGROUND SYNC LOGIC (Handles expiration & profile population)
+  import { authClient } from '../../lib/auth-client';
+  
+  async function syncAuth() {
+    try {
+      const { data } = await authClient.getSession();
+      const avatarImgEl = document.getElementById('profile-avatar-img-header') as HTMLImageElement;
+      const avatarFallbackEl = document.getElementById('profile-avatar-header');
+      const fallbackIconEl = document.getElementById('profile-avatar-fallback-icon');
 
-  if (themeToggleBtns.length > 0) {
-    if (document.documentElement.classList.contains('dark')) {
-      lightIcons.forEach(icon => icon.classList.remove('hidden'));
-    } else {
-      darkIcons.forEach(icon => icon.classList.remove('hidden'));
+      if (data && data.user) {
+        // Valid session: Set storage flag & trigger CSS
+        try { localStorage.setItem('auth_valid', 'true'); } catch(e) {}
+        document.documentElement.classList.add('is-auth');
+
+        // Swap generic icon for real data
+        const user = data.user as any;
+        if (user.image && avatarImgEl) {
+           avatarImgEl.src = user.image;
+           avatarImgEl.classList.remove('hidden');
+           if (avatarFallbackEl) avatarFallbackEl.classList.add('hidden');
+        } else if (avatarFallbackEl && (user.name || user.email)) {
+           const initial = user.name ? user.name : user.email;
+           avatarFallbackEl.textContent = initial.charAt(0).toUpperCase();
+           if (fallbackIconEl) fallbackIconEl.remove(); // Remove generic icon
+        }
+      } else {
+        // Expired or logged out: Remove storage flag & revert CSS
+        try { localStorage.removeItem('auth_valid'); } catch(e) {}
+        document.documentElement.classList.remove('is-auth');
+      }
+    } catch(e) {
+      // Error fetching session: Treat as logged out
+      try { localStorage.removeItem('auth_valid'); } catch(e) {}
+      document.documentElement.classList.remove('is-auth');
     }
+  }
+  
+  syncAuth();
 
+  // --- THEME TOGGLE LOGIC (Brave Shield Safe) ---
+  const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
+  if (themeToggleBtns.length > 0) {
     themeToggleBtns.forEach(btn => {
       btn.addEventListener('click', function() {
         const isCurrentlyDark = document.documentElement.classList.contains('dark');
-        
-        darkIcons.forEach(icon => icon.classList.toggle('hidden'));
-        lightIcons.forEach(icon => icon.classList.toggle('hidden'));
-
         if (isCurrentlyDark) {
           document.documentElement.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
+          try { localStorage.setItem('theme', 'light'); } catch (e) {}
         } else {
           document.documentElement.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
+          try { localStorage.setItem('theme', 'dark'); } catch (e) {}
         }
       });
     });
@@ -318,10 +296,7 @@ try {
     searchContent?.classList.remove('scale-95', 'opacity-0');
     searchContent?.classList.add('scale-100', 'opacity-100');
     document.body.style.overflow = 'hidden';
-    
-    setTimeout(() => {
-      searchInput?.focus();
-    }, 100);
+    setTimeout(() => { searchInput?.focus(); }, 100);
   }
 
   function closeSearch() {
@@ -331,15 +306,19 @@ try {
     document.body.style.overflow = '';
   }
 
-  // --- SEARCH MEMORY LOGIC ---
+  // Search Memory Logic
   function restoreSearchState() {
     const urlParams = new URLSearchParams(window.location.search);
     const queryFromUrl = urlParams.get('q');
-    const savedQuery = sessionStorage.getItem('lastSearchQuery');
+    
+    let savedQuery = null;
+    try {
+      savedQuery = sessionStorage.getItem('lastSearchQuery');
+    } catch (e) {}
 
     if (queryFromUrl) {
       if (searchInput) searchInput.value = queryFromUrl;
-      sessionStorage.setItem('lastSearchQuery', queryFromUrl);
+      try { sessionStorage.setItem('lastSearchQuery', queryFromUrl); } catch (e) {}
       searchSubmitContainer?.classList.remove('opacity-0', 'invisible');
     } else if (savedQuery) {
       if (searchInput) searchInput.value = savedQuery;
@@ -349,7 +328,7 @@ try {
 
   searchInput?.addEventListener('input', () => {
     if (searchInput) {
-      sessionStorage.setItem('lastSearchQuery', searchInput.value);
+      try { sessionStorage.setItem('lastSearchQuery', searchInput.value); } catch (e) {}
       
       if (searchInput.value.trim().length > 0) {
         searchSubmitContainer?.classList.remove('opacity-0', 'invisible');
@@ -382,7 +361,6 @@ try {
   const menuContent = document.getElementById('menu-content');
   const backBtn = document.getElementById('mobile-back-btn');
 
-  // Arrays to easily toggle the active/inactive classes
   const MENU_ACTIVE_CLASSES = ['is-active', 'text-tx-main', 'font-[600]', 'md:bg-tx-muted/5'];
   const MENU_INACTIVE_CLASSES = ['text-tx-muted'];
 
@@ -403,7 +381,6 @@ try {
     if (!menu || !btn) return;
     menu.classList.remove('hidden');
     menu.classList.add('flex');
-    // force a reflow so the transition fires reliably
     void menu.offsetWidth;
     menu.classList.remove('opacity-0', '-translate-y-1.5');
     document.body.style.overflow = 'hidden';
@@ -436,20 +413,17 @@ try {
     });
   }
 
-  // Handle clicking a category on the left sidebar
   categoryBtns.forEach(categoryBtn => {
     categoryBtn.addEventListener('click', () => {
       const targetId = categoryBtn.getAttribute('data-target');
       const hasSub = categoryBtn.getAttribute('data-has-sub') === 'true';
       const url = categoryBtn.getAttribute('data-url');
 
-      // If mobile and NO sub-items, act as a direct navigation link
       if (window.innerWidth < 768 && !hasSub) {
         if (url) window.location.href = url;
         return;
       }
 
-      // 1. Reset all category buttons to the quiet, inactive state, and adjust arrows
       categoryBtns.forEach(c => {
         c.classList.remove(...MENU_ACTIVE_CLASSES);
         c.classList.add(...MENU_INACTIVE_CLASSES);
@@ -460,7 +434,6 @@ try {
         }
       });
 
-      // 2. Mark the clicked button active, and highlight its arrow
       categoryBtn.classList.remove(...MENU_INACTIVE_CLASSES);
       categoryBtn.classList.add(...MENU_ACTIVE_CLASSES);
       const activeArrow = categoryBtn.querySelector('.menu-arrow');
@@ -469,7 +442,6 @@ try {
         activeArrow.classList.add('text-tx-main', 'md:opacity-100');
       }
 
-      // 3. Hide all right-side panels, then show the specific target panel
       submenuPanels.forEach(p => {
         p.classList.remove('flex');
         p.classList.add('hidden');
@@ -481,7 +453,6 @@ try {
         targetPanel.classList.add('flex');
       }
 
-      // 4. Mobile specific: Hide the sidebar entirely and show the content pane
       if (window.innerWidth < 768 && menuSidebar && menuContent && hasSub) {
         menuSidebar.classList.add('hidden');
         menuSidebar.classList.remove('flex');
@@ -491,10 +462,8 @@ try {
     });
   });
 
-  // Handle the Mobile "Back" button
   if (backBtn && menuSidebar && menuContent) {
     backBtn.addEventListener('click', () => {
-      // Hide content pane, show sidebar again
       menuContent.classList.remove('flex');
       menuContent.classList.add('hidden');
       menuSidebar.classList.remove('hidden');
