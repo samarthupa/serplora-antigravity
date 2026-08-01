@@ -54,14 +54,14 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
-        <!-- 🟢 Fade Overlay (Visual cue for scrolling on mobile) -->
+        <!-- Fade Overlay (Visual cue for scrolling on mobile) -->
         <div class="absolute right-0 top-0 bottom-[1px] w-14 bg-gradient-to-l from-main to-transparent pointer-events-none md:hidden z-10"></div>
         
       </div>
 
       <!-- Results Header -->
       <div class="flex items-center justify-between mb-6">
-        <span id="search-count" class="text-[15px] font-[400] text-tx-muted">About 0 search results</span>
+        <span id="search-count" class="text-[15px] font-[400] text-tx-muted"></span>
       </div>
 
       <!-- Loading State -->
@@ -106,7 +106,7 @@ import Layout from '../layouts/Layout.astro';
   let currentTab = 'all'; 
   let currentQuery = ''; 
 
-  // 🟢 Comprehensive Intent & Tech Synonym Dictionary
+  // Comprehensive Intent & Tech Synonym Dictionary
   const searchSynonyms: Record<string, string> = {
     "how to": "tutorial",
     "how do i": "tutorial",
@@ -243,7 +243,7 @@ import Layout from '../layouts/Layout.astro';
     currentQuery = query; // Save the original query to our global variable
     showLoading();
 
-    // 🟢 Intercept and replace synonyms automatically
+    // Intercept and replace synonyms automatically
     const optimizedQuery = optimizeSearchQuery(query);
 
     const pf = await initPagefind();
@@ -326,6 +326,7 @@ import Layout from '../layouts/Layout.astro';
 
   // --- UI Helpers ---
   function showLoading() {
+    if (countDisplay) countDisplay.textContent = 'Searching...';
     if (resultsContainer) resultsContainer.innerHTML = '';
     if (emptyState) emptyState.classList.add('hidden');
     if (loadingIndicator) loadingIndicator.classList.remove('hidden');
