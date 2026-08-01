@@ -1,6 +1,5 @@
 ---
 import { getEntry } from 'astro:content';
-// (authClient import is removed from here because we only use it on the client side now)
 
 // 🟢 Define Props
 interface Props {
@@ -21,7 +20,7 @@ const primaryBtn = {
 };
 ---
 
-<!-- 🟢 1. INSTANT PAINT SCRIPT (Prevents layout shift before HTML loads) -->
+<!-- 🟢 INSTANT PAINT SCRIPT (Prevents Sign-In button layout shift before HTML loads) -->
 <script is:inline>
   try {
     if (localStorage.getItem('auth_valid') === 'true') {
@@ -31,7 +30,7 @@ const primaryBtn = {
 </script>
 
 <style>
-  /* 🟢 2. CSS TOGGLE LOGIC */
+  /* 🟢 CSS TOGGLE LOGIC */
   #auth-signin-header { display: block; }
   #auth-profile-header { display: none; }
   
@@ -201,6 +200,35 @@ const primaryBtn = {
   </div>
 </header>
 
+<!-- 🟢 INSTANT PROFILE RENDER SCRIPT (Prevents avatar flash) -->
+<script is:inline>
+  try {
+    if (localStorage.getItem('auth_valid') === 'true') {
+      const avatarUrl = localStorage.getItem('auth_avatar');
+      const initialStr = localStorage.getItem('auth_initial');
+      
+      if (avatarUrl) {
+        const img = document.getElementById('profile-avatar-img-header');
+        const fallback = document.getElementById('profile-avatar-header');
+        const fallbackIcon = document.getElementById('profile-avatar-fallback-icon');
+        if (img && fallback) {
+          img.src = avatarUrl;
+          img.classList.remove('hidden');
+          fallback.classList.add('hidden');
+          if (fallbackIcon) fallbackIcon.remove();
+        }
+      } else if (initialStr) {
+        const fallback = document.getElementById('profile-avatar-header');
+        const fallbackIcon = document.getElementById('profile-avatar-fallback-icon');
+        if (fallback) {
+          fallback.textContent = initialStr;
+          if (fallbackIcon) fallbackIcon.remove();
+        }
+      }
+    }
+  } catch(e) {}
+</script>
+
 <!-- Minimal Search Overlay -->
 <div id="minimal-search-overlay" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-md opacity-0 invisible pointer-events-none transition-all duration-300 flex flex-col pt-[12vh] px-5">
   <div class="absolute inset-0" id="search-overlay-backdrop"></div>
@@ -225,7 +253,7 @@ const primaryBtn = {
 </div>
 
 <script>
-  // 🟢 3. BACKGROUND SYNC LOGIC (Handles expiration & profile population)
+  // 🟢 BACKGROUND SYNC LOGIC (Saves Avatar to LocalStorage)
   import { authClient } from '../../lib/auth-client';
   
   async function syncAuth() {
@@ -236,29 +264,49 @@ const primaryBtn = {
       const fallbackIconEl = document.getElementById('profile-avatar-fallback-icon');
 
       if (data && data.user) {
-        // Valid session: Set storage flag & trigger CSS
-        try { localStorage.setItem('auth_valid', 'true'); } catch(e) {}
+        const user = data.user as any;
+        const initial = user.name ? user.name : user.email;
+        const initialChar = initial.charAt(0).toUpperCase();
+
+        // 🟢 Caches the image/initial in localStorage so it doesn't flash next time
+        try { 
+          localStorage.setItem('auth_valid', 'true'); 
+          if (user.image) {
+            localStorage.setItem('auth_avatar', user.image);
+          } else {
+            localStorage.setItem('auth_initial', initialChar);
+          }
+        } catch(e) {}
+        
         document.documentElement.classList.add('is-auth');
 
-        // Swap generic icon for real data
-        const user = data.user as any;
+        // Swap generic icon for real data immediately
         if (user.image && avatarImgEl) {
            avatarImgEl.src = user.image;
            avatarImgEl.classList.remove('hidden');
            if (avatarFallbackEl) avatarFallbackEl.classList.add('hidden');
-        } else if (avatarFallbackEl && (user.name || user.email)) {
-           const initial = user.name ? user.name : user.email;
-           avatarFallbackEl.textContent = initial.charAt(0).toUpperCase();
-           if (fallbackIconEl) fallbackIconEl.remove(); // Remove generic icon
+           if (fallbackIconEl) fallbackIconEl.remove();
+        } else if (avatarFallbackEl) {
+           avatarFallbackEl.textContent = initialChar;
+           avatarFallbackEl.classList.remove('hidden');
+           if (avatarImgEl) avatarImgEl.classList.add('hidden');
+           if (fallbackIconEl) fallbackIconEl.remove(); 
         }
       } else {
-        // Expired or logged out: Remove storage flag & revert CSS
-        try { localStorage.removeItem('auth_valid'); } catch(e) {}
+        // Clear all cache if logged out
+        try { 
+          localStorage.removeItem('auth_valid'); 
+          localStorage.removeItem('auth_avatar');
+          localStorage.removeItem('auth_initial');
+        } catch(e) {}
         document.documentElement.classList.remove('is-auth');
       }
     } catch(e) {
-      // Error fetching session: Treat as logged out
-      try { localStorage.removeItem('auth_valid'); } catch(e) {}
+      try { 
+        localStorage.removeItem('auth_valid'); 
+        localStorage.removeItem('auth_avatar');
+        localStorage.removeItem('auth_initial');
+      } catch(e) {}
       document.documentElement.classList.remove('is-auth');
     }
   }
