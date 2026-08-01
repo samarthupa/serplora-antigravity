@@ -71,7 +71,7 @@ const primaryBtn = {
         <span class="hidden md:flex items-center justify-center border border-subtle/60 rounded-[4px] px-1.5 py-0.5 text-[10px] font-mono opacity-60">⌘K</span>
       </button>
 
-      <button class="theme-toggle-btn flex items-center justify-center w-[36px] h-[36px] md:w-[32px] md:h-[30px] rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
+      <button class="theme-toggle-btn flex items-center justify-center w-[36px] h-[36px] md:w-[32px] md:h-[32px] rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
         <svg class="theme-toggle-dark-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg class="theme-toggle-light-icon hidden w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
@@ -80,7 +80,7 @@ const primaryBtn = {
         
         <div id="auth-signin-header" style="display: none;">
           {primaryBtn.show && (
-            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[32px] px-3 md:px-4 rounded-[8px] bg-cta text-cta-text text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-cta-hover hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cta outline-none whitespace-nowrap">
+            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[30px] px-3 md:px-4 rounded-[8px] bg-cta text-cta-text text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-cta-hover hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cta outline-none whitespace-nowrap">
               <span>{primaryBtn.label}</span>
             </button>
           )}
