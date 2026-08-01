@@ -270,6 +270,19 @@ import Layout from '../layouts/Layout.astro';
     if (filteredResults.length === 0) {
       showEmpty(currentTab);
       if (countDisplay) countDisplay.textContent = `About 0 search results for "${currentQuery}"`;
+      
+      // 🟢 NEW: Send custom event to GA4 via GTM dataLayer for 0 results
+      try {
+        if (typeof window !== 'undefined') {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({ 
+            event: 'search_no_results', 
+            search_term: currentQuery,
+            search_tab: currentTab
+          });
+        }
+      } catch(e) {}
+      
       return;
     }
 
