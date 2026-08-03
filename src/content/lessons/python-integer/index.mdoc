@@ -1,0 +1,67 @@
+---
+title: Python Integer
+breadcrumbTitle: integer data type
+urlSlug: integer
+tutorial: python
+order: 11
+seo:
+  metaTitle: Python Integer (int)
+  metaDescription: Learn the Python integer data type with simple examples for beginners.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+An integer is a whole number with no decimal point. In Python, integers can be positive, negative, or zero. You can use an integer directly in your code or store it in a variable.
+
+{% codeEditor
+   language="python"
+   code="print(25)    # Positive integer\nprint(-10)   # Negative integer\nprint(0)     # Zero" /%}
+
+**Store integers in variables:**
+
+{% codeEditor
+   language="python"
+   code="age = 25\ntemperature = -10\nscore = 0\n\nprint(age)\nprint(temperature)\nprint(score)" /%}
+
+To verify that a variable is an integer, use the built-in `type()` function. If it outputs `<class 'int'>`, it's an integer.
+
+{% codeEditor language="python" code="age = 25\nprint(type(age))" /%}
+
+## Using Integers in Calculations
+
+You can perform mathematical operations with integers. For example, you can add, subtract, and multiply them.
+
+{% codeEditor
+   language="python"
+   code="print(10 + 5)\nprint(10 - 5)\nprint(10 * 5)" /%}
+
+You can also use variables in mathematical operations.
+
+{% codeEditor
+   language="python"
+   code="price = 20\nquantity = 3\n\nprint(price * quantity)" /%}
+
+## Large Integers
+
+Python can work with very large integers. Python integers have no maximum size limit.
+
+{% codeEditor
+   language="python"
+   code="population = 14000000000000\n\nprint(population)" /%}
+
+You can use underscores to make large numbers easier to read. Python ignores the underscores when executing the code.
+
+{% codeEditor
+   language="python"
+   code="population = 1_400_000_000\n\nprint(population)" /%}
+
+## Integers vs Strings
+
+The `+` operator performs addition for integers but concatenates (joins) strings. In the example below, both values are integers:
+
+{% codeEditor language="python" code="print(25 + 25)" /%}
+
+Now compare it with strings:
+
+{% codeEditor language="python" code="print(\"25\" + \"25\")" /%}

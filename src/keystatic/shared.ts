@@ -45,7 +45,7 @@ export const customCodeBlocks = {
         label: '▶️ Interactive Code Editor',
         ContentView: KeystaticCodePreview,
         schema: { 
-            language: fields.text({ label: 'Language', defaultValue: 'javascript' }), 
+            language: fields.text({ label: 'Language', defaultValue: 'python' }), 
             code: fields.text({ label: 'Initial Code', multiline: true }) 
         }
     }),

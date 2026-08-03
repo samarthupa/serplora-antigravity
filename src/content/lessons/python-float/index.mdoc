@@ -1,0 +1,81 @@
+---
+title: Python Float
+breadcrumbTitle: float data type
+urlSlug: float
+tutorial: python
+order: 11
+seo:
+  metaTitle: Learn Python Float (Decimals in Python)
+  metaDescription: Learn the Python float data type with simple examples for beginners.
+  robotsIndex: true
+  robotsFollow: true
+  disableStickyHeader: false
+  schemaType: none
+---
+A float is a number with a decimal point. Python uses the float data type to store decimal numbers. Floats are commonly used to represent prices, heights, temperatures, and measurements.
+
+{% codeEditor
+   language="python"
+   code="print(19.99)   # Positive float\nprint(-3.5)    # Negative float\nprint(0.0)     # Zero as a float" /%}
+
+**Store floats in variables:**
+
+{% codeEditor
+   language="python"
+   code="price = 19.99\nheight = 5.9\ntemperature = -2.5\n\nprint(price)\nprint(height)\nprint(temperature)" /%}
+
+## Check the Data Type
+
+To verify that a value is a float, use the built-in `type()` function. If it outputs `<class 'float'>`, the value is a float.
+
+{% codeEditor language="python" code="price = 19.99\n\nprint(type(price))" /%}
+
+## Using Floats in Calculations
+
+You can perform mathematical operations with floats. For example, you can add, subtract, multiply, and divide them.
+
+{% codeEditor
+   language="python"
+   code="print(10.5 + 2.5)\nprint(10.5 - 2.5)\nprint(10.5 * 2)\nprint(10.5 / 2)" /%}
+
+You can also use variables in mathematical operations:
+
+{% codeEditor
+   language="python"
+   code="price = 19.99\nquantity = 3\n\nprint(price * quantity)" /%}
+
+## Scientific Notation
+
+Python supports scientific notation for writing very large or very small decimal numbers.
+
+{% codeEditor
+   language="python"
+   code="distance = 1.5e6\nmass = 7.2e-3\n\nprint(distance)\nprint(mass)" /%}
+
+> `1.5e6` means `1.5 × 10⁶`.
+> 
+> `7.2e-3` means `7.2 × 10⁻³`.
+
+Scientific notation makes long numbers easier to write and read.
+
+## Floats vs Integers
+
+Integers and floats are different data types.
+
+{% codeEditor language="python" code="print(type(25))\nprint(type(25.0))" /%}
+
+Although `25` and `25.0` represent the same numeric value, Python stores them as different data types.
+
+## Floating-Point Precision
+
+When you add two float numbers in Python, the output can be different from normal math.
+
+For example, `0.1 + 0.2` should be `0.3`. However, Python prints `0.30000000000000004`.
+
+Try:
+
+{% codeEditor language="python" code="print(0.1 + 0.2)" /%}
+
+This happens because computers store numbers using binary (0s and 1s), not the decimal system. Because of this, some decimal numbers, such as `0.1` and `0.2`, cannot be stored exactly as they are.
+
+> **Note:** This is not a bug in Python. This is standard behavior in almost all programming languages.
