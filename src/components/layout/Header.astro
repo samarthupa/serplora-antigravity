@@ -43,10 +43,10 @@ const primaryBtn = {
   .styled-scrollbar::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.3); border-radius: 4px; }
 </style>
 
-<!-- 🟢 TOP STRIP (50px Height, Shifted Left, Ready for AdSense) -->
+<!-- 🟢 TOP STRIP (60px Height, Shifted Left, Ready for AdSense) -->
 <header 
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
-  class={`w-full z-[200] h-[50px] bg-main flex items-center pl-1.5 pr-3 transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class={`w-full z-[200] h-[60px] bg-main flex items-center pl-3 pr-3 transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
   <!-- Small Toggle Icon with Blue Dot -->
   <button
@@ -74,8 +74,8 @@ const primaryBtn = {
   id="site-sidebar" 
   class="fixed top-0 left-0 z-[250] w-[260px] h-[100dvh] bg-main/95 backdrop-blur-[12px] shadow-2xl border-r border-subtle/10 flex flex-col font-sans transition-transform duration-300 ease-out -translate-x-full"
 >
-  <!-- Sidebar Header: Logo & Close Button (50px height to match top strip) -->
-  <div class="flex items-center justify-between pl-4 pr-1.5 h-[50px] shrink-0 border-b border-subtle/10">
+  <!-- Sidebar Header: Logo & Close Button (60px height to match top strip) -->
+  <div class="flex items-center justify-between pl-4 pr-1.5 h-[60px] shrink-0 border-b border-subtle/10">
     <a href="/" class="flex items-center gap-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted rounded">
       {logo && (
         <>
@@ -144,9 +144,9 @@ const primaryBtn = {
     </div>
 
     <!-- Theme Toggle (Icon Only) -->
-    <button class="theme-toggle-btn flex items-center justify-center w-[34px] h-[34px] shrink-0 rounded-[6px] text-tx-muted hover:bg-tx-muted/10 hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
-      <svg class="block dark:hidden w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-      <svg class="hidden dark:block w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    <button class="theme-toggle-btn flex items-center justify-center w-[40px] h-[34px] shrink-0 rounded-[6px] text-tx-muted hover:bg-tx-muted/10 hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
+      <svg class="block dark:hidden w-5 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      <svg class="hidden dark:block w-5 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
 
   </div>
