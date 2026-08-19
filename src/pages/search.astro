@@ -5,77 +5,81 @@ import Layout from '../layouts/Layout.astro';
 // We explicitly tell Google NOT to index search result pages to prevent infinite empty URLs
 ---
 
-<Layout title="Search Results | Serplora">
+<Layout title="Search | Serplora">
   <!-- SEO Protection -->
   <Fragment slot="head">
     <meta name="robots" content="noindex, nofollow" />
   </Fragment>
 
-  <main class="min-h-screen bg-main pt-10 pb-20 px-4 md:px-8 font-['Outfit',sans-serif]">
-    <div class="max-w-4xl mx-auto w-full">
-
-      <!-- 🔍 Search Bar -->
-      <div class="relative w-full mb-8">
-        <form id="search-form" class="relative flex items-center">
-          <!-- Search Icon -->
-          <svg class="absolute left-4 w-5 h-5 text-tx-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          
+  <!-- We use min-h-screen and flex-col to control the layout shift -->
+  <main class="min-h-[100dvh] bg-main px-4 md:px-8 font-['Outfit',sans-serif] flex flex-col">
+    
+    <!-- 🔍 Big Search Bar Area (Shifts up when searching) -->
+    <!-- pt-[25vh] puts it in the center like the image. pt-12 shifts it up for results. -->
+    <div id="search-view-wrapper" class="w-full max-w-3xl mx-auto transition-all duration-500 ease-out pt-[25vh]">
+      
+      <!-- Design exactly matches Header.astro overlay (no back button) -->
+      <form id="search-page-form" action="/search" method="GET" class="w-full">
+        <div class="border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-colors">
           <input 
             type="search" 
-            id="search-input" 
-            class="w-full py-3 pl-12 pr-4 bg-transparent border border-subtle rounded-lg text-tx-main placeholder-tx-muted focus:outline-none focus:border-tx-main transition-colors"
-            placeholder="Search tutorials, projects, quizzes..."
-            autocomplete="off"
-          >
-          <button type="submit" class="hidden">Search</button>
-        </form>
-      </div>
-
-     <!-- 🟢 Tab Navigation -->
-      <div class="relative w-full mb-6">
+            name="q" 
+            id="search-page-input" 
+            placeholder="Search..." 
+            autocomplete="off" 
+            spellcheck="true" 
+            autocorrect="on" 
+            autocapitalize="off" 
+            class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40" 
+            autofocus
+          />
+        </div>
         
-        <!-- Scrollable Track -->
+        <!-- Submit Button (Fades in when typing) -->
+        <div id="search-submit-container" class="mt-6 flex justify-end opacity-0 invisible transition-all duration-200">
+          <button type="submit" class="inline-flex items-center gap-2 rounded-sm border border-subtle px-4 py-2 text-sm font-medium text-tx-main transition-all duration-200 hover:border-tx-main hover:bg-tx-muted/5 focus:outline-none focus:ring-2 focus:ring-tx-main/20">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <span>Search</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 🟢 RESULTS UI CONTAINER (Hidden until search is explicitly submitted) -->
+    <div id="search-results-wrapper" class="hidden w-full max-w-3xl mx-auto mt-8 pb-20 transition-all duration-500 opacity-0">
+
+      <!-- 🟢 Tab Navigation -->
+      <div class="relative w-full mb-6">
         <div class="flex items-center border-b border-subtle overflow-x-auto hide-scrollbar">
-          <!-- Added pr-12 to ensure the last tab doesn't get permanently stuck under the fade when fully scrolled -->
           <div class="flex items-center gap-6 md:gap-8 pr-12 md:pr-0" id="search-tabs">
             
-            <!-- All -->
             <button data-tab="all" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-main font-[600] outline-none cursor-pointer">
               All
               <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-100 transition-opacity duration-200"></span>
             </button>
             
-            <!-- Tutorials -->
             <button data-tab="tutorials" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
               Tutorials
               <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
             </button>
 
-            <!-- Projects -->
             <button data-tab="projects" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
               Projects
               <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
             </button>
 
-            <!-- Quizzes -->
             <button data-tab="quizzes" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
               Quizzes
               <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
             </button>
 
-            <!-- Articles -->
             <button data-tab="articles" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-muted hover:text-tx-main font-[500] transition-colors outline-none cursor-pointer">
               Articles
               <span class="tab-indicator absolute bottom-0 left-0 w-full h-[3px] bg-tx-main rounded-t-sm opacity-0 transition-opacity duration-200"></span>
             </button>
           </div>
         </div>
-
-        <!-- Fade Overlay (Visual cue for scrolling on mobile) -->
         <div class="absolute right-0 top-0 bottom-[1px] w-14 bg-gradient-to-l from-main to-transparent pointer-events-none md:hidden z-10"></div>
-        
       </div>
 
       <!-- Results Header -->
@@ -99,13 +103,13 @@ import Layout from '../layouts/Layout.astro';
         <!-- JS will inject results here -->
       </div>
 
-      <!-- Empty State (Hidden by default) -->
-      <div id="search-empty" class="hidden flex-col items-center justify-center py-20 text-center">
-        <svg class="w-16 h-16 text-tx-muted/50 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <!-- Empty State (No Matches) -->
+      <div id="search-empty" class="hidden flex-col items-center justify-center py-10 text-center">
+        <svg class="w-12 h-12 text-tx-muted/50 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
-        <h2 class="text-xl font-bold text-tx-main mb-2">No results found</h2>
-        <p class="text-tx-muted" id="empty-state-message">We couldn't find anything matching your query. Try modifying your search terms.</p>
+        <h2 class="text-lg font-bold text-tx-main mb-1">No results found</h2>
+        <p class="text-[15px] text-tx-muted" id="empty-state-message">We couldn't find anything matching your query.</p>
       </div>
 
     </div>
@@ -113,6 +117,13 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
+  // Elements
+  const searchViewWrapper = document.getElementById('search-view-wrapper');
+  const searchResultsWrapper = document.getElementById('search-results-wrapper');
+  const searchInput = document.getElementById('search-page-input') as HTMLInputElement;
+  const searchForm = document.getElementById('search-page-form') as HTMLFormElement;
+  const submitContainer = document.getElementById('search-submit-container');
+  
   const resultsContainer = document.getElementById('search-results');
   const loadingIndicator = document.getElementById('search-loading');
   const emptyState = document.getElementById('search-empty');
@@ -125,119 +136,43 @@ import Layout from '../layouts/Layout.astro';
   let currentTab = 'all'; 
   let currentQuery = ''; 
 
-  // Comprehensive Intent & Tech Synonym Dictionary
+  // Synonym Dictionary
   const searchSynonyms: Record<string, string> = {
-    "how to": "tutorial",
-    "how do i": "tutorial",
-    "learn": "tutorial",
-    "learning": "tutorial",
-    "beginner": "tutorial",
-    "beginners": "tutorial",
-    "starting": "tutorial",
-    "starter": "tutorial",
-    "intro": "tutorial",
-    "introduction": "tutorial",
-    "basics": "tutorial",
-    "basic": "tutorial",
-    "fundamentals": "tutorial",
-    "handbook": "guide",
-    "cheat sheet": "guide",
-    "cheatsheet": "guide",
-    "roadmap": "guide",
-    "course": "tutorial",
-    "courses": "tutorial",
-    "class": "tutorial",
-    "lesson": "tutorial",
-    "lessons": "tutorial",
-    "walkthrough": "tutorial",
-    "how to build": "project",
-    "how to make": "project",
-    "how to create": "project",
-    "build": "project",
-    "building": "project",
-    "make": "project",
-    "making": "project",
-    "create": "project",
-    "creating": "project",
-    "clone": "project",
-    "app": "project",
-    "application": "project",
-    "demo": "project",
-    "example": "project",
-    "examples": "project",
-    "sample": "project",
-    "exercise": "project",
-    "exercises": "project",
-    "hands on": "project",
-    "hands-on": "project",
-    "interview questions": "quiz",
-    "practice questions": "quiz",
-    "test": "quiz",
-    "tests": "quiz",
-    "testing": "quiz",
-    "exam": "quiz",
-    "exams": "quiz",
-    "assessment": "quiz",
-    "practice": "quiz",
-    "questions": "quiz",
-    "question": "quiz",
-    "mcq": "quiz",
-    "mcqs": "quiz",
-    "challenge": "quiz",
-    "challenges": "quiz",
-    "difference between": "vs",
-    "comparison": "vs",
-    "versus": "vs",
-    "blog": "article",
-    "blogs": "article",
-    "news": "article",
-    "post": "article",
-    "posts": "article",
-    "explained": "article",
-    "explanation": "article",
-    "overview": "article",
-    "understanding": "article",
-    "deep dive": "article",
-    "how to fix": "guide",
-    "fix": "guide",
-    "solve": "guide",
-    "error": "guide",
-    "bug": "guide",
-    "issue": "guide",
-    "solution": "guide",
-    "py": "python",
-    "py3": "python",
-    "js": "javascript",
-    "ts": "typescript",
-    "reactjs": "react",
-    "nodejs": "node",
-    "nextjs": "next",
-    "astrojs": "astro",
-    "tailwind": "tailwindcss",
-    "css3": "css",
+    "how to": "tutorial", "how do i": "tutorial", "learn": "tutorial", "learning": "tutorial",
+    "beginner": "tutorial", "beginners": "tutorial", "starting": "tutorial", "starter": "tutorial",
+    "intro": "tutorial", "introduction": "tutorial", "basics": "tutorial", "basic": "tutorial",
+    "fundamentals": "tutorial", "handbook": "guide", "cheat sheet": "guide", "cheatsheet": "guide",
+    "roadmap": "guide", "course": "tutorial", "courses": "tutorial", "class": "tutorial",
+    "lesson": "tutorial", "lessons": "tutorial", "walkthrough": "tutorial", "how to build": "project",
+    "how to make": "project", "how to create": "project", "build": "project", "building": "project",
+    "make": "project", "making": "project", "create": "project", "creating": "project", "clone": "project",
+    "app": "project", "application": "project", "demo": "project", "example": "project", "examples": "project",
+    "sample": "project", "exercise": "project", "exercises": "project", "hands on": "project",
+    "hands-on": "project", "interview questions": "quiz", "practice questions": "quiz", "test": "quiz",
+    "tests": "quiz", "testing": "quiz", "exam": "quiz", "exams": "quiz", "assessment": "quiz",
+    "practice": "quiz", "questions": "quiz", "question": "quiz", "mcq": "quiz", "mcqs": "quiz",
+    "challenge": "quiz", "challenges": "quiz", "difference between": "vs", "comparison": "vs",
+    "versus": "vs", "blog": "article", "blogs": "article", "news": "article", "post": "article",
+    "posts": "article", "explained": "article", "explanation": "article", "overview": "article",
+    "understanding": "article", "deep dive": "article", "how to fix": "guide", "fix": "guide",
+    "solve": "guide", "error": "guide", "bug": "guide", "issue": "guide", "solution": "guide",
+    "py": "python", "py3": "python", "js": "javascript", "ts": "typescript", "reactjs": "react",
+    "nodejs": "node", "nextjs": "next", "astrojs": "astro", "tailwind": "tailwindcss", "css3": "css",
     "html5": "html"
   };
 
-  // Helper function to safely replace phrases & words (sorted long-to-short)
   function optimizeSearchQuery(rawQuery: string): string {
     let query = rawQuery.toLowerCase();
-    
-    // Sort keys by character length descending so multi-word phrases match before single words
     const sortedKeys = Object.keys(searchSynonyms).sort((a, b) => b.length - a.length);
-
     for (const phrase of sortedKeys) {
       const replacement = searchSynonyms[phrase];
-      // Escape special characters for regex
       const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`\\b${escapedPhrase}\\b`, 'gi');
-      
       query = query.replace(regex, replacement);
     }
-
     return query;
   }
 
-  // 1. Load Pagefind dynamically
   async function initPagefind() {
     if (pagefindInstance) return pagefindInstance;
     try {
@@ -252,33 +187,50 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  // 2. Perform the actual search
-  async function performSearch(query: string) {
-    if (!query.trim()) {
-      clearResults();
-      return;
+  // --- Layout Transitions ---
+  function shiftLayoutToResults() {
+    if (searchViewWrapper) {
+      searchViewWrapper.classList.remove('pt-[25vh]');
+      searchViewWrapper.classList.add('pt-12');
     }
+    if (searchResultsWrapper) {
+      searchResultsWrapper.classList.remove('hidden');
+      setTimeout(() => searchResultsWrapper.classList.remove('opacity-0'), 50); // slight delay for smooth fade
+    }
+  }
 
-    currentQuery = query; // Save the original query to our global variable
+  function revertLayoutToCentered() {
+    if (searchViewWrapper) {
+      searchViewWrapper.classList.add('pt-[25vh]');
+      searchViewWrapper.classList.remove('pt-12');
+    }
+    if (searchResultsWrapper) {
+      searchResultsWrapper.classList.add('opacity-0');
+      setTimeout(() => searchResultsWrapper.classList.add('hidden'), 300); // Wait for fade out
+    }
+  }
+
+  // --- Core Search Logic ---
+  async function performSearch(query: string) {
+    currentQuery = query; 
+    
+    // Shift the UI up and show results container
+    shiftLayoutToResults();
     showLoading();
 
-    // Intercept and replace synonyms automatically
     const optimizedQuery = optimizeSearchQuery(query);
-
     const pf = await initPagefind();
+    
     if (!pf) {
       showEmpty();
       return;
     }
 
-    // Pass the hidden, optimized query into Pagefind
     const searchResult = await pf.search(optimizedQuery);
     allFetchedResults = await Promise.all(searchResult.results.map((r: any) => r.data()));
-
     renderResults();
   }
 
-  // 3. Render and Filter HTML dynamically
   function renderResults() {
     hideLoading();
 
@@ -288,27 +240,11 @@ import Layout from '../layouts/Layout.astro';
 
     if (filteredResults.length === 0) {
       showEmpty(currentTab);
-      if (countDisplay) countDisplay.textContent = `About 0 search results for "${currentQuery}"`;
-      
-      // 🟢 NEW: Send custom event to GA4 via GTM dataLayer for 0 results
-      try {
-        if (typeof window !== 'undefined') {
-          (window as any).dataLayer = (window as any).dataLayer || [];
-          (window as any).dataLayer.push({ 
-            event: 'search_no_results', 
-            search_term: currentQuery,
-            search_tab: currentTab
-          });
-        }
-      } catch(e) {}
-      
+      if (countDisplay) countDisplay.textContent = `About 0 results for "${currentQuery}"`;
       return;
     }
 
-    if (countDisplay) {
-      countDisplay.textContent = `About ${filteredResults.length.toLocaleString()} search results for "${currentQuery}"`;
-    }
-    
+    if (countDisplay) countDisplay.textContent = `About ${filteredResults.length.toLocaleString()} results for "${currentQuery}"`;
     if (emptyState) emptyState.classList.add('hidden');
     
     if (resultsContainer) {
@@ -323,7 +259,68 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  // 4. Tab Click Listeners
+  // --- UI Helpers ---
+  function showLoading() {
+    if (countDisplay) countDisplay.textContent = 'Searching...';
+    if (resultsContainer) resultsContainer.innerHTML = '';
+    if (emptyState) emptyState.classList.add('hidden');
+    if (loadingIndicator) {
+      loadingIndicator.classList.remove('hidden');
+      loadingIndicator.classList.add('flex');
+    }
+  }
+
+  function hideLoading() {
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+      loadingIndicator.classList.remove('flex');
+    }
+  }
+
+  function showEmpty(tab: string = 'all') {
+    if (resultsContainer) resultsContainer.innerHTML = '';
+    if (emptyState) {
+      emptyState.classList.remove('hidden');
+      emptyState.classList.add('flex');
+    }
+    if (emptyStateMessage) {
+      emptyStateMessage.textContent = tab === 'all' 
+        ? "We couldn't find anything matching your query. Try modifying your search terms." 
+        : `No ${tab} found for this query.`;
+    }
+  }
+
+  // --- Input & Form Handlers ---
+
+  // 1. Show/Hide submit button on typing (No auto-search)
+  searchInput?.addEventListener('input', (e) => {
+    const target = e.target as HTMLInputElement;
+    const val = target.value.trim();
+    if (val.length > 0) {
+      submitContainer?.classList.remove('opacity-0', 'invisible');
+    } else {
+      submitContainer?.classList.add('opacity-0', 'invisible');
+    }
+  });
+
+  // 2. Handle explicit submission (pressing Enter or clicking button)
+  searchForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = searchInput?.value.trim() || '';
+    
+    const newUrl = new URL(window.location.href);
+    if (query) {
+      newUrl.searchParams.set('q', query);
+      window.history.replaceState({}, '', newUrl);
+      performSearch(query); // Trigger search
+    } else {
+      newUrl.searchParams.delete('q');
+      window.history.replaceState({}, '', newUrl);
+      revertLayoutToCentered(); // Revert to center if they search an empty string
+    }
+  });
+
+  // 3. Tab Listeners
   searchTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       const target = e.currentTarget as HTMLElement;
@@ -332,7 +329,6 @@ import Layout from '../layouts/Layout.astro';
       if (currentTab === clickedTab) return;
       currentTab = clickedTab;
 
-      // Reset styling for all tabs securely
       searchTabs.forEach(t => {
         t.classList.remove('text-tx-main', 'font-[600]');
         t.classList.add('text-tx-muted', 'font-[500]');
@@ -343,7 +339,6 @@ import Layout from '../layouts/Layout.astro';
         }
       });
 
-      // Apply active styling to clicked tab securely
       target.classList.remove('text-tx-muted', 'font-[500]');
       target.classList.add('text-tx-main', 'font-[600]');
       const targetIndicator = target.querySelector('.tab-indicator');
@@ -356,90 +351,19 @@ import Layout from '../layouts/Layout.astro';
     });
   });
 
-  // --- UI Helpers ---
-  function showLoading() {
-    if (countDisplay) countDisplay.textContent = 'Searching...';
-    if (resultsContainer) resultsContainer.innerHTML = '';
-    if (emptyState) emptyState.classList.add('hidden');
-    if (loadingIndicator) loadingIndicator.classList.remove('hidden');
-    if (loadingIndicator) loadingIndicator.classList.add('flex');
-  }
-
-  function hideLoading() {
-    if (loadingIndicator) loadingIndicator.classList.add('hidden');
-    if (loadingIndicator) loadingIndicator.classList.remove('flex');
-  }
-
-  function showEmpty(tab: string = 'all') {
-    if (resultsContainer) resultsContainer.innerHTML = '';
-    if (emptyState) emptyState.classList.remove('hidden');
-    if (emptyState) emptyState.classList.add('flex');
-    
-    if (emptyStateMessage) {
-      if (tab === 'all') {
-        emptyStateMessage.textContent = "We couldn't find anything matching your query. Try modifying your search terms.";
-      } else {
-        emptyStateMessage.textContent = `No ${tab} found for this query.`;
-      }
-    }
-  }
-
-  function clearResults() {
-    hideLoading();
-    if (emptyState) emptyState.classList.add('hidden');
-    if (countDisplay) countDisplay.textContent = '';
-    if (resultsContainer) resultsContainer.innerHTML = '';
-  }
-
-  // --- Initialization & Search Bar Logic ---
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const searchForm = document.getElementById('search-form') as HTMLFormElement;
-  
+  // --- Initialization on Load ---
   const urlParams = new URLSearchParams(window.location.search);
   const initialQuery = urlParams.get('q');
 
-  // Handle Initial Load
   if (initialQuery) {
     if (searchInput) searchInput.value = initialQuery;
-    performSearch(initialQuery);
+    if (submitContainer) submitContainer.classList.remove('opacity-0', 'invisible');
+    performSearch(initialQuery); // Directly show results
   } else {
-    // Hide empty state on initial load if no search has been made yet
-    clearResults(); 
+    // Starts in the default centered state
+    revertLayoutToCentered(); 
   }
 
-  // Handle Form Submission (Pressing Enter)
-  searchForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const query = searchInput?.value.trim() || '';
-    updateUrlAndSearch(query);
-  });
-
-  // Handle Real-time Typing (Searches as you type)
-  let typingTimer: ReturnType<typeof setTimeout>;
-  searchInput?.addEventListener('input', (e) => {
-    clearTimeout(typingTimer);
-    const target = e.target as HTMLInputElement;
-    const query = target.value.trim();
-    
-    // Wait 300ms after user stops typing before searching
-    typingTimer = setTimeout(() => {
-      updateUrlAndSearch(query);
-    }, 300); 
-  });
-
-  // Helper to update URL without reloading the page
-  function updateUrlAndSearch(query: string) {
-    const newUrl = new URL(window.location.href);
-    if (query) {
-      newUrl.searchParams.set('q', query);
-      window.history.replaceState({}, '', newUrl);
-      performSearch(query);
-    } else {
-      newUrl.searchParams.delete('q');
-      window.history.replaceState({}, '', newUrl);
-      clearResults(); // Clear everything if the input is emptied
-    }
-  }
 </script>
 
 <style is:global>
@@ -449,12 +373,19 @@ import Layout from '../layouts/Layout.astro';
     font-weight: 700;
   }
   
-  /* Hide scrollbar for the tab navigation on mobile */
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  
+  /* Removes default webkit search input icons */
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
   }
 </style>
