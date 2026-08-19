@@ -20,7 +20,7 @@ const primaryBtn = {
 };
 ---
 
-<!-- 🟢 INSTANT PAINT SCRIPT (Prevents Sign-In button layout shift before HTML loads) -->
+<!-- 🟢 INSTANT PAINT SCRIPT (Prevents layout shift before HTML loads) -->
 <script is:inline>
   try {
     if (localStorage.getItem('auth_valid') === 'true') {
@@ -35,172 +35,116 @@ const primaryBtn = {
   #auth-profile-header { display: none; }
   
   html.is-auth #auth-signin-header { display: none !important; }
-  html.is-auth #auth-profile-header { display: flex !important; }
+  html.is-auth #auth-profile-header { display: block !important; }
+
+  /* Custom scrollbar for sidebar links */
+  .styled-scrollbar::-webkit-scrollbar { width: 4px; }
+  .styled-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .styled-scrollbar::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.3); border-radius: 4px; }
 </style>
 
+<!-- 🟢 UNIFIED CLAUDE TOGGLE BUTTON -->
+<button
+  type="button"
+  id="universal-sidebar-btn"
+  class="fixed top-4 left-4 z-[210] flex justify-center items-center w-[36px] h-[36px] rounded-[8px] bg-main/80 backdrop-blur-md shadow-sm border border-subtle/20 text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none cursor-pointer"
+  aria-label="Toggle Sidebar"
+>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+    <line x1="9" y1="3" x2="9" y2="21"></line>
+  </svg>
+</button>
+
+<!-- 🟢 MAIN SIDEBAR -->
 <header 
   id="site-header" 
-  data-disable-sticky={disableStickyHeader ? "true" : "false"}
-  class={`inset-x-0 w-full z-[200] h-[58px] md:h-[58px] bg-main/95 backdrop-blur-[12px] shadow-sm border-b border-transparent dark:border-white/6 flex items-center justify-center font-sans transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class="fixed top-0 left-0 z-[250] w-[260px] h-[100dvh] bg-main/95 backdrop-blur-[12px] shadow-2xl border-r border-subtle/10 flex flex-col font-sans transition-transform duration-300 ease-out -translate-x-full"
 >
-  <div class="w-full px-3 md:px-4 flex items-center gap-2 md:gap-4">
-    
-    <!-- Hamburger Menu Icon -->
-    <button
-      type="button"
-      class="relative z-[210] flex justify-center items-center w-[30px] h-[30px] md:w-[28px] md:h-[28px] rounded-[10px] transition-colors focus:outline-none cursor-pointer shrink-0 border-none p-0 text-tx-main"
-      id="mobile-menu-btn"
-      aria-label="Toggle navigation menu"
-    >
-      <svg
-        class="w-[24px] h-[24px] md:w-[22px] md:h-[22px] fill-current transition-transform duration-200 active:scale-95"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect x="2" y="4" width="20" height="2" rx="1" />
-        <rect x="2" y="11" width="20" height="2" rx="1" />
-        <rect x="2" y="18" width="20" height="2" rx="1" />
-      </svg>
-    </button>
-
-    <a href="/" class="flex flex-col items-start justify-center gap-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted rounded mr-auto md:mr-0">
-      <div class="flex items-center">
-        {logo && (
-          <>
-            <img src={logo} alt={siteTitle} width="110" height="38" class="h-9 md:h-10 w-auto object-contain dark:hidden" />
-            <img src={logoDark} alt={siteTitle} width="110" height="38" class="h-9 md:h-10 w-auto object-contain hidden dark:block" />
-          </>
-        )}
-        {!logo && <span class="text-[18px] md:text-[20px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
-      </div>
+  <!-- Sidebar Header: Logo & Close Button -->
+  <div class="flex items-center justify-between px-4 py-4 shrink-0 border-b border-subtle/10">
+    <a href="/" class="flex items-center gap-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted rounded">
+      {logo && (
+        <>
+          <img src={logo} alt={siteTitle} width="110" height="38" class="h-7 w-auto object-contain dark:hidden" />
+          <img src={logoDark} alt={siteTitle} width="110" height="38" class="h-7 w-auto object-contain hidden dark:block" />
+        </>
+      )}
+      {!logo && <span class="text-[18px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
     </a>
 
-    <div class="flex items-center justify-end gap-1.5 md:gap-4 md:ml-auto">
-      
-      <!-- Search Trigger -->
-      <button id="search-trigger" class="flex items-center justify-center md:justify-start w-[36px] h-[36px] rounded-[10px] text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0 md:w-[200px] md:h-[32px] md:px-3 md:bg-tx-muted/5 md:border md:border-subtle/20 md:rounded-[8px] md:text-tx-muted md:hover:bg-tx-muted/10" aria-label="Open Search">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 md:opacity-70">
-          <circle cx="7.5" cy="7.5" r="4.75"></circle>
-          <line x1="11" y1="11" x2="16" y2="16"></line>
-        </svg>
-        <span class="hidden md:block text-[14px] truncate text-left w-full ml-2 opacity-80">Search...</span>
-        <span class="hidden md:flex items-center justify-center border border-subtle/60 rounded-[4px] px-1.5 py-0.5 text-[10px] font-mono opacity-60">⌘K</span>
-      </button>
+    <button id="close-sidebar-btn" class="p-1.5 text-tx-muted hover:text-tx-main rounded-md transition-colors cursor-pointer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
 
-      <!-- Theme Toggle -->
-      <button class="theme-toggle-btn flex items-center justify-center w-[36px] h-[36px] md:w-[32px] md:h-[32px] rounded-full text-tx-muted hover:bg-main hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
-        <svg class="block dark:hidden w-5 h-5 transition-transform duration-300 hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        <svg class="hidden dark:block w-5 h-5 transition-transform duration-300 hover:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-      </button>
+  <!-- Search Button -->
+  <div class="px-3 pt-4 shrink-0">
+    <button id="search-trigger" class="flex items-center w-full h-[36px] px-3 bg-tx-muted/5 border border-subtle/20 rounded-[8px] text-tx-muted hover:bg-tx-muted/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Open Search">
+      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 opacity-70">
+        <circle cx="7.5" cy="7.5" r="4.75"></circle>
+        <line x1="11" y1="11" x2="16" y2="16"></line>
+      </svg>
+      <span class="text-[14px] ml-2 w-full text-left opacity-80">Search...</span>
+      <span class="flex items-center justify-center border border-subtle/60 rounded-[4px] px-1.5 py-0.5 text-[10px] font-mono opacity-60">⌘K</span>
+    </button>
+  </div>
 
-      <!-- AUTH SLOT CONTAINER -->
-      <div class="flex items-center">
-        
-        <div id="auth-signin-header">
-          {primaryBtn.show && (
-            <button id="dynamic-signin-btn" type="button" class="ml-2 md:ml-4 flex items-center justify-center h-[30px] px-3 md:px-4 rounded-[8px] bg-cta text-cta-text text-[13px] md:text-[14px] font-[700] tracking-tight transition-all shadow-sm hover:shadow-md hover:bg-cta-hover hover:-translate-y-[1px] active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cta outline-none whitespace-nowrap">
-              <span>{primaryBtn.label}</span>
-            </button>
-          )}
-        </div>
-
-        <div id="auth-profile-header" class="items-center">
-          <a href="/account" class="ml-2 md:ml-4 flex items-center justify-center h-[36px] md:h-[32px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
-            <img id="profile-avatar-img-header" src="" alt="Profile" class="w-6 h-6 rounded-full object-cover shrink-0 hidden" />
-            
-            <div id="profile-avatar-header" class="w-7 h-7 rounded-full bg-cta text-cta-text flex items-center justify-center font-extrabold text-[12px] shrink-0">
-              <!-- Generic fallback icon before sync finishes -->
-              <svg id="profile-avatar-fallback-icon" class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            </div>
-            
-            <span class="hidden md:inline ml-2.5">Profile</span>
-          </a>
-        </div>
-
-      </div>
-
+  <!-- Scrollable Navigation Area (Submenus Removed) -->
+  <div class="flex-1 overflow-y-auto px-3 py-4 styled-scrollbar mt-2">
+    <div class="flex flex-col gap-0.5">
+      {navItems.map((item: any) => (
+        <a href={item.url || '#'} class="flex items-center px-3 py-2 rounded-md font-[500] text-[14px] text-tx-main hover:bg-tx-muted/5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-tx-muted">
+          {item.label}
+        </a>
+      ))}
     </div>
+  </div>
 
-    <!-- Navigation Dropdown -->
-    <div 
-      id="mobile-menu" 
-      class="hidden absolute top-0 md:top-[58px] left-0 w-full bg-main flex-col h-[100dvh] md:h-[calc(100dvh-58px)] pt-[58px] md:pt-0 overflow-hidden z-[200] md:z-[190] border-t-0 md:border-t md:border-subtle/15 opacity-0 -translate-y-1.5 transition-[opacity,transform] duration-250 ease-out"
-    >
-      <div class="flex flex-col md:flex-row h-full w-full max-w-[1200px] mx-auto">
-        <div id="menu-sidebar" class="w-full md:w-[250px] lg:w-[280px] h-full overflow-y-auto md:border-r md:border-subtle/12 py-3 md:py-8 px-3 md:px-4 shrink-0 flex flex-col gap-1">
-          {navItems.map((item: any, index: number) => {
-            const isFirst = index === 0;
-            const hasSubItems = item.subItems && item.subItems.length > 0;
-            const activeClasses = 'is-active text-tx-main font-[600] md:bg-tx-muted/5';
-            const inactiveClasses = 'text-tx-muted';
-            
-            return (
-              <button
-                type="button"
-                data-target={`submenu-${index}`}
-                data-has-sub={hasSubItems ? "true" : "false"}
-                data-url={item.url || '#'}
-                class={`menu-category-btn flex items-center justify-between w-full text-left pl-4 pr-3 py-2.5 rounded-md font-[500] text-[15px] transition-colors focus:outline-none md:hover:bg-tx-muted/5 hover:text-tx-main ${isFirst ? activeClasses : inactiveClasses}`}
-              >
-                <span>{item.label}</span>
-                {hasSubItems && (
-                  <svg class={`menu-arrow w-4 h-4 shrink-0 transition-opacity duration-200 ${isFirst ? 'text-tx-main opacity-100' : 'text-tx-muted opacity-100 md:opacity-0'}`} fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                )}
-              </button>
-            );
-          })}
-        </div>
+  <!-- 🟢 Bottom Section: Theme Icon & Auth (Inline) -->
+  <div class="shrink-0 border-t border-subtle/10 p-3 bg-main/50 flex items-center justify-between gap-2">
+    
+    <!-- Theme Toggle (Icon Only) -->
+    <button class="theme-toggle-btn flex items-center justify-center w-[34px] h-[34px] shrink-0 rounded-[6px] text-tx-muted hover:bg-tx-muted/10 hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer" aria-label="Toggle theme">
+      <svg class="block dark:hidden w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      <svg class="hidden dark:block w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    </button>
 
-        <div id="menu-content" class="hidden md:flex flex-1 flex-col h-full overflow-y-auto bg-main p-6 md:px-12 md:py-10">
-          <button id="mobile-back-btn" class="md:hidden flex items-center gap-1.5 text-tx-muted hover:text-tx-main font-[500] text-[14px] mb-5 pb-4 border-b border-subtle/15 w-fit focus:outline-none cursor-pointer">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-            Back
+    <!-- Auth Containers (Takes up remaining width next to theme button) -->
+    <div class="flex-1 overflow-hidden">
+      
+      <!-- Logged Out State (Subtle Claude-style button) -->
+      <div id="auth-signin-header" class="w-full">
+        {primaryBtn.show && (
+          <button id="dynamic-signin-btn" type="button" class="w-full flex items-center justify-center h-[34px] rounded-[6px] bg-transparent border border-subtle/30 text-tx-main hover:bg-tx-muted/5 text-[13px] font-[500] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-tx-muted">
+            <span class="truncate">{primaryBtn.label}</span>
           </button>
-
-          {navItems.map((item: any, index: number) => {
-            const hasSubItems = item.subItems && item.subItems.length > 0;
-            const isHidden = index === 0 ? "flex" : "hidden";
-
-            return (
-              <div id={`submenu-${index}`} class={`submenu-panel flex-col h-full ${isHidden}`}>
-                {hasSubItems ? (
-                  <div class="flex flex-col h-full">
-                    <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[none] md:grid-rows-4 md:grid-flow-col md:auto-cols-fr gap-x-8 gap-y-3 list-disc list-inside marker:text-tx-main mb-8 w-full">
-                      {item.subItems.map((subItem: any) => (
-                        <li class="text-tx-muted">
-                          <a href={subItem.url || '#'} class="inline-block text-[15px] font-[450] text-tx-muted hover:text-tx-main transition-colors">
-                            {subItem.label}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                    <div class="mt-2 pt-4 border-t border-subtle/10 w-full flex justify-center">
-                    <a href={item.url || '#'} class="group inline-flex items-center gap-1.5 text-[15px] font-[600] text-tx-main hover:text-tx-muted transition-colors py-2">
-                        View all {item.label} 
-                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <div class="flex flex-col h-full w-full">
-                    <a href={item.url || '#'} class="group mr-auto inline-flex items-center gap-1.5 text-[15px] font-[600] text-tx-main hover:text-tx-muted transition-colors mt-2 w-fit">
-                      View all {item.label} 
-                      <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </a>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        )}
       </div>
+
+      <!-- Logged In State (Profile Block) -->
+      <div id="auth-profile-header" class="w-full">
+        <a href="/account" class="flex items-center w-full h-[34px] px-2 rounded-[6px] bg-transparent hover:bg-tx-muted/5 transition-colors outline-none cursor-pointer group focus-visible:ring-2 focus-visible:ring-tx-muted">
+          <img id="profile-avatar-img-header" src="" alt="Profile" class="w-6 h-6 rounded-md object-cover shrink-0 hidden" />
+          <div id="profile-avatar-header" class="w-6 h-6 rounded-md bg-tx-muted/10 text-tx-muted flex items-center justify-center font-bold text-[11px] shrink-0 border border-subtle/10">
+            <svg id="profile-avatar-fallback-icon" class="w-3.5 h-3.5 opacity-60" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <span class="ml-2.5 text-[13px] font-[500] truncate text-tx-muted group-hover:text-tx-main transition-colors">My Account</span>
+        </a>
+      </div>
+
     </div>
   </div>
 </header>
 
-<!-- 🟢 INSTANT PROFILE RENDER SCRIPT (Prevents avatar flash) -->
+<!-- Overlay Backdrop for Sidebar -->
+<div id="sidebar-backdrop" class="fixed inset-0 bg-surface/80 backdrop-blur-sm z-[240] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+
+<!-- 🟢 INSTANT PROFILE RENDER SCRIPT -->
 <script is:inline>
   try {
     if (localStorage.getItem('auth_valid') === 'true') {
@@ -229,7 +173,7 @@ const primaryBtn = {
   } catch(e) {}
 </script>
 
-<!-- Minimal Search Overlay -->
+<!-- 🟢 EXACT ORIGINAL SEARCH OVERLAY -->
 <div id="minimal-search-overlay" class="fixed inset-0 z-[300] bg-surface/95 backdrop-blur-md opacity-0 invisible pointer-events-none transition-all duration-300 flex flex-col pt-[12vh] px-5">
   <div class="absolute inset-0" id="search-overlay-backdrop"></div>
   <div id="search-overlay-content" class="relative z-10 w-full max-w-2xl mx-auto transform scale-95 opacity-0 transition-all duration-500 ease-out">
@@ -252,10 +196,11 @@ const primaryBtn = {
   </div>
 </div>
 
+<!-- 🟢 EXACT ORIGINAL JAVASCRIPT LOGIC + SIMPLE SIDEBAR TOGGLE -->
 <script>
-  // 🟢 BACKGROUND SYNC LOGIC (Saves Avatar to LocalStorage)
   import { authClient } from '../../lib/auth-client';
   
+  // 1. ORIGINAL BACKGROUND SYNC
   async function syncAuth() {
     try {
       const { data } = await authClient.getSession();
@@ -268,7 +213,6 @@ const primaryBtn = {
         const initial = user.name ? user.name : user.email;
         const initialChar = initial.charAt(0).toUpperCase();
 
-        // 🟢 Caches the image/initial in localStorage so it doesn't flash next time
         try { 
           localStorage.setItem('auth_valid', 'true'); 
           if (user.image) {
@@ -280,7 +224,6 @@ const primaryBtn = {
         
         document.documentElement.classList.add('is-auth');
 
-        // Swap generic icon for real data immediately
         if (user.image && avatarImgEl) {
            avatarImgEl.src = user.image;
            avatarImgEl.classList.remove('hidden');
@@ -293,7 +236,6 @@ const primaryBtn = {
            if (fallbackIconEl) fallbackIconEl.remove(); 
         }
       } else {
-        // Clear all cache if logged out
         try { 
           localStorage.removeItem('auth_valid'); 
           localStorage.removeItem('auth_avatar');
@@ -310,10 +252,9 @@ const primaryBtn = {
       document.documentElement.classList.remove('is-auth');
     }
   }
-  
   syncAuth();
 
-  // --- THEME TOGGLE LOGIC (Brave Shield Safe) ---
+  // 2. ORIGINAL THEME TOGGLE
   const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
   if (themeToggleBtns.length > 0) {
     themeToggleBtns.forEach(btn => {
@@ -330,7 +271,7 @@ const primaryBtn = {
     });
   }
 
-  // --- MINIMAL SEARCH OVERLAY LOGIC ---
+  // 3. ORIGINAL SEARCH
   const searchTrigger = document.getElementById('search-trigger');
   const searchOverlay = document.getElementById('minimal-search-overlay');
   const searchBackdrop = document.getElementById('search-overlay-backdrop');
@@ -354,15 +295,12 @@ const primaryBtn = {
     document.body.style.overflow = '';
   }
 
-  // Search Memory Logic
   function restoreSearchState() {
     const urlParams = new URLSearchParams(window.location.search);
     const queryFromUrl = urlParams.get('q');
     
     let savedQuery = null;
-    try {
-      savedQuery = sessionStorage.getItem('lastSearchQuery');
-    } catch (e) {}
+    try { savedQuery = sessionStorage.getItem('lastSearchQuery'); } catch (e) {}
 
     if (queryFromUrl) {
       if (searchInput) searchInput.value = queryFromUrl;
@@ -377,7 +315,6 @@ const primaryBtn = {
   searchInput?.addEventListener('input', () => {
     if (searchInput) {
       try { sessionStorage.setItem('lastSearchQuery', searchInput.value); } catch (e) {}
-      
       if (searchInput.value.trim().length > 0) {
         searchSubmitContainer?.classList.remove('opacity-0', 'invisible');
       } else {
@@ -387,7 +324,6 @@ const primaryBtn = {
   });
 
   restoreSearchState();
-
   searchTrigger?.addEventListener('click', openSearch);
   searchBackdrop?.addEventListener('click', closeSearch);
   closeSearchBtn?.addEventListener('click', closeSearch);
@@ -400,126 +336,7 @@ const primaryBtn = {
     }
   });
 
-  // --- SPLIT-PANE MEGA MENU LOGIC ---
-  const btn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('mobile-menu');
-  const categoryBtns = document.querySelectorAll('.menu-category-btn');
-  const submenuPanels = document.querySelectorAll('.submenu-panel');
-  const menuSidebar = document.getElementById('menu-sidebar');
-  const menuContent = document.getElementById('menu-content');
-  const backBtn = document.getElementById('mobile-back-btn');
-
-  const MENU_ACTIVE_CLASSES = ['is-active', 'text-tx-main', 'font-[600]', 'md:bg-tx-muted/5'];
-  const MENU_INACTIVE_CLASSES = ['text-tx-muted'];
-
-  function resetMobileMenuView() {
-    if (window.innerWidth < 768) {
-      if (menuSidebar) {
-        menuSidebar.classList.remove('hidden');
-        menuSidebar.classList.add('flex');
-      }
-      if (menuContent) {
-        menuContent.classList.remove('flex');
-        menuContent.classList.add('hidden');
-      }
-    }
-  }
-
-  function openMegaMenu() {
-    if (!menu || !btn) return;
-    menu.classList.remove('hidden');
-    menu.classList.add('flex');
-    void menu.offsetWidth;
-    menu.classList.remove('opacity-0', '-translate-y-1.5');
-    document.body.style.overflow = 'hidden';
-    btn.classList.remove('text-tx-main');
-    btn.classList.add('text-cta');
-  }
-
-  function closeMegaMenu() {
-    if (!menu || !btn) return;
-    menu.classList.add('opacity-0', '-translate-y-1.5');
-    document.body.style.overflow = '';
-    btn.classList.remove('text-cta');
-    btn.classList.add('text-tx-main');
-
-    window.setTimeout(() => {
-      menu.classList.add('hidden');
-      menu.classList.remove('flex');
-      resetMobileMenuView();
-    }, 250);
-  }
-
-  if (btn && menu) {
-    btn.addEventListener('click', () => {
-      const isOpen = !menu.classList.contains('hidden') && !menu.classList.contains('opacity-0');
-      if (isOpen) {
-        closeMegaMenu();
-      } else {
-        openMegaMenu();
-      }
-    });
-  }
-
-  categoryBtns.forEach(categoryBtn => {
-    categoryBtn.addEventListener('click', () => {
-      const targetId = categoryBtn.getAttribute('data-target');
-      const hasSub = categoryBtn.getAttribute('data-has-sub') === 'true';
-      const url = categoryBtn.getAttribute('data-url');
-
-      if (window.innerWidth < 768 && !hasSub) {
-        if (url) window.location.href = url;
-        return;
-      }
-
-      categoryBtns.forEach(c => {
-        c.classList.remove(...MENU_ACTIVE_CLASSES);
-        c.classList.add(...MENU_INACTIVE_CLASSES);
-        const arrow = c.querySelector('.menu-arrow');
-        if(arrow) {
-          arrow.classList.remove('text-tx-main', 'md:opacity-100');
-          arrow.classList.add('text-tx-muted', 'md:opacity-0');
-        }
-      });
-
-      categoryBtn.classList.remove(...MENU_INACTIVE_CLASSES);
-      categoryBtn.classList.add(...MENU_ACTIVE_CLASSES);
-      const activeArrow = categoryBtn.querySelector('.menu-arrow');
-      if(activeArrow) {
-        activeArrow.classList.remove('text-tx-muted', 'md:opacity-0');
-        activeArrow.classList.add('text-tx-main', 'md:opacity-100');
-      }
-
-      submenuPanels.forEach(p => {
-        p.classList.remove('flex');
-        p.classList.add('hidden');
-      });
-      
-      const targetPanel = document.getElementById(targetId || '');
-      if (targetPanel) {
-        targetPanel.classList.remove('hidden');
-        targetPanel.classList.add('flex');
-      }
-
-      if (window.innerWidth < 768 && menuSidebar && menuContent && hasSub) {
-        menuSidebar.classList.add('hidden');
-        menuSidebar.classList.remove('flex');
-        menuContent.classList.remove('hidden');
-        menuContent.classList.add('flex');
-      }
-    });
-  });
-
-  if (backBtn && menuSidebar && menuContent) {
-    backBtn.addEventListener('click', () => {
-      menuContent.classList.remove('flex');
-      menuContent.classList.add('hidden');
-      menuSidebar.classList.remove('hidden');
-      menuSidebar.classList.add('flex');
-    });
-  }
-
-  // --- DYNAMIC SIGN-IN ROUTING ---
+  // 4. ORIGINAL ROUTING
   const dynamicSigninBtn = document.getElementById('dynamic-signin-btn');
   if (dynamicSigninBtn) {
     dynamicSigninBtn.addEventListener('click', () => {
@@ -527,4 +344,28 @@ const primaryBtn = {
       window.location.href = `/login?returnUrl=${encodeURIComponent(currentPath)}`;
     });
   }
+
+  // 5. BULLETPROOF SIDEBAR TOGGLE
+  const universalBtn = document.getElementById('universal-sidebar-btn');
+  const siteHeader = document.getElementById('site-header');
+  const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+  function toggleSidebar() {
+    if (!siteHeader) return;
+    
+    const isClosed = siteHeader.classList.contains('-translate-x-full');
+    
+    if (isClosed) {
+      siteHeader.classList.remove('-translate-x-full');
+      sidebarBackdrop?.classList.remove('opacity-0', 'pointer-events-none');
+    } else {
+      siteHeader.classList.add('-translate-x-full');
+      sidebarBackdrop?.classList.add('opacity-0', 'pointer-events-none');
+    }
+  }
+
+  universalBtn?.addEventListener('click', toggleSidebar);
+  closeSidebarBtn?.addEventListener('click', toggleSidebar);
+  sidebarBackdrop?.addEventListener('click', toggleSidebar);
 </script>

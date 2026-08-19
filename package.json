@@ -44,11 +44,11 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "relatinator": "^2.1.0",
-    "tailwindcss": "^4.3.3",
     "wrangler": "^4.111.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260716.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
   }
 }
