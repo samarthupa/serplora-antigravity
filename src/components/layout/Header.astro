@@ -43,10 +43,10 @@ const primaryBtn = {
   .styled-scrollbar::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.3); border-radius: 4px; }
 </style>
 
-<!-- 🟢 TOP STRIP (60px Height, Shifted Left, Ready for AdSense) -->
+<!-- 🟢 TOP STRIP (50px Height, Shifted Left, Ready for AdSense) -->
 <header 
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
-  class={`w-full z-[200] h-[60px] bg-main flex items-center pl-1.5 pr-3 transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
+  class={`w-full z-[200] h-[50px] bg-main flex items-center pl-1.5 pr-3 transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
   <!-- Small Toggle Icon with Blue Dot -->
   <button
@@ -74,13 +74,13 @@ const primaryBtn = {
   id="site-sidebar" 
   class="fixed top-0 left-0 z-[250] w-[260px] h-[100dvh] bg-main/95 backdrop-blur-[12px] shadow-2xl border-r border-subtle/10 flex flex-col font-sans transition-transform duration-300 ease-out -translate-x-full"
 >
-  <!-- Sidebar Header: Logo & Close Button (60px height to match top strip) -->
-  <div class="flex items-center justify-between pl-4 pr-1.5 h-[60px] shrink-0 border-b border-subtle/10">
+  <!-- Sidebar Header: Logo & Close Button (50px height to match top strip) -->
+  <div class="flex items-center justify-between pl-4 pr-1.5 h-[50px] shrink-0 border-b border-subtle/10">
     <a href="/" class="flex items-center gap-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted rounded">
       {logo && (
         <>
-          <img src={logo} alt={siteTitle} width="110" height="38" class="h-9 w-auto object-contain dark:hidden" />
-          <img src={logoDark} alt={siteTitle} width="110" height="38" class="h-9 w-auto object-contain hidden dark:block" />
+          <img src={logo} alt={siteTitle} width="110" height="38" class="h-8 w-auto object-contain dark:hidden" />
+          <img src={logoDark} alt={siteTitle} width="110" height="38" class="h-8 w-auto object-contain hidden dark:block" />
         </>
       )}
       {!logo && <span class="text-[18px] font-[800] text-tx-main tracking-[-0.5px]">{siteTitle}</span>}
