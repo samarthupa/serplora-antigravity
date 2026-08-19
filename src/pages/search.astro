@@ -11,16 +11,13 @@ import Layout from '../layouts/Layout.astro';
     <meta name="robots" content="noindex, nofollow" />
   </Fragment>
 
-  <!-- We use min-h-screen and flex-col to control the layout shift -->
   <main class="min-h-[100dvh] bg-main px-4 md:px-8 font-['Outfit',sans-serif] flex flex-col">
     
-    <!-- 🔍 Big Search Bar Area (Shifts up when searching) -->
-    <!-- pt-[25vh] puts it in the center like the image. pt-12 shifts it up for results. -->
+    <!-- 🔍 Big Search Bar Area (Shifts up and shrinks when searching) -->
     <div id="search-view-wrapper" class="w-full max-w-3xl mx-auto transition-all duration-500 ease-out pt-[25vh]">
       
-      <!-- Design exactly matches Header.astro overlay (no back button) -->
       <form id="search-page-form" action="/search" method="GET" class="w-full">
-        <div class="border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-colors">
+        <div id="search-input-container" class="border-b border-tx-muted/20 pb-3 focus-within:border-tx-main transition-all duration-300">
           <input 
             type="search" 
             name="q" 
@@ -30,18 +27,11 @@ import Layout from '../layouts/Layout.astro';
             spellcheck="true" 
             autocorrect="on" 
             autocapitalize="off" 
-            class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40" 
+            class="w-full bg-transparent border-none outline-none appearance-none p-0 text-2xl md:text-3xl font-semibold tracking-tight text-tx-main placeholder:text-tx-muted/40 transition-all duration-300" 
             autofocus
           />
         </div>
-        
-        <!-- Submit Button (Fades in when typing) -->
-        <div id="search-submit-container" class="mt-6 flex justify-end opacity-0 invisible transition-all duration-200">
-          <button type="submit" class="inline-flex items-center gap-2 rounded-sm border border-subtle px-4 py-2 text-sm font-medium text-tx-main transition-all duration-200 hover:border-tx-main hover:bg-tx-muted/5 focus:outline-none focus:ring-2 focus:ring-tx-main/20">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            <span>Search</span>
-          </button>
-        </div>
+        <button type="submit" class="hidden" aria-hidden="true" tabindex="-1">Search</button>
       </form>
     </div>
 
@@ -50,7 +40,7 @@ import Layout from '../layouts/Layout.astro';
 
       <!-- 🟢 Tab Navigation -->
       <div class="relative w-full mb-6">
-        <div class="flex items-center border-b border-subtle overflow-x-auto hide-scrollbar">
+        <div class="flex items-center overflow-x-auto hide-scrollbar">
           <div class="flex items-center gap-6 md:gap-8 pr-12 md:pr-0" id="search-tabs">
             
             <button data-tab="all" class="search-tab group relative pb-3 flex items-center gap-2 text-tx-main font-[600] outline-none cursor-pointer">
@@ -119,10 +109,10 @@ import Layout from '../layouts/Layout.astro';
 <script>
   // Elements
   const searchViewWrapper = document.getElementById('search-view-wrapper');
+  const searchInputContainer = document.getElementById('search-input-container');
   const searchResultsWrapper = document.getElementById('search-results-wrapper');
   const searchInput = document.getElementById('search-page-input') as HTMLInputElement;
   const searchForm = document.getElementById('search-page-form') as HTMLFormElement;
-  const submitContainer = document.getElementById('search-submit-container');
   
   const resultsContainer = document.getElementById('search-results');
   const loadingIndicator = document.getElementById('search-loading');
@@ -189,24 +179,45 @@ import Layout from '../layouts/Layout.astro';
 
   // --- Layout Transitions ---
   function shiftLayoutToResults() {
+    // Move wrapper to the top
     if (searchViewWrapper) {
       searchViewWrapper.classList.remove('pt-[25vh]');
-      searchViewWrapper.classList.add('pt-12');
+      searchViewWrapper.classList.add('pt-8');
     }
+    // Shrink the input padding
+    if (searchInputContainer) {
+      searchInputContainer.classList.remove('pb-3');
+      searchInputContainer.classList.add('pb-2');
+    }
+    // Shrink text size and blur (deactivate) the input
+    if (searchInput) {
+      searchInput.classList.remove('text-2xl', 'md:text-3xl', 'font-semibold');
+      searchInput.classList.add('text-lg', 'md:text-xl', 'font-medium');
+      searchInput.blur(); // Drops the mobile keyboard and removes focus
+    }
+    // Show results
     if (searchResultsWrapper) {
       searchResultsWrapper.classList.remove('hidden');
-      setTimeout(() => searchResultsWrapper.classList.remove('opacity-0'), 50); // slight delay for smooth fade
+      setTimeout(() => searchResultsWrapper.classList.remove('opacity-0'), 50); 
     }
   }
 
   function revertLayoutToCentered() {
     if (searchViewWrapper) {
       searchViewWrapper.classList.add('pt-[25vh]');
-      searchViewWrapper.classList.remove('pt-12');
+      searchViewWrapper.classList.remove('pt-8');
+    }
+    if (searchInputContainer) {
+      searchInputContainer.classList.add('pb-3');
+      searchInputContainer.classList.remove('pb-2');
+    }
+    if (searchInput) {
+      searchInput.classList.add('text-2xl', 'md:text-3xl', 'font-semibold');
+      searchInput.classList.remove('text-lg', 'md:text-xl', 'font-medium');
     }
     if (searchResultsWrapper) {
       searchResultsWrapper.classList.add('opacity-0');
-      setTimeout(() => searchResultsWrapper.classList.add('hidden'), 300); // Wait for fade out
+      setTimeout(() => searchResultsWrapper.classList.add('hidden'), 300); 
     }
   }
 
@@ -214,7 +225,7 @@ import Layout from '../layouts/Layout.astro';
   async function performSearch(query: string) {
     currentQuery = query; 
     
-    // Shift the UI up and show results container
+    // Shift the UI up, shrink input, and show results container
     shiftLayoutToResults();
     showLoading();
 
@@ -292,18 +303,7 @@ import Layout from '../layouts/Layout.astro';
 
   // --- Input & Form Handlers ---
 
-  // 1. Show/Hide submit button on typing (No auto-search)
-  searchInput?.addEventListener('input', (e) => {
-    const target = e.target as HTMLInputElement;
-    const val = target.value.trim();
-    if (val.length > 0) {
-      submitContainer?.classList.remove('opacity-0', 'invisible');
-    } else {
-      submitContainer?.classList.add('opacity-0', 'invisible');
-    }
-  });
-
-  // 2. Handle explicit submission (pressing Enter or clicking button)
+  // Handle explicit submission (pressing Enter)
   searchForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const query = searchInput?.value.trim() || '';
@@ -320,7 +320,7 @@ import Layout from '../layouts/Layout.astro';
     }
   });
 
-  // 3. Tab Listeners
+  // Tab Listeners
   searchTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       const target = e.currentTarget as HTMLElement;
@@ -357,7 +357,6 @@ import Layout from '../layouts/Layout.astro';
 
   if (initialQuery) {
     if (searchInput) searchInput.value = initialQuery;
-    if (submitContainer) submitContainer.classList.remove('opacity-0', 'invisible');
     performSearch(initialQuery); // Directly show results
   } else {
     // Starts in the default centered state
