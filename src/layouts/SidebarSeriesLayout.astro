@@ -77,67 +77,39 @@ const hasItems = sidebarItems.length > 0;
   excerptFallback={currentActiveData.excerpt}
   schemaData={currentActiveData}
 >
-  <div class="flex flex-col lg:flex-row w-full mx-auto justify-center items-start relative font-['Outfit',sans-serif]">
+  
+  {/* --- MODAL BACKDROP --- */}
+  <div id="nav-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[140] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+  
+  {/* --- NAVIGATION DRAWER (Slides from BOTTOM on Mobile & Desktop) --- */}
+  <aside id="series-nav-modal" class="fixed bottom-0 left-0 w-full h-[96dvh] md:h-[92dvh] bg-main z-[150] transform translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] border-t border-subtle shadow-[0_-10px_50px_rgba(0,0,0,0.2)] flex flex-col rounded-t-[2rem]">
     
-    {/* --- MOBILE: Top Breadcrumbs & Minimalist App Bar --- */}
-    <div class="lg:hidden w-full flex flex-col pt-4">
-      <div class="w-full max-w-[800px] mx-auto px-4 sm:px-6">
-        {currentSlug === 'overview' ? (
-          <Breadcrumb 
-            section={basePath as any} 
-            current={parentBreadcrumb} 
-            class="pt-4 pb-4 mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap" 
-          />
-        ) : (
-          <Breadcrumb 
-            section={basePath as any} 
-            parents={[{ label: parentBreadcrumb, url: `/${basePath}/${parent.id}` }]} 
-            current={currentBreadcrumb} 
-            class="pt-4 pb-4 mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap" 
-          />
-        )}
+    {/* Visual Drag Handle for aesthetics */}
+    <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 rounded-full bg-surface border border-subtle"></div>
 
-        <div class="bg-main/95 backdrop-blur-md py-2 flex items-center justify-between">
-  <button id="sidebar-toggle-btn" class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-main hover:border-brand/50 transition-all active:scale-95" aria-label="Toggle Menu">
-    <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
-  </button>
-
-  <div class="flex items-center gap-2">
-            {prevLink && (
-              <a href={prevLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:text-brand transition-colors active:scale-95" aria-label="Previous">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-              </a>
-            )}
-            {nextLink && (
-              <a href={nextLink.url} class="p-2.5 rounded-lg bg-surface border border-subtle text-tx-muted hover:brightness-90 transition-all active:scale-95" aria-label="Next">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="mobile-sidebar-backdrop" class="fixed top-[64px] inset-x-0 bottom-0 [.header-hidden_&]:top-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
-    
-    {/* Left Sidebar */}
-    <aside id="series-sidebar" class="fixed top-[54px] h-[calc(100dvh-54px)] md:top-[48px] md:h-[calc(100dvh-52px)] left-0 z-[150] lg:z-[150] w-[85vw] max-w-[260px] bg-main/95 shadow-2xl transform -translate-x-full transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:sticky lg:w-[260px] lg:min-w-[200px] lg:shrink-[999] [.header-hidden_&]:top-0 [.header-hidden_&]:h-[100dvh] border-r border-subtle py-5 px-4 lg:pt-10 lg:pb-6 lg:bg-main/95 lg:shadow-none flex flex-col">
-      <div class="mb-5 px-2 flex justify-between items-center shrink-0">
+    {/* Constrained Inner Wrapper (Keeps it readable on Ultra-Wide Desktop monitors) */}
+    <div class="w-full max-w-[800px] mx-auto flex flex-col h-full pt-4 relative">
+      
+      {/* Header */}
+      <div class="px-5 pt-4 pb-5 flex justify-between items-center shrink-0 border-b border-subtle">
         <div>
-          <p class="text-[10px] uppercase tracking-widest font-['JetBrains_Mono',monospace] text-tx-muted mb-2 font-bold">
+          <p class="text-[10px] uppercase tracking-widest font-['JetBrains_Mono',monospace] text-tx-muted mb-1.5 font-bold">
             {basePath === 'tutorials' ? 'Tutorial Series' : 'Quiz Series'}
           </p>
-          <p class="text-[14px] font-black text-tx-main leading-tight">{parent.data.title}</p>
+          <p class="text-[18px] md:text-[20px] font-black text-tx-main leading-tight pr-2">{parent.data.title}</p>
         </div>
-        <button id="sidebar-close-btn" class="lg:hidden p-2 text-tx-muted hover:text-tx-main bg-main rounded-lg border border-subtle active:scale-95 transition-all">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        
+        {/* Minimize Button */}
+        <button id="modal-close-btn" class="p-2.5 text-tx-muted hover:text-tx-main bg-surface/50 hover:bg-surface border border-transparent hover:border-subtle rounded-xl transition-all active:scale-95 shrink-0" aria-label="Minimize Menu">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" /></svg>
         </button>
       </div>
 
-      <nav id="sidebar-nav-container" class="flex-1 overflow-y-auto min-h-0 custom-scrollbar flex flex-col gap-1 pr-1.5 pb-4 mt-2 relative">
+      {/* Scrollable Nav Items */}
+      <nav id="sidebar-nav-container" class="flex-1 overflow-y-auto px-4 py-6 custom-scrollbar flex flex-col gap-1.5 relative">
         
         {/* Overview Link */}
-        <a href={`/${basePath}/${parent.id}`} class={`block px-2 py-1.5 text-[14px] transition-colors ${currentSlug === 'overview' ? 'text-brand font-semibold active-item' : 'text-tx-main hover:text-brand'}`}>
+        <a href={`/${basePath}/${parent.id}`} class={`block px-4 py-3 rounded-xl text-[14.5px] transition-all ${currentSlug === 'overview' ? 'bg-brand/10 text-brand font-semibold active-item' : 'text-tx-main hover:bg-surface hover:text-brand'}`}>
           {cleanTitle(parent.data.title)} Overview
         </a>
 
@@ -145,7 +117,6 @@ const hasItems = sidebarItems.length > 0;
         {hasItems ? (
           sidebarItems.map((block: any) => {
             
-            // 🟢 Handle Grouped Dropdowns
             if (block.discriminant === 'group') {
               const group = block.value;
               const isGroupActive = group.lessons.some((lessonId: string) => {
@@ -154,31 +125,28 @@ const hasItems = sidebarItems.length > 0;
               });
 
               return (
-                <details class="group" open={isGroupActive || undefined}>
-                  {/* Parent Category Title - Normal weight */}
-                  <summary class="flex items-center justify-between cursor-pointer px-2 py-1.5 text-[14px] text-tx-main hover:text-brand transition-colors list-none mt-1">
+                <details class="group mt-2" open={isGroupActive || undefined}>
+                  <summary class="flex items-center justify-between cursor-pointer px-4 py-2.5 rounded-xl text-[14.5px] text-tx-main font-medium hover:bg-surface transition-colors list-none">
                     <span>{group.groupTitle}</span>
-                    <svg class="w-4 h-4 transition-transform duration-200 group-open:rotate-180 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 transition-transform duration-200 group-open:rotate-180 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </summary>
                   
-                  {/* Children Links - Only active one is font-semibold */}
-                  <ul class="flex flex-col ml-4 mb-2 mt-0.5">
+                  <ul class="flex flex-col ml-4 pl-3 border-l border-subtle mt-1.5 mb-3 gap-1">
                     {group.lessons.map((lessonId: string) => {
                       const item = items.find((i: any) => i.data.urlSlug === lessonId || i.id === lessonId);
                       if (!item) return null;
-                      
                       const isActive = currentSlug === item.data.urlSlug;
                       
                       return (
                         <li>
                           <a 
                             href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} 
-                            class={`block px-2 py-1.5 text-[14px] transition-colors ${
+                            class={`block px-4 py-2.5 rounded-lg text-[14.5px] transition-all ${
                               isActive 
-                                ? 'text-brand font-semibold active-item' 
-                                : 'text-tx-muted hover:text-tx-main'
+                                ? 'bg-brand/10 text-brand font-semibold active-item' 
+                                : 'text-tx-muted hover:bg-surface hover:text-tx-main'
                             }`}
                           >
                             {cleanTitle(item.data.title)}
@@ -191,21 +159,19 @@ const hasItems = sidebarItems.length > 0;
               )
             }
             
-            // 🟢 Handle Standalone Links - Only active one is font-semibold
             else if (block.discriminant === 'link') {
               const lessonId = block.value.lesson;
               const item = items.find((i: any) => i.data.urlSlug === lessonId || i.id === lessonId);
               if (!item) return null;
-              
               const isActive = currentSlug === item.data.urlSlug;
               
               return (
                 <a 
                   href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} 
-                  class={`block px-2 py-1.5 mt-1 text-[14px] transition-colors ${
+                  class={`block px-4 py-3 mt-2 rounded-xl text-[14.5px] transition-all ${
                     isActive 
-                      ? 'text-brand font-semibold active-item' 
-                      : 'text-tx-main hover:text-brand'
+                      ? 'bg-brand/10 text-brand font-semibold active-item' 
+                      : 'text-tx-main hover:bg-surface hover:text-brand'
                   }`}
                 >
                   {cleanTitle(item.data.title)}
@@ -214,72 +180,95 @@ const hasItems = sidebarItems.length > 0;
             }
           })
         ) : (
-          /* Fallback for flat lists - Only active one is font-semibold */
           items.map((item: any) => (
-            <a href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} class={`block px-2 py-1.5 text-[14px] transition-colors ${currentSlug === item.data.urlSlug ? 'text-brand font-semibold active-item' : 'text-tx-main hover:text-brand'}`}>
+            <a href={`/${basePath}/${parent.id}/${item.data.urlSlug}`} class={`block px-4 py-3 rounded-xl text-[14.5px] transition-all ${currentSlug === item.data.urlSlug ? 'bg-brand/10 text-brand font-semibold active-item' : 'text-tx-main hover:bg-surface hover:text-brand'}`}>
               {cleanTitle(item.data.title)}
             </a>
           ))
         )}
       </nav>
+      
+      {/* Optional Ad inside drawer */}
       {adHtml && (
-        <div class="lg:hidden shrink-0 mt-4 pt-4 border-t border-subtle">
+        <div class="lg:hidden shrink-0 pt-4 border-t border-subtle px-4 pb-8">
           <div class="ad-container w-full" set:html={adHtml} />
         </div>
       )}
-    </aside>
+    </div>
+  </aside>
 
-    {/* Main Content */}
-    <main class="flex-1 min-w-0 w-full max-w-[800px] shrink mx-auto px-4 md:px-6 lg:px-8 py-6 lg:py-8">
+  {/* --- PAGE CONTENT LAYOUT (Perfectly Centered Container) --- */}
+  <div class="max-w-[1400px] mx-auto flex flex-col min-[1264px]:flex-row w-full justify-between items-start relative font-['Outfit',sans-serif]">
+    
+    {/* 1. Dummy Left Counterweight (Crucial for perfect centering!) */}
+    <div class="hidden min-[1264px]:block w-[300px] shrink-0"></div>
+
+    {/* 2. Main Content Area */}
+    <main class="flex-1 min-w-0 w-full max-w-[800px] shrink mx-auto flex flex-col pt-6 md:pt-8 px-4 md:px-6 lg:px-8">
+      
+      {/* Breadcrumbs */}
       {currentSlug === 'overview' ? (
         <Breadcrumb 
           section={basePath as any} 
           current={parentBreadcrumb} 
-          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap py-1.5 rounded-md w-fit" 
+          class="mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap" 
         />
       ) : (
         <Breadcrumb 
           section={basePath as any} 
           parents={[{ label: parentBreadcrumb, url: `/${basePath}/${parent.id}` }]} 
           current={currentBreadcrumb} 
-          class="hidden lg:flex mb-8 font-['JetBrains_Mono',monospace] text-[12px] text-tx-muted items-center gap-2 flex-wrap py-1.5 rounded-md w-fit" 
+          class="mb-6 font-['JetBrains_Mono',monospace] text-[11px] text-tx-muted flex items-center gap-1.5 flex-wrap" 
         />
       )}
 
-      <div class="markdown-content text-[15.5px] md:text-[17px] leading-[1.7] md:leading-[1.8] pb-8">
-        <slot />
-      </div>
+      {/* 
+        Sleek Minimalist TOC Button. 
+        It renders hidden here, and a script moves it EXACTLY below the markdown <h1> title.
+      */}
+      <button id="toc-trigger-btn" style="display: none;" class="items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-tx-muted hover:text-brand transition-colors w-fit pb-6 pt-1 cursor-pointer">
+        <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+        Browse All Lessons
+      </button>
 
-      {/* Pagination Footer */}
-      <div class="mt-8 pt-6 border-t border-subtle flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
-        {prevLink ? (
-<a href={prevLink.url} class="group flex items-center justify-start gap-3 py-3.5 w-full sm:w-auto sm:max-w-[48%] sm:ml-auto">
-            <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-brand/10 group-hover:text-brand transition-colors">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-            </div>
-            <div class="flex flex-col text-left overflow-hidden">
-              <span class="text-[11px] uppercase tracking-widest text-tx-muted font-bold mb-0.5">Previous</span>
-              <span class="text-[14px] text-tx-main font-semibold group-hover:text-brand transition-colors truncate">{prevLink.title}</span>
-            </div>
-          </a>
-        ) : <div class="hidden sm:block"></div>}
+      {/* Markdown Body */}
+      <div class="w-full">
+        <div class="markdown-content text-[15.5px] md:text-[17px] leading-[1.7] md:leading-[1.8] pb-8">
+          <slot />
+        </div>
 
-        {nextLink ? (
-          <a href={nextLink.url} class="group flex items-center gap-3 py-3.5 w-fit max-w-[100%] sm:max-w-[48%] ml-auto">
-            <div class="flex flex-col text-right overflow-hidden">
-              <span class="text-[11px] uppercase tracking-widest text-tx-muted font-bold mb-0.5">Up Next</span>
-              <span class="text-[14px] text-tx-main font-semibold group-hover:text-brand transition-colors truncate">{nextLink.title}</span>
-            </div>
-            <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-brand/10 group-hover:text-brand transition-colors">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </div>
-          </a>
-        ) : <div class="hidden sm:block"></div>}
+        {/* Bottom Pagination */}
+        <div class="mt-8 pt-6 border-t border-subtle flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pb-12">
+          {prevLink ? (
+            <a href={prevLink.url} class="group flex items-center justify-start gap-3 py-3.5 w-full sm:w-auto sm:max-w-[48%] sm:ml-auto">
+              <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-brand/10 group-hover:text-brand transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+              </div>
+              <div class="flex flex-col text-left overflow-hidden">
+                <span class="text-[11px] uppercase tracking-widest text-tx-muted font-bold mb-0.5">Previous</span>
+                <span class="text-[14px] text-tx-main font-semibold group-hover:text-brand transition-colors truncate">{prevLink.title}</span>
+              </div>
+            </a>
+          ) : <div class="hidden sm:block"></div>}
+
+          {nextLink ? (
+            <a href={nextLink.url} class="group flex items-center gap-3 py-3.5 w-fit max-w-[100%] sm:max-w-[48%] ml-auto">
+              <div class="flex flex-col text-right overflow-hidden">
+                <span class="text-[11px] uppercase tracking-widest text-tx-muted font-bold mb-0.5">Up Next</span>
+                <span class="text-[14px] text-tx-main font-semibold group-hover:text-brand transition-colors truncate">{nextLink.title}</span>
+              </div>
+              <div class="w-8 h-8 rounded-full bg-main border border-subtle flex items-center justify-center shrink-0 group-hover:bg-brand/10 group-hover:text-brand transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              </div>
+            </a>
+          ) : <div class="hidden sm:block"></div>}
+        </div>
       </div>
+      
     </main>
 
-    {/* Right Sidebar */}
-    <aside class="hidden min-[1264px]:flex flex-col w-[310px] min-w-[200px] shrink-[9999] sticky top-[64px] h-[calc(100vh-64px)] py-10 lg:py-16 pl-6 pr-4 z-30">
+    {/* 3. Right Sidebar (Ads for Desktop) */}
+    <aside class="hidden min-[1264px]:flex flex-col w-[300px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] py-10 pl-6 pr-4 z-30">
       {adHtml && (
         <div class="ad-container w-full flex-1 overflow-y-auto custom-scrollbar min-h-0" set:html={adHtml} />
       )}
@@ -289,13 +278,8 @@ const hasItems = sidebarItems.length > 0;
 </Layout>
 
 <style is:global>
-  /* Hide default summary markers for a cleaner look */
-  details > summary {
-    list-style: none;
-  }
-  details > summary::-webkit-details-marker {
-    display: none;
-  }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
 
   .custom-scrollbar::-webkit-scrollbar { width: 4px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -303,7 +287,9 @@ const hasItems = sidebarItems.length > 0;
   .custom-scrollbar:hover::-webkit-scrollbar-thumb { background-color: #94a3b8; }
   
   .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 { color: var(--color-tx-main); font-weight: 800; letter-spacing: -0.015em; margin-top: 1.6em; margin-bottom: 0.6em; }
-  .markdown-content h1 { font-size: 1.75rem; line-height: 1.25; margin-top: 0; margin-bottom: 0.8em; }
+  
+  /* Reduced bottom margin on h1 so the minimalist button sits closer to it */
+  .markdown-content h1 { font-size: 1.75rem; line-height: 1.25; margin-top: 0; margin-bottom: 0.3em; }
   .markdown-content h2 { font-size: 1.4rem; line-height: 1.3; padding-bottom: 0.25em; }
   .markdown-content h3 { font-size: 1.25rem; line-height: 1.3; }
   
@@ -339,41 +325,61 @@ const hasItems = sidebarItems.length > 0;
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const toggleBtn = document.getElementById('sidebar-toggle-btn');
-    const closeBtn = document.getElementById('sidebar-close-btn');
-    const sidebar = document.getElementById('series-sidebar');
+    
+    // --- 1. Move Minimalist TOC Button Below H1 ---
+    const tocBtn = document.getElementById('toc-trigger-btn');
+    const mdTitle = document.querySelector('.markdown-content h1');
+    
+    if (tocBtn) {
+      if (mdTitle) {
+        mdTitle.insertAdjacentElement('afterend', tocBtn);
+      }
+      tocBtn.style.display = 'flex';
+    }
+
+    // --- 2. Drawer Logic (Sliding UP from Bottom) ---
+    const closeBtn = document.getElementById('modal-close-btn');
+    const modal = document.getElementById('series-nav-modal');
     const navContainer = document.getElementById('sidebar-nav-container');
-    const backdrop = document.getElementById('mobile-sidebar-backdrop');
+    const backdrop = document.getElementById('nav-backdrop');
     const activeItem = document.querySelector('.active-item');
 
-    // 🟢 NEW SCROLL LOGIC: Scroll ONLY the nav container, not the whole window
     if (activeItem && navContainer) {
       const navRect = navContainer.getBoundingClientRect();
       const itemRect = activeItem.getBoundingClientRect();
-      // Calculate offset so the active item sits cleanly in the view
       const scrollAmount = itemRect.top - navRect.top - (navRect.height / 2) + (itemRect.height / 2);
       navContainer.scrollTop += scrollAmount;
     }
 
-    function openSidebar() {
-      if (!sidebar || !backdrop) return;
-      backdrop.classList.remove('hidden');
-      void backdrop.offsetWidth; 
-      backdrop.classList.remove('opacity-0');
-      sidebar.classList.remove('-translate-x-full');
+    function openModal() {
+      if (!modal || !backdrop) return;
+      document.body.style.overflow = 'hidden'; 
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      
+      // Animate up from bottom
+      modal.classList.remove('translate-y-full');
+      modal.classList.add('translate-y-0');
     }
 
-    function closeSidebar() {
-      if (!sidebar || !backdrop) return;
-      backdrop.classList.add('opacity-0');
-      sidebar.classList.add('-translate-x-full');
-      setTimeout(() => backdrop.classList.add('hidden'), 300);
+    function closeModal() {
+      if (!modal || !backdrop) return;
+      document.body.style.overflow = ''; 
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      
+      // Animate down to bottom
+      modal.classList.remove('translate-y-0');
+      modal.classList.add('translate-y-full');
     }
 
-    if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
-    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-    if (backdrop) backdrop.addEventListener('click', closeSidebar);
+    if (tocBtn) tocBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
 
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // --- 3. Copy Code Buttons ---
     const codeBlocks = document.querySelectorAll('.markdown-content pre');
     codeBlocks.forEach((preBlock) => {
       const textToCopy = preBlock.innerText || preBlock.textContent;
