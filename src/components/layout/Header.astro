@@ -58,11 +58,11 @@ const primaryBtn = {
   data-disable-sticky={disableStickyHeader ? "true" : "false"}
   class={`inset-x-0 w-full z-[200] h-[58px] bg-main/95 backdrop-blur-[12px] shadow-sm border-b border-transparent dark:border-white/6 flex items-center font-sans transition-transform duration-300 ${disableStickyHeader ? 'relative' : 'sticky top-0'}`}
 >
-  <!-- 🟢 Standard Flex Layout -->
-  <div class="w-full h-full px-3 md:px-6 flex items-center justify-between gap-4 max-w-[1400px] mx-auto">
+  <!-- 🟢 Standard Flex Layout with justify-between for perfect gap distribution -->
+  <div class="w-full h-full px-3 md:px-6 flex items-center justify-between max-w-[1400px] mx-auto">
     
-    <!-- 1. LEFT: Hamburger (Mobile) + Logo (flex-1 ensures it takes equal space as right side) -->
-    <div class="flex items-center gap-2 md:gap-4 flex-1">
+    <!-- 1. LEFT: Hamburger (Mobile) + Logo -->
+    <div class="flex items-center gap-2 md:gap-4">
       <!-- Hamburger Menu Icon (Mobile Only) -->
       <button
         type="button"
@@ -94,12 +94,12 @@ const primaryBtn = {
     </div>
 
     <!-- 2. MIDDLE: Desktop Navigation -->
-    <nav class="hidden md:flex items-center justify-center gap-2 lg:gap-4 shrink-0">
+    <nav class="hidden md:flex items-center justify-center gap-2 lg:gap-4">
       {navItems.map((item: any) => {
         const hasSubItems = item.subItems && item.subItems.length > 0;
         return (
           <div class="relative group h-full flex items-center">
-            <a href={item.url || '#'} class="flex items-center gap-1.5 px-3 py-2 text-[14px] font-[500] text-tx-muted hover:text-tx-main transition-colors rounded-md hover:bg-tx-muted/5 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted">
+            <a href={item.url || '#'} class="flex items-center gap-1.5 px-3 py-2 text-[14px] font-[600] text-tx-muted hover:text-tx-main transition-colors rounded-md hover:bg-tx-muted/5 outline-none focus-visible:ring-2 focus-visible:ring-tx-muted">
               {item.label}
               {hasSubItems && (
                 <svg class="w-3.5 h-3.5 opacity-70 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
@@ -121,8 +121,8 @@ const primaryBtn = {
       })}
     </nav>
 
-    <!-- 3. RIGHT: Search, Theme, Auth (flex-1 perfectly balances the left side) -->
-    <div class="flex items-center justify-end gap-1.5 md:gap-3 flex-1">
+    <!-- 3. RIGHT: Search, Theme, Auth -->
+    <div class="flex items-center justify-end gap-1.5 md:gap-3">
       
       <!-- Search Icon Link -->
       <a href="/search" class="flex items-center justify-center w-[36px] h-[36px] md:w-[32px] md:h-[32px] rounded-full text-tx-muted hover:bg-tx-muted/10 hover:text-tx-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-tx-muted cursor-pointer shrink-0" aria-label="Search">
@@ -150,14 +150,15 @@ const primaryBtn = {
         </div>
 
         <div id="auth-profile-header" class="items-center">
-          <a href="/account" class="ml-1 md:ml-3 flex items-center justify-center h-[36px] md:h-[32px] px-2.5 md:px-3 rounded-[8px] bg-transparent text-tx-main text-[13px] md:text-[14px] font-[600] hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
-            <img id="profile-avatar-img-header" src="" alt="Profile" class="w-6 h-6 rounded-full object-cover shrink-0 hidden" />
+          <a href="/account" class="ml-1 md:ml-3 flex items-center justify-center gap-2 px-1.5 py-1 rounded-[8px] bg-transparent hover:bg-tx-muted/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 outline-none whitespace-nowrap">
+            <!-- 🟢 Profile Icon fixed (flexible padding instead of fixed height) -->
+            <img id="profile-avatar-img-header" src="" alt="Profile" class="w-8 h-8 rounded-full object-cover shrink-0 hidden border border-subtle/20" />
             
-            <div id="profile-avatar-header" class="w-7 h-7 rounded-full bg-cta text-cta-text flex items-center justify-center font-extrabold text-[12px] shrink-0">
+            <div id="profile-avatar-header" class="w-8 h-8 rounded-full bg-cta text-cta-text flex items-center justify-center font-extrabold text-[13px] shrink-0 border border-subtle/10">
               <svg id="profile-avatar-fallback-icon" class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             </div>
             
-            <span class="hidden md:inline ml-2.5">Profile</span>
+            <span class="hidden md:inline pr-1 text-[14px] font-[600] text-tx-main">Profile</span>
           </a>
         </div>
 
@@ -185,7 +186,7 @@ const primaryBtn = {
               <button
                 type="button"
                 data-target={`accordion-content-${index}`}
-                class="accordion-btn flex items-center justify-between w-full text-left px-3 py-3 rounded-[8px] font-[500] text-[15px] text-tx-main hover:bg-tx-muted/5 transition-colors focus:outline-none"
+                class="accordion-btn flex items-center justify-between w-full text-left px-3 py-3 rounded-[8px] font-[600] text-[15px] text-tx-main hover:bg-tx-muted/5 transition-colors focus:outline-none"
               >
                 <span>{item.label}</span>
                 <svg class="accordion-arrow w-4 h-4 shrink-0 text-tx-muted transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -195,7 +196,7 @@ const primaryBtn = {
             ) : (
               <a
                 href={item.url || '#'}
-                class="flex items-center justify-between w-full text-left px-3 py-3 rounded-[8px] font-[500] text-[15px] text-tx-main hover:bg-tx-muted/5 transition-colors focus:outline-none"
+                class="flex items-center justify-between w-full text-left px-3 py-3 rounded-[8px] font-[600] text-[15px] text-tx-main hover:bg-tx-muted/5 transition-colors focus:outline-none"
               >
                 <span>{item.label}</span>
               </a>
@@ -223,8 +224,8 @@ const primaryBtn = {
     <div class="mt-auto pt-6 pb-8 w-full">
       <button class="theme-toggle-btn group flex items-center justify-between w-full px-4 py-3.5 rounded-[8px] bg-tx-muted/5 border border-subtle/10 text-tx-main hover:bg-tx-muted/10 transition-colors focus:outline-none cursor-pointer">
         <!-- Dynamic Text based on active theme -->
-        <span class="font-[500] text-[14px] block dark:hidden">Dark Theme</span>
-        <span class="font-[500] text-[14px] hidden dark:block">Light Theme</span>
+        <span class="font-[600] text-[14px] block dark:hidden">Dark Theme</span>
+        <span class="font-[600] text-[14px] hidden dark:block">Light Theme</span>
         
         <div class="flex items-center justify-center">
           <svg class="block dark:hidden w-5 h-5 text-tx-muted transition-transform duration-300 group-hover:rotate-12 group-hover:text-tx-main" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
